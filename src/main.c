@@ -1,7 +1,6 @@
 /*******************************************************************************
 *
 *   (c) 2016 Ledger
-*   (c) 2020 Concordium
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -16,12 +15,24 @@
 *  limitations under the License.
 ********************************************************************************/
 
-#include "cx.h"
+#include "getPublicKey.h"
 #include "glyphs.h"
 #include "menu.h"
 #include "os.h"
 #include "ux.h"
 #include <string.h>
+
+// The expected CLA byte
+#define CLA 0xE0
+
+// The Ledger uses APDU commands (https://en.wikipedia.org/wiki/Smart_card_application_protocol_data_unit)
+// for performing actions. The INS byte contains the instruction code that determines which action to perform.
+#define OFFSET_CLA 0x00
+#define OFFSET_INS 0x01
+#define OFFSET_CDATA 0x05
+
+// An INS instruction containing 0x01 means that we should start the public-key flow.
+#define INS_GET_PUBLIC_KEY 0x01
 
 // Main entry of application that listens for APDU commands that will be received from the
 // computer. The APDU commands control what flow is activated, i.e. which control flow is initiated.
@@ -47,32 +58,16 @@ static void concordium_main(void) {
                     THROW(0x6982);
                 }
 
-                if (G_io_apdu_buffer[0] != 0x80) {
+                if (G_io_apdu_buffer[OFFSET_CLA] != CLA) {
                     THROW(0x6E00);
                 }
 
-                // unauthenticated instruction
-                switch (G_io_apdu_buffer[1]) {
-                case 0x00: // reset
-                    flags |= IO_RESET_AFTER_REPLIED;
-                    THROW(0x9000);
-                    break;
-
-                case 0x01: // case 1
-                    THROW(0x9000);
-                    break;
-
-                case 0x02: // echo
-                    tx = rx;
-                    THROW(0x9000);
-                    break;
-
-                case 0xFF: // return to dashboard
-                    goto return_to_dashboard;
-
-                default:
-                    THROW(0x6D00);
-                    break;
+                switch (G_io_apdu_buffer[OFFSET_INS]) {
+                    case INS_GET_PUBLIC_KEY:
+                        handleGetPublicKey(G_io_apdu_buffer + OFFSET_CDATA, &flags);
+                    default:
+                        THROW(0x6D00);
+                        break;
                 }
             }
             CATCH_OTHER(e) {
@@ -95,11 +90,7 @@ static void concordium_main(void) {
         }
         END_TRY;
     }
-
-return_to_dashboard:
-    return;
 }
-
 
 // Required Ledger magic starts here and ends at the end of the file.
 // The only way to understand what is happening is to look at the source code in the SDK,
