@@ -48,11 +48,18 @@ void getPrivateKey(uint32_t accountNumber, cx_ecfp_private_key_t *privateKey) {
     uint32_t bip32Path[] = {44 | HARDENED_OFFSET, CONCORDIUM_COIN_TYPE | HARDENED_OFFSET, accountNumber | HARDENED_OFFSET};
 
     // Invoke the device methods for generating a private key.
-    os_perso_derive_node_bip32_seed_key(HDW_ED25519_SLIP10, CX_CURVE_Ed25519, bip32Path, CONCORDIUM_BIP32_PATH_LENGTH, privateKeyData, NULL, NULL, 0);
-    cx_ecfp_init_private_key(CX_CURVE_Ed25519, privateKeyData, 32, privateKey);
-
-   // Clean up the private key seed data to avoid leaking information.
-    explicit_bzero(&privateKeyData, sizeof(privateKeyData));
+    // Wrap in try/finally to ensure that private key information is cleaned up, even if a system call fails.
+    BEGIN_TRY {
+        TRY {
+            os_perso_derive_node_bip32_seed_key(HDW_ED25519_SLIP10, CX_CURVE_Ed25519, bip32Path, CONCORDIUM_BIP32_PATH_LENGTH, privateKeyData, NULL, NULL, 0);
+            cx_ecfp_init_private_key(CX_CURVE_Ed25519, privateKeyData, 32, privateKey);
+        }
+        FINALLY {
+            // Clean up the private key seed data, so that we cannot leak it.
+            explicit_bzero(&privateKeyData, sizeof(privateKeyData));
+        }
+    }
+    END_TRY;
 }
 
 // Gets the derived public-key for the given account number. It is written to the provided byte array that must have
@@ -64,10 +71,17 @@ void getPublicKey(uint32_t accountNumber, uint8_t *publicKeyArray) {
     getPrivateKey(accountNumber, &privateKey);
 
     // Invoke the device method for generating a public-key pair.
-    cx_ecfp_generate_pair(CX_CURVE_Ed25519, &publicKey, &privateKey, 1);
-
-    // Clean up the private key as we are done using it, so that we do not leak it.
-    explicit_bzero(&privateKey, sizeof(privateKey));
+    // Wrap in try/finally to ensure private key information is cleaned up, even if the system call fails.
+    BEGIN_TRY {
+        TRY {
+            cx_ecfp_generate_pair(CX_CURVE_Ed25519, &publicKey, &privateKey, 1);
+        }
+        FINALLY {
+            // Clean up the private key as we are done using it, so that we cannot leak it.
+            explicit_bzero(&privateKey, sizeof(privateKey));
+        }
+    }
+    END_TRY;
 
     // Build the public-key bytes in the expected format.
     for (int i = 0; i < 32; i++) {
