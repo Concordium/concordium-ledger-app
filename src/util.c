@@ -2,6 +2,7 @@
 #include "cx.h"
 #include <stdbool.h>
 #include <stdlib.h>
+#include <string.h>
 #include "util.h"
 #include "menu.h"
 
@@ -51,7 +52,7 @@ void getPrivateKey(uint32_t accountNumber, cx_ecfp_private_key_t *privateKey) {
     cx_ecfp_init_private_key(CX_CURVE_Ed25519, privateKeyData, 32, privateKey);
 
    // Clean up the private key seed data to avoid leaking information.
-    os_memset(privateKeyData, 0, sizeof(privateKeyData));
+    explicit_bzero(&privateKeyData, sizeof(privateKeyData));
 }
 
 // Gets the derived public-key for the given account number. It is written to the provided byte array that must have
@@ -66,7 +67,7 @@ void getPublicKey(uint32_t accountNumber, uint8_t *publicKeyArray) {
     cx_ecfp_generate_pair(CX_CURVE_Ed25519, &publicKey, &privateKey, 1);
 
     // Clean up the private key as we are done using it, so that we do not leak it.
-    os_memset(&privateKey, 0, sizeof(privateKey));
+    explicit_bzero(&privateKey, sizeof(privateKey));
 
     // Build the public-key bytes in the expected format.
     for (int i = 0; i < 32; i++) {
