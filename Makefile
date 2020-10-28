@@ -27,6 +27,13 @@ ICONNAME = nanos-concordium-icon.gif
 APPVERSION = 0.1.0
 APP_LOAD_PARAMS = --appFlags 0x00 $(COMMON_LOAD_PARAMS)
 
+# Restrict derivation paths to the Concordium specific path.
+# FIXME: Update 691 to the final coin_type we get in SLIP44.
+APP_LOAD_PARAMS += --path "44'/691'"
+
+# Restrict derivation to only be able to use ed25519
+APP_LOAD_PARAMS += --curve ed25519
+
 # Build configuration
 
 APP_SOURCE_PATH += src
