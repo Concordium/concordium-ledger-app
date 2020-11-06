@@ -19,6 +19,7 @@
 #include "glyphs.h"
 #include "menu.h"
 #include "os.h"
+#include "signTransaction.h"
 #include "ux.h"
 #include <string.h>
 
@@ -29,10 +30,14 @@
 // for performing actions. The INS byte contains the instruction code that determines which action to perform.
 #define OFFSET_CLA 0x00
 #define OFFSET_INS 0x01
+#define OFFSET_LC    0x04
 #define OFFSET_CDATA 0x05
 
 // An INS instruction containing 0x01 means that we should start the public-key flow.
 #define INS_GET_PUBLIC_KEY 0x01
+
+// An INS instruction containing 0x02 means that we should start the signing flow.
+#define INS_SIGN_TRANSACTION 0x02
 
 // Main entry of application that listens for APDU commands that will be received from the
 // computer. The APDU commands control what flow is activated, i.e. which control flow is initiated.
@@ -65,6 +70,8 @@ static void concordium_main(void) {
                 switch (G_io_apdu_buffer[OFFSET_INS]) {
                     case INS_GET_PUBLIC_KEY:
                         handleGetPublicKey(G_io_apdu_buffer + OFFSET_CDATA, &flags);
+                    case INS_SIGN_TRANSACTION:
+                        signTransaction(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_LC], &flags);
                     default:
                         THROW(0x6D00);
                         break;

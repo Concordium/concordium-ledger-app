@@ -3,6 +3,9 @@
 #include "globals.h"
 #include <stdbool.h>
 
+// Converts bytes into uint64_t (big endian)
+#define U8BE(buf, off) (((uint64_t)(U4BE(buf, off))     << 32) | ((uint64_t)(U4BE(buf, off + 4)) & 0xFFFFFFFF))
+
 void sendUserRejection();
 
 void sendSuccess(uint8_t tx);
