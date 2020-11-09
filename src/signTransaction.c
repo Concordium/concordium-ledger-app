@@ -4,10 +4,64 @@
 #include <stdint.h>
 #include "menu.h"
 #include "util.h"
+#include <string.h>
 
-// Variable length.
-static uint8_t displayStr[128];
+static uint8_t accountIndex;
+static uint8_t displayAccount[8];
+
+// The toAddress that we are displaying is 32 bytes, in hexadecimal that is 64 bytes + 1 for string terminator.
+static char displayStr[65];
+
 static uint8_t displayAmount[9];
+static uint8_t transactionHash[32];
+
+// The signature is 64 bytes, in hexadecimal that is 128 bytes + 1 for string terminator.
+static char signatureAsHex[129];
+
+// UI definitions for comparison of the signature of the transaction hash.
+// the user.
+UX_STEP_VALID(
+    ux_sign_compare_0_step,
+    bnnn_paging,
+    ui_idle(),
+    {
+      .title = "Compare",
+      .text = (char *) signatureAsHex
+    });
+UX_FLOW(ux_sign_compare_flow,
+    &ux_sign_compare_0_step
+);
+
+// Function that is called when the user accepts signing the received transaction. It will use the private key
+// to sign the hash of the transaction, and send it back to the computer. Afterwards a UI flow for comparing the
+// signature is started.
+void signTransactionHash() {
+    // Sign the transaction hash with the private key for the given account index.
+    cx_ecfp_private_key_t privateKey;
+    uint8_t signedHash[64];
+
+    BEGIN_TRY {
+        TRY {
+            getPrivateKey(accountIndex, &privateKey);
+            cx_eddsa_sign(&privateKey, CX_RND_RFC6979 | CX_LAST, CX_SHA512, transactionHash, 32, NULL, 0, signedHash, 64, NULL);
+        }
+        FINALLY {
+            // Clean up the private key, so that we cannot leak it.
+            explicit_bzero(&privateKey, sizeof(privateKey));
+        }
+    }
+    END_TRY;
+
+    // Return the signature on the transaction hash to the computer. The computer should then display the received
+    // signature and the user should compare the signature on the device with the one shown on the computer.
+    os_memmove(G_io_apdu_buffer, signedHash, sizeof(signedHash));
+    sendSuccessNoIdle(sizeof(signedHash));
+
+    // Initialize flow where the user will be shown the signature of the transaction hash. The user then has to
+    // verify that the signature on the device is the one shown on the computer.
+    toHex(signedHash, sizeof(signedHash), signatureAsHex);
+    ux_flow_init(0, ux_sign_compare_flow, NULL);
+}
 
 // UI definitions for displaying the transaction contents for verification before approval by
 // the user.
@@ -18,93 +72,82 @@ UX_STEP_NOCB(
       .title = "Recipient",
       .text = (char *) displayStr
     });
-UX_STEP_VALID(
+UX_STEP_NOCB(
     ux_sign_flow_1_step,
     bn,
-    ui_idle(),
     {
       "Amount",
       (char *) displayAmount
     });
+UX_STEP_VALID(
+    ux_sign_flow_2_step,
+    pnn,
+    signTransactionHash(),
+    {
+      &C_icon_validate_14,
+      "Sign TX",
+      (char *) displayAccount
+    });
 UX_FLOW(ux_sign_flow,
     &ux_sign_flow_0_step,
-    &ux_sign_flow_1_step
+    &ux_sign_flow_1_step,
+    &ux_sign_flow_2_step
 );
 
-
-// TODO Understand this function, and clean it up.
-int bin2dec(uint8_t *dst, uint64_t n) {
-	if (n == 0) {
-		dst[0] = '0';
-		dst[1] = '\0';
-		return 1;
-	}
-	// determine final length
-	int len = 0;
-	for (uint64_t nn = n; nn != 0; nn /= 10) {
-		len++;
-	}
-	// write digits in big-endian order
-	for (int i = len-1; i >= 0; i--) {
-		dst[i] = (n % 10) + '0';
-		n /= 10;
-	}
-	dst[len] = '\0';
-	return len;
-}
-
-void signTransaction(uint8_t *dataBuffer, uint16_t dataLength, volatile unsigned int *flags) {
-    // Verify that the transaction header has the expected size. If that is not the case, then the received command
-    // must be corrupt. A transaction header is exactly 60 bytes, and has to received in the initial exchange.
-    if (dataLength != 60) {
-        THROW(0x6B01);
-    }
-
+// Constructs the SHA256 hash of the transaction bytes. This function relies deeply on the serialization format
+// of account transactions.
+void buildTransactionHash(uint8_t *transactionHash, uint8_t *dataBuffer) {
     // Initialize the hash that will be the hash of the whole transaction, which is what will be signed
     // if the user approves.
     cx_sha256_t hash;
     cx_sha256_init(&hash);
 
-    // Add the transaction header to the hash.
+    // Add the transaction header to the hash. The transaction header is always 60 bytes.
     cx_hash((cx_hash_t *) &hash, 0, dataBuffer, 60, NULL, 0);
     dataBuffer += 60;
 
-    // Transaction payload/body comes right after the transaction header. For this initial version we assume it is
-    // received within the same command, but this will probably be changed into a multiple commands kind of
-    // protocol, because we cannot assume all transaction payloads can be within a single command (255 bytes).
+    // Transaction payload/body comes right after the transaction header. First byte determines the transaction kind.
     uint8_t transactionKind[1];
     os_memmove(transactionKind, dataBuffer, 1);
     dataBuffer += 1;
 
-    // Extract the destination address.
+    // Add transaction kind to the hash.
+    cx_hash((cx_hash_t *) &hash, 0, transactionKind, 1, NULL, 0);
+
+    // Extract the destination address and add to hash.
     uint8_t toAddress[32];
     os_memmove(toAddress, dataBuffer, 32);
     dataBuffer += 32;
+    cx_hash((cx_hash_t *) &hash, 0, toAddress, 32, NULL, 0);
 
     // Used in display of recipient address
-    char toAddressAsHex[65];
-    publicKeyToHex(toAddress, sizeof(toAddress), toAddressAsHex);
-    os_memmove(displayStr, &toAddressAsHex, 65);
-
+    toHex(toAddress, sizeof(toAddress), displayStr);
 
     // Used to display the amount being transferred.
     uint64_t amount = U8BE(dataBuffer, 0);
     os_memmove(displayAmount, "GTU ", 4);
     bin2dec(displayAmount + 4, amount);
-    dataBuffer += 8;
 
-    // Extract the amount to transfer.
-    // uint8_t amount[8];
-    // os_memmove(amount, dataBuffer, 8);
+    // Add transfer amount to the hash.
+    cx_hash((cx_hash_t *) &hash, 0, dataBuffer, 8, NULL, 0);
 
-    // This is probably not a good idea. Consider direct conversion with shifts instead.
-    // uint64_t amountAsInt = *((uint64_t *) amount);
+    // Build the hash and write to memory.
+    cx_hash((cx_hash_t *) &hash, CX_LAST, NULL, 0, transactionHash, 32);
+}
 
-    // os_memmove(displayStr, "GTU ", 4);
-    // os_memmove(displayStr + 4, &amountAsInt, 8);
+// Entry-point from the main class to the handler of signing simple transfers.
+void handleSignTransaction(uint8_t p1, uint8_t *dataBuffer, uint16_t dataLength, volatile unsigned int *flags) {
+    accountIndex = p1;
+    os_memmove(displayAccount, "with #", 6);
+    bin2dec(displayAccount + 6, accountIndex);
 
+    // Calculate transaction hash. This function has the side effect that the values required to display
+    // the transaction to the user are loaded. So it has to be run before initializing the ux_sign_flow.
+    buildTransactionHash(transactionHash, dataBuffer);
+
+    // Display the transaction information to the user (recipient address and amount to be sent).
     ux_flow_init(0, ux_sign_flow, NULL);
 
-    // TODO Remove this - just used for testing.
-    THROW(0x9000);
+    // Tell the main process to wait for a button press.
+    *flags |= IO_ASYNCH_REPLY;
 }

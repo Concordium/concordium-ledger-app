@@ -14,12 +14,13 @@ if args.account == None:
 # We also need to get the account address as input... So not just the transaction header in the initial
 # exchange of data. Or perhaps split it into two different initial exchanges, because not all transactions will
 # have a transaction header.
-account = '{:08x}'.format(int(args.account))
+account = '{:02x}'.format(int(args.account))
+print(account)
 
 # Build APDU message that prompts the Concordium Ledger application to start the signing-flow.
 # CLA 0xE0 (has to be set to this always, if not the message will be rejected)
 # INS 0x02 (instruction code for signing a transaction)
-# P1  0x00 (unused)
+# P1  0x00 (account index, can be 0-255)
 # P2  0x00 (unused)
 
 # Transaction header
@@ -36,7 +37,9 @@ to_address = "2ae13c414a03176e887c91b7f93f47af4c1130c5ece7b9e250113ea40beb0e4d"
 amount = "0000000000001388"
 transaction_payload = transaction_kind + to_address + amount
 
-message = "E0020000" + '{:02x}'.format(60) + transaction_header + transaction_payload
+# Note the size here is incorrect
+message = "E002" + account + "00" + '{:02x}'.format(60) + transaction_header + transaction_payload
+print(message)
 apdu = bytearray.fromhex(message)
 
 print("Requesting for a signature for a transaction using account: " + args.account)
@@ -44,4 +47,4 @@ print("Requesting for a signature for a transaction using account: " + args.acco
 dongle = getDongle(True)
 result = dongle.exchange(apdu)
 
-print(result.decode("utf-8"))
+print(result.hex())

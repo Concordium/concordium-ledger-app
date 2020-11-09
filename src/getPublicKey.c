@@ -33,7 +33,7 @@ UX_FLOW(ux_compare_public_flow,
 void sendPublicKey(uint32_t accountNumber) {
     uint8_t publicKey[32];
     getPublicKey(accountNumber, publicKey);
-    publicKeyToHex(publicKey, sizeof(publicKey), publicKeyAsHex);
+    toHex(publicKey, sizeof(publicKey), publicKeyAsHex);
 
     // tx is holding the offset in the buffer we have written to. It is a convention to call this tx for ledger apps.
     uint8_t tx = 0;

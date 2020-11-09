@@ -28,8 +28,10 @@
 
 // The Ledger uses APDU commands (https://en.wikipedia.org/wiki/Smart_card_application_protocol_data_unit)
 // for performing actions. The INS byte contains the instruction code that determines which action to perform.
-#define OFFSET_CLA 0x00
-#define OFFSET_INS 0x01
+#define OFFSET_CLA   0x00
+#define OFFSET_INS   0x01
+#define OFFSET_P1    0x02
+#define OFFSET_P2    0x03
 #define OFFSET_LC    0x04
 #define OFFSET_CDATA 0x05
 
@@ -70,8 +72,10 @@ static void concordium_main(void) {
                 switch (G_io_apdu_buffer[OFFSET_INS]) {
                     case INS_GET_PUBLIC_KEY:
                         handleGetPublicKey(G_io_apdu_buffer + OFFSET_CDATA, &flags);
+                        break;
                     case INS_SIGN_TRANSACTION:
-                        signTransaction(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_LC], &flags);
+                        handleSignTransaction(G_io_apdu_buffer[OFFSET_P1], G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_LC], &flags);
+                        break;
                     default:
                         THROW(0x6D00);
                         break;

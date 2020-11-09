@@ -27,16 +27,45 @@ void sendSuccess(uint8_t tx) {
     ui_idle();
 }
 
+void sendSuccessNoIdle(uint8_t tx) {
+    G_io_apdu_buffer[tx++] = 0x90;
+    G_io_apdu_buffer[tx++] = 0x00;
+    io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, tx);
+}
+
 // Helper method that converts a byte array into a character array with the bytes translated
 // into their hexadecimal representation. This is used to have a human readable representation of the
-// public-key to present to the user.
-void publicKeyToHex(uint8_t *publicKeyArray, const uint64_t len, char * publicKeyAsHex) {
+// different keys and addresses.
+void toHex(uint8_t *byteArray, const uint64_t len, char *asHex) {
     static uint8_t const hex[] = "0123456789abcdef";
     for (uint64_t i = 0; i < len; i++) {
-        publicKeyAsHex[2 * i + 0] = hex[(publicKeyArray[i]>>4) & 0x0F];
-        publicKeyAsHex[2 * i + 1] = hex[(publicKeyArray[i]>>0) & 0x0F];
+        asHex[2 * i + 0] = hex[(byteArray[i]>>4) & 0x0F];
+        asHex[2 * i + 1] = hex[(byteArray[i]>>0) & 0x0F];
     }
-    publicKeyAsHex[2 * len] = '\0';
+    asHex[2 * len] = '\0';
+}
+
+// Helper method that writes the input integer to the binary format that the device can display.
+int bin2dec(uint8_t *dst, uint64_t n) {
+	if (n == 0) {
+		dst[0] = '0';
+		dst[1] = '\0';
+		return 1;
+	}
+
+	// Determine the length
+	int len = 0;
+	for (uint64_t nn = n; nn != 0; nn /= 10) {
+		len++;
+	}
+
+	// Build in big-endian order.
+	for (int i = len-1; i >= 0; i--) {
+		dst[i] = (n % 10) + '0';
+		n /= 10;
+	}
+	dst[len] = '\0';
+	return len;
 }
 
 // Method that gets the private key for the given accountNumber. Make sure to clean up memory right after
