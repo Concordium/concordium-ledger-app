@@ -69,10 +69,10 @@ void signTransferHash() {
 // the user.
 UX_STEP_NOCB(
     ux_sign_flow_0_step,
-    bnnn_paging,
+    nn,
     {
-      .title = "Recipient",
-      .text = (char *) displayStr
+      "Review",
+      "transaction"
     });
 UX_STEP_NOCB(
     ux_sign_flow_1_step,
@@ -81,10 +81,17 @@ UX_STEP_NOCB(
       "Amount",
       (char *) displayAmount
     });
-UX_STEP_VALID(
+UX_STEP_NOCB(
     ux_sign_flow_2_step,
+    bnnn_paging,
+    {
+      .title = "Recipient",
+      .text = (char *) displayStr
+    });
+UX_STEP_VALID(
+    ux_sign_flow_3_step,
     pnn,
-    signTransactionHash(),
+    signTransferHash(),
     {
       &C_icon_validate_14,
       "Sign TX",
@@ -93,7 +100,8 @@ UX_STEP_VALID(
 UX_FLOW(ux_sign_flow,
     &ux_sign_flow_0_step,
     &ux_sign_flow_1_step,
-    &ux_sign_flow_2_step
+    &ux_sign_flow_2_step,
+    &ux_sign_flow_3_step
 );
 
 // Constructs the SHA256 hash of the transaction bytes. This function relies deeply on the serialization format
@@ -147,7 +155,7 @@ void handleSignTransfer(uint8_t *dataBuffer, uint16_t dataLength, volatile unsig
 
     // Calculate transaction hash. This function has the side effect that the values required to display
     // the transaction to the user are loaded. So it has to be run before initializing the ux_sign_flow.
-    buildTransactionHash(transactionHash, dataBuffer);
+    buildTransferHash(transactionHash, dataBuffer);
 
     // Display the transaction information to the user (recipient address and amount to be sent).
     ux_flow_init(0, ux_sign_flow, NULL);
