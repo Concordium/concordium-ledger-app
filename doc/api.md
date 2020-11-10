@@ -62,9 +62,8 @@ The input APDU message:
 
 | CLA | INS | P1 | P2 | Lc                       | Command data   | Le                            | 
 |-----|-----|----|----|--------------------------|----------------|-------------------------------|
-| E0  | 01  | 00 | 00 | Length of account number | Account number | Variable (not set explicitly) |
+| E0  | 01  | 00 | 00 | Length of Identity + AccountIndex | Identity + AccountIndex | Variable (not set explicitly) |
 
-Here 'Account number' should contain the account number to retrieve a public-key for, using up at most 4 bytes (uint32_t).
 A successful output has the following format, where the status word '9000' indicates a success.
 
 | Public-key bytes                   | Status word |
