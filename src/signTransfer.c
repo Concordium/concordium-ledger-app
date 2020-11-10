@@ -13,7 +13,7 @@ static uint8_t displayAccount[8];
 // The toAddress that we are displaying is 32 bytes, in hexadecimal that is 64 bytes + 1 for string terminator.
 static char displayStr[65];
 
-static uint8_t displayAmount[9];
+static uint8_t displayAmount[25];
 static uint8_t transactionHash[32];
 
 // The signature is 64 bytes, in hexadecimal that is 128 bytes + 1 for string terminator.
@@ -76,10 +76,10 @@ UX_STEP_NOCB(
     });
 UX_STEP_NOCB(
     ux_sign_flow_1_step,
-    bn,
+    paging,
     {
       "Amount",
-      (char *) displayAmount
+      (char *) displayAmount,
     });
 UX_STEP_NOCB(
     ux_sign_flow_2_step,
@@ -135,8 +135,8 @@ void buildTransferHash(uint8_t *transactionHash, uint8_t *dataBuffer) {
 
     // Used to display the amount being transferred.
     uint64_t amount = U8BE(dataBuffer, 0);
-    os_memmove(displayAmount, "GTU ", 4);
-    bin2dec(displayAmount + 4, amount);
+    os_memmove(displayAmount, "uGTU ", 5);
+    bin2dec(displayAmount + 5, amount);
 
     // Add transfer amount to the hash.
     cx_hash((cx_hash_t *) &hash, 0, dataBuffer, 8, NULL, 0);
