@@ -6,7 +6,20 @@
 #include "util.h"
 #include "menu.h"
 
+static accountSubtreePath_t *keyPath = &path;
 static const uint32_t HARDENED_OFFSET = 0x80000000;
+
+// Parses the key derivation path that is available in the first 2 bytes received for account instructions.
+// This is used for building the key derivation path when deriving a private key.
+void parseAccountSignatureKeyPath(uint8_t *dataBuffer) {
+    uint8_t identity[1];
+    os_memmove(identity, dataBuffer , 1);
+    keyPath->identity = identity[0];
+
+    uint8_t accountIndex[1];
+    os_memmove(accountIndex, dataBuffer + 1, 1);
+    keyPath->accountIndex = accountIndex[0];
+}
 
 // Sends back the user rejection error code 0x6985, which indicates that
 // the user has rejected the incoming command at some step in the process.
@@ -27,6 +40,7 @@ void sendSuccess(uint8_t tx) {
     ui_idle();
 }
 
+// Send data back to the computer, but do not return to the idle screen.
 void sendSuccessNoIdle(uint8_t tx) {
     G_io_apdu_buffer[tx++] = 0x90;
     G_io_apdu_buffer[tx++] = 0x00;
@@ -68,19 +82,14 @@ int bin2dec(uint8_t *dst, uint64_t n) {
 	return len;
 }
 
-// Method that gets the private key for the given accountNumber. Make sure to clean up memory right after
-// using the privateKey.
-void getPrivateKey(uint32_t accountNumber, cx_ecfp_private_key_t *privateKey) {
+void getPrivateKeyBasic(uint32_t *keyPath, uint8_t keyPathLength, cx_ecfp_private_key_t *privateKey) {
     uint8_t privateKeyData[32];
-
-    // The Concordium specific BIP32 path.
-    uint32_t bip32Path[] = {44 | HARDENED_OFFSET, CONCORDIUM_COIN_TYPE | HARDENED_OFFSET, accountNumber | HARDENED_OFFSET};
 
     // Invoke the device methods for generating a private key.
     // Wrap in try/finally to ensure that private key information is cleaned up, even if a system call fails.
     BEGIN_TRY {
         TRY {
-            os_perso_derive_node_bip32_seed_key(HDW_ED25519_SLIP10, CX_CURVE_Ed25519, bip32Path, CONCORDIUM_BIP32_PATH_LENGTH, privateKeyData, NULL, NULL, 0);
+            os_perso_derive_node_bip32_seed_key(HDW_ED25519_SLIP10, CX_CURVE_Ed25519, keyPath, keyPathLength, privateKeyData, NULL, NULL, 0);
             cx_ecfp_init_private_key(CX_CURVE_Ed25519, privateKeyData, 32, privateKey);
         }
         FINALLY {
@@ -91,13 +100,20 @@ void getPrivateKey(uint32_t accountNumber, cx_ecfp_private_key_t *privateKey) {
     END_TRY;
 }
 
-// Gets the derived public-key for the given account number. It is written to the provided byte array that must have
-// a size of exactly 32 bytes.
-void getPublicKey(uint32_t accountNumber, uint8_t *publicKeyArray) {
+// Derives an account private key for signatures.
+// Path = 44'/coin_type'/0'/identity'/0'/account_index'
+void getAccountSignaturePrivateKey(uint32_t identity, uint32_t accountIndex, cx_ecfp_private_key_t *privateKey) {
+    uint32_t keyPath[] = {44 | HARDENED_OFFSET, CONCORDIUM_COIN_TYPE | HARDENED_OFFSET, 0 | HARDENED_OFFSET, identity | HARDENED_OFFSET, accountIndex | HARDENED_OFFSET};
+    getPrivateKeyBasic(keyPath, 5, privateKey);
+}
+
+// Gets the derived public-key for the given identity and account index. It is written to the provided byte array that
+// must have a size of exactly 32 bytes.
+void getPublicKey(uint32_t identity, uint32_t accountIndex, uint8_t *publicKeyArray) {
     cx_ecfp_private_key_t privateKey;
     cx_ecfp_public_key_t publicKey;
 
-    getPrivateKey(accountNumber, &privateKey);
+    getAccountSignaturePrivateKey(identity, accountIndex, &privateKey);
 
     // Invoke the device method for generating a public-key pair.
     // Wrap in try/finally to ensure private key information is cleaned up, even if the system call fails.

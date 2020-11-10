@@ -1,6 +1,6 @@
 # This file contains a small test using ledgerblue for quick interfacing with the Ledger device.
 # It demonstrates the APDU message that has to be sent to the running Concordium app on the Ledger device, for
-# it to start the public-key flow.
+# it to start the signing of a simple transfer transaction.
 from ledgerblue.comm import getDongle
 import argparse
 
@@ -11,7 +11,7 @@ args = parser.parse_args()
 if args.account == None:
     raise Exception("Please provide an account. Use --help for details.")
 
-# We also need to get the account address as input... So not just the transaction header in the initial
+# We also need to get the account address as input... So not just     getPrivateKeyBasic(keyPath, 5, privateKey);the transaction header in the initial
 # exchange of data. Or perhaps split it into two different initial exchanges, because not all transactions will
 # have a transaction header.
 account = '{:02x}'.format(int(args.account))
@@ -22,6 +22,9 @@ print(account)
 # INS 0x02 (instruction code for signing a transaction)
 # P1  0x00 (account index, can be 0-255)
 # P2  0x00 (unused)
+
+# Key derivation path definition (account subtree, signature account usage, account index 0)
+path = "00" + account
 
 # Transaction header
 address = "2ae13c414a03176e887c91b7f93f47af4c1130c5ece7b9e250113ea40beb0e4d"
@@ -38,7 +41,7 @@ amount = "0000000000001388"
 transaction_payload = transaction_kind + to_address + amount
 
 # Note the size here is incorrect
-message = "E002" + account + "00" + '{:02x}'.format(60) + transaction_header + transaction_payload
+message = "E002" + account + "00" + '{:02x}'.format(60) + path + transaction_header + transaction_payload
 print(message)
 apdu = bytearray.fromhex(message)
 

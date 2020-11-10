@@ -4,12 +4,11 @@
 #include "util.h"
 #include "menu.h"
 
+static accountSubtreePath_t *keyPath = &path;
+
 // The public-key is 32 bytes, and when converted to hexadecimal it takes up 64 characters. The 65th character
 // is for the C string terminator '\0'.
 static char publicKeyAsHex[65];
-
-// Holds the account number provided in the command received from the computer.
-static uint32_t accountNumber;
 
 // UI definitions for the comparison of the public-key. The public-key should be displayed in the wallet, and then
 // compared with the public-key being displayed on the Ledger device. This is done to avoid the computer maliciously
@@ -30,9 +29,10 @@ UX_FLOW(ux_compare_public_flow,
 // Derive the public-key for the given address, convert it to hex (human readable), and then write it to
 // the APDU buffer to be returned to the computer. Continue into the comparison/verification UI flow after
 // having returned the public-key to the computer.
-void sendPublicKey(uint32_t accountNumber) {
+void sendPublicKey() {
     uint8_t publicKey[32];
-    getPublicKey(accountNumber, publicKey);
+
+    getPublicKey(keyPath->identity, keyPath->accountIndex, publicKey);
     toHex(publicKey, sizeof(publicKey), publicKeyAsHex);
 
     // tx is holding the offset in the buffer we have written to. It is a convention to call this tx for ledger apps.
@@ -57,7 +57,7 @@ void sendPublicKey(uint32_t accountNumber) {
 UX_STEP_VALID(
     ux_generate_public_flow_0_step,
     pnn,
-    sendPublicKey(accountNumber),
+    sendPublicKey(),
     {
       &C_icon_validate_14,
       "Generate",
@@ -69,7 +69,7 @@ UX_STEP_VALID(
     sendUserRejection(),
     {
       &C_icon_crossmark,
-      "Decline",
+      "Decline"
     });
 UX_FLOW(ux_generate_public_flow,
     &ux_generate_public_flow_0_step,
@@ -79,9 +79,8 @@ UX_FLOW(ux_generate_public_flow,
 
 // Entry-point from the main class to the handler of public keys.
 void handleGetPublicKey(uint8_t *dataBuffer, volatile unsigned int *flags) {
-    // Read the account number received from the command. Note that U4LE is an SDK macro that takes 4-bytes of
-    // buffer from the provided index, and converts it into a uint32_t.
-    accountNumber = U4LE(dataBuffer, 0);
+    parseAccountSignatureKeyPath(dataBuffer);
+    dataBuffer += 2;
 
     // Display the UI for the public-key flow, where the user has to compare the public-key displayed on the device
     // and the public-key shown in the wallet.

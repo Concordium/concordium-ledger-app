@@ -19,9 +19,12 @@
 #include "glyphs.h"
 #include "menu.h"
 #include "os.h"
-#include "signTransaction.h"
+#include "signTransfer.h"
 #include "ux.h"
 #include <string.h>
+
+// Global variable definitions
+accountSubtreePath_t path;
 
 // The expected CLA byte
 #define CLA 0xE0
@@ -39,7 +42,7 @@
 #define INS_GET_PUBLIC_KEY 0x01
 
 // An INS instruction containing 0x02 means that we should start the signing flow.
-#define INS_SIGN_TRANSACTION 0x02
+#define INS_SIGN_TRANSFER 0x02
 
 // Main entry of application that listens for APDU commands that will be received from the
 // computer. The APDU commands control what flow is activated, i.e. which control flow is initiated.
@@ -73,8 +76,8 @@ static void concordium_main(void) {
                     case INS_GET_PUBLIC_KEY:
                         handleGetPublicKey(G_io_apdu_buffer + OFFSET_CDATA, &flags);
                         break;
-                    case INS_SIGN_TRANSACTION:
-                        handleSignTransaction(G_io_apdu_buffer[OFFSET_P1], G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_LC], &flags);
+                    case INS_SIGN_TRANSFER:
+                        handleSignTransfer(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_LC], &flags);
                         break;
                     default:
                         THROW(0x6D00);

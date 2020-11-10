@@ -6,7 +6,8 @@
 #include "util.h"
 #include <string.h>
 
-static uint8_t accountIndex;
+static accountSubtreePath_t *keyPath = &path;
+
 static uint8_t displayAccount[8];
 
 // The toAddress that we are displaying is 32 bytes, in hexadecimal that is 64 bytes + 1 for string terminator.
@@ -35,14 +36,15 @@ UX_FLOW(ux_sign_compare_flow,
 // Function that is called when the user accepts signing the received transaction. It will use the private key
 // to sign the hash of the transaction, and send it back to the computer. Afterwards a UI flow for comparing the
 // signature is started.
-void signTransactionHash() {
+// TODO: Generalize and move to a separate transaction file. Signing is the same except for the key path.
+void signTransferHash() {
     // Sign the transaction hash with the private key for the given account index.
     cx_ecfp_private_key_t privateKey;
     uint8_t signedHash[64];
 
     BEGIN_TRY {
         TRY {
-            getPrivateKey(accountIndex, &privateKey);
+            getAccountSignaturePrivateKey(keyPath->identity, keyPath->accountIndex, &privateKey);
             cx_eddsa_sign(&privateKey, CX_RND_RFC6979 | CX_LAST, CX_SHA512, transactionHash, 32, NULL, 0, signedHash, 64, NULL);
         }
         FINALLY {
@@ -96,7 +98,7 @@ UX_FLOW(ux_sign_flow,
 
 // Constructs the SHA256 hash of the transaction bytes. This function relies deeply on the serialization format
 // of account transactions.
-void buildTransactionHash(uint8_t *transactionHash, uint8_t *dataBuffer) {
+void buildTransferHash(uint8_t *transactionHash, uint8_t *dataBuffer) {
     // Initialize the hash that will be the hash of the whole transaction, which is what will be signed
     // if the user approves.
     cx_sha256_t hash;
@@ -136,10 +138,12 @@ void buildTransactionHash(uint8_t *transactionHash, uint8_t *dataBuffer) {
 }
 
 // Entry-point from the main class to the handler of signing simple transfers.
-void handleSignTransaction(uint8_t p1, uint8_t *dataBuffer, uint16_t dataLength, volatile unsigned int *flags) {
-    accountIndex = p1;
+void handleSignTransfer(uint8_t *dataBuffer, uint16_t dataLength, volatile unsigned int *flags) {
+    parseAccountSignatureKeyPath(dataBuffer);
+    dataBuffer += 2;
+
     os_memmove(displayAccount, "with #", 6);
-    bin2dec(displayAccount + 6, accountIndex);
+    bin2dec(displayAccount + 6, keyPath->accountIndex);
 
     // Calculate transaction hash. This function has the side effect that the values required to display
     // the transaction to the user are loaded. So it has to be run before initializing the ux_sign_flow.

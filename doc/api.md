@@ -10,7 +10,20 @@ the Ledger device. A very brief introduction to the protocol can be
 found [here](https://en.wikipedia.org/wiki/Smart_card_application_protocol_data_unit), but it will help to provide
 an overview of the Concordium specific messages below.
 
-## Signing simple transfer
+## Account derivation path
+
+For all instructions that are for account transactions will have to prefix a transaction with 1 byte indicating
+the identity and 1 byte indicating the account index to use for signing. This means that initial bytes sent to the
+device should be:
+
+```
+CLA INS P1 P2 Lc IDENTITY ACCOUNT_INDEX Remainder of command data...
+```
+
+In other words the command data (CDATA) is prefixed with two bytes indicating the identity and account index that the
+instruction should use.
+
+## Signing (simple) transfer
 
 ### Description
 
@@ -25,7 +38,7 @@ The input APDU message:
 
 | CLA | INS | P1 | P2 | Lc                       | Command data   | Le                            | 
 |-----|-----|----|----|--------------------------|----------------|-------------------------------|
-| E0  | 02  | Account index (1 byte, 0-255) | 00 | length(transaction header + transaction payload) | Transaction header + transaction body | Variable (not set explicitly) |
+| E0  | 02  | 00 | 00 | length(transaction header + transaction payload) | Identity + AccountIndex + Transaction header + transaction body | Variable (not set explicitly) |
 
 A successful output has the following format, where the status word '9000' indicates a success. The signature bytes
 is the signature on the hash of the transaction.

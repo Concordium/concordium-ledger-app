@@ -18,6 +18,10 @@ void sendResponse(uint8_t tx, bool approve);
 
 void getPrivateKey(uint32_t accountNumber, cx_ecfp_private_key_t *privateKey);
 
-void getPublicKey(uint32_t accountNumber, uint8_t *publicKeyArray);
+void getPublicKey(uint32_t identity, uint32_t accountIndex, uint8_t *publicKeyArray);
 
 void toHex(uint8_t *byteArray, const uint64_t len, char *asHex);
+
+void parseAccountSignatureKeyPath(uint8_t *dataBuffer);
+
+void getAccountSignaturePrivateKey(uint32_t identity, uint32_t accountIndex, cx_ecfp_private_key_t *privateKey);
