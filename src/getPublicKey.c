@@ -45,7 +45,7 @@ void sendPublicKey() {
     }
 
     // Send back success response including the public-key.
-    sendSuccess(tx);
+    sendSuccessNoIdle(tx);
 
     // Goto the comparison UX flow where the user can compare the public-key on the computer with the public-key
     // displayed on the device.
