@@ -6,6 +6,7 @@
 
 // TODO: The concordium coin type value has to be set to the value we get in SLIP44.
 #define CONCORDIUM_COIN_TYPE 691
+#define CONCORDIUM_PURPOSE 583
 
 typedef struct {
     uint8_t identity;

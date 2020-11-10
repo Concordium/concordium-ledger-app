@@ -103,7 +103,7 @@ void getPrivateKeyBasic(uint32_t *keyPath, uint8_t keyPathLength, cx_ecfp_privat
 // Derives an account private key for signatures.
 // Path = 44'/coin_type'/0'/identity'/0'/account_index'
 void getAccountSignaturePrivateKey(uint32_t identity, uint32_t accountIndex, cx_ecfp_private_key_t *privateKey) {
-    uint32_t keyPath[] = {44 | HARDENED_OFFSET, CONCORDIUM_COIN_TYPE | HARDENED_OFFSET, 0 | HARDENED_OFFSET, identity | HARDENED_OFFSET, accountIndex | HARDENED_OFFSET};
+    uint32_t keyPath[] = {CONCORDIUM_PURPOSE | HARDENED_OFFSET, CONCORDIUM_COIN_TYPE | HARDENED_OFFSET, 0 | HARDENED_OFFSET, identity | HARDENED_OFFSET, accountIndex | HARDENED_OFFSET};
     getPrivateKeyBasic(keyPath, 5, privateKey);
 }
 
