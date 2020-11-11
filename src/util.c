@@ -136,3 +136,24 @@ void getPublicKey(uint32_t identity, uint32_t accountIndex, uint8_t *publicKeyAr
         publicKeyArray[31] |= 0x80;
     }
 }
+
+// Generic method that signs a transaction hash with the provided identity/account index private key.
+void signTransactionHash(uint32_t identity, uint32_t accountIndex, uint8_t *transactionHash, uint8_t *signedHash) {
+    // Sign the transaction hash with the private key for the given account index.
+    cx_ecfp_private_key_t privateKey;
+
+    BEGIN_TRY {
+        TRY {
+            getAccountSignaturePrivateKey(keyPath->identity, keyPath->accountIndex, &privateKey);
+            cx_eddsa_sign(&privateKey, CX_RND_RFC6979 | CX_LAST, CX_SHA512, transactionHash, 32, NULL, 0, signedHash, 64, NULL);
+        }
+        FINALLY {
+            // Clean up the private key, so that we cannot leak it.
+            explicit_bzero(&privateKey, sizeof(privateKey));
+        }
+    }
+    END_TRY;
+}
+
+
+

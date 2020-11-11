@@ -26,6 +26,7 @@
 
 // Global variable definitions
 accountSubtreePath_t path;
+tx_state_t tx_context;
 
 // The expected CLA byte
 #define CLA 0xE0
@@ -51,6 +52,9 @@ accountSubtreePath_t path;
 // Main entry of application that listens for APDU commands that will be received from the
 // computer. The APDU commands control what flow is activated, i.e. which control flow is initiated.
 static void concordium_main(void) {
+    // The transaction context is uninitialized when booting up.
+    tx_context.initialized = false;
+
     volatile unsigned int rx = 0;
     volatile unsigned int tx = 0;
     volatile unsigned int flags = 0;

@@ -25,3 +25,5 @@ void toHex(uint8_t *byteArray, const uint64_t len, char *asHex);
 void parseAccountSignatureKeyPath(uint8_t *dataBuffer);
 
 void getAccountSignaturePrivateKey(uint32_t identity, uint32_t accountIndex, cx_ecfp_private_key_t *privateKey);
+
+void signTransactionHash(uint32_t identity, uint32_t accountIndex, uint8_t *transactionHash, uint8_t *signedHash);

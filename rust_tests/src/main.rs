@@ -44,6 +44,7 @@ fn main() {
     // Generate 17 scheduled transfers to demonstrate that splitting by 15 transfers works.
     let mut command_data = "".to_string();
 
+    println!("The final result received contains the signature.");
     for i in 1..18 {
         let scheduled_timestamp = "00000000604445A8";
         let amount = "0000000256245C73";
@@ -61,10 +62,9 @@ fn main() {
                 data: hex::decode(&command_data).unwrap()
             };
 
-            ledger.exchange(command).expect("Scheduled transfer command failed");
+            let result = ledger.exchange(command).expect("Scheduled transfer command failed");
+            println!("{}", hex::encode(result.data));
             command_data = "".to_string();
         }
     }
-
-    // Receive signature (if approved by the user).
 }
