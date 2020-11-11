@@ -46,8 +46,8 @@ fn main() {
 
     println!("The final result received contains the signature.");
     for i in 1..18 {
-        let scheduled_timestamp = "00000000604445A8";
-        let amount = "0000000256245C73";
+        let scheduled_timestamp = "FFFFFFFFFFFFFFFF";
+        let amount = "FFFFFFFFFFFFFFFF";
         command_data = format!("{}{}{}", &command_data, &scheduled_timestamp, &amount);
 
         // Send APDU 15 pairs at a time, or when done iterating.

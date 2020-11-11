@@ -70,7 +70,7 @@ UX_STEP_NOCB(
     ux_sign_scheduled_transfer_pair_flow_1_step,
     bn,
     {
-        "Amount",
+        "Amount (uGTU)",
         (char *) displayAmount
     });
 UX_STEP_CB(
