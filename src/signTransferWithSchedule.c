@@ -111,7 +111,6 @@ UX_FLOW(ux_sign_scheduled_transfer_flow,
     &ux_sign_scheduled_transfer_flow_1_step
 );
 
-// TODO: Consider moving to util shared class and re-use between all account signing.
 // Hashes transaction, signs it and sends the signature back to the computer.
 void signTransferWithScheduleHash() {
     // Reset initialization status, as we are done processing the current transaction.
