@@ -20,6 +20,7 @@
 #include "menu.h"
 #include "os.h"
 #include "signTransfer.h"
+#include "signTransferWithSchedule.h"
 #include "ux.h"
 #include <string.h>
 
@@ -41,8 +42,11 @@ accountSubtreePath_t path;
 // An INS instruction containing 0x01 means that we should start the public-key flow.
 #define INS_GET_PUBLIC_KEY 0x01
 
-// An INS instruction containing 0x02 means that we should start the signing flow.
+// An INS instruction containing 0x02 means that we should start the transfer signing flow.
 #define INS_SIGN_TRANSFER 0x02
+
+// An INS instruction containing 0x03 means that we should start the scheduled transfer signing flow.
+#define INS_SIGN_TRANSFER_WITH_SCHEDULE 0x03
 
 // Main entry of application that listens for APDU commands that will be received from the
 // computer. The APDU commands control what flow is activated, i.e. which control flow is initiated.
@@ -78,6 +82,9 @@ static void concordium_main(void) {
                         break;
                     case INS_SIGN_TRANSFER:
                         handleSignTransfer(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_LC], &flags);
+                        break;
+                    case INS_SIGN_TRANSFER_WITH_SCHEDULE:
+                        handleSignTransferWithSchedule(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_P1], &flags);
                         break;
                     default:
                         THROW(0x6D00);

@@ -35,7 +35,7 @@ expiry = "0000017579871035"
 transaction_header = address + nonce + energy + payload_size + expiry
 
 # Transaction payload for a simple transaction
-transaction_kind = "01"
+transaction_kind = "03"
 to_address = "2ae13c414a03176e887c91b7f93f47af4c1130c5ece7b9e250113ea40beb0e4d"
 amount = "00000000000000FF"
 transaction_payload = transaction_kind + to_address + amount
