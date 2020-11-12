@@ -14,7 +14,6 @@ typedef struct {
     uint8_t identity;
     uint8_t accountIndex;
 } accountSubtreePath_t;
-
 extern accountSubtreePath_t path;
 
 // Helper object used when computing the hash of a transaction.
@@ -27,8 +26,20 @@ typedef struct {
 // Each instruction's state has to have its own struct here that is put in the global union below. This translates
 // into each handler file having its own struct here.
 typedef struct {
+    // The toAddress that we are displaying is 32 bytes, in hexadecimal that is 64 bytes + 1 for string terminator.
     char displayStr[65];
-    uint8_t displayAccount[8];
+
+    uint8_t displayAccount[10];
+    uint8_t displayAmount[25];
+
+    // The signature is 64 bytes, in hexadecimal that is 128 bytes + 1 for string terminator.
+    char signatureAsHex[129];
+    tx_state_t tx_state;
+} signTransferContext_t;
+
+typedef struct {
+    char displayStr[65];
+    uint8_t displayAccount[10];
     uint8_t remainingNumberOfScheduledAmounts;
     uint8_t scheduledAmountsInCurrentPacket;
 
@@ -40,11 +51,12 @@ typedef struct {
     uint8_t pos;
 
     tx_state_t tx_state;
-} signTransferContext_t;
+} signTransferWithScheduleContext_t;
 
 // As the Ledger device is very limited on memory, the context of each instruction is stored in a
 // shared global union, so that we use no more memory than that of the most space using instruction context.
 typedef union {
+    signTransferWithScheduleContext_t signTransferWithScheduleContext;
     signTransferContext_t signTransferContext;
 } instructionContext;
 extern instructionContext global;

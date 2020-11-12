@@ -8,16 +8,49 @@
 
 static accountSubtreePath_t *keyPath = &path;
 
-static uint8_t displayAccount[8];
+static signTransferContext_t *ctx = &global.signTransferContext;
+static tx_state_t *tx_state = &global.signTransferContext.tx_state;
 
-// The toAddress that we are displaying is 32 bytes, in hexadecimal that is 64 bytes + 1 for string terminator.
-static char displayStr[65];
+void signTransferHash();
 
-static uint8_t displayAmount[25];
-static uint8_t transactionHash[32];
-
-// The signature is 64 bytes, in hexadecimal that is 128 bytes + 1 for string terminator.
-static char signatureAsHex[129];
+// UI definitions for displaying the transaction contents for verification before approval by
+// the user.
+UX_STEP_NOCB(
+    ux_sign_flow_0_step,
+    nn,
+    {
+      "Review",
+      "transaction"
+    });
+UX_STEP_NOCB(
+    ux_sign_flow_1_step,
+    bnnn_paging,
+    {
+      .title = "Amount",
+      .text = (char *) global.signTransferContext.displayAmount,
+    });
+UX_STEP_NOCB(
+    ux_sign_flow_2_step,
+    bnnn_paging,
+    {
+      .title = "Recipient",
+      .text = (char *) global.signTransferContext.displayStr
+    });
+UX_STEP_VALID(
+    ux_sign_flow_3_step,
+    pnn,
+    signTransferHash(),
+    {
+      &C_icon_validate_14,
+      "Sign tx",
+      (char *) global.signTransferContext.displayAccount
+    });
+UX_FLOW(ux_sign_flow,
+    &ux_sign_flow_0_step,
+    &ux_sign_flow_1_step,
+    &ux_sign_flow_2_step,
+    &ux_sign_flow_3_step
+);
 
 // UI definitions for comparison of the signature of the transaction hash.
 // the user.
@@ -27,7 +60,7 @@ UX_STEP_VALID(
     ui_idle(),
     {
       .title = "Compare",
-      .text = (char *) signatureAsHex
+      .text = (char *) global.signTransferContext.signatureAsHex
     });
 UX_FLOW(ux_sign_compare_flow,
     &ux_sign_compare_0_step
@@ -45,7 +78,7 @@ void signTransferHash() {
     BEGIN_TRY {
         TRY {
             getAccountSignaturePrivateKey(keyPath->identity, keyPath->accountIndex, &privateKey);
-            cx_eddsa_sign(&privateKey, CX_RND_RFC6979 | CX_LAST, CX_SHA512, transactionHash, 32, NULL, 0, signedHash, 64, NULL);
+            cx_eddsa_sign(&privateKey, CX_RND_RFC6979 | CX_LAST, CX_SHA512, tx_state->transactionHash, 32, NULL, 0, signedHash, 64, NULL);
         }
         FINALLY {
             // Clean up the private key, so that we cannot leak it.
@@ -61,59 +94,21 @@ void signTransferHash() {
 
     // Initialize flow where the user will be shown the signature of the transaction hash. The user then has to
     // verify that the signature on the device is the one shown on the computer.
-    toHex(signedHash, sizeof(signedHash), signatureAsHex);
+    toHex(signedHash, sizeof(signedHash), ctx->signatureAsHex);
     ux_flow_init(0, ux_sign_compare_flow, NULL);
 }
 
-// UI definitions for displaying the transaction contents for verification before approval by
-// the user.
-UX_STEP_NOCB(
-    ux_sign_flow_0_step,
-    nn,
-    {
-      "Review",
-      "transaction"
-    });
-UX_STEP_NOCB(
-    ux_sign_flow_1_step,
-    paging,
-    {
-      "Amount",
-      (char *) displayAmount,
-    });
-UX_STEP_NOCB(
-    ux_sign_flow_2_step,
-    bnnn_paging,
-    {
-      .title = "Recipient",
-      .text = (char *) displayStr
-    });
-UX_STEP_VALID(
-    ux_sign_flow_3_step,
-    pnn,
-    signTransferHash(),
-    {
-      &C_icon_validate_14,
-      "Sign TX",
-      (char *) displayAccount
-    });
-UX_FLOW(ux_sign_flow,
-    &ux_sign_flow_0_step,
-    &ux_sign_flow_1_step,
-    &ux_sign_flow_2_step,
-    &ux_sign_flow_3_step
-);
+
 
 // Constructs the SHA256 hash of the transaction bytes. This function relies deeply on the serialization format
 // of account transactions.
-void buildTransferHash(uint8_t *transactionHash, uint8_t *dataBuffer) {
+void buildTransferHash(uint8_t *dataBuffer) {
     // Initialize the hash that will be the hash of the whole transaction, which is what will be signed
     // if the user approves.
-    cx_sha256_t hash;
-    cx_sha256_init(&hash);
+    cx_sha256_init(&tx_state->hash);
 
     // Add the transaction header to the hash. The transaction header is always 60 bytes.
-    cx_hash((cx_hash_t *) &hash, 0, dataBuffer, 60, NULL, 0);
+    cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 60, NULL, 0);
     dataBuffer += 60;
 
     // Transaction payload/body comes right after the transaction header. First byte determines the transaction kind.
@@ -122,27 +117,27 @@ void buildTransferHash(uint8_t *transactionHash, uint8_t *dataBuffer) {
     dataBuffer += 1;
 
     // Add transaction kind to the hash.
-    cx_hash((cx_hash_t *) &hash, 0, transactionKind, 1, NULL, 0);
+    cx_hash((cx_hash_t *) &tx_state->hash, 0, transactionKind, 1, NULL, 0);
 
     // Extract the destination address and add to hash.
     uint8_t toAddress[32];
     os_memmove(toAddress, dataBuffer, 32);
     dataBuffer += 32;
-    cx_hash((cx_hash_t *) &hash, 0, toAddress, 32, NULL, 0);
+    cx_hash((cx_hash_t *) &tx_state->hash, 0, toAddress, 32, NULL, 0);
 
     // Used in display of recipient address
-    toHex(toAddress, sizeof(toAddress), displayStr);
+    toHex(toAddress, sizeof(toAddress), ctx->displayStr);
 
     // Used to display the amount being transferred.
     uint64_t amount = U8BE(dataBuffer, 0);
-    os_memmove(displayAmount, "uGTU ", 5);
-    bin2dec(displayAmount + 5, amount);
+    os_memmove(ctx->displayAmount, "uGTU ", 5);
+    bin2dec(ctx->displayAmount + 5, amount);
 
     // Add transfer amount to the hash.
-    cx_hash((cx_hash_t *) &hash, 0, dataBuffer, 8, NULL, 0);
+    cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 8, NULL, 0);
 
     // Build the hash and write to memory.
-    cx_hash((cx_hash_t *) &hash, CX_LAST, NULL, 0, transactionHash, 32);
+    cx_hash((cx_hash_t *) &tx_state->hash, CX_LAST, NULL, 0, tx_state->transactionHash, 32);
 }
 
 // Entry-point from the main class to the handler of signing simple transfers.
@@ -150,12 +145,12 @@ void handleSignTransfer(uint8_t *dataBuffer, uint16_t dataLength, volatile unsig
     parseAccountSignatureKeyPath(dataBuffer);
     dataBuffer += 2;
 
-    os_memmove(displayAccount, "with #", 6);
-    bin2dec(displayAccount + 6, keyPath->accountIndex);
+    os_memmove(ctx->displayAccount, "with #", 6);
+    bin2dec(ctx->displayAccount + 6, keyPath->accountIndex);
 
     // Calculate transaction hash. This function has the side effect that the values required to display
     // the transaction to the user are loaded. So it has to be run before initializing the ux_sign_flow.
-    buildTransferHash(transactionHash, dataBuffer);
+    buildTransferHash(dataBuffer);
 
     // Display the transaction information to the user (recipient address and amount to be sent).
     ux_flow_init(0, ux_sign_flow, NULL);

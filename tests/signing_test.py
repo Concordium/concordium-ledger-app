@@ -5,7 +5,7 @@ from ledgerblue.comm import getDongle
 import argparse
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--account', help="The BIP32 account to retrieve a public-key for, e.g. \"315\".")
+parser.add_argument('--account', help="The BIP32 account to retrieve a public-key for, e.g. \"34\".")
 args = parser.parse_args()
 
 if args.account == None:
@@ -20,7 +20,7 @@ print(account)
 # Build APDU message that prompts the Concordium Ledger application to start the signing-flow.
 # CLA 0xE0 (has to be set to this always, if not the message will be rejected)
 # INS 0x02 (instruction code for signing a transaction)
-# P1  0x00 (account index, can be 0-255)
+# P1  0x00 (unused)
 # P2  0x00 (unused)
 
 # Key derivation path definition (account subtree, signature account usage, account index 0)
@@ -41,7 +41,7 @@ amount = "00000000000000FF"
 transaction_payload = transaction_kind + to_address + amount
 
 # Note the size here is incorrect
-message = "E002" + account + "00" + '{:02x}'.format(60) + path + transaction_header + transaction_payload
+message = "E0020000" + '{:02x}'.format(60) + path + transaction_header + transaction_payload
 print(message)
 apdu = bytearray.fromhex(message)
 

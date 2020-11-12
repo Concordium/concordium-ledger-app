@@ -15,7 +15,7 @@ fn main() {
 
     // Account transactions must prefix command_data with the identity and account index to use.
     // One byte for identity and one byte for account index. Here identity 0, account 0.
-    let path_prefix = "000F";
+    let path_prefix = "00FF";
 
     // Transaction kind is 19 -> 13 in hexadecimal.
     let transaction_kind = "13";

@@ -53,7 +53,7 @@ accountSubtreePath_t path;
 // computer. The APDU commands control what flow is activated, i.e. which control flow is initiated.
 static void concordium_main(void) {
     // The transaction context is uninitialized when booting up.
-    global.signTransferContext.tx_state.initialized = false;
+    global.signTransferWithScheduleContext.tx_state.initialized = false;
 
     volatile unsigned int rx = 0;
     volatile unsigned int tx = 0;

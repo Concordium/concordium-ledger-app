@@ -7,8 +7,8 @@
 #include <string.h>
 
 static accountSubtreePath_t *keyPath = &path;
-static signTransferContext_t *ctx = &global.signTransferContext;
-static tx_state_t *tx_state = &global.signTransferContext.tx_state;
+static signTransferWithScheduleContext_t *ctx = &global.signTransferWithScheduleContext;
+static tx_state_t *tx_state = &global.signTransferWithScheduleContext.tx_state;
 
 void processNextScheduledAmount(uint8_t *buffer);
 void signTransferWithScheduleHash();
@@ -27,7 +27,7 @@ UX_STEP_NOCB(
     bnnn_paging,
     {
       .title = "Recipient",
-      .text = (char *) global.signTransferContext.displayStr
+      .text = (char *) global.signTransferWithScheduleContext.displayStr
     });
 UX_STEP_VALID(
     ux_scheduled_transfer_initial_flow_2_step,
@@ -49,14 +49,14 @@ UX_STEP_NOCB(
     bn,
     {
         "Timestamp",
-        (char *) global.signTransferContext.displayTimestamp
+        (char *) global.signTransferWithScheduleContext.displayTimestamp
     });
 UX_STEP_NOCB(
     ux_sign_scheduled_transfer_pair_flow_1_step,
     bn,
     {
         "Amount (uGTU)",
-        (char *) global.signTransferContext.displayAmount
+        (char *) global.signTransferWithScheduleContext.displayAmount
     });
 UX_STEP_CB(
     ux_sign_scheduled_transfer_pair_flow_2_step,
@@ -80,7 +80,7 @@ UX_STEP_CB(
     {
       &C_icon_validate_14,
       "Sign tx",
-      (char *) global.signTransferContext.displayAccount
+      (char *) global.signTransferWithScheduleContext.displayAccount
     });
 UX_STEP_CB(
     ux_sign_scheduled_transfer_flow_1_step,
