@@ -15,7 +15,7 @@ fn main() {
 
     // Account transactions must prefix command_data with the identity and account index to use.
     // One byte for identity and one byte for account index. Here identity 0, account 0.
-    let path_prefix = "0000";
+    let path_prefix = "000F";
 
     // Transaction kind is 19 -> 13 in hexadecimal.
     let transaction_kind = "13";
@@ -25,7 +25,7 @@ fn main() {
     // only move 255 bytes at a time. In the first command we send the list size, which we
     // restrict to be less than 255 items, i.e. the number fits within 1 byte. For this example
     // we send 17 pairs to demonstrate that multiple packets are handled correctly.
-    let number_of_scheduled_amounts = "11";
+    let number_of_scheduled_amounts = "03";
 
     // Send initial command.
     let initial_command_data = format!("{}{}{}{}{}", &path_prefix, &number_of_scheduled_amounts, &transaction_header, &transaction_kind, &to_address);
@@ -45,13 +45,14 @@ fn main() {
     let mut command_data = "".to_string();
 
     println!("The final result received contains the signature.");
-    for i in 1..18 {
+    for i in 1..4 {
         let scheduled_timestamp = "FFFFFFFFFFFFFFFF";
         let amount = "FFFFFFFFFFFFFFFF";
         command_data = format!("{}{}{}", &command_data, &scheduled_timestamp, &amount);
 
         // Send APDU 15 pairs at a time, or when done iterating.
-        if i % 15 == 0 || i == 17 {
+        // Note that the packets containing the scheduled amounts must set P1 = 0x01.
+        if i % 15 == 0 || i == 3 {
             println!("{}", &command_data.len());
             let command = ApduCommand {
                 cla: 224,

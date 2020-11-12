@@ -7,23 +7,8 @@
 #include <string.h>
 
 static accountSubtreePath_t *keyPath = &path;
-static tx_state_t *tx_state = &tx_context;
-
-// TODO: Optimize memory management. Each instruction file should have its own structure, and then we build a
-// TODO global variable that supports the different types of transactions in a union. Then the memory footprint will
-// TODO be no greater than what a single file uses. Currently each file uses more and more RAM.
-
-static char displayStr[65];
-static uint8_t displayAccount[8];
-static uint8_t remainingNumberOfScheduledAmounts;
-static uint8_t scheduledAmountsInCurrentPacket;
-
-static uint8_t displayAmount[25];
-static uint8_t displayTimestamp[25];
-
-// Buffer to hold the incoming databuffer so that we can iterate over it.
-static uint8_t buffer[255];
-static uint8_t pos;
+static signTransferContext_t *ctx = &global.signTransferContext;
+static tx_state_t *tx_state = &global.signTransferContext.tx_state;
 
 void processNextScheduledAmount(uint8_t *buffer);
 void signTransferWithScheduleHash();
@@ -42,7 +27,7 @@ UX_STEP_NOCB(
     bnnn_paging,
     {
       .title = "Recipient",
-      .text = (char *) displayStr
+      .text = (char *) global.signTransferContext.displayStr
     });
 UX_STEP_VALID(
     ux_scheduled_transfer_initial_flow_2_step,
@@ -64,19 +49,19 @@ UX_STEP_NOCB(
     bn,
     {
         "Timestamp",
-        (char *) displayTimestamp
+        (char *) global.signTransferContext.displayTimestamp
     });
 UX_STEP_NOCB(
     ux_sign_scheduled_transfer_pair_flow_1_step,
     bn,
     {
         "Amount (uGTU)",
-        (char *) displayAmount
+        (char *) global.signTransferContext.displayAmount
     });
 UX_STEP_CB(
     ux_sign_scheduled_transfer_pair_flow_2_step,
     nn,
-    processNextScheduledAmount(buffer),
+    processNextScheduledAmount(ctx->buffer),
     {
       "Continue",
       "with transaction"
@@ -94,8 +79,8 @@ UX_STEP_CB(
     signTransferWithScheduleHash(),
     {
       &C_icon_validate_14,
-      "Sign TX",
-      (char *) displayAccount
+      "Sign tx",
+      (char *) global.signTransferContext.displayAccount
     });
 UX_STEP_CB(
     ux_sign_scheduled_transfer_flow_1_step,
@@ -104,7 +89,7 @@ UX_STEP_CB(
     {
       &C_icon_crossmark,
       "Decline to",
-      "sign transaction"
+      "sign tx"
     });
 UX_FLOW(ux_sign_scheduled_transfer_flow,
     &ux_sign_scheduled_transfer_flow_0_step,
@@ -127,27 +112,27 @@ void signTransferWithScheduleHash() {
 
 void processNextScheduledAmount(uint8_t *buffer) {
     // The full transaction has been added to the hash, so we can continue to the signing process.
-    if (remainingNumberOfScheduledAmounts == 0 && scheduledAmountsInCurrentPacket == 0) {
+    if (ctx->remainingNumberOfScheduledAmounts == 0 && ctx->scheduledAmountsInCurrentPacket == 0) {
         ux_flow_init(0, ux_sign_scheduled_transfer_flow, NULL);
-    } else if (scheduledAmountsInCurrentPacket == 0) {
+    } else if (ctx->scheduledAmountsInCurrentPacket == 0) {
         // Current packet has been successfully read, but there are still more data to receive. Ask the computer
         // for more data.
         sendSuccessNoIdle(0);
     } else {
         // The current packet still has additional timestamp/amount pairs to be added to the hash and
         // displayed for the user.
-        uint64_t timestamp = U8BE(buffer, pos);
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, buffer + pos, 8, NULL, 0);
-        pos += 8;
-        bin2dec(displayTimestamp, timestamp);
+        uint64_t timestamp = U8BE(ctx->buffer, ctx->pos);
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, buffer + ctx->pos, 8, NULL, 0);
+        ctx->pos += 8;
+        bin2dec(ctx->displayTimestamp, timestamp);
 
-        uint64_t amount = U8BE(buffer, pos);
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, buffer + pos, 8, NULL, 0);
-        pos += 8;
-        bin2dec(displayAmount, amount);
+        uint64_t amount = U8BE(ctx->buffer, ctx->pos);
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, buffer + ctx->pos, 8, NULL, 0);
+        ctx->pos += 8;
+        bin2dec(ctx->displayAmount, amount);
 
         // We read one more scheduled amount, so count down to keep track of remaining to process.
-        scheduledAmountsInCurrentPacket -= 1;
+        ctx->scheduledAmountsInCurrentPacket -= 1;
 
         // Display the timestamp and amount for the user to validate it.
         ux_flow_init(0, ux_sign_scheduled_transfer_pair_flow, NULL);
@@ -181,12 +166,12 @@ void handleSignTransferWithSchedule(uint8_t *dataBuffer, uint8_t p1, volatile un
         parseAccountSignatureKeyPath(dataBuffer);
         dataBuffer += 2;
 
-        os_memmove(displayAccount, "with #", 6);
-        bin2dec(displayAccount + 6, keyPath->accountIndex);
+        os_memmove(ctx->displayAccount, "with #", 6);
+        bin2dec(ctx->displayAccount + 6, keyPath->accountIndex);
 
         uint8_t numberOfScheduledAmountsArray[1];
         os_memmove(numberOfScheduledAmountsArray, dataBuffer, 1);
-        remainingNumberOfScheduledAmounts = numberOfScheduledAmountsArray[0];
+        ctx->remainingNumberOfScheduledAmounts = numberOfScheduledAmountsArray[0];
         dataBuffer += 1;
 
         // Initialize the transaction hash object.
@@ -208,7 +193,7 @@ void handleSignTransferWithSchedule(uint8_t *dataBuffer, uint8_t p1, volatile un
         cx_hash((cx_hash_t *) &tx_state->hash, 0, toAddress, 32, NULL, 0);
 
         // Used in display of recipient address
-        toHex(toAddress, sizeof(toAddress), displayStr);
+        toHex(toAddress, sizeof(toAddress), ctx->displayStr);
 
         // Display the transaction information to the user (recipient address and amount to be sent).
         ux_flow_init(0, ux_scheduled_transfer_initial_flow, NULL);
@@ -220,20 +205,20 @@ void handleSignTransferWithSchedule(uint8_t *dataBuffer, uint8_t p1, volatile un
         // First 8 bytes is the timestamp, the following 8 bytes is the amount.
         // We have room for 255 bytes, so 240 = 15 * 16, i.e. 15 pairs in each packet. Determine how many pairs are
         // in the current packet.
-        if (remainingNumberOfScheduledAmounts <= 15) {
-            scheduledAmountsInCurrentPacket = remainingNumberOfScheduledAmounts;
-            remainingNumberOfScheduledAmounts = 0;
+        if (ctx->remainingNumberOfScheduledAmounts <= 15) {
+            ctx->scheduledAmountsInCurrentPacket = ctx->remainingNumberOfScheduledAmounts;
+            ctx->remainingNumberOfScheduledAmounts = 0;
         } else {
             // The maximum is available in the packet.
-            scheduledAmountsInCurrentPacket = 15;
-            remainingNumberOfScheduledAmounts -= 15;
+            ctx->scheduledAmountsInCurrentPacket = 15;
+            ctx->remainingNumberOfScheduledAmounts -= 15;
         }
 
         // Reset pointer keeping track of where we are in the current packet being processed.
-        pos = 0;
+        ctx->pos = 0;
 
-        os_memmove(buffer, dataBuffer, scheduledAmountsInCurrentPacket * 16);
-        processNextScheduledAmount(buffer);
+        os_memmove(ctx->buffer, dataBuffer, ctx->scheduledAmountsInCurrentPacket * 16);
+        processNextScheduledAmount(ctx->buffer);
 
         // Tell the main process to wait for a button press.
         *flags |= IO_ASYNCH_REPLY;

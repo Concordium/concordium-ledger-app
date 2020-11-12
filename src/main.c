@@ -25,8 +25,8 @@
 #include <string.h>
 
 // Global variable definitions
+instructionContext global;
 accountSubtreePath_t path;
-tx_state_t tx_context;
 
 // The expected CLA byte
 #define CLA 0xE0
@@ -53,7 +53,7 @@ tx_state_t tx_context;
 // computer. The APDU commands control what flow is activated, i.e. which control flow is initiated.
 static void concordium_main(void) {
     // The transaction context is uninitialized when booting up.
-    tx_context.initialized = false;
+    global.signTransferContext.tx_state.initialized = false;
 
     volatile unsigned int rx = 0;
     volatile unsigned int tx = 0;
