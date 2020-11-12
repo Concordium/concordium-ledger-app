@@ -98,9 +98,6 @@ UX_FLOW(ux_sign_scheduled_transfer_flow,
 
 // Hashes transaction, signs it and sends the signature back to the computer.
 void signTransferWithScheduleHash() {
-    // Reset initialization status, as we are done processing the current transaction.
-    tx_state->initialized = false;
-
     cx_hash((cx_hash_t *) &tx_state->hash, CX_LAST, NULL, 0, tx_state->transactionHash, 32);
 
     uint8_t signedHash[64];
@@ -108,6 +105,9 @@ void signTransferWithScheduleHash() {
 
     os_memmove(G_io_apdu_buffer, signedHash, sizeof(signedHash));
     sendSuccess(sizeof(signedHash));
+
+    // Reset initialization status, as we are done processing the current transaction.
+    tx_state->initialized = false;
 }
 
 void processNextScheduledAmount(uint8_t *buffer) {

@@ -24,10 +24,10 @@ UX_STEP_NOCB(
     });
 UX_STEP_NOCB(
     ux_sign_flow_1_step,
-    bnnn_paging,
+    bn,
     {
-      .title = "Amount",
-      .text = (char *) global.signTransferContext.displayAmount,
+      "Amount (uGTU)",
+      (char *) global.signTransferContext.displayAmount,
     });
 UX_STEP_NOCB(
     ux_sign_flow_2_step,
@@ -45,11 +45,21 @@ UX_STEP_VALID(
       "Sign tx",
       (char *) global.signTransferContext.displayAccount
     });
+UX_STEP_CB(
+    ux_sign_flow_4_step,
+    pnn,
+    sendUserRejection(),
+    {
+      &C_icon_crossmark,
+      "Decline to",
+      "sign tx"
+    });
 UX_FLOW(ux_sign_flow,
     &ux_sign_flow_0_step,
     &ux_sign_flow_1_step,
     &ux_sign_flow_2_step,
-    &ux_sign_flow_3_step
+    &ux_sign_flow_3_step,
+    &ux_sign_flow_4_step
 );
 
 // UI definitions for comparison of the signature of the transaction hash.
@@ -69,23 +79,10 @@ UX_FLOW(ux_sign_compare_flow,
 // Function that is called when the user accepts signing the received transaction. It will use the private key
 // to sign the hash of the transaction, and send it back to the computer. Afterwards a UI flow for comparing the
 // signature is started.
-// TODO: Generalize and move to a separate transaction file. Signing is the same except for the key path.
 void signTransferHash() {
     // Sign the transaction hash with the private key for the given account index.
-    cx_ecfp_private_key_t privateKey;
     uint8_t signedHash[64];
-
-    BEGIN_TRY {
-        TRY {
-            getAccountSignaturePrivateKey(keyPath->identity, keyPath->accountIndex, &privateKey);
-            cx_eddsa_sign(&privateKey, CX_RND_RFC6979 | CX_LAST, CX_SHA512, tx_state->transactionHash, 32, NULL, 0, signedHash, 64, NULL);
-        }
-        FINALLY {
-            // Clean up the private key, so that we cannot leak it.
-            explicit_bzero(&privateKey, sizeof(privateKey));
-        }
-    }
-    END_TRY;
+    signTransactionHash(keyPath->identity, keyPath->accountIndex, tx_state->transactionHash, signedHash);
 
     // Return the signature on the transaction hash to the computer. The computer should then display the received
     // signature and the user should compare the signature on the device with the one shown on the computer.
@@ -97,8 +94,6 @@ void signTransferHash() {
     toHex(signedHash, sizeof(signedHash), ctx->signatureAsHex);
     ux_flow_init(0, ux_sign_compare_flow, NULL);
 }
-
-
 
 // Constructs the SHA256 hash of the transaction bytes. This function relies deeply on the serialization format
 // of account transactions.
@@ -130,8 +125,7 @@ void buildTransferHash(uint8_t *dataBuffer) {
 
     // Used to display the amount being transferred.
     uint64_t amount = U8BE(dataBuffer, 0);
-    os_memmove(ctx->displayAmount, "uGTU ", 5);
-    bin2dec(ctx->displayAmount + 5, amount);
+    bin2dec(ctx->displayAmount, amount);
 
     // Add transfer amount to the hash.
     cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 8, NULL, 0);

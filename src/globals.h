@@ -30,7 +30,7 @@ typedef struct {
     char displayStr[65];
 
     uint8_t displayAccount[10];
-    uint8_t displayAmount[25];
+    uint8_t displayAmount[21];
 
     // The signature is 64 bytes, in hexadecimal that is 128 bytes + 1 for string terminator.
     char signatureAsHex[129];
@@ -43,7 +43,7 @@ typedef struct {
     uint8_t remainingNumberOfScheduledAmounts;
     uint8_t scheduledAmountsInCurrentPacket;
 
-    uint8_t displayAmount[25];
+    uint8_t displayAmount[21];
     uint8_t displayTimestamp[25];
 
     // Buffer to hold the incoming databuffer so that we can iterate over it.
