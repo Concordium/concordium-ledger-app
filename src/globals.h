@@ -37,7 +37,7 @@ typedef struct {
 } signTransferContext_t;
 
 typedef struct {
-    char displayStr[52];
+    unsigned char displayStr[52];
     uint8_t displayAccount[10];
     uint8_t remainingNumberOfScheduledAmounts;
     uint8_t scheduledAmountsInCurrentPacket;

@@ -13,6 +13,7 @@ static tx_state_t *tx_state = &global.signTransferWithScheduleContext.tx_state;
 
 void processNextScheduledAmount(uint8_t *buffer);
 void signTransferWithScheduleHash();
+void declineToSign();
 
 // UI definitions for displaying the transaction contents of the first packet for verification before continuing
 // to process the scheduled amount pairs that will be received in separate packets.
@@ -86,7 +87,7 @@ UX_STEP_CB(
 UX_STEP_CB(
     ux_sign_scheduled_transfer_flow_1_step,
     pnn,
-    sendUserRejection(),
+    declineToSign(),
     {
       &C_icon_crossmark,
       "Decline to",
@@ -96,6 +97,12 @@ UX_FLOW(ux_sign_scheduled_transfer_flow,
     &ux_sign_scheduled_transfer_flow_0_step,
     &ux_sign_scheduled_transfer_flow_1_step
 );
+
+// Send user rejection and make sure to reset context (otherwise a new request would be rejected).
+void declineToSign() {
+    global.signTransferWithScheduleContext.tx_state.initialized = false;
+    sendUserRejection();
+}
 
 // Hashes transaction, signs it and sends the signature back to the computer.
 void signTransferWithScheduleHash() {
