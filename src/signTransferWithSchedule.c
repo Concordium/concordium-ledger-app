@@ -5,6 +5,7 @@
 #include "menu.h"
 #include "util.h"
 #include <string.h>
+#include "base58check.h"
 
 static accountSubtreePath_t *keyPath = &path;
 static signTransferWithScheduleContext_t *ctx = &global.signTransferWithScheduleContext;
@@ -192,8 +193,12 @@ void handleSignTransferWithSchedule(uint8_t *dataBuffer, uint8_t p1, volatile un
         dataBuffer += 32;
         cx_hash((cx_hash_t *) &tx_state->hash, 0, toAddress, 32, NULL, 0);
 
-        // Used in display of recipient address
-        toHex(toAddress, sizeof(toAddress), ctx->displayStr);
+        // Used in display of recipient address.
+        size_t outputSize = sizeof(ctx->displayStr);
+        if (base58check_encode(toAddress, sizeof(toAddress), ctx->displayStr, &outputSize) != 0) {
+            THROW(0x6B01);  // The received address bytes are not valid a valid base58 encoding.
+        }
+        ctx->displayStr[50] = '\0';
 
         // Display the transaction information to the user (recipient address and amount to be sent).
         ux_flow_init(0, ux_scheduled_transfer_initial_flow, NULL);

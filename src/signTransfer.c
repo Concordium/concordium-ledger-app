@@ -5,7 +5,7 @@
 #include "menu.h"
 #include "util.h"
 #include <string.h>
-#include "base58.h"
+#include "base58check.h"
 
 static accountSubtreePath_t *keyPath = &path;
 
