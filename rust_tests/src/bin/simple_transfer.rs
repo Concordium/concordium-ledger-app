@@ -1,8 +1,5 @@
-use ed25519_dalek::{Keypair, PublicKey, SecretKey, Signer, Verifier};
-use ed25519_dalek::ed25519::signature::Signature;
 use hex;
 use ledger::{ApduCommand, LedgerApp};
-use sha2::{Digest, Sha256};
 use base58check::*;
 
 fn main() {

@@ -26,8 +26,7 @@ typedef struct {
 // Each instruction's state has to have its own struct here that is put in the global union below. This translates
 // into each handler file having its own struct here.
 typedef struct {
-    // The toAddress that we are displaying is 32 bytes, in hexadecimal that is 64 bytes + 1 for string terminator.
-    char displayStr[65];
+    unsigned char displayStr[52];
 
     uint8_t displayAccount[10];
     uint8_t displayAmount[21];

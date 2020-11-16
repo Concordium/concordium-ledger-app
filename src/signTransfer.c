@@ -5,6 +5,7 @@
 #include "menu.h"
 #include "util.h"
 #include <string.h>
+#include "base58.h"
 
 static accountSubtreePath_t *keyPath = &path;
 
@@ -120,8 +121,12 @@ void buildTransferHash(uint8_t *dataBuffer) {
     dataBuffer += 32;
     cx_hash((cx_hash_t *) &tx_state->hash, 0, toAddress, 32, NULL, 0);
 
-    // Used in display of recipient address
-    toHex(toAddress, sizeof(toAddress), ctx->displayStr);
+    // Used in display of recipient address.
+    size_t outputSize = sizeof(ctx->displayStr);
+    if (base58check_encode(toAddress, sizeof(toAddress), ctx->displayStr, &outputSize) != 0) {
+        THROW(0x6B01);  // The received address bytes are not valid a valid base58 encoding.
+    }
+    ctx->displayStr[50] = '\0';
 
     // Used to display the amount being transferred.
     uint64_t amount = U8BE(dataBuffer, 0);
