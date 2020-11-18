@@ -52,11 +52,42 @@ typedef struct {
     tx_state_t tx_state;
 } signTransferWithScheduleContext_t;
 
+// TODO This could be heavily optimized, but let's skip that for now unless we run into trouble.
+typedef struct {
+    uint8_t displayAccount[10];
+    uint8_t numberOfVerificationKeys;
+
+    char accountVerificationKey[65];
+
+    uint8_t signatureThreshold[4];
+    char regIdCred[97];
+
+    uint8_t identityProviderIdentity[4];
+    uint8_t anonymityRevocationThreshold[4];
+
+    uint16_t anonymityRevocationListLength;
+
+    uint8_t arIdentity[11];
+    uint8_t encIdCredPubShare[1];
+
+    uint8_t validTo[8];
+    uint8_t createdAt[8];
+
+    uint16_t attributeListLength;
+
+    char attributeTag[19];
+
+    uint8_t attributeValueLength;
+    uint8_t attributeValue[256];
+
+} signCredentialDeploymentContext_t;
+
 // As the Ledger device is very limited on memory, the context of each instruction is stored in a
 // shared global union, so that we use no more memory than that of the most space using instruction context.
 typedef union {
     signTransferWithScheduleContext_t signTransferWithScheduleContext;
     signTransferContext_t signTransferContext;
+    signCredentialDeploymentContext_t signCredentialDeploymentContext;
 } instructionContext;
 extern instructionContext global;
 
