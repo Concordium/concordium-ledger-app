@@ -197,6 +197,12 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, volatile un
         cx_sha256_init(&tx_state->hash);
         tx_state->initialized = true;
 
+        // Parse the type of credential deployment (existing or new account).
+        uint8_t typeOfCredentialDeployment[1];
+        os_memmove(typeOfCredentialDeployment, dataBuffer, 1);
+        ctx->type = typeOfCredentialDeployment[0];
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, typeOfCredentialDeployment, 1, NULL, 0);
+
         ctx->state = 1;
         parseVerificationKeysLength(dataBuffer);
     } else if (p1 == P1_VERIFICATION_KEY) {

@@ -71,6 +71,8 @@ typedef struct {
 
 typedef struct {
     uint8_t displayAccount[10];
+
+    uint8_t type;
     uint8_t numberOfVerificationKeys;
 
     char accountVerificationKey[65];
