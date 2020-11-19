@@ -31,7 +31,10 @@ themselves, but that is quite difficult and probably not something a user would 
 
 ## Protocol description
 
-The following sequence of bytes must be sent in the specified sequence, and with the given P1 value.
+The following sequence of bytes must be sent in the specified sequence, and with the given P1 value. Some of the commands
+should be repeated until all data has been sent.
+
+* Multiple commands.
 
 | P1 | CDATA | Comment |
 |--------|-------------|----|

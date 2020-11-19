@@ -8,7 +8,6 @@
 #include "base58check.h"
 
 static accountSubtreePath_t *keyPath = &path;
-
 static signTransferContext_t *ctx = &global.signTransferContext;
 static tx_state_t *tx_state = &global.signTransferContext.tx_state;
 
@@ -44,7 +43,7 @@ UX_STEP_VALID(
     {
       &C_icon_validate_14,
       "Sign tx",
-      (char *) global.signTransferContext.displayAccount
+      (char *) path.displayAccount
     });
 UX_STEP_CB(
     ux_sign_flow_4_step,
@@ -143,9 +142,6 @@ void buildTransferHash(uint8_t *dataBuffer) {
 void handleSignTransfer(uint8_t *dataBuffer, uint16_t dataLength, volatile unsigned int *flags) {
     parseAccountSignatureKeyPath(dataBuffer);
     dataBuffer += 2;
-
-    os_memmove(ctx->displayAccount, "with #", 6);
-    bin2dec(ctx->displayAccount + 6, keyPath->accountIndex);
 
     // Calculate transaction hash. This function has the side effect that the values required to display
     // the transaction to the user are loaded. So it has to be run before initializing the ux_sign_flow.
