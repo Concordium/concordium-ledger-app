@@ -20,6 +20,6 @@ account transaction, which is quite similar.
 | `(4 + 96)*` | ArIdentity and encIdCredPubShare | Yes |
 | `3`  | Credential valid to (2 first bytes is the year, last byte is the month) | Yes |
 | `3`  | Credential created at (2 first bytes is the year, last byte is the month) | Yes |
-| `2 + (1 + [1..255])*` | 2 bytes for number of attributes, then attribute tag and attribute value list | Yes |
+| `2 + (1 + [1..255])*` | 2 bytes for number of attributes, then attribute tag and attribute value list | Yes (SHA256 of all of it?) |
 | `4`  | Length of proofs | No | 
-| `?`  | Proofs | Yes (SHA256 of it) |
+| `?`  | Proofs | No  |

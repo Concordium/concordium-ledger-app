@@ -52,7 +52,9 @@ typedef struct {
     tx_state_t tx_state;
 } signTransferWithScheduleContext_t;
 
-// TODO This could be heavily optimized, but let's skip that for now unless we run into trouble.
+// TODO This could be heavily optimized, but let's skip that for now unless we run into trouble. Optimization
+// TODO would be to re-use a display buffer instead of having one per field we receive (as we don't have to hold
+// TODO them simultaneously.
 typedef struct {
     uint8_t displayAccount[10];
     uint8_t numberOfVerificationKeys;
@@ -75,11 +77,13 @@ typedef struct {
 
     uint16_t attributeListLength;
 
-    char attributeTag[19];
-
     uint8_t attributeValueLength;
-    uint8_t attributeValue[256];
+    uint8_t attributeHashDisplay[65];
 
+    uint32_t proofLength;
+    uint8_t buffer[255];
+
+    tx_state_t tx_state;
 } signCredentialDeploymentContext_t;
 
 // As the Ledger device is very limited on memory, the context of each instruction is stored in a

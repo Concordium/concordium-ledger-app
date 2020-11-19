@@ -11,13 +11,14 @@
 static accountSubtreePath_t *keyPath = &path;
 static signCredentialDeploymentContext_t *ctx = &global.signCredentialDeploymentContext;
 
-// The attribute names mapping has to be consistent with ATTRIBUTE_NAMES in types.rs.
-const char *ATTRIBUTE_NAMES[10] = {
-    "firstName ",
-    "lastName  "
-};
+// TODO Move to shared memory, but it failed before. So keeping it here to make progress...
+static cx_sha256_t attributeHash;
+
+static tx_state_t *tx_state = &global.signCredentialDeploymentContext.tx_state;
 
 void processNextVerificationKey();
+void signCredentialDeployment();
+void declineToSignCredentialDeployment();
 
 UX_STEP_CB(
     ux_credential_deployment_initial_flow_0_step,
@@ -87,7 +88,7 @@ UX_STEP_NOCB(
       (char *) global.signCredentialDeploymentContext.arIdentity
     });
 // TODO Consider if it is necessary to show the encrypted id cred pub shares. I assume that the transaction is rejected
-// if they are invalid anyway?
+// TODO if they are invalid anyway? And the user has no real chance of validating it anyhow?
 UX_STEP_CB(
     ux_credential_deployment_aridentity_key_flow_1_step,
     bn_paging,
@@ -123,15 +124,59 @@ UX_FLOW(ux_credential_deployment_dates,
 
 UX_STEP_CB(
     ux_credential_deployment_attributes_0_step,
-    bn,
-    sendSuccess(0),
+    bn_paging,
+    sendSuccessNoIdle(0),
     {
-        (char *) global.signCredentialDeploymentContext.attributeTag,
-        (char *) global.signCredentialDeploymentContext.attributeValue
+        "Attributes hash",
+        (char *) global.signCredentialDeploymentContext.attributeHashDisplay
     });
 UX_FLOW(ux_credential_deployment_attributes,
     &ux_credential_deployment_attributes_0_step
 );
+
+// UI definitions for signing the transaction, or declining to do so.
+UX_STEP_CB(
+    ux_sign_credential_deployment_flow_0_step,
+    pnn,
+    signCredentialDeployment(),
+    {
+      &C_icon_validate_14,
+      "Sign tx",
+      (char *) global.signCredentialDeploymentContext.displayAccount
+    });
+UX_STEP_CB(
+    ux_sign_credential_deployment_flow_1_step,
+    pnn,
+    declineToSign(),
+    {
+      &C_icon_crossmark,
+      "Decline to",
+      "sign tx"
+    });
+UX_FLOW(ux_sign_credential_deployment_flow,
+    &ux_sign_credential_deployment_flow_0_step,
+    &ux_sign_credential_deployment_flow_1_step
+);
+
+// Hashes transaction, signs it and sends the signature back to the computer.
+void signCredentialDeployment() {
+    cx_hash((cx_hash_t *) &tx_state->hash, CX_LAST, NULL, 0, tx_state->transactionHash, 32);
+
+    uint8_t signedHash[64];
+    signTransactionHash(keyPath->identity, keyPath->accountIndex, tx_state->transactionHash, signedHash);
+
+    os_memmove(G_io_apdu_buffer, signedHash, sizeof(signedHash));
+    sendSuccess(sizeof(signedHash));
+
+    // Reset initialization status, as we are done processing the current transaction.
+    tx_state->initialized = false;
+}
+
+// Send user rejection and make sure to reset context (otherwise a new request would be rejected).
+void declineToSignCredentialDeployment() {
+    global.signCredentialDeploymentContext.tx_state.initialized = false;
+    sendUserRejection();
+}
 
 void processNextVerificationKey() {
     if (ctx->numberOfVerificationKeys <= 0) {
@@ -146,6 +191,7 @@ void parseVerificationKey(uint8_t *buffer) {
     uint8_t verificationKey[32];
     os_memmove(verificationKey, buffer, 32);
     buffer += 32;
+    cx_hash((cx_hash_t *) &tx_state->hash, 0, verificationKey, 32, NULL, 0);
 
     // Convert to a human-readable format.
     toHex(verificationKey, sizeof(verificationKey), ctx->accountVerificationKey);
@@ -161,22 +207,11 @@ void parseVerificationKeysLength(uint8_t *dataBuffer) {
     os_memmove(numberOfVerificationKeysArray, dataBuffer, 1);
     ctx->numberOfVerificationKeys = numberOfVerificationKeysArray[0];
 
+    cx_hash((cx_hash_t *) &tx_state->hash, 0, numberOfVerificationKeysArray, 1, NULL, 0);
     ux_flow_init(0, ux_credential_deployment_initial_flow, NULL);
 }
 
-// TODO implement support for the remainder of the values.
-const char* getAttributeName(uint8_t attributeTag) {
-    switch (attributeTag) {
-        case 1:
-            return "First name";
-        case 2:
-            return "Last name";
-        default:
-            return "TODO";
-    }
-}
-
-// APDU parameters specific to transfer with schedule transaction (multiple packets protocol).
+// APDU parameters specific to credential deployment transaction (multiple packets protocol).
 #define P1_INITIAL_PACKET           0x00    // Sent for 1st packet of the transfer.
 #define P1_VERIFICATION_KEY         0x01    // Sent for packets containing a verification key.
 #define P1_SIGNATURE_THRESHOLD      0x02    // Sent for the packet containing signature threshold, RegIdCred,
@@ -187,12 +222,11 @@ const char* getAttributeName(uint8_t attributeTag) {
 #define P1_ATTRIBUTE_TAG            0x05    // Sent for the packet containing the attribute tag, and the attribute
                                             // value length, which is used to read the attribute value.
 #define P1_ATTRIBUTE_VALUE          0x06    // Sent for the packet containing an attribute value.
+#define P1_LENGTH_OF_PROOFS         0x07    // Sent for the packet containing the byte length of the proofs.
+#define P1_PROOFS                   0x08    // Sent for the packets containing proof bytes.
 
 // TODO: 'Add initialization protection to avoid concatenation of transactions.'
 void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, volatile unsigned int *flags) {
-
-    // TODO Refactor the if/else block into something nicer?
-
 
     if (p1 == P1_INITIAL_PACKET) {
         parseAccountSignatureKeyPath(dataBuffer);
@@ -200,6 +234,8 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, volatile un
 
         os_memmove(ctx->displayAccount, "with #", 6);
         bin2dec(ctx->displayAccount + 6, keyPath->accountIndex);
+
+        cx_sha256_init(&tx_state->hash);
 
         parseVerificationKeysLength(dataBuffer);
     } else if (p1 == P1_VERIFICATION_KEY) {
@@ -218,12 +254,14 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, volatile un
         os_memmove(temp, dataBuffer, 1);
         bin2dec(ctx->signatureThreshold, temp[0]);
         dataBuffer += 1;
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, temp, 1, NULL, 0);
 
         // Parse RegIdCred and make it displayable as hex.
         uint8_t regIdCred[48];
         os_memmove(regIdCred, dataBuffer, 48);
         dataBuffer += 48;
         toHex(regIdCred, sizeof(regIdCred), ctx->regIdCred);
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, regIdCred, 48, NULL, 0);
 
         // Parse identity provider identity.
         uint8_t identityProviderIdentity[4];
@@ -231,24 +269,28 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, volatile un
         uint32_t identityProviderValue = U4BE(identityProviderIdentity, 0);
         bin2dec(ctx->identityProviderIdentity, identityProviderValue);
         dataBuffer += 4;
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, identityProviderIdentity, 4, NULL, 0);
 
         // Parse anonymity revocation threshold.
         os_memmove(temp, dataBuffer, 1);
         bin2dec(ctx->anonymityRevocationThreshold, temp[0]);
         dataBuffer += 1;
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, temp, 1, NULL, 0);
 
         // Parse the length of the following list of anonymity revokers.
         ctx->anonymityRevocationListLength = U2BE(dataBuffer, 0);
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 2, NULL, 0);
         dataBuffer += 2;
+
+        // Initialize values for later.
+        cx_sha256_init(&attributeHash);
 
         // TODO Update state that the signature threshold step has completed.
 
         // Display the loaded data.
         ux_flow_init(0, ux_credential_deployment_threshold_flow, NULL);
     } else if (p1 == P1_AR_IDENTITY) {
-
         // TODO Fail if invalid state at this point.
-
         if (ctx->anonymityRevocationListLength <= 0) {
             THROW(0x6B01);  // Invalid state, sender says ar identity pair is incoming, but we already received all.
         }
@@ -256,12 +298,14 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, volatile un
         // Parse ArIdentity
         uint32_t arIdentity = U4BE(dataBuffer, 0);
         bin2dec(ctx->arIdentity, arIdentity);
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 4, NULL, 0);
         dataBuffer += 4;
 
         // Parse enc_id_cred_pub_share
         uint8_t encIdCredPubShare[96];
         os_memmove(encIdCredPubShare, dataBuffer, 96);
         toHex(encIdCredPubShare, sizeof(encIdCredPubShare), ctx->encIdCredPubShare);
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, encIdCredPubShare, 96, NULL, 0);
         dataBuffer += 96;
 
         // Display the loaded data.
@@ -273,8 +317,10 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, volatile un
 
         // Build display of valid to
         uint16_t validToYear = U2BE(dataBuffer, 0);
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 2, NULL, 0);
         dataBuffer += 2;
         os_memmove(temp, dataBuffer, 1);
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 1, NULL, 0);
         dataBuffer += 1;
         bin2dec(ctx->validTo, validToYear);
         ctx->validTo[4] = ' ';
@@ -282,8 +328,10 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, volatile un
 
         // Build display of created at
         uint16_t createdAtYear = U2BE(dataBuffer, 0);
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 2, NULL, 0);
         dataBuffer += 2;
         os_memmove(temp, dataBuffer, 1);
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 1, NULL, 0);
         dataBuffer += 1;
         bin2dec(ctx->createdAt, createdAtYear);
         ctx->createdAt[4] = ' ';
@@ -291,6 +339,8 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, volatile un
 
         // Read attribute list length
         ctx->attributeListLength = U2BE(dataBuffer, 0);
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 2, NULL, 0);
+        dataBuffer += 2;
 
         // TODO Update state
 
@@ -298,16 +348,24 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, volatile un
     } else if (p1 == P1_ATTRIBUTE_TAG) {
         // TODO Validate state, i.e. that we have seen credential states.
 
+        if (ctx->attributeListLength <= 0) {
+            THROW(0x6B01);
+        }
+
         // Parse attribute tag, and map it the attribute name (the display text).
         uint8_t attributeTag[1];
         os_memmove(attributeTag, dataBuffer, 1);
-        os_memmove(ctx->attributeTag, getAttributeName(attributeTag[0]), 10);
         dataBuffer += 1;
+        cx_hash((cx_hash_t *) &attributeHash, 0, attributeTag, 1, NULL, 0);
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, attributeTag, 1, NULL, 0);
+
 
         // Parse attribute length, so we know how much to parse in next packet.
         uint8_t attributeValueLength[1];
         os_memmove(attributeValueLength, dataBuffer, 1);
         ctx->attributeValueLength = attributeValueLength[0];
+        cx_hash((cx_hash_t *) &attributeHash, 0, attributeValueLength, 1, NULL, 0);
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, attributeValueLength, 1, NULL, 0);
 
         // Ask computer for the attribute value.
         sendSuccessNoIdle(0);
@@ -315,29 +373,45 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, volatile un
         // TODO Check for state and all that jazz.
 
         // TODO Attribute values are encoded with UTF-8... To display anything sensible we would need a UTF-8
-        // TODO decoder to display it.
-        // Parse attribute value and display it.
+        // TODO decoder to display it. The device can't even display all UTF-8 values, so forget about it.
+        // TODO Hash the full attribute list object and display that on the computer and on the device.
+        // Add attribute value to the hash.
+        cx_hash((cx_hash_t *) &attributeHash, 0, dataBuffer, ctx->attributeValueLength, NULL, 0);
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, ctx->attributeValueLength, NULL, 0);
 
-        os_memmove(ctx->attributeValue, dataBuffer, ctx->attributeValueLength);
-        ctx->attributeValue[255] = '\0';
+        ctx->attributeListLength -= 1;
 
-        ux_flow_init(0, ux_credential_deployment_attributes, NULL);
+        // We have processed all attributes, so display the attribute hash value.
+        if (ctx->attributeListLength == 0) {
+            uint8_t attributeHashBytes[32];
+            cx_hash((cx_hash_t *) &attributeHash, CX_LAST, NULL, 0, attributeHashBytes, 32);
+            toHex(attributeHashBytes, sizeof(attributeHashBytes), ctx->attributeHashDisplay);
+            ux_flow_init(0, ux_credential_deployment_attributes, NULL);
+
+            // TODO Update state machine.
+        } else {
+            // There are additional attributes to be read, so ask for more.
+            sendSuccessNoIdle(0);
+        }
+    } else if (p1 == P1_LENGTH_OF_PROOFS) {
+        ctx->proofLength = U4BE(dataBuffer, 0);
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 4, NULL, 0);
+        sendSuccessNoIdle(0);
+        // TODO Update state machine.
+    } else if (p1 == P1_PROOFS) {
+        if (ctx->proofLength > 255) {
+            cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 255, NULL, 0);
+            os_memmove(ctx->buffer, dataBuffer, 255);
+            ctx->proofLength -= 255;
+            sendSuccessNoIdle(0);
+        } else {
+            cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, ctx->proofLength, NULL, 0);
+            os_memmove(ctx->buffer, dataBuffer, ctx->proofLength);
+
+            // TODO Goto ask user to sign transaction hash.
+            ux_flow_init(0, ux_sign_credential_deployment_flow, NULL);
+        }
     }
 
     *flags |= IO_ASYNCH_REPLY;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
