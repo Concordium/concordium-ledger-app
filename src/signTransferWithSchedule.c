@@ -12,8 +12,6 @@ static signTransferWithScheduleContext_t *ctx = &global.signTransferWithSchedule
 static tx_state_t *tx_state = &global_tx_state;
 
 void processNextScheduledAmount(uint8_t *buffer);
-void signTransferWithScheduleHash();
-void declineToSign();
 
 // UI definitions for displaying the transaction contents of the first packet for verification before continuing
 // to process the scheduled amount pairs that will be received in separate packets.
