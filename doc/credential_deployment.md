@@ -1,5 +1,7 @@
 # Credential deployment transaction
 
+NOTE: Only supports new account presently.
+
 A transaction used to deploy credentials for a user.
 
 ## Credential deployment (new account)

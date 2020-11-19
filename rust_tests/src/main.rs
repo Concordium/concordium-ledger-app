@@ -27,19 +27,17 @@ fn main() {
     let mut receiver_address = sender_address.from_base58check().unwrap().1;
 
     // For scheduled amounts we have to split the transaction into multiple packages, as we can
-    // only move 255 bytes at a time. In the first command we send the list size, which we
-    // restrict to be less than 255 items, i.e. the number fits within 1 byte. For this example
-    // we send 17 pairs to demonstrate that multiple packets are handled correctly.
+    // only move 255 bytes at a time.
     let mut number_of_scheduled_amounts = hex::decode("03").unwrap();
 
     // Send initial command.
     // let initial_command_data = format!("{}{}{}{}{}", &path_prefix, &number_of_scheduled_amounts, &transaction_header, &transaction_kind, &to_address);
 
     let mut initial_command_data = path_prefix;
-    initial_command_data.append(&mut number_of_scheduled_amounts);
     initial_command_data.append(&mut transaction_header);
     initial_command_data.append(&mut transaction_kind);
     initial_command_data.append(&mut receiver_address);
+    initial_command_data.append(&mut number_of_scheduled_amounts);
 
     let initial_command = ApduCommand {
         cla: 224, // Has to be this value for all commands.

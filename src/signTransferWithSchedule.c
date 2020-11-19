@@ -128,11 +128,6 @@ void handleSignTransferWithSchedule(uint8_t *dataBuffer, uint8_t p1, volatile un
         parseAccountSignatureKeyPath(dataBuffer);
         dataBuffer += 2;
 
-        uint8_t numberOfScheduledAmountsArray[1];
-        os_memmove(numberOfScheduledAmountsArray, dataBuffer, 1);
-        ctx->remainingNumberOfScheduledAmounts = numberOfScheduledAmountsArray[0];
-        dataBuffer += 1;
-
         // Initialize the transaction hash object.
         cx_sha256_init(&tx_state->hash);
 
@@ -157,6 +152,12 @@ void handleSignTransferWithSchedule(uint8_t *dataBuffer, uint8_t p1, volatile un
             THROW(0x6B01);  // The received address bytes are not valid a valid base58 encoding.
         }
         ctx->displayStr[50] = '\0';
+
+        uint8_t numberOfScheduledAmountsArray[1];
+        os_memmove(numberOfScheduledAmountsArray, dataBuffer, 1);
+        ctx->remainingNumberOfScheduledAmounts = numberOfScheduledAmountsArray[0];
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, numberOfScheduledAmountsArray, 1, NULL, 0);
+        dataBuffer += 1;
 
         // Display the transaction information to the user (recipient address and amount to be sent).
         ux_flow_init(0, ux_scheduled_transfer_initial_flow, NULL);
