@@ -28,6 +28,7 @@
 // Global variable definitions
 instructionContext global;
 accountSubtreePath_t path;
+tx_state_t global_tx_state;
 
 // The expected CLA byte
 #define CLA 0xE0
@@ -58,6 +59,7 @@ accountSubtreePath_t path;
 static void concordium_main(void) {
     // The transaction context is uninitialized when booting up.
     global.signTransferWithScheduleContext.tx_state.initialized = false;
+    global_tx_state.initialized = false;
 
     volatile unsigned int rx = 0;
     volatile unsigned int tx = 0;

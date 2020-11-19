@@ -10,6 +10,20 @@
 #define CONCORDIUM_COIN_TYPE 691
 #define CONCORDIUM_PURPOSE 583
 
+#define SW_INVALID_STATE 0x6B01
+
+typedef enum {
+    TX_INITIAL,
+    TX_VERIFICATION_KEY,
+    TX_SIGNATURE_THRESHOLD,
+    TX_AR_IDENTITY,
+    TX_CREDENTIAL_DATES,
+    TX_ATTRIBUTE_TAG,
+    TX_ATTRIBUTE_VALUE,
+    TX_LENGTH_OF_PROOFS,
+    TX_PROOFS
+} protocolState_t;
+
 typedef struct {
     uint8_t identity;
     uint8_t accountIndex;
@@ -22,6 +36,7 @@ typedef struct {
     uint8_t transactionHash[32];
     bool initialized;
 } tx_state_t;
+extern tx_state_t global_tx_state;
 
 // Each instruction's state has to have its own struct here that is put in the global union below. This translates
 // into each handler file having its own struct here.
@@ -83,7 +98,7 @@ typedef struct {
     uint32_t proofLength;
     uint8_t buffer[255];
 
-    tx_state_t tx_state;
+    protocolState_t state;
 } signCredentialDeploymentContext_t;
 
 // As the Ledger device is very limited on memory, the context of each instruction is stored in a

@@ -7,14 +7,14 @@
 #include <string.h>
 #include "base58check.h"
 #include <stdio.h>
+#include "sign.h"
 
 static accountSubtreePath_t *keyPath = &path;
 static signCredentialDeploymentContext_t *ctx = &global.signCredentialDeploymentContext;
 
 // TODO Move to shared memory, but it failed before. So keeping it here to make progress...
 static cx_sha256_t attributeHash;
-
-static tx_state_t *tx_state = &global.signCredentialDeploymentContext.tx_state;
+static tx_state_t *tx_state = &global_tx_state;
 
 void processNextVerificationKey();
 void signCredentialDeployment();
@@ -87,6 +87,7 @@ UX_STEP_NOCB(
       "ArIdentity",
       (char *) global.signCredentialDeploymentContext.arIdentity
     });
+
 // TODO Consider if it is necessary to show the encrypted id cred pub shares. I assume that the transaction is rejected
 // TODO if they are invalid anyway? And the user has no real chance of validating it anyhow?
 UX_STEP_CB(
@@ -134,53 +135,9 @@ UX_FLOW(ux_credential_deployment_attributes,
     &ux_credential_deployment_attributes_0_step
 );
 
-// UI definitions for signing the transaction, or declining to do so.
-UX_STEP_CB(
-    ux_sign_credential_deployment_flow_0_step,
-    pnn,
-    signCredentialDeployment(),
-    {
-      &C_icon_validate_14,
-      "Sign tx",
-      (char *) global.signCredentialDeploymentContext.displayAccount
-    });
-UX_STEP_CB(
-    ux_sign_credential_deployment_flow_1_step,
-    pnn,
-    declineToSign(),
-    {
-      &C_icon_crossmark,
-      "Decline to",
-      "sign tx"
-    });
-UX_FLOW(ux_sign_credential_deployment_flow,
-    &ux_sign_credential_deployment_flow_0_step,
-    &ux_sign_credential_deployment_flow_1_step
-);
-
-// Hashes transaction, signs it and sends the signature back to the computer.
-void signCredentialDeployment() {
-    cx_hash((cx_hash_t *) &tx_state->hash, CX_LAST, NULL, 0, tx_state->transactionHash, 32);
-
-    uint8_t signedHash[64];
-    signTransactionHash(keyPath->identity, keyPath->accountIndex, tx_state->transactionHash, signedHash);
-
-    os_memmove(G_io_apdu_buffer, signedHash, sizeof(signedHash));
-    sendSuccess(sizeof(signedHash));
-
-    // Reset initialization status, as we are done processing the current transaction.
-    tx_state->initialized = false;
-}
-
-// Send user rejection and make sure to reset context (otherwise a new request would be rejected).
-void declineToSignCredentialDeployment() {
-    global.signCredentialDeploymentContext.tx_state.initialized = false;
-    sendUserRejection();
-}
-
 void processNextVerificationKey() {
-    if (ctx->numberOfVerificationKeys <= 0) {
-        // TODO Continue to parse incoming transaction. UI idle for now to not get stuck indefinitely.
+    if (ctx->numberOfVerificationKeys == 0) {
+        // TODO Update state here. That is why there are two branches here that currently do the same.
         sendSuccessNoIdle(0);
     } else {
         sendSuccessNoIdle(0);   // Request more data from the computer.
@@ -225,8 +182,11 @@ void parseVerificationKeysLength(uint8_t *dataBuffer) {
 #define P1_LENGTH_OF_PROOFS         0x07    // Sent for the packet containing the byte length of the proofs.
 #define P1_PROOFS                   0x08    // Sent for the packets containing proof bytes.
 
-// TODO: 'Add initialization protection to avoid concatenation of transactions.'
+// TODO Add improved state checking to disallow a computer stepping outside of the protocol.
 void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, volatile unsigned int *flags) {
+    if (p1 != P1_INITIAL_PACKET && tx_state->initialized == false) {
+        THROW(SW_INVALID_STATE);
+    }
 
     if (p1 == P1_INITIAL_PACKET) {
         parseAccountSignatureKeyPath(dataBuffer);
@@ -235,14 +195,20 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, volatile un
         os_memmove(ctx->displayAccount, "with #", 6);
         bin2dec(ctx->displayAccount + 6, keyPath->accountIndex);
 
+        // Initialize values.
         cx_sha256_init(&tx_state->hash);
+        tx_state->initialized = true;
 
+        ctx->state = 1;
         parseVerificationKeysLength(dataBuffer);
     } else if (p1 == P1_VERIFICATION_KEY) {
-        if (ctx->numberOfVerificationKeys > 0) {
+        if (ctx->numberOfVerificationKeys > 0 && ctx->state == TX_VERIFICATION_KEY) {
+            if (ctx->numberOfVerificationKeys == 0) {
+                ctx->state += 1;
+            }
             parseVerificationKey(dataBuffer);
         } else {
-            THROW(0x6B01);  // Invalid state, sender says a verification is incoming, but we already received all.
+            THROW(0x6B01);
         }
     } else if (p1 == P1_SIGNATURE_THRESHOLD) {
         if (ctx->numberOfVerificationKeys != 0) {
@@ -285,12 +251,9 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, volatile un
         // Initialize values for later.
         cx_sha256_init(&attributeHash);
 
-        // TODO Update state that the signature threshold step has completed.
-
         // Display the loaded data.
         ux_flow_init(0, ux_credential_deployment_threshold_flow, NULL);
     } else if (p1 == P1_AR_IDENTITY) {
-        // TODO Fail if invalid state at this point.
         if (ctx->anonymityRevocationListLength <= 0) {
             THROW(0x6B01);  // Invalid state, sender says ar identity pair is incoming, but we already received all.
         }
@@ -311,8 +274,6 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, volatile un
         // Display the loaded data.
         ux_flow_init(0, ux_credential_deployment_aridentity_key_flow, NULL);
     } else if (p1 == P1_CREDENTIAL_DATES) {
-        // TODO Consider validating that the values are sensible.
-
         uint8_t temp[1];
 
         // Build display of valid to
@@ -342,12 +303,8 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, volatile un
         cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 2, NULL, 0);
         dataBuffer += 2;
 
-        // TODO Update state
-
         ux_flow_init(0, ux_credential_deployment_dates, NULL);
     } else if (p1 == P1_ATTRIBUTE_TAG) {
-        // TODO Validate state, i.e. that we have seen credential states.
-
         if (ctx->attributeListLength <= 0) {
             THROW(0x6B01);
         }
@@ -370,11 +327,6 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, volatile un
         // Ask computer for the attribute value.
         sendSuccessNoIdle(0);
     } else if (p1 == P1_ATTRIBUTE_VALUE) {
-        // TODO Check for state and all that jazz.
-
-        // TODO Attribute values are encoded with UTF-8... To display anything sensible we would need a UTF-8
-        // TODO decoder to display it. The device can't even display all UTF-8 values, so forget about it.
-        // TODO Hash the full attribute list object and display that on the computer and on the device.
         // Add attribute value to the hash.
         cx_hash((cx_hash_t *) &attributeHash, 0, dataBuffer, ctx->attributeValueLength, NULL, 0);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, ctx->attributeValueLength, NULL, 0);
@@ -387,8 +339,6 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, volatile un
             cx_hash((cx_hash_t *) &attributeHash, CX_LAST, NULL, 0, attributeHashBytes, 32);
             toHex(attributeHashBytes, sizeof(attributeHashBytes), ctx->attributeHashDisplay);
             ux_flow_init(0, ux_credential_deployment_attributes, NULL);
-
-            // TODO Update state machine.
         } else {
             // There are additional attributes to be read, so ask for more.
             sendSuccessNoIdle(0);
@@ -397,7 +347,6 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, volatile un
         ctx->proofLength = U4BE(dataBuffer, 0);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 4, NULL, 0);
         sendSuccessNoIdle(0);
-        // TODO Update state machine.
     } else if (p1 == P1_PROOFS) {
         if (ctx->proofLength > 255) {
             cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 255, NULL, 0);
@@ -407,9 +356,7 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, volatile un
         } else {
             cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, ctx->proofLength, NULL, 0);
             os_memmove(ctx->buffer, dataBuffer, ctx->proofLength);
-
-            // TODO Goto ask user to sign transaction hash.
-            ux_flow_init(0, ux_sign_credential_deployment_flow, NULL);
+            ux_flow_init(0, ux_sign_flow_shared, NULL);
         }
     }
 
