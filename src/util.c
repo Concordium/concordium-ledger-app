@@ -9,6 +9,8 @@
 static accountSubtreePath_t *keyPath = &path;
 static const uint32_t HARDENED_OFFSET = 0x80000000;
 
+int bin2dec(uint8_t *dst, uint64_t n);
+
 // Parses the key derivation path that is available in the first 2 bytes received for account instructions.
 // This is used for building the key derivation path when deriving a private key.
 void parseAccountSignatureKeyPath(uint8_t *dataBuffer) {
@@ -19,6 +21,9 @@ void parseAccountSignatureKeyPath(uint8_t *dataBuffer) {
     uint8_t accountIndex[1];
     os_memmove(accountIndex, dataBuffer + 1, 1);
     keyPath->accountIndex = accountIndex[0];
+
+    os_memmove(keyPath->displayAccount, "with #", 6);
+    bin2dec(keyPath->displayAccount + 6, keyPath->accountIndex);
 }
 
 // Sends back the user rejection error code 0x6985, which indicates that

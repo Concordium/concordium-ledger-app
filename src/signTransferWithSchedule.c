@@ -6,10 +6,10 @@
 #include "util.h"
 #include <string.h>
 #include "base58check.h"
+#include "sign.h"
 
-static accountSubtreePath_t *keyPath = &path;
 static signTransferWithScheduleContext_t *ctx = &global.signTransferWithScheduleContext;
-static tx_state_t *tx_state = &global.signTransferWithScheduleContext.tx_state;
+static tx_state_t *tx_state = &global_tx_state;
 
 void processNextScheduledAmount(uint8_t *buffer);
 void signTransferWithScheduleHash();
@@ -74,54 +74,10 @@ UX_FLOW(ux_sign_scheduled_transfer_pair_flow,
     &ux_sign_scheduled_transfer_pair_flow_2_step
 );
 
-// UI definitions for signing the transaction, or declining to do so.
-UX_STEP_CB(
-    ux_sign_scheduled_transfer_flow_0_step,
-    pnn,
-    signTransferWithScheduleHash(),
-    {
-      &C_icon_validate_14,
-      "Sign tx",
-      (char *) global.signTransferWithScheduleContext.displayAccount
-    });
-UX_STEP_CB(
-    ux_sign_scheduled_transfer_flow_1_step,
-    pnn,
-    declineToSign(),
-    {
-      &C_icon_crossmark,
-      "Decline to",
-      "sign tx"
-    });
-UX_FLOW(ux_sign_scheduled_transfer_flow,
-    &ux_sign_scheduled_transfer_flow_0_step,
-    &ux_sign_scheduled_transfer_flow_1_step
-);
-
-// Send user rejection and make sure to reset context (otherwise a new request would be rejected).
-void declineToSign() {
-    global.signTransferWithScheduleContext.tx_state.initialized = false;
-    sendUserRejection();
-}
-
-// Hashes transaction, signs it and sends the signature back to the computer.
-void signTransferWithScheduleHash() {
-    cx_hash((cx_hash_t *) &tx_state->hash, CX_LAST, NULL, 0, tx_state->transactionHash, 32);
-
-    uint8_t signedHash[64];
-    signTransactionHash(keyPath->identity, keyPath->accountIndex, tx_state->transactionHash, signedHash);
-
-    os_memmove(G_io_apdu_buffer, signedHash, sizeof(signedHash));
-    sendSuccess(sizeof(signedHash));
-
-    // Reset initialization status, as we are done processing the current transaction.
-    tx_state->initialized = false;
-}
-
 void processNextScheduledAmount(uint8_t *buffer) {
     // The full transaction has been added to the hash, so we can continue to the signing process.
     if (ctx->remainingNumberOfScheduledAmounts == 0 && ctx->scheduledAmountsInCurrentPacket == 0) {
-        ux_flow_init(0, ux_sign_scheduled_transfer_flow, NULL);
+        ux_flow_init(0, ux_sign_flow_shared, NULL);
     } else if (ctx->scheduledAmountsInCurrentPacket == 0) {
         // Current packet has been successfully read, but there are still more data to receive. Ask the computer
         // for more data.
@@ -173,9 +129,6 @@ void handleSignTransferWithSchedule(uint8_t *dataBuffer, uint8_t p1, volatile un
     if (p1 == P1_INITIAL_PACKET) {
         parseAccountSignatureKeyPath(dataBuffer);
         dataBuffer += 2;
-
-        os_memmove(ctx->displayAccount, "with #", 6);
-        bin2dec(ctx->displayAccount + 6, keyPath->accountIndex);
 
         uint8_t numberOfScheduledAmountsArray[1];
         os_memmove(numberOfScheduledAmountsArray, dataBuffer, 1);

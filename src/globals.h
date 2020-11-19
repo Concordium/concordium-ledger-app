@@ -29,6 +29,7 @@ typedef enum {
 typedef struct {
     uint8_t identity;
     uint8_t accountIndex;
+    uint8_t displayAccount[10];
 } accountSubtreePath_t;
 extern accountSubtreePath_t path;
 

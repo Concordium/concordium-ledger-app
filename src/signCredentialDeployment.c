@@ -9,7 +9,6 @@
 #include <stdio.h>
 #include "sign.h"
 
-static accountSubtreePath_t *keyPath = &path;
 static signCredentialDeploymentContext_t *ctx = &global.signCredentialDeploymentContext;
 static cx_sha256_t attributeHash;
 static tx_state_t *tx_state = &global_tx_state;
@@ -189,9 +188,6 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, volatile un
     if (p1 == P1_INITIAL_PACKET) {
         parseAccountSignatureKeyPath(dataBuffer);
         dataBuffer += 2;
-
-        os_memmove(ctx->displayAccount, "with #", 6);
-        bin2dec(ctx->displayAccount + 6, keyPath->accountIndex);
 
         // Initialize values.
         cx_sha256_init(&tx_state->hash);

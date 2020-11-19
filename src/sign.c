@@ -21,7 +21,7 @@ UX_STEP_CB(
     {
       &C_icon_validate_14,
       "Sign tx",
-      (char *) global.signCredentialDeploymentContext.displayAccount
+      (char *) path.displayAccount
     });
 UX_STEP_CB(
     ux_sign_flow_shared_1_step,
