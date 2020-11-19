@@ -11,8 +11,6 @@
 
 static accountSubtreePath_t *keyPath = &path;
 static signCredentialDeploymentContext_t *ctx = &global.signCredentialDeploymentContext;
-
-// TODO Move to shared memory, but it failed before. So keeping it here to make progress...
 static cx_sha256_t attributeHash;
 static tx_state_t *tx_state = &global_tx_state;
 
@@ -208,11 +206,11 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, volatile un
             }
             parseVerificationKey(dataBuffer);
         } else {
-            THROW(0x6B01);
+            THROW(SW_INVALID_STATE);
         }
     } else if (p1 == P1_SIGNATURE_THRESHOLD) {
         if (ctx->numberOfVerificationKeys != 0) {
-            THROW(0x6B01);  // Invalid state, the sender has not sent all verification keys before moving on.
+            THROW(SW_INVALID_STATE);  // Invalid state, the sender has not sent all verification keys before moving on.
         }
 
         // Parse signature threshold.
@@ -255,7 +253,7 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, volatile un
         ux_flow_init(0, ux_credential_deployment_threshold_flow, NULL);
     } else if (p1 == P1_AR_IDENTITY) {
         if (ctx->anonymityRevocationListLength <= 0) {
-            THROW(0x6B01);  // Invalid state, sender says ar identity pair is incoming, but we already received all.
+            THROW(SW_INVALID_STATE);  // Invalid state, sender says ar identity pair is incoming, but we already received all.
         }
 
         // Parse ArIdentity
@@ -306,7 +304,7 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, volatile un
         ux_flow_init(0, ux_credential_deployment_dates, NULL);
     } else if (p1 == P1_ATTRIBUTE_TAG) {
         if (ctx->attributeListLength <= 0) {
-            THROW(0x6B01);
+            THROW(SW_INVALID_STATE);
         }
 
         // Parse attribute tag, and map it the attribute name (the display text).
@@ -315,7 +313,6 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, volatile un
         dataBuffer += 1;
         cx_hash((cx_hash_t *) &attributeHash, 0, attributeTag, 1, NULL, 0);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, attributeTag, 1, NULL, 0);
-
 
         // Parse attribute length, so we know how much to parse in next packet.
         uint8_t attributeValueLength[1];
@@ -330,7 +327,6 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, volatile un
         // Add attribute value to the hash.
         cx_hash((cx_hash_t *) &attributeHash, 0, dataBuffer, ctx->attributeValueLength, NULL, 0);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, ctx->attributeValueLength, NULL, 0);
-
         ctx->attributeListLength -= 1;
 
         // We have processed all attributes, so display the attribute hash value.
@@ -348,10 +344,10 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, volatile un
         cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 4, NULL, 0);
         sendSuccessNoIdle(0);
     } else if (p1 == P1_PROOFS) {
-        if (ctx->proofLength > 255) {
-            cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 255, NULL, 0);
-            os_memmove(ctx->buffer, dataBuffer, 255);
-            ctx->proofLength -= 255;
+        if (ctx->proofLength > MAX_CDATA_LENGTH) {
+            cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, MAX_CDATA_LENGTH, NULL, 0);
+            os_memmove(ctx->buffer, dataBuffer, MAX_CDATA_LENGTH);
+            ctx->proofLength -= MAX_CDATA_LENGTH;
             sendSuccessNoIdle(0);
         } else {
             cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, ctx->proofLength, NULL, 0);

@@ -12,6 +12,8 @@
 
 #define SW_INVALID_STATE 0x6B01
 
+#define MAX_CDATA_LENGTH 255
+
 typedef enum {
     TX_INITIAL,
     TX_VERIFICATION_KEY,
@@ -67,9 +69,6 @@ typedef struct {
     tx_state_t tx_state;
 } signTransferWithScheduleContext_t;
 
-// TODO This could be heavily optimized, but let's skip that for now unless we run into trouble. Optimization
-// TODO would be to re-use a display buffer instead of having one per field we receive (as we don't have to hold
-// TODO them simultaneously.
 typedef struct {
     uint8_t displayAccount[10];
     uint8_t numberOfVerificationKeys;
@@ -85,15 +84,16 @@ typedef struct {
     uint16_t anonymityRevocationListLength;
 
     uint8_t arIdentity[11];
-    uint8_t encIdCredPubShare[1];
+    char encIdCredPubShare[192];
 
     uint8_t validTo[8];
     uint8_t createdAt[8];
 
     uint16_t attributeListLength;
 
+    cx_sha256_t attributeHash;
     uint8_t attributeValueLength;
-    uint8_t attributeHashDisplay[65];
+    char attributeHashDisplay[65];
 
     uint32_t proofLength;
     uint8_t buffer[255];
