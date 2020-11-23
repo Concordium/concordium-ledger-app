@@ -6,7 +6,6 @@
 #include <stdio.h>
 #include "sign.h"
 
-static accountSubtreePath_t *keyPath = &path;
 static tx_state_t *tx_state = &global_tx_state;
 
 void buildAndSignTransactionHash();
@@ -20,8 +19,8 @@ UX_STEP_CB(
     buildAndSignTransactionHash(),
     {
       &C_icon_validate_14,
-      "Sign tx",
-      (char *) path.displayAccount
+      "Sign",
+      "transaction"
     });
 UX_STEP_CB(
     ux_sign_flow_shared_1_step,
@@ -30,7 +29,7 @@ UX_STEP_CB(
     {
       &C_icon_crossmark,
       "Decline to",
-      "sign tx"
+      "sign transaction"
     });
 UX_FLOW(ux_sign_flow_shared,
     &ux_sign_flow_shared_0_step,
@@ -42,7 +41,7 @@ void buildAndSignTransactionHash() {
     cx_hash((cx_hash_t *) &tx_state->hash, CX_LAST, NULL, 0, tx_state->transactionHash, 32);
 
     uint8_t signedHash[64];
-    signTransactionHash(keyPath->identity, keyPath->accountIndex, tx_state->transactionHash, signedHash);
+    signTransactionHash(tx_state->transactionHash, signedHash);
 
     os_memmove(G_io_apdu_buffer, signedHash, sizeof(signedHash));
     sendSuccess(sizeof(signedHash));

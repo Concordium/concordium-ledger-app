@@ -4,8 +4,6 @@
 #include "util.h"
 #include "menu.h"
 
-static accountSubtreePath_t *keyPath = &path;
-
 // The public-key is 32 bytes, and when converted to hexadecimal it takes up 64 characters. The 65th character
 // is for the C string terminator '\0'.
 static char publicKeyAsHex[65];

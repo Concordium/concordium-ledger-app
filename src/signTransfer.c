@@ -7,7 +7,6 @@
 #include <string.h>
 #include "base58check.h"
 
-static accountSubtreePath_t *keyPath = &path;
 static signTransferContext_t *ctx = &global.signTransferContext;
 static tx_state_t *tx_state = &global.signTransferContext.tx_state;
 
@@ -42,8 +41,8 @@ UX_STEP_VALID(
     signTransferHash(),
     {
       &C_icon_validate_14,
-      "Sign tx",
-      (char *) path.displayAccount
+      "Sign",
+      "transaction"
     });
 UX_STEP_CB(
     ux_sign_flow_4_step,
@@ -82,7 +81,7 @@ UX_FLOW(ux_sign_compare_flow,
 void signTransferHash() {
     // Sign the transaction hash with the private key for the given account index.
     uint8_t signedHash[64];
-    signTransactionHash(keyPath->identity, keyPath->accountIndex, tx_state->transactionHash, signedHash);
+    signTransactionHash(tx_state->transactionHash, signedHash);
 
     // Return the signature on the transaction hash to the computer. The computer should then display the received
     // signature and the user should compare the signature on the device with the one shown on the computer.
@@ -140,8 +139,8 @@ void buildTransferHash(uint8_t *dataBuffer) {
 
 // Entry-point from the main class to the handler of signing simple transfers.
 void handleSignTransfer(uint8_t *dataBuffer, uint16_t dataLength, volatile unsigned int *flags) {
-    parseAccountSignatureKeyPath(dataBuffer);
-    dataBuffer += 2;
+    int bytesRead = parseKeyDerivationPath(dataBuffer);
+    dataBuffer += bytesRead;
 
     // Calculate transaction hash. This function has the side effect that the values required to display
     // the transaction to the user are loaded. So it has to be run before initializing the ux_sign_flow.

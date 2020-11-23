@@ -1,3 +1,5 @@
+mod path;
+
 use hex;
 use ledger::{ApduCommand, LedgerApp};
 use base58check::*;
@@ -29,10 +31,7 @@ fn main() {
     transaction_payload.append(&mut receiver_address);
     transaction_payload.append(&mut amount);
 
-    // Choice of identity and account (identity=0, account=0).
-    let path_prefix = hex::decode("0000").unwrap();
-
-    let mut command_data = path_prefix;
+    let mut command_data = path::generate_key_derivation_path();
     command_data.append(&mut transaction_header);
     command_data.append(&mut transaction_payload);
 

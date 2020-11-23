@@ -125,8 +125,8 @@ void handleSignTransferWithSchedule(uint8_t *dataBuffer, uint8_t p1, volatile un
     }
 
     if (p1 == P1_INITIAL_PACKET) {
-        parseAccountSignatureKeyPath(dataBuffer);
-        dataBuffer += 2;
+        int bytesRead = parseKeyDerivationPath(dataBuffer);
+        dataBuffer += bytesRead;
 
         // Initialize the transaction hash object.
         cx_sha256_init(&tx_state->hash);

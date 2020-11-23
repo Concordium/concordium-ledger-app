@@ -6,7 +6,7 @@
 #include "util.h"
 #include "menu.h"
 
-static accountSubtreePath_t *keyPath = &path;
+static keyDerivationPath_t *keyPath = &path;
 static const uint32_t HARDENED_OFFSET = 0x80000000;
 
 int bin2dec(uint8_t *dst, uint64_t n);
@@ -28,21 +28,6 @@ int parseKeyDerivationPath(uint8_t *dataBuffer) {
     }
 
     return 1 + (4 * keyPath->pathLength);
-}
-
-// Parses the key derivation path that is available in the first 2 bytes received for account instructions.
-// This is used for building the key derivation path when deriving a private key.
-void parseAccountSignatureKeyPath(uint8_t *dataBuffer) {
-    uint8_t identity[1];
-    os_memmove(identity, dataBuffer , 1);
-    keyPath->identity = identity[0];
-
-    uint8_t accountIndex[1];
-    os_memmove(accountIndex, dataBuffer + 1, 1);
-    keyPath->accountIndex = accountIndex[0];
-
-    os_memmove(keyPath->displayAccount, "with #", 6);
-    bin2dec(keyPath->displayAccount + 6, keyPath->accountIndex);
 }
 
 // Sends back the user rejection error code 0x6985, which indicates that
@@ -179,14 +164,14 @@ void getPublicKey(uint8_t *publicKeyArray) {
     }
 }
 
-// Generic method that signs a transaction hash with the provided identity/account index private key.
-void signTransactionHash(uint32_t identity, uint32_t accountIndex, uint8_t *transactionHash, uint8_t *signedHash) {
-    // Sign the transaction hash with the private key for the given account index.
+// Generic method that signs a transaction hash with the key given by the derivation path that
+// has been loaded into keyPath.
+void signTransactionHash(uint8_t *transactionHash, uint8_t *signedHash) {
     cx_ecfp_private_key_t privateKey;
 
     BEGIN_TRY {
         TRY {
-            getAccountSignaturePrivateKey(keyPath->identity, keyPath->accountIndex, &privateKey);
+            getPrivateKey(keyPath->keyDerivationPath, keyPath->pathLength, &privateKey);
             cx_eddsa_sign(&privateKey, CX_RND_RFC6979 | CX_LAST, CX_SHA512, transactionHash, 32, NULL, 0, signedHash, 64, NULL);
         }
         FINALLY {
@@ -196,6 +181,4 @@ void signTransactionHash(uint32_t identity, uint32_t accountIndex, uint8_t *tran
     }
     END_TRY;
 }
-
-
 

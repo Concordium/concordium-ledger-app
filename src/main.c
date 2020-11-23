@@ -27,7 +27,7 @@
 
 // Global variable definitions
 instructionContext global;
-accountSubtreePath_t path;
+keyDerivationPath_t path;
 tx_state_t global_tx_state;
 
 // The expected CLA byte

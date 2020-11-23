@@ -30,14 +30,13 @@ typedef enum {
 typedef struct {
     uint8_t identity;
     uint8_t accountIndex;
-    uint8_t displayAccount[10];
 
     // Max length of path is 8. Currently we expect to receive the root, i.e. purpose and cointype as well.
     // This could be refactored into having those values hardcoded if we determine they will be static.
     uint8_t pathLength;
     uint32_t keyDerivationPath[8];
-} accountSubtreePath_t;
-extern accountSubtreePath_t path;
+} keyDerivationPath_t;
+extern keyDerivationPath_t path;
 
 // Helper object used when computing the hash of a transaction.
 typedef struct {
@@ -51,8 +50,6 @@ extern tx_state_t global_tx_state;
 // into each handler file having its own struct here.
 typedef struct {
     unsigned char displayStr[52];
-
-    uint8_t displayAccount[10];
     uint8_t displayAmount[21];
 
     // The signature is 64 bytes, in hexadecimal that is 128 bytes + 1 for string terminator.
@@ -62,7 +59,6 @@ typedef struct {
 
 typedef struct {
     unsigned char displayStr[52];
-    uint8_t displayAccount[10];
     uint8_t remainingNumberOfScheduledAmounts;
     uint8_t scheduledAmountsInCurrentPacket;
 
@@ -77,8 +73,6 @@ typedef struct {
 } signTransferWithScheduleContext_t;
 
 typedef struct {
-    uint8_t displayAccount[10];
-
     uint8_t type;
     uint8_t numberOfVerificationKeys;
 

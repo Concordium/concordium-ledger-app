@@ -1,3 +1,5 @@
+mod path;
+
 use hex;
 use ledger::{ApduCommand, LedgerApp, ApduAnswer};
 
@@ -10,8 +12,8 @@ fn main() {
     let mut verification_key_list_length = hex::decode("01").unwrap();
     let mut verification_key = hex::decode("f78929ec8a9819f6ae2e10e79522b6b311949635fecc3d924d9d1e23f8e9e1c3").unwrap();
 
-    // Choice of identity and account (identity=0, account=0).
-    let mut path_prefix = hex::decode("0000").unwrap();
+
+    let mut path_prefix = path::generate_key_derivation_path();
 
     let mut command_data = Vec::new();
     command_data.append(&mut path_prefix);
@@ -29,7 +31,7 @@ fn main() {
     };
 
     let ledger = LedgerApp::new().unwrap();
-    let result = ledger.exchange(initial_command).expect("Credential deployment packet failed.");
+    ledger.exchange(initial_command).expect("Credential deployment packet failed.");
 
     let verification_key_command = ApduCommand {
         cla: 224,

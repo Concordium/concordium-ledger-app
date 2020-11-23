@@ -1,3 +1,5 @@
+mod path;
+
 use base58check::*;
 use hex;
 use ledger::{ApduCommand, LedgerApp};
@@ -18,10 +20,6 @@ fn main() {
     // The full transaction header (sender_address + blob)
     transaction_header.append(&mut transaction_header_blob_bytes);
 
-    // Account transactions must prefix command_data with the identity and account index to use.
-    // One byte for identity and one byte for account index. Here identity 0, account 0.
-    let path_prefix = hex::decode("0000").unwrap();
-
     // Transaction kind is 19 -> 13 in hexadecimal.
     let mut transaction_kind = hex::decode("13").unwrap();
     let mut receiver_address = sender_address.from_base58check().unwrap().1;
@@ -33,7 +31,7 @@ fn main() {
     // Send initial command.
     // let initial_command_data = format!("{}{}{}{}{}", &path_prefix, &number_of_scheduled_amounts, &transaction_header, &transaction_kind, &to_address);
 
-    let mut initial_command_data = path_prefix;
+    let mut initial_command_data = path::generate_key_derivation_path();
     initial_command_data.append(&mut transaction_header);
     initial_command_data.append(&mut transaction_kind);
     initial_command_data.append(&mut receiver_address);
