@@ -26,6 +26,4 @@ void parseAccountSignatureKeyPath(uint8_t *dataBuffer);
 
 int parseKeyDerivationPath(uint8_t *dataBuffer);
 
-void getAccountSignaturePrivateKey(uint32_t identity, uint32_t accountIndex, cx_ecfp_private_key_t *privateKey);
-
 void signTransactionHash(uint8_t *transactionHash, uint8_t *signedHash);

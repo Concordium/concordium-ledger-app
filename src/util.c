@@ -91,31 +91,6 @@ int bin2dec(uint8_t *dst, uint64_t n) {
 	return len;
 }
 
-void getPrivateKeyBasic(uint32_t *keyPath, uint8_t keyPathLength, cx_ecfp_private_key_t *privateKey) {
-    uint8_t privateKeyData[32];
-
-    // Invoke the device methods for generating a private key.
-    // Wrap in try/finally to ensure that private key information is cleaned up, even if a system call fails.
-    BEGIN_TRY {
-        TRY {
-            os_perso_derive_node_bip32_seed_key(HDW_ED25519_SLIP10, CX_CURVE_Ed25519, keyPath, keyPathLength, privateKeyData, NULL, NULL, 0);
-            cx_ecfp_init_private_key(CX_CURVE_Ed25519, privateKeyData, 32, privateKey);
-        }
-        FINALLY {
-            // Clean up the private key seed data, so that we cannot leak it.
-            explicit_bzero(&privateKeyData, sizeof(privateKeyData));
-        }
-    }
-    END_TRY;
-}
-
-// Derives an account private key for signatures.
-// Path = purpose'/coin_type'/0'/identity'/0'/account_index'
-void getAccountSignaturePrivateKey(uint32_t identity, uint32_t accountIndex, cx_ecfp_private_key_t *privateKey) {
-    uint32_t keyPath[] = {CONCORDIUM_PURPOSE | HARDENED_OFFSET, CONCORDIUM_COIN_TYPE | HARDENED_OFFSET, 0 | HARDENED_OFFSET, identity | HARDENED_OFFSET, accountIndex | HARDENED_OFFSET};
-    getPrivateKeyBasic(keyPath, 5, privateKey);
-}
-
 void getPrivateKey(uint32_t *keyPath, uint8_t keyPathLength, cx_ecfp_private_key_t *privateKey) {
     uint8_t privateKeyData[32];
 
