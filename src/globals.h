@@ -11,6 +11,7 @@
 #define CONCORDIUM_PURPOSE 583
 
 #define SW_INVALID_STATE 0x6B01
+#define SW_INVALID_PATH  0x6B02
 
 #define MAX_CDATA_LENGTH 255
 
@@ -30,6 +31,11 @@ typedef struct {
     uint8_t identity;
     uint8_t accountIndex;
     uint8_t displayAccount[10];
+
+    // Max length of path is 8. Currently we expect to receive the root, i.e. purpose and cointype as well.
+    // This could be refactored into having those values hardcoded if we determine they will be static.
+    uint8_t pathLength;
+    uint32_t keyDerivationPath[8];
 } accountSubtreePath_t;
 extern accountSubtreePath_t path;
 

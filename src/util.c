@@ -11,6 +11,25 @@ static const uint32_t HARDENED_OFFSET = 0x80000000;
 
 int bin2dec(uint8_t *dst, uint64_t n);
 
+// Parses the key derivation path for the command to be executed. Our current needed max length is 6,
+// and therefore this method will reject requests that specify a depth greater than that.
+int parseKeyDerivationPath(uint8_t *dataBuffer) {
+    uint8_t pathLength[1];
+    os_memmove(pathLength, dataBuffer, 1);
+
+    if (pathLength[0] > 8) {
+        THROW(SW_INVALID_PATH);
+    }
+
+    keyPath->pathLength = pathLength[0];
+    for (int i = 0; i < pathLength[0]; ++i) {
+        uint32_t node = U4BE(dataBuffer, 1 + (i * 4));
+        keyPath->keyDerivationPath[i] = node | HARDENED_OFFSET;
+    }
+
+    return 1 + (4 * keyPath->pathLength);
+}
+
 // Parses the key derivation path that is available in the first 2 bytes received for account instructions.
 // This is used for building the key derivation path when deriving a private key.
 void parseAccountSignatureKeyPath(uint8_t *dataBuffer) {
@@ -112,13 +131,31 @@ void getAccountSignaturePrivateKey(uint32_t identity, uint32_t accountIndex, cx_
     getPrivateKeyBasic(keyPath, 5, privateKey);
 }
 
-// Gets the derived public-key for the given identity and account index. It is written to the provided byte array that
-// must have a size of exactly 32 bytes.
-void getPublicKey(uint32_t identity, uint32_t accountIndex, uint8_t *publicKeyArray) {
+void getPrivateKey(uint32_t *keyPath, uint8_t keyPathLength, cx_ecfp_private_key_t *privateKey) {
+    uint8_t privateKeyData[32];
+
+    // Invoke the device methods for generating a private key.
+    // Wrap in try/finally to ensure that private key information is cleaned up, even if a system call fails.
+    BEGIN_TRY {
+        TRY {
+            os_perso_derive_node_bip32_seed_key(HDW_ED25519_SLIP10, CX_CURVE_Ed25519, keyPath, keyPathLength, privateKeyData, NULL, NULL, 0);
+            cx_ecfp_init_private_key(CX_CURVE_Ed25519, privateKeyData, 32, privateKey);
+        }
+        FINALLY {
+            // Clean up the private key seed data, so that we cannot leak it.
+            explicit_bzero(&privateKeyData, sizeof(privateKeyData));
+        }
+    }
+    END_TRY;
+}
+
+// Gets the derived public-key for the path that has been loaded into keyPath. The public-key is written to the provided
+// byte array that must have an exact size of 32 bytes.
+void getPublicKey(uint8_t *publicKeyArray) {
     cx_ecfp_private_key_t privateKey;
     cx_ecfp_public_key_t publicKey;
 
-    getAccountSignaturePrivateKey(identity, accountIndex, &privateKey);
+    getPrivateKey(keyPath->keyDerivationPath, keyPath->pathLength, &privateKey);
 
     // Invoke the device method for generating a public-key pair.
     // Wrap in try/finally to ensure private key information is cleaned up, even if the system call fails.
