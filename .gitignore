@@ -1,0 +1,9 @@
+/obj
+/debug
+/bin
+/dep
+/src/glyphs.c
+/src/glyphs.h
+.vscode
+**/target/
+*.lock
