@@ -2,7 +2,6 @@ mod path;
 
 use hex;
 use ledger::{ApduCommand, LedgerApp};
-use ed25519_dalek::{Keypair, Signer, Signature};
 
 fn main() {
     let mut key_derivation_path = path::generate_key_derivation_path();

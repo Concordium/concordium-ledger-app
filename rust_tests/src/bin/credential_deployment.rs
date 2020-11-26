@@ -10,7 +10,7 @@ fn main() {
 
     let mut new_account = hex::decode("01").unwrap();
     let mut verification_key_list_length = hex::decode("01").unwrap();
-    let mut verification_key = hex::decode("f78929ec8a9819f6ae2e10e79522b6b311949635fecc3d924d9d1e23f8e9e1c3").unwrap();
+    let verification_key = hex::decode("f78929ec8a9819f6ae2e10e79522b6b311949635fecc3d924d9d1e23f8e9e1c3").unwrap();
 
 
     let mut path_prefix = path::generate_key_derivation_path();
@@ -102,7 +102,7 @@ fn main() {
     // Attribute list commands
     let mut attribute_tag = hex::decode("01").unwrap();
 
-    let mut attribute_value = b"John".to_vec();
+    let attribute_value = b"John".to_vec();
     let mut attribute_length = attribute_value.len().to_be_bytes().to_vec();
     attribute_tag.append(&mut attribute_length);
 
