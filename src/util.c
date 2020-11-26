@@ -11,7 +11,7 @@ static const uint32_t HARDENED_OFFSET = 0x80000000;
 
 int bin2dec(uint8_t *dst, uint64_t n);
 
-// Parses the key derivation path for the command to be executed. Our current needed max length is 6,
+// Parses the key derivation path for the command to be executed. Our current needed max length is 8,
 // and therefore this method will reject requests that specify a depth greater than that.
 int parseKeyDerivationPath(uint8_t *dataBuffer) {
     uint8_t pathLength[1];
