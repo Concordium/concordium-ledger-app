@@ -23,6 +23,7 @@
 #include "signTransferWithSchedule.h"
 #include "signCredentialDeployment.h"
 #include "exportPrivateKeySeed.h"
+#include "signUpdateExchangeRate.h"
 #include "ux.h"
 #include <string.h>
 
@@ -56,6 +57,7 @@ tx_state_t global_tx_state;
 #define INS_CREDENTIAL_DEPLOYMENT 0x04
 
 #define INS_EXPORT_PRIVATE_KEY_SEED 0x05
+#define INS_UPDATE_EXCHANGE_RATE  0x06
 
 // Main entry of application that listens for APDU commands that will be received from the
 // computer. The APDU commands control what flow is activated, i.e. which control flow is initiated.
@@ -104,6 +106,9 @@ static void concordium_main(void) {
                         break;
                     case INS_EXPORT_PRIVATE_KEY_SEED:
                         handleExportPrivateKeySeed(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_P1], &flags);
+                        break;
+                    case INS_UPDATE_EXCHANGE_RATE:
+                        handleSignUpdateExchangeRate(G_io_apdu_buffer + OFFSET_CDATA, &flags);
                         break;
                     default:
                         THROW(0x6D00);

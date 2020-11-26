@@ -16,6 +16,8 @@
 
 #define MAX_CDATA_LENGTH 255
 
+#define UPDATE_HEADER_LENGTH 28
+
 typedef enum {
     TX_INITIAL,
     TX_VERIFICATION_KEY,
@@ -105,12 +107,18 @@ typedef struct {
     protocolState_t state;
 } signCredentialDeploymentContext_t;
 
+typedef struct {
+    uint8_t ratio[43];
+    uint8_t type[16];
+} signExchangeRateContext_t;
+
 // As the Ledger device is very limited on memory, the context of each instruction is stored in a
 // shared global union, so that we use no more memory than that of the most space using instruction context.
 typedef union {
     signTransferWithScheduleContext_t signTransferWithScheduleContext;
     signTransferContext_t signTransferContext;
     signCredentialDeploymentContext_t signCredentialDeploymentContext;
+    signExchangeRateContext_t signExchangeRateContext;
 } instructionContext;
 extern instructionContext global;
 
