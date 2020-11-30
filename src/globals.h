@@ -18,6 +18,19 @@
 
 #define UPDATE_HEADER_LENGTH 28
 
+// To add support for additional access structures with the update authorizations
+// transaction, you simply have to add a new item to the enum priot to the 'END' entry,
+// and update the enum -> string method in signUpdateAuthorizations.c.
+typedef enum {
+    EMERGENCY,
+    AUTHORIZATION,
+    PROTOCOL,
+    ELECTION_DIFFICULTY,
+    EURO_PER_ENERGY,
+    MICRO_GTU_PER_EURO,
+    END
+} authorizationType_e;
+
 typedef enum {
     TX_INITIAL,
     TX_VERIFICATION_KEY,
@@ -112,6 +125,17 @@ typedef struct {
     uint8_t type[16];
 } signExchangeRateContext_t;
 
+typedef struct {
+    uint16_t publicKeyListLength;
+    uint16_t publicKeyCount;
+    uint8_t publicKey[65];
+    uint16_t accessStructureSize;
+    uint8_t title[20];
+    uint8_t displayKeyIndex[6];
+    uint8_t buffer[255];
+    authorizationType_e authorizationType;
+} signUpdateAuthorizations_t;
+
 // As the Ledger device is very limited on memory, the context of each instruction is stored in a
 // shared global union, so that we use no more memory than that of the most space using instruction context.
 typedef union {
@@ -119,6 +143,7 @@ typedef union {
     signTransferContext_t signTransferContext;
     signCredentialDeploymentContext_t signCredentialDeploymentContext;
     signExchangeRateContext_t signExchangeRateContext;
+    signUpdateAuthorizations_t signUpdateAuthorizations;
 } instructionContext;
 extern instructionContext global;
 
