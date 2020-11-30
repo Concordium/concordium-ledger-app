@@ -132,7 +132,12 @@ typedef struct {
     uint16_t accessStructureSize;
     uint8_t title[20];
     uint8_t displayKeyIndex[6];
+
+    uint8_t processedCount;
+    
     uint8_t buffer[255];
+    int bufferPointer;
+    
     authorizationType_e authorizationType;
 } signUpdateAuthorizations_t;
 
