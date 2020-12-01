@@ -16,6 +16,7 @@
 
 #define MAX_CDATA_LENGTH 255
 
+#define ACCOUNT_TRANSACTION_HEADER_LENGTH 60
 #define UPDATE_HEADER_LENGTH 28
 
 // To add support for additional access structures with the update authorizations
@@ -145,6 +146,11 @@ typedef struct {
     uint8_t amount[9];
 } signTransferToEncrypted_t;
 
+typedef struct { 
+    uint8_t to[52];
+    uint16_t proofSize;
+} signEncryptedAmountToTransfer_t;
+
 // As the Ledger device is very limited on memory, the context of each instruction is stored in a
 // shared global union, so that we use no more memory than that of the most space using instruction context.
 typedef union {
@@ -154,6 +160,7 @@ typedef union {
     signExchangeRateContext_t signExchangeRateContext;
     signUpdateAuthorizations_t signUpdateAuthorizations;
     signTransferToEncrypted_t signTransferToEncrypted;
+    signEncryptedAmountToTransfer_t signEncryptedAmountToTransfer;
 } instructionContext;
 extern instructionContext global;
 

@@ -26,6 +26,7 @@
 #include "exportPrivateKeySeed.h"
 #include "signUpdateExchangeRate.h"
 #include "signTransferToEncrypted.h"
+#include "signEncryptedAmountTransfer.h"
 #include "ux.h"
 #include <string.h>
 
@@ -58,11 +59,12 @@ tx_state_t global_tx_state;
 // An INS instruction containing 0x04 means that we should start the credential deployment signing flow.
 #define INS_CREDENTIAL_DEPLOYMENT 0x04
 
-#define INS_EXPORT_PRIVATE_KEY_SEED 0x05
-#define INS_UPDATE_EXCHANGE_RATE  0x06
-#define INS_UPDATE_AUTHORIZATIONS 0x08
+#define INS_EXPORT_PRIVATE_KEY_SEED     0x05
+#define INS_UPDATE_EXCHANGE_RATE        0x06
+#define INS_UPDATE_AUTHORIZATIONS       0x08
 
-#define INS_TRANSFER_TO_ENCRYPTED 0x11
+#define INS_ENCRYPTED_AMOUNT_TRANSFER   0x10
+#define INS_TRANSFER_TO_ENCRYPTED       0x11
 
 // Main entry of application that listens for APDU commands that will be received from the
 // computer. The APDU commands control what flow is activated, i.e. which control flow is initiated.
@@ -120,6 +122,9 @@ static void concordium_main(void) {
                         break;
                     case INS_TRANSFER_TO_ENCRYPTED:
                         handleSignTransferToEncrypted(G_io_apdu_buffer + OFFSET_CDATA, &flags);
+                        break;
+                    case INS_ENCRYPTED_AMOUNT_TRANSFER:
+                        handleSignEncryptedAmountTransfer(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_P1], G_io_apdu_buffer[OFFSET_LC], &flags);
                         break;
                     default:
                         THROW(0x6D00);
