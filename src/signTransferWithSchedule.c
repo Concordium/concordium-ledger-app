@@ -139,6 +139,7 @@ void handleSignTransferWithSchedule(uint8_t *dataBuffer, uint8_t p1, volatile un
         uint8_t transactionKind[1];
         os_memmove(transactionKind, dataBuffer, 1);
         dataBuffer += 1;
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, transactionKind, 1, NULL, 0);
 
         // Extract the destination address and add to hash.
         uint8_t toAddress[32];
