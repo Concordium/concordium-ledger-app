@@ -22,8 +22,6 @@ void getPublicKey(uint8_t *publicKeyArray);
 
 void toHex(uint8_t *byteArray, const uint64_t len, char *asHex);
 
-void parseAccountSignatureKeyPath(uint8_t *dataBuffer);
-
 int parseKeyDerivationPath(uint8_t *dataBuffer);
 
 void signTransactionHash(uint8_t *transactionHash, uint8_t *signedHash);
