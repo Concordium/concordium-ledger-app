@@ -147,8 +147,8 @@ void handleSignUpdateAuthorizations(uint8_t *dataBuffer, uint8_t p1, volatile un
         // FIXME: This could be made more elegant, by determining whether we have a full batch, or it 
         // is the final batch with less than 127 key indices. That way the loop can be removed.
         while (ctx->accessStructureSize > 0 && ctx->processedCount < 127) {
-            cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer + (2 * processedCount), 2, NULL, 0);
-            os_memmove(ctx->buffer + (2 * processedCount), dataBuffer + (2 * processedCount), 2);
+            cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer + (2 * ctx->processedCount), 2, NULL, 0);
+            os_memmove(ctx->buffer + (2 * ctx->processedCount), dataBuffer + (2 * ctx->processedCount), 2);
             ctx->processedCount += 1;
         }
         processKeyIndices();
