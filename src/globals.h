@@ -151,6 +151,14 @@ typedef struct {
     uint16_t proofSize;
 } signEncryptedAmountToTransfer_t;
 
+typedef struct {
+    char regId[97];
+    char idCredPub[97];
+    uint8_t publicKeysLength;
+    char publicKey[65];
+    uint8_t threshold[4];
+} signPublicInformationForIp_t;
+
 // As the Ledger device is very limited on memory, the context of each instruction is stored in a
 // shared global union, so that we use no more memory than that of the most space using instruction context.
 typedef union {
@@ -161,6 +169,7 @@ typedef union {
     signUpdateAuthorizations_t signUpdateAuthorizations;
     signTransferToEncrypted_t signTransferToEncrypted;
     signEncryptedAmountToTransfer_t signEncryptedAmountToTransfer;
+    signPublicInformationForIp_t signPublicInformationForIp;
 } instructionContext;
 extern instructionContext global;
 

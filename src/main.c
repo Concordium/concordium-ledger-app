@@ -27,6 +27,7 @@
 #include "signUpdateExchangeRate.h"
 #include "signTransferToEncrypted.h"
 #include "signEncryptedAmountTransfer.h"
+#include "signPublicInformationForIp.h"
 #include "ux.h"
 #include <string.h>
 
@@ -65,6 +66,8 @@ tx_state_t global_tx_state;
 
 #define INS_ENCRYPTED_AMOUNT_TRANSFER   0x10
 #define INS_TRANSFER_TO_ENCRYPTED       0x11
+
+#define INS_PUBLIC_INFO_FOR_IP          0x20
 
 // Main entry of application that listens for APDU commands that will be received from the
 // computer. The APDU commands control what flow is activated, i.e. which control flow is initiated.
@@ -125,6 +128,9 @@ static void concordium_main(void) {
                         break;
                     case INS_ENCRYPTED_AMOUNT_TRANSFER:
                         handleSignEncryptedAmountTransfer(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_P1], G_io_apdu_buffer[OFFSET_LC], &flags);
+                        break;
+                    case INS_PUBLIC_INFO_FOR_IP:
+                        handleSignPublicInformationForIp(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_P1], G_io_apdu_buffer[OFFSET_LC], &flags);
                         break;
                     default:
                         THROW(0x6D00);
