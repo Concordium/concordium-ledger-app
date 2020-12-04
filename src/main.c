@@ -28,6 +28,7 @@
 #include "signTransferToEncrypted.h"
 #include "signEncryptedAmountTransfer.h"
 #include "signPublicInformationForIp.h"
+#include "signTransferToPublic.h"
 #include "ux.h"
 #include <string.h>
 
@@ -66,6 +67,7 @@ tx_state_t global_tx_state;
 
 #define INS_ENCRYPTED_AMOUNT_TRANSFER   0x10
 #define INS_TRANSFER_TO_ENCRYPTED       0x11
+#define INS_TRANSFER_TO_PUBLIC          0x12
 
 #define INS_PUBLIC_INFO_FOR_IP          0x20
 
@@ -128,6 +130,9 @@ static void concordium_main(void) {
                         break;
                     case INS_ENCRYPTED_AMOUNT_TRANSFER:
                         handleSignEncryptedAmountTransfer(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_P1], G_io_apdu_buffer[OFFSET_LC], &flags);
+                        break;
+                    case INS_TRANSFER_TO_PUBLIC:
+                        handleSignTransferToPublic(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_P1], G_io_apdu_buffer[OFFSET_LC], &flags);
                         break;
                     case INS_PUBLIC_INFO_FOR_IP:
                         handleSignPublicInformationForIp(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_P1], G_io_apdu_buffer[OFFSET_LC], &flags);

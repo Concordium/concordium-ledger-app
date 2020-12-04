@@ -49,4 +49,5 @@ fn build_key_derivation_path() -> Vec<u8> {
     return key_derivation_path;
 }
 
+#[allow(dead_code)]
 fn main() { }

@@ -74,8 +74,8 @@ void handleSignEncryptedAmountTransfer(uint8_t *dataBuffer, uint8_t p1, uint8_t 
         // proof bytes that we are going to receive.
         ctx->proofSize = U2BE(dataBuffer, 24);
 
-        ux_flow_init(0, ux_sign_encrypted_amount_transfer, NULL);
-        *flags |= IO_ASYNCH_REPLY;
+    ux_flow_init(0, ux_sign_encrypted_amount_transfer, NULL);
+    *flags |= IO_ASYNCH_REPLY;
     } else if (p1 == P1_PROOF) { 
         cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, dataLength, NULL, 0);
         ctx->proofSize -= dataLength;
