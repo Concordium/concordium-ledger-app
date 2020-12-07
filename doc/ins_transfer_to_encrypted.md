@@ -1,4 +1,4 @@
-# Transfer to public
+# Transfer to encrypted
 
 A transaction for transferring an amount to the encrypted balance of the account.
 
