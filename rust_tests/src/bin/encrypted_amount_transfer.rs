@@ -3,7 +3,6 @@ mod path;
 use hex;
 use ledger::{ApduCommand, LedgerApp};
 use base58check::*;
-use std::panic::resume_unwind;
 
 fn main() {
 
