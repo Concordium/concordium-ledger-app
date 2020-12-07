@@ -33,6 +33,12 @@ typedef enum {
 } authorizationType_e;
 
 typedef enum {
+    MESSAGE,
+    SPECIFICATION_URL,
+    TEXT_STATE_END
+} textState_t;
+
+typedef enum {
     TX_INITIAL,
     TX_VERIFICATION_KEY,
     TX_SIGNATURE_THRESHOLD,
@@ -164,6 +170,14 @@ typedef struct {
     uint16_t proofSize;
 } signTransferToPublic_t;
 
+typedef struct {
+    uint64_t payloadLength;
+    uint64_t textLength;
+    uint8_t buffer[255];
+    textState_t textState;
+    char specificationHash[65];
+} signUpdateProtocolContext_t;
+
 // As the Ledger device is very limited on memory, the context of each instruction is stored in a
 // shared global union, so that we use no more memory than that of the most space using instruction context.
 typedef union {
@@ -176,6 +190,7 @@ typedef union {
     signEncryptedAmountToTransfer_t signEncryptedAmountToTransfer;
     signPublicInformationForIp_t signPublicInformationForIp;
     signTransferToPublic_t signTransferToPublic;
+    signUpdateProtocolContext_t signUpdateProtocolContext;
 } instructionContext;
 extern instructionContext global;
 
