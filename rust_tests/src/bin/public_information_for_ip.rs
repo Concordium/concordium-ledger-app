@@ -2,7 +2,6 @@ mod path;
 
 use hex;
 use ledger::{ApduCommand, LedgerApp};
-use base58check::*;
 
 fn main() {
 
@@ -33,15 +32,17 @@ fn main() {
     let ledger = LedgerApp::new().unwrap();
     ledger.exchange(command).unwrap();
 
-    for verification_key in verification_keys {
+    for mut verification_key in verification_keys {
         println!("Sending verification key!");
+        let mut key_blob = hex::decode("00").unwrap();
+        key_blob.append(&mut verification_key);
         let command = ApduCommand {
             cla: 224, // Has to be this value for all commands.
             ins: 32,
             p1: 1,
             p2: 0,
-            length: verification_key.len() as u8,
-            data: verification_key
+            length: key_blob.len() as u8,
+            data: key_blob
         };
         ledger.exchange(command).unwrap();
     }

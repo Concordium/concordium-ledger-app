@@ -121,6 +121,10 @@ void handleSignPublicInformationForIp(uint8_t *dataBuffer, uint8_t p1, uint8_t d
             THROW(SW_INVALID_STATE);
         }
 
+        // Hash key type
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 1, NULL, 0);
+        dataBuffer += 1;
+
         uint8_t publicKey[32];
         os_memmove(publicKey, dataBuffer, 32);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, publicKey, 32, NULL, 0);
@@ -128,13 +132,13 @@ void handleSignPublicInformationForIp(uint8_t *dataBuffer, uint8_t p1, uint8_t d
         toHex(publicKey, 32, ctx->publicKey);
 
         ctx->publicKeysLength -= 1;
-
+        
         ux_flow_init(0, ux_sign_public_info_for_i_public_key, NULL);
         *flags |= IO_ASYNCH_REPLY;
     } else if (p1 == P1_THRESHOLD) {
         // Read the threshold byte and parse it to display it.
-        bin2dec(ctx->threshold, dataBuffer[0]);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 1, NULL, 0);
+        bin2dec(ctx->threshold, dataBuffer[0]);
         dataBuffer += 1;
 
         ux_flow_init(0, ux_sign_public_info_for_ip_threshold, NULL);
