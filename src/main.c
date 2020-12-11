@@ -30,6 +30,7 @@
 #include "signPublicInformationForIp.h"
 #include "signTransferToPublic.h"
 #include "signUpdateProtocol.h"
+#include "signChallenge.h"
 #include "ux.h"
 #include <string.h>
 
@@ -72,6 +73,8 @@ tx_state_t global_tx_state;
 
 #define INS_PUBLIC_INFO_FOR_IP          0x20
 #define INS_UPDATE_PROTOCOL             0x21
+
+#define INS_SIGN_CHALLENGE              0x30
 
 // Main entry of application that listens for APDU commands that will be received from the
 // computer. The APDU commands control what flow is activated, i.e. which control flow is initiated.
@@ -141,6 +144,9 @@ static void concordium_main(void) {
                         break;
                     case INS_UPDATE_PROTOCOL:
                         handleSignUpdateProtocol(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_P1], G_io_apdu_buffer[OFFSET_LC], &flags);
+                        break;
+                    case INS_SIGN_CHALLENGE:
+                        handleSignChallenge(G_io_apdu_buffer + OFFSET_CDATA, &flags);
                         break;
                     default:
                         THROW(0x6D00);

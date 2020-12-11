@@ -18,10 +18,10 @@ fn main() {
     let mut update_type = hex::decode("03").unwrap();
 
     let message_text = "This is a brief message about the update.";
-    let mut message_length = message_text.as_bytes().len() as u64;
+    let message_length = message_text.as_bytes().len() as u64;
 
     let specification_url = "http://concordium.com/specification/v/123";
-    let mut specification_url_length = message_text.as_bytes().len() as u64;
+    let specification_url_length = message_text.as_bytes().len() as u64;
 
     let mut specification_hash = hex::decode("75e34b7235d488828961216c5b9fbd5b88fe74c76516eb635c57cc61632222de").unwrap();
 
