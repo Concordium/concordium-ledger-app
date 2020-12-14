@@ -142,6 +142,10 @@ void processNextVerificationKey() {
 }
 
 void parseVerificationKey(uint8_t *buffer) {
+    uint8_t schemeId = buffer[0];
+    cx_hash((cx_hash_t *) &tx_state->hash, 0, buffer, 1, NULL, 0);
+    buffer += 1;
+
     uint8_t verificationKey[32];
     os_memmove(verificationKey, buffer, 32);
     buffer += 32;

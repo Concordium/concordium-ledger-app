@@ -10,7 +10,7 @@ fn main() {
 
     let mut new_account = hex::decode("01").unwrap();
     let mut verification_key_list_length = hex::decode("01").unwrap();
-    let verification_key = hex::decode("f78929ec8a9819f6ae2e10e79522b6b311949635fecc3d924d9d1e23f8e9e1c3").unwrap();
+    let mut verification_key = hex::decode("f78929ec8a9819f6ae2e10e79522b6b311949635fecc3d924d9d1e23f8e9e1c3").unwrap();
 
 
     let mut path_prefix = path::generate_key_derivation_path();
@@ -33,13 +33,16 @@ fn main() {
     let ledger = LedgerApp::new().unwrap();
     ledger.exchange(initial_command).expect("Credential deployment packet failed.");
 
+    let mut key_blob = hex::decode("00").unwrap();
+    key_blob.append(&mut verification_key);
+
     let verification_key_command = ApduCommand {
         cla: 224,
         ins: 4,
         p1: 1,
         p2: 0,
         length: 0,
-        data: verification_key
+        data: key_blob
     };
 
     ledger.exchange(verification_key_command).unwrap();
