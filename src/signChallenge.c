@@ -9,11 +9,14 @@
 #include "sign.h"
 
 static tx_state_t *tx_state = &global_tx_state;
+static signAccountChallenge_t *ctx = &global.signAccountChallengeContext;
+
+void signChallenge();
 
 UX_STEP_CB(
     ux_sign_credential_challenge_flow_0_step,
     pnn,
-    buildAndSignTransactionHash(),
+    signChallenge(),
     {
       &C_icon_validate_14,
       "Sign account",
@@ -37,11 +40,22 @@ void handleSignChallenge(uint8_t *dataBuffer, volatile unsigned int *flags) {
     int bytesRead = parseKeyDerivationPath(dataBuffer);
     dataBuffer += bytesRead;
 
-    // The challenge is 32 bytes, but we cannot display it to the user as the user has no
-    // way of validating it as being correct.
-    cx_sha256_init(&tx_state->hash);
-    cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 32, NULL, 0);
+    // Keep the challenge bytes so they can be signed. It does not make sense to
+    // display the value to the user, as they have no of validating it.
+    os_memmove(ctx->challenge, dataBuffer, 32);
 
     ux_flow_init(0, ux_sign_credential_challenge_flow, NULL);
     *flags |= IO_ASYNCH_REPLY;
+}
+
+void signChallenge() {
+    uint8_t signedChallenge[64];
+
+    // Note that it is not a hash being signed here, so perhaps the naming of that
+    // method should be generalized. In this case it's just the raw challenge bytes.
+    signTransactionHash(ctx->challenge, signedChallenge);
+
+    // Send the signature back to the user.
+    os_memmove(G_io_apdu_buffer, signedChallenge, sizeof(signedChallenge));
+    sendSuccess(sizeof(signedChallenge));
 }
