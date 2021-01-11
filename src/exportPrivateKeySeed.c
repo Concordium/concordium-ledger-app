@@ -95,12 +95,11 @@ void handleExportPrivateKeySeed(uint8_t *dataBuffer, uint8_t p1, volatile unsign
             idp | HARDENED_OFFSET,
             ar_index | HARDENED_OFFSET,
         };
-        os_memmove(ctx->arPath, keyDerivationPath, 5);
+        os_memmove(ctx->arPath, keyDerivationPath, sizeof(keyDerivationPath) * 5);
         ctx->pathLength = 5;
 
         uint8_t lengthCount = 5;
         os_memmove(ctx->display, "IDP #", lengthCount);
-        lengthCount += 5;
         lengthCount += bin2dec(ctx->display + lengthCount, idp);
         os_memmove(ctx->display + lengthCount, " ", 1);
         lengthCount += 1;
