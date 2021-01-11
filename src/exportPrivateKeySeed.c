@@ -80,7 +80,7 @@ void handleExportPrivateKeySeed(uint8_t *dataBuffer, uint8_t p1, volatile unsign
             identity | HARDENED_OFFSET,
             typeOfKey | HARDENED_OFFSET
         };
-        os_memmove(ctx->path, keyDerivationPath, 6);
+        os_memmove(ctx->path, keyDerivationPath, sizeof(keyDerivationPath) * 6);
         ctx->pathLength = 6;
 
         os_memmove(ctx->display, "ID #", 4);
