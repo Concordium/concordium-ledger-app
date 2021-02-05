@@ -32,6 +32,7 @@
 #include "signUpdateProtocol.h"
 #include "signChallenge.h"
 #include "signUpdateTransactionFeeDistribution.h"
+#include "signUpdateGasRewards.h"
 #include "ux.h"
 #include <string.h>
 
@@ -75,6 +76,7 @@ tx_state_t global_tx_state;
 #define INS_PUBLIC_INFO_FOR_IP          0x20
 #define INS_UPDATE_PROTOCOL             0x21
 #define INS_UPDATE_TRANSACTION_FEE_DIST 0x22
+#define INS_UPDATE_GAS_REWARDS          0x23
 
 #define INS_SIGN_CHALLENGE              0x30
 
@@ -149,6 +151,9 @@ static void concordium_main(void) {
                         break;
                     case INS_UPDATE_TRANSACTION_FEE_DIST:
                         handleSignUpdateTransactionFeeDistribution(G_io_apdu_buffer + OFFSET_CDATA, &flags);
+                        break;
+                    case INS_UPDATE_GAS_REWARDS:
+                        handleSignUpdateGasRewards(G_io_apdu_buffer + OFFSET_CDATA, &flags);
                         break;
                     case INS_SIGN_CHALLENGE:
                         handleSignChallenge(G_io_apdu_buffer + OFFSET_CDATA, &flags);

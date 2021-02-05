@@ -1,0 +1,1 @@
+void handleSignUpdateGasRewards(uint8_t *dataBuffer, volatile unsigned int *flags);
