@@ -25,3 +25,9 @@ make delete
 
 Both scripts require you to respond to the installation UI on the device for the installation or deletion
 to complete.
+
+## Developing for the Ledger
+
+Refer to the official documentation provided by Ledger. For quick development when deploying to the 
+device, make sure to deploy a custom certificate to the device. See the "PIN Bypass" section 
+[here](https://ledger.readthedocs.io/en/latest/userspace/debugging.html).
