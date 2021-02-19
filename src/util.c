@@ -24,10 +24,25 @@ int parseKeyDerivationPath(uint8_t *dataBuffer) {
     keyPath->pathLength = pathLength[0];
     for (int i = 0; i < pathLength[0]; ++i) {
         uint32_t node = U4BE(dataBuffer, 1 + (i * 4));
+        keyPath->rawKeyDerivationPath[i] = node;
         keyPath->keyDerivationPath[i] = node | HARDENED_OFFSET;
     }
 
     return 1 + (4 * keyPath->pathLength);
+}
+
+// Builds a display version of the identity/account path. A pre-condition
+// for running this method is that 'parseKeyDerivation' has been
+// run prior to it.
+void getIdentityAccountDisplay(uint8_t *dst) {
+    uint32_t identityIndex = keyPath->rawKeyDerivationPath[4];
+    uint32_t accountIndex = keyPath->rawKeyDerivationPath[6];
+
+    int offset = bin2dec(dst, identityIndex);
+    os_memmove(dst + offset, "/", 1);
+    offset = offset + 1;
+    offset = offset + bin2dec(dst + offset, accountIndex);
+    os_memmove(dst + offset, "\0", 1);
 }
 
 // Sends back the user rejection error code 0x6985, which indicates that

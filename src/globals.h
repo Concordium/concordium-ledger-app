@@ -58,6 +58,7 @@ typedef struct {
     // This could be refactored into having those values hardcoded if we determine they will be static.
     uint8_t pathLength;
     uint32_t keyDerivationPath[8];
+    uint32_t rawKeyDerivationPath[8];
 } keyDerivationPath_t;
 extern keyDerivationPath_t path;
 
@@ -178,6 +179,10 @@ typedef struct {
     char specificationHash[65];
 } signUpdateProtocolContext_t;
 
+typedef struct { 
+    uint8_t display[64];
+} exportPublicKeyContext_t;
+
 typedef struct {
     char type[20];
     char display[15];
@@ -215,6 +220,7 @@ typedef struct {
 // As the Ledger device is very limited on memory, the context of each instruction is stored in a
 // shared global union, so that we use no more memory than that of the most space using instruction context.
 typedef union {
+    exportPublicKeyContext_t exportPublicKeyContext;
     signTransferWithScheduleContext_t signTransferWithScheduleContext;
     signTransferContext_t signTransferContext;
     signCredentialDeploymentContext_t signCredentialDeploymentContext;
