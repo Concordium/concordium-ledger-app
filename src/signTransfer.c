@@ -51,7 +51,7 @@ UX_STEP_CB(
     {
       &C_icon_crossmark,
       "Decline to",
-      "sign tx"
+      "sign transaction"
     });
 UX_FLOW(ux_sign_flow,
     &ux_sign_flow_0_step,
@@ -61,41 +61,19 @@ UX_FLOW(ux_sign_flow,
     &ux_sign_flow_4_step
 );
 
-// UI definitions for comparison of the signature of the transaction hash.
-// the user.
-UX_STEP_VALID(
-    ux_sign_compare_0_step,
-    bnnn_paging,
-    ui_idle(),
-    {
-      .title = "Compare",
-      .text = (char *) global.signTransferContext.signatureAsHex
-    });
-UX_FLOW(ux_sign_compare_flow,
-    &ux_sign_compare_0_step
-);
-
 // Function that is called when the user accepts signing the received transaction. It will use the private key
-// to sign the hash of the transaction, and send it back to the computer. Afterwards a UI flow for comparing the
-// signature is started.
+// to sign the hash of the transaction, and send the signature back to the computer.
 void signTransferHash() {
     // Sign the transaction hash with the private key for the given account index.
     uint8_t signedHash[64];
     signTransactionHash(tx_state->transactionHash, signedHash);
 
-    // Return the signature on the transaction hash to the computer. The computer should then display the received
-    // signature and the user should compare the signature on the device with the one shown on the computer.
+    // Return the signature on the transaction hash to the computer.
     os_memmove(G_io_apdu_buffer, signedHash, sizeof(signedHash));
-    sendSuccessNoIdle(sizeof(signedHash));
-
-    // Initialize flow where the user will be shown the signature of the transaction hash. The user then has to
-    // verify that the signature on the device is the one shown on the computer.
-    toHex(signedHash, sizeof(signedHash), ctx->signatureAsHex);
-    ux_flow_init(0, ux_sign_compare_flow, NULL);
+    sendSuccess(sizeof(signedHash));
 }
 
-// Constructs the SHA256 hash of the transaction bytes. This function relies deeply on the serialization format
-// of account transactions.
+// Constructs the SHA256 hash of the transaction bytes.
 void buildTransferHash(uint8_t *dataBuffer) {
     // Initialize the hash that will be the hash of the whole transaction, which is what will be signed
     // if the user approves.
@@ -106,12 +84,13 @@ void buildTransferHash(uint8_t *dataBuffer) {
     dataBuffer += 60;
 
     // Transaction payload/body comes right after the transaction header. First byte determines the transaction kind.
-    uint8_t transactionKind[1];
-    os_memmove(transactionKind, dataBuffer, 1);
-    dataBuffer += 1;
-
+    uint8_t transactionKind = dataBuffer[0];
+    if (transactionKind != TRANSFER) {
+      THROW(SW_INVALID_TRANSACTION);
+    }
     // Add transaction kind to the hash.
-    cx_hash((cx_hash_t *) &tx_state->hash, 0, transactionKind, 1, NULL, 0);
+    cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 1, NULL, 0);
+    dataBuffer += 1;
 
     // Extract the destination address and add to hash.
     uint8_t toAddress[32];
@@ -119,10 +98,11 @@ void buildTransferHash(uint8_t *dataBuffer) {
     dataBuffer += 32;
     cx_hash((cx_hash_t *) &tx_state->hash, 0, toAddress, 32, NULL, 0);
 
-    // Used in display of recipient address.
+    // Used to display recipient address.
     size_t outputSize = sizeof(ctx->displayStr);
     if (base58check_encode(toAddress, sizeof(toAddress), ctx->displayStr, &outputSize) != 0) {
-        THROW(0x6B01);  // The received address bytes are not valid a valid base58 encoding.
+      // The received address bytes are not a valid base58 encoding.
+        THROW(SW_INVALID_TRANSACTION);  
     }
     ctx->displayStr[50] = '\0';
 

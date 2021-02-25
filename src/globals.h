@@ -10,14 +10,22 @@
 #define CONCORDIUM_COIN_TYPE 691
 #define CONCORDIUM_PURPOSE 583
 
-#define SW_INVALID_STATE 0x6B01
-#define SW_INVALID_PATH  0x6B02
-#define SW_INVALID_PARAM 0x6B03
+#define SW_INVALID_STATE       0x6B01
+#define SW_INVALID_PATH        0x6B02
+#define SW_INVALID_PARAM       0x6B03
+#define SW_INVALID_TRANSACTION 0x6B04
 
 #define MAX_CDATA_LENGTH 255
 
 #define ACCOUNT_TRANSACTION_HEADER_LENGTH 60
 #define UPDATE_HEADER_LENGTH 28
+
+typedef enum {
+    DEPLOY_MODULE,
+    INIT_CONTRACT,
+    UPDATE,
+    TRANSFER
+} transactionKind_e;
 
 // To add support for additional access structures with the update authorizations
 // transaction, you simply have to add a new item to the enum priot to the 'END' entry,
@@ -75,9 +83,6 @@ extern tx_state_t global_tx_state;
 typedef struct {
     unsigned char displayStr[52];
     uint8_t displayAmount[21];
-
-    // The signature is 64 bytes, in hexadecimal that is 128 bytes + 1 for string terminator.
-    char signatureAsHex[129];
     tx_state_t tx_state;
 } signTransferContext_t;
 
