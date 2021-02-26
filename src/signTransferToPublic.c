@@ -32,8 +32,9 @@ UX_FLOW(ux_sign_transfer_to_public,
     &ux_sign_transfer_to_public_1_step
 );
 
-#define P1_INITIAL      0x00
-#define P1_PROOF        0x01
+#define P1_INITIAL          0x00
+#define P1_REMAINING_AMOUNT 0x01
+#define P1_PROOF            0x02
 
 void handleSignTransferToPublic(uint8_t *dataBuffer, uint8_t p1, uint8_t dataLength, volatile unsigned int *flags) {
     if (p1 == P1_INITIAL) {
@@ -44,10 +45,13 @@ void handleSignTransferToPublic(uint8_t *dataBuffer, uint8_t p1, uint8_t dataLen
         cx_sha256_init(&tx_state->hash);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, ACCOUNT_TRANSACTION_HEADER_LENGTH + 1, NULL, 0);
         dataBuffer += ACCOUNT_TRANSACTION_HEADER_LENGTH + 1;
-        
+
+        // Ask the computer to continue with the protocol
+        sendSuccessNoIdle(0);
+    } else if (p1 == P1_REMAINING_AMOUNT) {
         // Hash remaining amount
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 8, NULL, 0);
-        dataBuffer += 8;
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 192, NULL, 0);
+        dataBuffer += 192;
 
         // Parse transaction amount so it can be displayed.
         uint64_t amountToEncrypted = U8BE(dataBuffer, 0);
