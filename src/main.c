@@ -118,7 +118,7 @@ static void concordium_main(void) {
 
                 switch (G_io_apdu_buffer[OFFSET_INS]) {
                     case INS_GET_PUBLIC_KEY:
-                        handleGetPublicKey(G_io_apdu_buffer + OFFSET_CDATA, &flags);
+                        handleGetPublicKey(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_P1], &flags);
                         break;
                     case INS_SIGN_TRANSFER:
                         handleSignTransfer(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_LC], &flags);
