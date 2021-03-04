@@ -58,6 +58,12 @@ typedef enum {
     TX_PROOFS
 } protocolState_t;
 
+typedef enum {
+    INITIAL,
+    VERIFICATION_KEY,
+    THRESHOLD
+} publicInfoForIpState_t;
+
 typedef struct {
     uint8_t identity;
     uint8_t accountIndex;
@@ -164,11 +170,12 @@ typedef struct {
 } signEncryptedAmountToTransfer_t;
 
 typedef struct {
-    char regId[97];
+    char credId[97];
     char idCredPub[97];
     uint8_t publicKeysLength;
     char publicKey[65];
     uint8_t threshold[4];
+    publicInfoForIpState_t state;
 } signPublicInformationForIp_t;
 
 typedef struct {

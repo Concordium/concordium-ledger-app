@@ -30,8 +30,8 @@ UX_STEP_CB(
     bn_paging,
     sendSuccessNoIdle(0),
     {
-      .title = "RegId",
-      .text = (char *) global.signPublicInformationForIp.regId
+      .title = "CredId",
+      .text = (char *) global.signPublicInformationForIp.credId
     });
 UX_FLOW(ux_sign_public_info_for_ip,
     &ux_sign_public_info_for_ip_0_step,
@@ -87,12 +87,16 @@ UX_FLOW(ux_sign_public_info_for_ip_threshold,
 #define P1_THRESHOLD            0x02
 
 void handleSignPublicInformationForIp(uint8_t *dataBuffer, uint8_t p1, uint8_t dataLength, volatile unsigned int *flags) {
-
+    if (p1 != P1_INITIAL && tx_state->initialized == false) {
+        THROW(SW_INVALID_STATE);
+    }
+    
     if (p1 == P1_INITIAL) {
         int bytesRead = parseKeyDerivationPath(dataBuffer);
         dataBuffer += bytesRead;
 
         cx_sha256_init(&tx_state->hash);
+        tx_state->initialized = true;
 
         // Parse id_cred_pub so it can be displayed.
         uint8_t idCredPub[48];
@@ -101,25 +105,28 @@ void handleSignPublicInformationForIp(uint8_t *dataBuffer, uint8_t p1, uint8_t d
         dataBuffer += 48;
         toHex(idCredPub, 48, ctx->idCredPub);
 
-        // Parse reg_id so it can be displayed.
-        uint8_t regId[48];
-        os_memmove(regId, dataBuffer, 48);
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, regId, 48, NULL, 0);
+        // Parse cred_id so it can be displayed.
+        uint8_t credId[48];
+        os_memmove(credId, dataBuffer, 48);
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, credId, 48, NULL, 0);
         dataBuffer += 48;
-        toHex(regId, 48, ctx->regId);
+        toHex(credId, 48, ctx->credId);
 
         // Parse number of public-keys that will be received next.
         ctx->publicKeysLength = dataBuffer[0];
         cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 1, NULL, 0);
         dataBuffer += 1;
 
+        ctx->state = VERIFICATION_KEY;
         ux_flow_init(0, ux_sign_public_info_for_ip, NULL);
         *flags |= IO_ASYNCH_REPLY;
     } else if (p1 == P1_VERIFICATION_KEY) {
-        // All public-keys have already been received, so this is an invalid state.
-        if (ctx->publicKeysLength <= 0) {
+        if (ctx->publicKeysLength <= 0 || ctx->state != VERIFICATION_KEY) {
             THROW(SW_INVALID_STATE);
         }
+        // Hash key index
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 1, NULL, 0);
+        dataBuffer += 1;
 
         // Hash key type
         cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 1, NULL, 0);
@@ -132,10 +139,16 @@ void handleSignPublicInformationForIp(uint8_t *dataBuffer, uint8_t p1, uint8_t d
         toHex(publicKey, 32, ctx->publicKey);
 
         ctx->publicKeysLength -= 1;
-        
+        if (ctx->publicKeysLength == 0) {
+            ctx->state = THRESHOLD;
+        }
         ux_flow_init(0, ux_sign_public_info_for_i_public_key, NULL);
         *flags |= IO_ASYNCH_REPLY;
     } else if (p1 == P1_THRESHOLD) {
+        if (ctx->state != THRESHOLD) {
+            THROW(SW_INVALID_STATE);
+        }
+
         // Read the threshold byte and parse it to display it.
         cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 1, NULL, 0);
         bin2dec(ctx->threshold, dataBuffer[0]);
