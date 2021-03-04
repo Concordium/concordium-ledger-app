@@ -142,7 +142,11 @@ void processNextVerificationKey() {
 }
 
 void parseVerificationKey(uint8_t *buffer) {
-    uint8_t schemeId = buffer[0];
+    // Hash key index
+    cx_hash((cx_hash_t *) &tx_state->hash, 0, buffer, 1, NULL, 0);
+    buffer += 1;
+
+    // Hash schemeId
     cx_hash((cx_hash_t *) &tx_state->hash, 0, buffer, 1, NULL, 0);
     buffer += 1;
 
@@ -160,12 +164,8 @@ void parseVerificationKey(uint8_t *buffer) {
 }
 
 void parseVerificationKeysLength(uint8_t *dataBuffer) {
-    // Read number of verification keys that we are going to receive.
-    uint8_t numberOfVerificationKeysArray[1];
-    os_memmove(numberOfVerificationKeysArray, dataBuffer, 1);
-    ctx->numberOfVerificationKeys = numberOfVerificationKeysArray[0];
-
-    cx_hash((cx_hash_t *) &tx_state->hash, 0, numberOfVerificationKeysArray, 1, NULL, 0);
+    ctx->numberOfVerificationKeys = dataBuffer[0];
+    cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 1, NULL, 0);
     ux_flow_init(0, ux_credential_deployment_initial_flow, NULL);
 }
 
@@ -196,12 +196,6 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, volatile un
         // Initialize values.
         cx_sha256_init(&tx_state->hash);
         tx_state->initialized = true;
-
-        // Parse the type of credential deployment (existing or new account).
-        uint8_t typeOfCredentialDeployment[1];
-        os_memmove(typeOfCredentialDeployment, dataBuffer, 1);
-        ctx->type = typeOfCredentialDeployment[0];
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, typeOfCredentialDeployment, 1, NULL, 0);
 
         ctx->state = 1;
         parseVerificationKeysLength(dataBuffer);
@@ -347,9 +341,11 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, volatile un
         }
     } else if (p1 == P1_LENGTH_OF_PROOFS) {
         ctx->proofLength = U4BE(dataBuffer, 0);
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 4, NULL, 0);
+        // cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 4, NULL, 0);
         sendSuccessNoIdle(0);
     } else if (p1 == P1_PROOFS) {
+        
+
         if (ctx->proofLength > MAX_CDATA_LENGTH) {
             cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, MAX_CDATA_LENGTH, NULL, 0);
             os_memmove(ctx->buffer, dataBuffer, MAX_CDATA_LENGTH);
