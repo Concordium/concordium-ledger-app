@@ -132,6 +132,37 @@ UX_FLOW(ux_credential_deployment_attributes,
     &ux_credential_deployment_attributes_0_step
 );
 
+UX_STEP_NOCB(
+    ux_sign_credential_deployment_0_step,
+    bn_paging,
+    {
+      .title = "Account address",
+      .text = (char *) global.signCredentialDeploymentContext.accountAddress
+    });
+UX_STEP_CB(
+    ux_sign_credential_deployment_1_step,
+    pnn,
+    buildAndSignTransactionHash(),
+    {
+      &C_icon_validate_14,
+      "Sign",
+      "transaction"
+    });
+UX_STEP_CB(
+    ux_sign_credential_deployment_2_step,
+    pnn,
+    declineToSignTransaction(),
+    {
+      &C_icon_crossmark,
+      "Decline to",
+      "sign transaction"
+    });
+UX_FLOW(ux_sign_credential_deployment,
+    &ux_sign_credential_deployment_0_step,
+    &ux_sign_credential_deployment_1_step,
+    &ux_sign_credential_deployment_2_step
+);
+
 void processNextVerificationKey() {
     if (ctx->numberOfVerificationKeys == 0) {
         // TODO Update state here. That is why there are two branches here that currently do the same.
@@ -182,6 +213,7 @@ void parseVerificationKeysLength(uint8_t *dataBuffer) {
 #define P1_ATTRIBUTE_VALUE          0x06    // Sent for the packet containing an attribute value.
 #define P1_LENGTH_OF_PROOFS         0x07    // Sent for the packet containing the byte length of the proofs.
 #define P1_PROOFS                   0x08    // Sent for the packets containing proof bytes.
+#define P1_NEW_OR_EXISTING          0x09
 
 // TODO Add improved state checking to disallow a computer stepping outside of the protocol.
 void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, volatile unsigned int *flags) {
@@ -351,7 +383,33 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, volatile un
         } else {
             cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, ctx->proofLength, NULL, 0);
             os_memmove(ctx->buffer, dataBuffer, ctx->proofLength);
+            sendSuccessNoIdle(0);    
+        }
+    } else if (p1 == P1_NEW_OR_EXISTING) {
+        // 0 indicates new, 1 indicates existing
+        uint8_t newOrExisting = dataBuffer[0];
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 1, NULL, 0);
+        dataBuffer += 1;
+
+        if (newOrExisting == 0) {
+            cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 8, NULL, 0);
             ux_flow_init(0, ux_sign_flow_shared, NULL);
+        } else if (newOrExisting == 1) {
+            uint8_t accountAddress[32];
+            os_memmove(accountAddress, dataBuffer, 32);
+
+            // Used to display account address.
+            size_t outputSize = sizeof(ctx->accountAddress);
+            if (base58check_encode(accountAddress, sizeof(accountAddress), ctx->accountAddress, &outputSize) != 0) {
+            // The received address bytes are not a valid base58 encoding.
+                THROW(SW_INVALID_TRANSACTION);  
+            }
+            ctx->accountAddress[50] = '\0';
+
+            cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 32, NULL, 0);
+            ux_flow_init(0, ux_sign_credential_deployment, NULL);
+        } else {
+            THROW(SW_INVALID_TRANSACTION);
         }
     }
 

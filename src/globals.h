@@ -136,6 +136,8 @@ typedef struct {
     uint32_t proofLength;
     uint8_t buffer[255];
 
+    uint8_t accountAddress[52];
+
     protocolState_t state;
 } signCredentialDeploymentContext_t;
 
