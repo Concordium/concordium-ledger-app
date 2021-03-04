@@ -341,11 +341,8 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, volatile un
         }
     } else if (p1 == P1_LENGTH_OF_PROOFS) {
         ctx->proofLength = U4BE(dataBuffer, 0);
-        // cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 4, NULL, 0);
         sendSuccessNoIdle(0);
     } else if (p1 == P1_PROOFS) {
-        
-
         if (ctx->proofLength > MAX_CDATA_LENGTH) {
             cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, MAX_CDATA_LENGTH, NULL, 0);
             os_memmove(ctx->buffer, dataBuffer, MAX_CDATA_LENGTH);
