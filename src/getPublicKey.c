@@ -64,10 +64,29 @@ void handleGetPublicKey(uint8_t *dataBuffer, uint8_t p1, volatile unsigned int *
     if (p1 == 0x01) {
         sendPublicKey();
     } else {
-        getIdentityAccountDisplay(ctx->display);
+        // If the key path is of length 5, then it is a request for a governance key.
+        if (keyPath->pathLength == 5) {
+            uint32_t purpose = keyPath->rawKeyDerivationPath[3];
+
+            switch (purpose) {
+                case 0:
+                    os_memmove(ctx->display, "Gov. root", 10);
+                    break;
+                case 1:
+                    os_memmove(ctx->display, "Gov. level 1", 13);
+                    break;
+                case 2:
+                    os_memmove(ctx->display, "Gov. level 2", 13);
+                    break;
+                default:
+                    THROW(SW_INVALID_PATH);
+            }
+        } else {
+            getIdentityAccountDisplay(ctx->display);
+        }
 
         // Display the UI for the public-key flow, where the user can validate that the
-        // public-key being generated is for the expected identity and account.
+        // public-key being generated is for the expected one.
         ux_flow_init(0, ux_generate_public_flow, NULL);
 
         // Tell the main process to wait for a button press.
