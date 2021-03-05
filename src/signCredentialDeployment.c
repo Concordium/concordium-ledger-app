@@ -301,8 +301,9 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, volatile un
         cx_hash((cx_hash_t *) &tx_state->hash, 0, encIdCredPubShare, 96, NULL, 0);
         dataBuffer += 96;
 
+        sendSuccessNoIdle(0);
         // Display the loaded data.
-        ux_flow_init(0, ux_credential_deployment_aridentity_key_flow, NULL);
+        // ux_flow_init(0, ux_credential_deployment_aridentity_key_flow, NULL);
     } else if (p1 == P1_CREDENTIAL_DATES) {
         uint8_t temp[1];
 
