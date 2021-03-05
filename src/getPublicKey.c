@@ -49,14 +49,30 @@ void sendPublicKey() {
         tx++;
     }
 
-    // Send back success response including the public-key.
+    if (ctx->signPublicKey) {
+        uint8_t signedPublicKey[64];
+        // Note that it is not a hash being signed here, so perhaps the naming of that
+        // method should be generalized. In this case it's the public-key.
+        signTransactionHash(publicKey, signedPublicKey);
+        
+        for (uint8_t i = 32; i < sizeof(signedPublicKey) + 32; i++) {
+            G_io_apdu_buffer[i] = signedPublicKey[i];
+            tx++;
+        }
+    }
+
+    // Send back success response including the public-key (and signature, if wanted).
     sendSuccess(tx);
 }
 
 // Entry-point from the main class to the handler of public keys.
-void handleGetPublicKey(uint8_t *dataBuffer, uint8_t p1, volatile unsigned int *flags) {
+void handleGetPublicKey(uint8_t *dataBuffer, uint8_t p1, uint8_t p2, volatile unsigned int *flags) {
     int bytesRead = parseKeyDerivationPath(dataBuffer);
     dataBuffer += bytesRead;
+
+    // If P1 == 02, then the public-key is signed by its corresponding private key, and
+    // appended to the returned public-key.
+    ctx->signPublicKey = p2 == 1;
 
     // If P1 == 01, then we skip displaying the key being exported. This is used when it 
     // it is not important for the user to validate the key path, i.e. for governance, 
@@ -86,7 +102,7 @@ void handleGetPublicKey(uint8_t *dataBuffer, uint8_t p1, volatile unsigned int *
         }
 
         // Display the UI for the public-key flow, where the user can validate that the
-        // public-key being generated is for the expected one.
+        // public-key being generated is the expected one.
         ux_flow_init(0, ux_generate_public_flow, NULL);
 
         // Tell the main process to wait for a button press.

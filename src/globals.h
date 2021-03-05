@@ -195,6 +195,7 @@ typedef struct {
 
 typedef struct { 
     uint8_t display[64];
+    bool signPublicKey;
 } exportPublicKeyContext_t;
 
 typedef struct {
