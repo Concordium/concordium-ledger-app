@@ -54,11 +54,8 @@ void sendPublicKey() {
         // Note that it is not a hash being signed here, so perhaps the naming of that
         // method should be generalized. In this case it's the public-key.
         signTransactionHash(publicKey, signedPublicKey);
-        
-        for (uint8_t i = 32; i < sizeof(signedPublicKey) + 32; i++) {
-            G_io_apdu_buffer[i] = signedPublicKey[i];
-            tx++;
-        }
+        os_memmove(G_io_apdu_buffer + tx, signedPublicKey, sizeof(signedPublicKey));
+        tx += sizeof(signedPublicKey);
     }
 
     // Send back success response including the public-key (and signature, if wanted).
@@ -72,7 +69,7 @@ void handleGetPublicKey(uint8_t *dataBuffer, uint8_t p1, uint8_t p2, volatile un
 
     // If P1 == 02, then the public-key is signed by its corresponding private key, and
     // appended to the returned public-key.
-    ctx->signPublicKey = p2 == 1;
+    ctx->signPublicKey = p2 == 0x01;
 
     // If P1 == 01, then we skip displaying the key being exported. This is used when it 
     // it is not important for the user to validate the key path, i.e. for governance, 
