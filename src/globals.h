@@ -26,7 +26,8 @@ typedef enum {
     UPDATE,
     TRANSFER,
     ADD_BAKER,
-    REMOVE_BAKER
+    REMOVE_BAKER,
+    UPDATE_BAKER_STAKE
 } transactionKind_e;
 
 // To add support for additional access structures with the update authorizations
@@ -204,6 +205,10 @@ typedef struct {
 } signAddBakerContext_t;
 
 typedef struct {
+    uint8_t amount[20];
+} signUpdateBakerStakeContext_t;
+
+typedef struct {
     uint64_t payloadLength;
     uint64_t textLength;
     uint8_t buffer[255];
@@ -272,6 +277,7 @@ typedef union {
     signUpdateMintDistribution_t signUpdateMintDistribution;
     signElectionDifficultyContext_t signElectionDifficulty;
     signAddBakerContext_t signAddBaker;
+    signUpdateBakerStakeContext_t signUpdateBakerStake;
 } instructionContext;
 extern instructionContext global;
 
