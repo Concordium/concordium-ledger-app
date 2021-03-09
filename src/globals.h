@@ -24,7 +24,8 @@ typedef enum {
     DEPLOY_MODULE,
     INIT_CONTRACT,
     UPDATE,
-    TRANSFER
+    TRANSFER,
+    ADD_BAKER
 } transactionKind_e;
 
 // To add support for additional access structures with the update authorizations
@@ -63,6 +64,12 @@ typedef enum {
     VERIFICATION_KEY,
     THRESHOLD
 } publicInfoForIpState_t;
+
+typedef enum {
+    ADD_BAKER_INITIAL,
+    ADD_BAKER_VERIFY_KEYS,
+    ADD_BAKER_PROOFS_AMOUNT_RESTAKE
+} addBakerState_t;
 
 typedef struct {
     uint8_t identity;
@@ -190,6 +197,12 @@ typedef struct {
 } signTransferToPublic_t;
 
 typedef struct {
+    uint8_t amount[20];
+    uint8_t restake[4];
+    addBakerState_t state;
+} signAddBakerContext_t;
+
+typedef struct {
     uint64_t payloadLength;
     uint64_t textLength;
     uint8_t buffer[255];
@@ -257,6 +270,7 @@ typedef union {
     signUpdateFoundationAccountContext_t signUpdateFoundationAccountContext;
     signUpdateMintDistribution_t signUpdateMintDistribution;
     signElectionDifficultyContext_t signElectionDifficulty;
+    signAddBakerContext_t signAddBaker;
 } instructionContext;
 extern instructionContext global;
 

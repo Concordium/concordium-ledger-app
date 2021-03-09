@@ -36,6 +36,7 @@
 #include "signUpdateFoundationAccount.h"
 #include "signUpdateMintDistribution.h"
 #include "signUpdateElectionDifficulty.h"
+#include "signAddBaker.h"
 #include "ux.h"
 #include <string.h>
 
@@ -75,6 +76,8 @@ tx_state_t global_tx_state;
 #define INS_ENCRYPTED_AMOUNT_TRANSFER   0x10
 #define INS_TRANSFER_TO_ENCRYPTED       0x11
 #define INS_TRANSFER_TO_PUBLIC          0x12
+
+#define INS_ADD_BAKER                   0x13
 
 #define INS_PUBLIC_INFO_FOR_IP          0x20
 #define INS_UPDATE_PROTOCOL             0x21
@@ -172,6 +175,9 @@ static void concordium_main(void) {
                         break;
                     case INS_UPDATE_ELECTION_DIFFICULTY:
                         handleSignUpdateElectionDifficulty(G_io_apdu_buffer + OFFSET_CDATA, &flags);
+                        break;
+                    case INS_ADD_BAKER:
+                        handleSignAddBaker(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_P1], &flags);
                         break;
                     default:
                         THROW(0x6D00);
