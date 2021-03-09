@@ -147,6 +147,10 @@ typedef struct {
 } signExchangeRateContext_t;
 
 typedef struct {
+    uint8_t electionDifficulty[17];
+} signElectionDifficultyContext_t;
+
+typedef struct {
     uint16_t publicKeyListLength;
     uint16_t publicKeyCount;
     uint8_t publicKey[65];
@@ -252,6 +256,7 @@ typedef union {
     signUpdateGasRewardsContext_t signUpdateGasRewardsContext;
     signUpdateFoundationAccountContext_t signUpdateFoundationAccountContext;
     signUpdateMintDistribution_t signUpdateMintDistribution;
+    signElectionDifficultyContext_t signElectionDifficulty;
 } instructionContext;
 extern instructionContext global;
 

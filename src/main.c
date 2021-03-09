@@ -35,6 +35,7 @@
 #include "signUpdateGasRewards.h"
 #include "signUpdateFoundationAccount.h"
 #include "signUpdateMintDistribution.h"
+#include "signUpdateElectionDifficulty.h"
 #include "ux.h"
 #include <string.h>
 
@@ -81,6 +82,7 @@ tx_state_t global_tx_state;
 #define INS_UPDATE_GAS_REWARDS          0x23
 #define INS_UPDATE_FOUNDATION_ACCOUNT   0x24
 #define INS_UPDATE_MINT_DISTRIBUTION    0x25
+#define INS_UPDATE_ELECTION_DIFFICULTY  0x26
 
 #define INS_SIGN_CHALLENGE              0x30
 
@@ -167,6 +169,9 @@ static void concordium_main(void) {
                         break;
                     case INS_SIGN_CHALLENGE:
                         handleSignChallenge(G_io_apdu_buffer + OFFSET_CDATA, &flags);
+                        break;
+                    case INS_UPDATE_ELECTION_DIFFICULTY:
+                        handleSignUpdateElectionDifficulty(G_io_apdu_buffer + OFFSET_CDATA, &flags);
                         break;
                     default:
                         THROW(0x6D00);
