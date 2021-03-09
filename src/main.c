@@ -37,6 +37,7 @@
 #include "signUpdateMintDistribution.h"
 #include "signUpdateElectionDifficulty.h"
 #include "signAddBaker.h"
+#include "signRemoveBaker.h"
 #include "ux.h"
 #include <string.h>
 
@@ -78,6 +79,7 @@ tx_state_t global_tx_state;
 #define INS_TRANSFER_TO_PUBLIC          0x12
 
 #define INS_ADD_BAKER                   0x13
+#define INS_REMOVE_BAKER                0x14
 
 #define INS_PUBLIC_INFO_FOR_IP          0x20
 #define INS_UPDATE_PROTOCOL             0x21
@@ -178,6 +180,9 @@ static void concordium_main(void) {
                         break;
                     case INS_ADD_BAKER:
                         handleSignAddBaker(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_P1], &flags);
+                        break;
+                    case INS_REMOVE_BAKER:
+                        handleSignRemoveBaker(G_io_apdu_buffer + OFFSET_CDATA, &flags);
                         break;
                     default:
                         THROW(0x6D00);

@@ -25,7 +25,8 @@ typedef enum {
     INIT_CONTRACT,
     UPDATE,
     TRANSFER,
-    ADD_BAKER
+    ADD_BAKER,
+    REMOVE_BAKER
 } transactionKind_e;
 
 // To add support for additional access structures with the update authorizations
