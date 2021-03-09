@@ -31,7 +31,7 @@ UX_STEP_NOCB(
 UX_STEP_CB(
     ux_sign_encrypted_amount_transfer_2_step,
     bn_paging,
-    sendSuccessNoIdle(0),
+    sendSuccessNoIdle(),
     {
       .title = "Recipient",
       .text = (char *) global.signEncryptedAmountToTransfer.to
@@ -89,7 +89,7 @@ void handleSignEncryptedAmountTransfer(uint8_t *dataBuffer, uint8_t p1, uint8_t 
             THROW(SW_INVALID_STATE);    
         } else {
             // There are more bytes to be received. Ask the computer for more.
-            sendSuccessNoIdle(0);
+            sendSuccessNoIdle();
         }
     } else {
         THROW(SW_INVALID_PARAM);

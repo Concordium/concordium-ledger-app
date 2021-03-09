@@ -32,7 +32,7 @@ UX_STEP_NOCB(
 UX_STEP_VALID(
     ux_scheduled_transfer_initial_flow_2_step,
     nn,
-    sendSuccessNoIdle(0),
+    sendSuccessNoIdle(),
     {
       "Continue",
       "with transaction"
@@ -79,7 +79,7 @@ void processNextScheduledAmount(uint8_t *buffer) {
     } else if (ctx->scheduledAmountsInCurrentPacket == 0) {
         // Current packet has been successfully read, but there are still more data to receive. Ask the computer
         // for more data.
-        sendSuccessNoIdle(0);
+        sendSuccessNoIdle();
     } else {
         // The current packet still has additional timestamp/amount pairs to be added to the hash and
         // displayed for the user.

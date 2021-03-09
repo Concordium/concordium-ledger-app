@@ -28,7 +28,7 @@ UX_STEP_NOCB(
 UX_STEP_CB(
     ux_sign_public_info_for_ip_2_step,
     bn_paging,
-    sendSuccessNoIdle(0),
+    sendSuccessNoIdle(),
     {
       .title = "CredId",
       .text = (char *) global.signPublicInformationForIp.credId
@@ -42,7 +42,7 @@ UX_FLOW(ux_sign_public_info_for_ip,
 UX_STEP_CB(
     ux_sign_public_info_for_i_public_key_0_step,
     bn_paging,
-    sendSuccessNoIdle(0),
+    sendSuccessNoIdle(),
     {
       .title = "Verification key",
       .text = (char *) global.signPublicInformationForIp.publicKey

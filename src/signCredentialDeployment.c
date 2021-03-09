@@ -20,7 +20,7 @@ void declineToSignCredentialDeployment();
 UX_STEP_CB(
     ux_credential_deployment_initial_flow_0_step,
     nn,
-    sendSuccessNoIdle(0),
+    sendSuccessNoIdle(),
     {
       "Review",
       "transaction"
@@ -65,7 +65,7 @@ UX_STEP_NOCB(
 UX_STEP_CB(
     ux_credential_deployment_threshold_flow_3_step,
     bn,
-    sendSuccessNoIdle(0),
+    sendSuccessNoIdle(),
     {
       "Revocation threshold",
       (char *) global.signCredentialDeploymentContext.anonymityRevocationThreshold
@@ -90,7 +90,7 @@ UX_STEP_NOCB(
 UX_STEP_CB(
     ux_credential_deployment_aridentity_key_flow_1_step,
     bn_paging,
-    sendSuccessNoIdle(0),
+    sendSuccessNoIdle(),
     {
       "EncIdCred",
       (char *) global.signCredentialDeploymentContext.encIdCredPubShare
@@ -110,7 +110,7 @@ UX_STEP_NOCB(
 UX_STEP_CB(
     ux_credential_deployment_dates_1_step,
     bn,
-    sendSuccessNoIdle(0),
+    sendSuccessNoIdle(),
     {
       "Created at",
       (char *) global.signCredentialDeploymentContext.createdAt
@@ -123,7 +123,7 @@ UX_FLOW(ux_credential_deployment_dates,
 UX_STEP_CB(
     ux_credential_deployment_attributes_0_step,
     bn_paging,
-    sendSuccessNoIdle(0),
+    sendSuccessNoIdle(),
     {
         "Attributes hash",
         (char *) global.signCredentialDeploymentContext.attributeHashDisplay
@@ -166,9 +166,9 @@ UX_FLOW(ux_sign_credential_deployment,
 void processNextVerificationKey() {
     if (ctx->numberOfVerificationKeys == 0) {
         // TODO Update state here. That is why there are two branches here that currently do the same.
-        sendSuccessNoIdle(0);
+        sendSuccessNoIdle();
     } else {
-        sendSuccessNoIdle(0);   // Request more data from the computer.
+        sendSuccessNoIdle();   // Request more data from the computer.
     }
 }
 
@@ -301,7 +301,7 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, volatile un
         cx_hash((cx_hash_t *) &tx_state->hash, 0, encIdCredPubShare, 96, NULL, 0);
         dataBuffer += 96;
 
-        sendSuccessNoIdle(0);
+        sendSuccessNoIdle();
         // Display the loaded data.
         // ux_flow_init(0, ux_credential_deployment_aridentity_key_flow, NULL);
     } else if (p1 == P1_CREDENTIAL_DATES) {
@@ -355,7 +355,7 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, volatile un
         cx_hash((cx_hash_t *) &tx_state->hash, 0, attributeValueLength, 1, NULL, 0);
 
         // Ask computer for the attribute value.
-        sendSuccessNoIdle(0);
+        sendSuccessNoIdle();
     } else if (p1 == P1_ATTRIBUTE_VALUE) {
         // Add attribute value to the hash.
         cx_hash((cx_hash_t *) &attributeHash, 0, dataBuffer, ctx->attributeValueLength, NULL, 0);
@@ -370,21 +370,21 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, volatile un
             ux_flow_init(0, ux_credential_deployment_attributes, NULL);
         } else {
             // There are additional attributes to be read, so ask for more.
-            sendSuccessNoIdle(0);
+            sendSuccessNoIdle();
         }
     } else if (p1 == P1_LENGTH_OF_PROOFS) {
         ctx->proofLength = U4BE(dataBuffer, 0);
-        sendSuccessNoIdle(0);
+        sendSuccessNoIdle();
     } else if (p1 == P1_PROOFS) {
         if (ctx->proofLength > MAX_CDATA_LENGTH) {
             cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, MAX_CDATA_LENGTH, NULL, 0);
             os_memmove(ctx->buffer, dataBuffer, MAX_CDATA_LENGTH);
             ctx->proofLength -= MAX_CDATA_LENGTH;
-            sendSuccessNoIdle(0);
+            sendSuccessNoIdle();
         } else {
             cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, ctx->proofLength, NULL, 0);
             os_memmove(ctx->buffer, dataBuffer, ctx->proofLength);
-            sendSuccessNoIdle(0);    
+            sendSuccessNoIdle();    
         }
     } else if (p1 == P1_NEW_OR_EXISTING) {
         // 0 indicates new, 1 indicates existing

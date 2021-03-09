@@ -10,7 +10,7 @@ void sendUserRejection();
 
 void sendSuccess(uint8_t tx);
 
-void sendSuccessNoIdle(uint8_t tx);
+void sendSuccessNoIdle();
 
 int bin2dec(uint8_t *dst, uint64_t n);
 

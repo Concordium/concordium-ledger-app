@@ -47,7 +47,7 @@ UX_FLOW(ux_sign_protocol_update_url,
 UX_STEP_CB(
     ux_sign_protocol_update_specification_hash_0_step,
     bn_paging,
-    sendSuccessNoIdle(0),
+    sendSuccessNoIdle(),
     {
         "Spec. hash",
         (char *) global.signUpdateProtocolContext.specificationHash
@@ -60,7 +60,7 @@ void handleText() {
     if (ctx->textLength == 0) {
         ctx->textState += 1;
     }
-    sendSuccessNoIdle(0);
+    sendSuccessNoIdle();
 }
 
 #define P1_INITIAL              0x00
@@ -87,7 +87,7 @@ void handleSignUpdateProtocol(uint8_t *dataBuffer, uint8_t p1, uint8_t dataLengt
 
         ctx->textState = MESSAGE;
 
-        sendSuccessNoIdle(0);
+        sendSuccessNoIdle();
     } else if (p1 == P1_TEXT_LENGTH) {
         
         // Read message text length
@@ -98,7 +98,7 @@ void handleSignUpdateProtocol(uint8_t *dataBuffer, uint8_t p1, uint8_t dataLengt
         // Update payload length to ensure we end up with the length of the auxiliary data.
         ctx->payloadLength -= 8;
 
-        sendSuccessNoIdle(0);
+        sendSuccessNoIdle();
     } else if (p1 == P1_TEXT) {
         if (ctx->textLength <= 0) {
             THROW(SW_INVALID_STATE);
@@ -143,7 +143,7 @@ void handleSignUpdateProtocol(uint8_t *dataBuffer, uint8_t p1, uint8_t dataLengt
             *flags |= IO_ASYNCH_REPLY;
         } else if (ctx->payloadLength > 0) {
             // Ask for more bytes as we have not received all of them yet.
-            sendSuccessNoIdle(0);
+            sendSuccessNoIdle();
         } else {
             THROW(SW_INVALID_STATE);
         }

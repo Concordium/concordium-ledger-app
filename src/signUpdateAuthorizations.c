@@ -44,7 +44,7 @@ UX_FLOW(ux_update_authorizations_threshold,
 UX_STEP_CB(
     ux_update_authorizations_public_key_0_step,
     bn_paging,
-    sendSuccessNoIdle(0),
+    sendSuccessNoIdle(),
     {
         "Public-key",
         (char *) global.signUpdateAuthorizations.publicKey
@@ -74,7 +74,7 @@ void processThreshold() {
     if (ctx->authorizationType == END) {
         ux_flow_init(0, ux_sign_flow_shared, NULL);
     } else {
-        sendSuccessNoIdle(0); // Ask for the next access structure, as we are not done processing all of them
+        sendSuccessNoIdle(); // Ask for the next access structure, as we are not done processing all of them
     }
 }
 
@@ -85,10 +85,10 @@ void processKeyIndices() {
     if (ctx->accessStructureSize == 0) {
         // The current access structure has been fully processed, continue to the next.
         ctx->authorizationType += 1;
-        sendSuccessNoIdle(0);
+        sendSuccessNoIdle();
     } else if (ctx->processedCount == 0) {
         // The current batch was processed, but there are more to be processed. Ask for more data.
-        sendSuccessNoIdle(0);
+        sendSuccessNoIdle();
     } else {
         uint16_t keyIndex = U2BE(ctx->buffer, ctx->bufferPointer);
         bin2dec(ctx->displayKeyIndex, keyIndex);
@@ -119,12 +119,12 @@ void handleSignUpdateAuthorizations(uint8_t *dataBuffer, uint8_t p1, volatile un
         cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, UPDATE_HEADER_LENGTH + 1, NULL, 0);
         dataBuffer += UPDATE_HEADER_LENGTH + 1;
 
-        sendSuccessNoIdle(0);
+        sendSuccessNoIdle();
 
     } else if (p1 == P1_PUBLIC_KEY_INITIAL) {
         ctx->publicKeyListLength = U2BE(dataBuffer, 0);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 2, NULL, 0);
-        sendSuccessNoIdle(0);
+        sendSuccessNoIdle();
 
     } else if (p1 == P1_PUBLIC_KEY) {
         uint8_t publicKeyInput[32];
@@ -138,7 +138,7 @@ void handleSignUpdateAuthorizations(uint8_t *dataBuffer, uint8_t p1, volatile un
     } else if (p1 == P1_ACCESS_STRUCTURE_INITIAL) {
         cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 2, NULL, 0);
         ctx->accessStructureSize = U2BE(dataBuffer, 0);
-        sendSuccessNoIdle(0);
+        sendSuccessNoIdle();
 
     } else if (p1 == P1_ACCESS_STRUCTURE) {
         ctx->bufferPointer = 0;

@@ -64,8 +64,9 @@ void sendSuccess(uint8_t tx) {
     ui_idle();
 }
 
-// Send data back to the computer, but do not return to the idle screen.
-void sendSuccessNoIdle(uint8_t tx) {
+// Send success back to the computer, but do not return to the idle screen.
+void sendSuccessNoIdle() {
+    uint8_t tx = 0;
     G_io_apdu_buffer[tx++] = 0x90;
     G_io_apdu_buffer[tx++] = 0x00;
     io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, tx);

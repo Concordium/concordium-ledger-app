@@ -22,7 +22,7 @@ UX_STEP_NOCB(
 UX_STEP_CB(
     ux_sign_transfer_to_public_1_step,
     bn_paging,
-    sendSuccessNoIdle(0),
+    sendSuccessNoIdle(),
     {
       .title = "Amount to public",
       .text = (char *) global.signTransferToPublic.amount
@@ -47,7 +47,7 @@ void handleSignTransferToPublic(uint8_t *dataBuffer, uint8_t p1, uint8_t dataLen
         dataBuffer += ACCOUNT_TRANSACTION_HEADER_LENGTH + 1;
 
         // Ask the computer to continue with the protocol
-        sendSuccessNoIdle(0);
+        sendSuccessNoIdle();
     } else if (p1 == P1_REMAINING_AMOUNT) {
         // Hash remaining amount
         cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 192, NULL, 0);
@@ -82,7 +82,7 @@ void handleSignTransferToPublic(uint8_t *dataBuffer, uint8_t p1, uint8_t dataLen
             THROW(SW_INVALID_STATE);    
         } else {
             // There are more bytes to be received. Ask the computer for more.
-            sendSuccessNoIdle(0);
+            sendSuccessNoIdle();
         }
     } else {
         THROW(SW_INVALID_STATE);
