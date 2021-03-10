@@ -1,4 +1,5 @@
 mod path;
+mod update_transaction_header;
 
 use hex;
 use ledger::{ApduCommand, LedgerApp};
@@ -7,14 +8,6 @@ use ledger::{ApduCommand, LedgerApp};
 /// Therefore it is preferred if they are restricted to the ASCII character set in the UI.
 fn main() {
     let mut key_derivation_path = path::generate_key_derivation_path();
-
-    // Hex part of update header.
-    let update_sequence_number = "000000000000000A";
-    let transaction_time = "0000000000000064";
-    let transaction_expiry_time = "0000000063DE5DA7";
-    let payload_size = "00000029";
-    let update_header_blob = format!("{}{}{}{}", &update_sequence_number, &transaction_time, &transaction_expiry_time, &payload_size);
-    let mut update_header_blob_bytes = hex::decode(update_header_blob).unwrap();
     let mut update_type = hex::decode("03").unwrap();
 
     let message_text = "This is a brief message about the update.";
@@ -34,7 +27,7 @@ fn main() {
 
     let mut cdata = Vec::new();
     cdata.append(&mut key_derivation_path);
-    cdata.append(&mut update_header_blob_bytes);
+    cdata.append(&mut update_transaction_header::generate_update_transaction_header());
     cdata.append(&mut update_type);
     cdata.append(&mut payload_length.to_be_bytes().to_vec());
 

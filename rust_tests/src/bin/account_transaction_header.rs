@@ -17,3 +17,6 @@ pub fn generate_account_transaction_header() -> Vec<u8> {
 
     return transaction_header;
 }
+
+#[allow(dead_code)]
+fn main() { }
