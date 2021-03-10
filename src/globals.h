@@ -28,7 +28,8 @@ typedef enum {
     ADD_BAKER,
     REMOVE_BAKER,
     UPDATE_BAKER_STAKE,
-    UPDATE_BAKER_STAKE_EARNINGS
+    UPDATE_BAKER_STAKE_EARNINGS,
+    UPDATE_BAKER_KEYS
 } transactionKind_e;
 
 // To add support for additional access structures with the update authorizations

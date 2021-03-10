@@ -36,7 +36,7 @@
 #include "signUpdateFoundationAccount.h"
 #include "signUpdateMintDistribution.h"
 #include "signUpdateElectionDifficulty.h"
-#include "signAddBaker.h"
+#include "signAddBakerOrUpdateBakerKeys.h"
 #include "signRemoveBaker.h"
 #include "signUpdateBakerStake.h"
 #include "signUpdateBakerRestakeEarnings.h"
@@ -80,7 +80,7 @@ tx_state_t global_tx_state;
 #define INS_TRANSFER_TO_ENCRYPTED       0x11
 #define INS_TRANSFER_TO_PUBLIC          0x12
 
-#define INS_ADD_BAKER                   0x13
+#define INS_ADD_BAKER_OR_UPDATE_KEYS    0x13
 #define INS_REMOVE_BAKER                0x14
 #define INS_UPDATE_BAKER_STAKE          0x15
 #define INS_UPDATE_BAKER_RESTAKE_EARNINGS   0x16
@@ -182,8 +182,8 @@ static void concordium_main(void) {
                     case INS_UPDATE_ELECTION_DIFFICULTY:
                         handleSignUpdateElectionDifficulty(G_io_apdu_buffer + OFFSET_CDATA, &flags);
                         break;
-                    case INS_ADD_BAKER:
-                        handleSignAddBaker(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_P1], &flags);
+                    case INS_ADD_BAKER_OR_UPDATE_KEYS:
+                        handleSignAddBakerOrUpdateBakerKeys(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_P1], G_io_apdu_buffer[OFFSET_P2], &flags);
                         break;
                     case INS_REMOVE_BAKER:
                         handleSignRemoveBaker(G_io_apdu_buffer + OFFSET_CDATA, &flags);
