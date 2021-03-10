@@ -1,3 +1,4 @@
+mod account_transaction_header;
 mod path;
 
 use hex;
@@ -5,26 +6,10 @@ use ledger::{ApduCommand, LedgerApp};
 use base58check::*;
 
 fn main() {
-
-    // Base58 part of header, so we can't just use hex and map to bytes.
-    let sender_address = "3C8N65hBwc2cNtJkGmVyGeWYxhZ6R3X77mLWTwAKsnAnyworTq";
-    let mut transaction_header = sender_address.from_base58check().unwrap().1;
-
-    // Hex part of header.
-    let nonce = "000000000000000A";
-    let energy = "0000000000000064";
-    let payload_size = "00000029";
-    let expiry = "0000000063DE5DA7";
-    let transaction_header_blob = format!("{}{}{}{}", &nonce, &energy, &payload_size, &expiry);
-    let mut transaction_header_blob_bytes = hex::decode(transaction_header_blob).unwrap();
-
-    // The full transaction header (sender_address + blob)
-    transaction_header.append(&mut transaction_header_blob_bytes);
-
-    // Transaction payload
     let transaction_kind = "10";
 
     // These values should be encrypted amounts, and not just random bytes like in this test.
+    let sender_address = "3C8N65hBwc2cNtJkGmVyGeWYxhZ6R3X77mLWTwAKsnAnyworTq";
     let mut to_address = sender_address.from_base58check().unwrap().1;
     let mut remaining_amount = hex::decode("00000000000F4240").unwrap();
     let mut transfer_amount = hex::decode("0000C0A0000F4240").unwrap();
@@ -41,7 +26,7 @@ fn main() {
     transaction_payload.append(&mut proofs_size);
 
     let mut command_data = path::generate_key_derivation_path();
-    command_data.append(&mut transaction_header);
+    command_data.append(&mut account_transaction_header::generate_account_transaction_header());
     command_data.append(&mut transaction_payload);
 
     println!("{}", command_data.len());

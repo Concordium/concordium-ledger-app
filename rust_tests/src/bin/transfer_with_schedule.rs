@@ -1,3 +1,4 @@
+mod account_transaction_header;
 mod path;
 
 use base58check::*;
@@ -5,23 +6,10 @@ use hex;
 use ledger::{ApduCommand, LedgerApp};
 
 fn main() {
-    // Base58 part of header, so we can't just use hex and map to bytes.
-    let sender_address = "3C8N65hBwc2cNtJkGmVyGeWYxhZ6R3X77mLWTwAKsnAnyworTq";
-    let mut transaction_header = sender_address.from_base58check().unwrap().1;
-
-    // Hex part of header.
-    let nonce = "000000000000000A";
-    let energy = "0000000000000064";
-    let payload_size = "00000029";
-    let expiry = "0000000063DE5DA7";
-    let transaction_header_blob = format!("{}{}{}{}", &nonce, &energy, &payload_size, &expiry);
-    let mut transaction_header_blob_bytes = hex::decode(transaction_header_blob).unwrap();
-
-    // The full transaction header (sender_address + blob)
-    transaction_header.append(&mut transaction_header_blob_bytes);
-
     // Transaction kind is 19 -> 13 in hexadecimal.
     let mut transaction_kind = hex::decode("13").unwrap();
+
+    let sender_address = "3C8N65hBwc2cNtJkGmVyGeWYxhZ6R3X77mLWTwAKsnAnyworTq";
     let mut receiver_address = sender_address.from_base58check().unwrap().1;
 
     // For scheduled amounts we have to split the transaction into multiple packages, as we can
@@ -32,7 +20,7 @@ fn main() {
     // let initial_command_data = format!("{}{}{}{}{}", &path_prefix, &number_of_scheduled_amounts, &transaction_header, &transaction_kind, &to_address);
 
     let mut initial_command_data = path::generate_key_derivation_path();
-    initial_command_data.append(&mut transaction_header);
+    initial_command_data.append(&mut account_transaction_header::generate_account_transaction_header());
     initial_command_data.append(&mut transaction_kind);
     initial_command_data.append(&mut receiver_address);
     initial_command_data.append(&mut number_of_scheduled_amounts);
@@ -54,7 +42,7 @@ fn main() {
     println!("The final result received contains the signature.");
     for i in 1..4 {
         let mut scheduled_timestamp = hex::decode("FFFFFFFFFFFFFFFF").unwrap();
-        let mut amount = hex::decode("FFFFFFFFFFFFFFFF").unwrap();
+        let mut amount = hex::decode("000000FFDFFFFFFF").unwrap();
 
         command_data.append(&mut scheduled_timestamp);
         command_data.append(&mut amount);
