@@ -163,6 +163,55 @@ UX_FLOW(ux_sign_credential_deployment,
     &ux_sign_credential_deployment_2_step
 );
 
+
+UX_STEP_CB(
+    ux_sign_credential_update_id_0_step,
+    bn_paging,
+    sendSuccessNoIdle(),
+    {
+      .title = "Remove CredId",
+      .text = (char *) global.signCredentialDeploymentContext.credentialId
+    });
+UX_FLOW(ux_sign_credential_update_id,
+    &ux_sign_credential_update_id_0_step
+);
+
+
+/*
+ * The UI flow for the final part of the update credential, which displays
+ * the threshold and allows the user to either sign or decline.
+ */
+UX_STEP_NOCB(
+    ux_sign_credential_update_threshold_0_step,
+    bn_paging,
+    {
+      .title = "Threshold",
+      .text = (char *) global.signCredentialDeploymentContext.threshold
+    });
+UX_STEP_CB(
+    ux_sign_credential_update_threshold_1_step,
+    pnn,
+    buildAndSignTransactionHash(),
+    {
+      &C_icon_validate_14,
+      "Sign",
+      "transaction"
+    });
+UX_STEP_CB(
+    ux_sign_credential_update_threshold_2_step,
+    pnn,
+    declineToSignTransaction(),
+    {
+      &C_icon_crossmark,
+      "Decline to",
+      "sign transaction"
+    });
+UX_FLOW(ux_sign_credential_update_threshold,
+    &ux_sign_credential_update_threshold_0_step,
+    &ux_sign_credential_update_threshold_1_step,
+    &ux_sign_credential_update_threshold_2_step
+);
+
 void processNextVerificationKey() {
     if (ctx->numberOfVerificationKeys == 0) {
         // TODO Update state here. That is why there are two branches here that currently do the same.
@@ -215,11 +264,75 @@ void parseVerificationKeysLength(uint8_t *dataBuffer) {
 #define P1_PROOFS                   0x08    // Sent for the packets containing proof bytes.
 #define P1_NEW_OR_EXISTING          0x09
 
+#define P2_CREDENTIAL_INITIAL       0x00
+#define P2_CREDENTIAL_CREDENTIAL    0x01
+#define P2_CREDENTIAL_ID_COUNT      0x02
+#define P2_CREDENTIAL_ID            0x03
+#define P2_THRESHOLD                0x04
+
+void handleSignUpdateCredential(uint8_t *dataBuffer, uint8_t p1, uint8_t p2, volatile unsigned int *flags) {
+    if (p2 == P2_CREDENTIAL_INITIAL) {
+        int bytesRead = parseKeyDerivationPath(dataBuffer);
+        dataBuffer += bytesRead;
+
+        cx_sha256_init(&tx_state->hash);
+        tx_state->initialized = true;
+
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, ACCOUNT_TRANSACTION_HEADER_LENGTH + 1, NULL, 0);
+        dataBuffer += ACCOUNT_TRANSACTION_HEADER_LENGTH + 1;
+
+        ctx->credentialDeploymentCount = dataBuffer[0];
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 1, NULL, 0);
+        if (ctx->credentialDeploymentCount == 0) {
+            ctx->updateCredentialState = TX_UPDATE_CREDENTIAL_ID_COUNT;
+        } else {
+            ctx->updateCredentialState = TX_UPDATE_CREDENTIAL_CREDENTIAL;
+        }
+
+        ux_flow_init(0, ux_credential_deployment_initial_flow, NULL);
+        *flags |= IO_ASYNCH_REPLY;
+    } else if (p2 == P2_CREDENTIAL_CREDENTIAL) {
+        // TODO Forward calls to the method below
+        
+    } else if (p2 == P2_CREDENTIAL_ID_COUNT) {
+        ctx->credentialIdCount = dataBuffer[0];
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 1, NULL, 0);
+
+        if (ctx->credentialIdCount == 0) {
+            ctx->updateCredentialState = TX_UPDATE_CREDENTIAL_THRESHOLD;
+        } else {
+            ctx->updateCredentialState = TX_UPDATE_CREDENTIAL_ID;
+        }
+        sendSuccessNoIdle();
+    } else if (p2 == P2_CREDENTIAL_ID) {
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 48, NULL, 0);
+        toHex(dataBuffer, 48, ctx->credentialId);
+
+        ctx->credentialIdCount = ctx->credentialIdCount - 1;
+        if (ctx->credentialIdCount == 0) {
+            ctx->updateCredentialState = TX_UPDATE_CREDENTIAL_THRESHOLD;
+        }
+        
+        ux_flow_init(0, ux_sign_credential_update_id, NULL);
+        *flags |= IO_ASYNCH_REPLY;
+    } else if (p2 == P2_THRESHOLD) {
+        uint8_t threshold = dataBuffer[0];
+        bin2dec(ctx->threshold, threshold);
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 1, NULL, 0);
+
+        ux_flow_init(0, ux_sign_credential_update_threshold, NULL);
+        *flags |= IO_ASYNCH_REPLY;
+    } else {
+        THROW(SW_INVALID_PARAM);
+    }
+}
+
 // TODO Add improved state checking to disallow a computer stepping outside of the protocol.
 void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, volatile unsigned int *flags) {
     if (p1 != P1_INITIAL_PACKET && tx_state->initialized == false) {
         THROW(SW_INVALID_STATE);
     }
+
 
     if (p1 == P1_INITIAL_PACKET) {
         int bytesRead = parseKeyDerivationPath(dataBuffer);

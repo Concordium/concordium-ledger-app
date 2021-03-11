@@ -94,6 +94,7 @@ tx_state_t global_tx_state;
 #define INS_UPDATE_ELECTION_DIFFICULTY  0x26
 
 #define INS_SIGN_CHALLENGE              0x30
+#define INS_SIGN_UPDATE_CREDENTIAL      0x31
 
 // Main entry of application that listens for APDU commands that will be received from the
 // computer. The APDU commands control what flow is activated, i.e. which control flow is initiated.
@@ -193,6 +194,9 @@ static void concordium_main(void) {
                         break;
                     case INS_UPDATE_BAKER_RESTAKE_EARNINGS:
                         handleSignUpdateBakerRestakeEarnings(G_io_apdu_buffer + OFFSET_CDATA, &flags);
+                        break;
+                    case INS_SIGN_UPDATE_CREDENTIAL:
+                        handleSignUpdateCredential(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_P1], G_io_apdu_buffer[OFFSET_P2], &flags);
                         break;
                     default:
                         THROW(0x6D00);

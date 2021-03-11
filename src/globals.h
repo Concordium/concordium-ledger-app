@@ -75,6 +75,14 @@ typedef enum {
     ADD_BAKER_PROOFS_AMOUNT_RESTAKE
 } addBakerState_t;
 
+typedef enum {
+    TX_UPDATE_CREDENTIAL_INITIAL,
+    TX_UPDATE_CREDENTIAL_CREDENTIAL,
+    TX_UPDATE_CREDENTIAL_ID_COUNT,
+    TX_UPDATE_CREDENTIAL_ID,
+    TX_UPDATE_CREDENTIAL_THRESHOLD
+} updateCredentialState_t;
+
 typedef struct {
     uint8_t identity;
     uint8_t accountIndex;
@@ -121,6 +129,13 @@ typedef struct {
 typedef struct {
     uint8_t type;
     uint8_t numberOfVerificationKeys;
+
+    uint8_t credentialDeploymentCount;
+    uint8_t credentialIdCount;
+    char credentialId[97];
+    uint8_t threshold[4];
+    updateCredentialState_t updateCredentialState;
+
 
     char accountVerificationKey[65];
 
