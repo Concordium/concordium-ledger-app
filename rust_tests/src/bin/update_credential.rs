@@ -5,7 +5,7 @@ use hex;
 use ledger::{ApduCommand, LedgerApp};
 
 fn main() {
-    let mut transaction_kind = hex::decode("32").unwrap();
+    let mut transaction_kind = hex::decode("14").unwrap();
 
     // Initial packet contains the key path, account transaction header, transaction kind
     // and finally the number of credential deployments.

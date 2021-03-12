@@ -278,11 +278,14 @@ void handleSignUpdateCredential(uint8_t *dataBuffer, uint8_t p1, uint8_t p2, vol
         cx_sha256_init(&tx_state->hash);
         tx_state->initialized = true;
 
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, ACCOUNT_TRANSACTION_HEADER_LENGTH + 1, NULL, 0);
-
-        // Validate transaction kind here to ensure it is correct.
-
-        dataBuffer += ACCOUNT_TRANSACTION_HEADER_LENGTH + 1;
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, ACCOUNT_TRANSACTION_HEADER_LENGTH, NULL, 0);
+        dataBuffer += ACCOUNT_TRANSACTION_HEADER_LENGTH;
+        uint8_t transactionKind = dataBuffer[0];
+        if (transactionKind != UPDATE_CREDENTIALS) {
+            THROW(SW_INVALID_TRANSACTION);
+        }
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 1, NULL, 0);
+        dataBuffer += 1;
 
         ctx->credentialDeploymentCount = dataBuffer[0];
         cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 1, NULL, 0);
