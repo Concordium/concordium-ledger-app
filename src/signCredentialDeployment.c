@@ -297,7 +297,7 @@ void handleSignUpdateCredential(uint8_t *dataBuffer, uint8_t p1, uint8_t p2, vol
 
         ux_flow_init(0, ux_credential_deployment_initial_flow, NULL);
         *flags |= IO_ASYNCH_REPLY;
-    } else if (p2 == P2_CREDENTIAL_CREDENTIAL && ctx->updateCredentialState == TX_UPDATE_CREDENTIAL_CREDENTIAL) {
+    } else if (p2 == P2_CREDENTIAL_CREDENTIAL && ctx->updateCredentialState == TX_UPDATE_CREDENTIAL_CREDENTIAL && ctx->credentialDeploymentCount > 0) {
         handleSignCredentialDeployment(dataBuffer, p1, p2, flags);
     } else if (p2 == P2_CREDENTIAL_ID_COUNT && ctx->updateCredentialState == TX_UPDATE_CREDENTIAL_ID_COUNT) {
         ctx->credentialIdCount = dataBuffer[0];
@@ -506,8 +506,12 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, uint8_t p2,
             cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, ctx->proofLength, NULL, 0);
 
             // If an update credential transaction, then update state to next step.
-            if (p2 == P2_CREDENTIAL_CREDENTIAL && ctx->updateCredentialState == TX_UPDATE_CREDENTIAL_CREDENTIAL) {
-                ctx->updateCredentialState = TX_UPDATE_CREDENTIAL_ID_COUNT;
+            if (p2 == P2_CREDENTIAL_CREDENTIAL && ctx->updateCredentialState == TX_UPDATE_CREDENTIAL_CREDENTIAL && ctx->credentialDeploymentCount > 0) {
+                ctx->credentialDeploymentCount -= 1;
+                if (ctx->credentialDeploymentCount == 0) {
+                    ctx->updateCredentialState = TX_UPDATE_CREDENTIAL_ID_COUNT;
+                    ctx->state = 0;
+                }
             }
             sendSuccessNoIdle();
         }
