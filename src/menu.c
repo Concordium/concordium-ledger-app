@@ -25,7 +25,6 @@ UX_FLOW(ux_menu_idle_flow,
 );
 
 void ui_idle(void) {
-    // reserve a display stack slot if none yet
     if (G_ux.stack_count == 0) {
         ux_stack_push();
     }

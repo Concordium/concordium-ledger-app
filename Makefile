@@ -52,6 +52,9 @@ DEFINES += HAVE_IO_USB HAVE_L4_USBLIB IO_USB_MAX_ENDPOINTS=7 IO_HID_EP_LENGTH=64
 # Both nano S and X benefit from the flow.
 DEFINES += HAVE_UX_FLOW
 
+# Use stack canary for development. Will reboot device if a stack overflow is detected.
+DEFINES += HAVE_BOLOS_APP_STACK_CANARY
+
 # Compiler, assembler, and linker
 
 ifneq ($(BOLOS_ENV),)

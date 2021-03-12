@@ -160,8 +160,6 @@ typedef struct {
     char attributeHashDisplay[65];
 
     uint32_t proofLength;
-    uint8_t buffer[255];
-
     uint8_t accountAddress[52];
 
     protocolState_t state;

@@ -8,7 +8,7 @@ use ledger::{ApduCommand, LedgerApp};
 
 fn main() {
 
-    let mut verification_key_list_length = hex::decode("01").unwrap();
+    let verification_key_list_length = hex::decode("01").unwrap();
     let mut verification_key = hex::decode("f78929ec8a9819f6ae2e10e79522b6b311949635fecc3d924d9d1e23f8e9e1c3").unwrap();
 
 
@@ -16,7 +16,6 @@ fn main() {
 
     let mut command_data = Vec::new();
     command_data.append(&mut path_prefix);
-    command_data.append(&mut verification_key_list_length);
 
     // Initial command
     let initial_command = ApduCommand {
@@ -30,6 +29,17 @@ fn main() {
 
     let ledger = LedgerApp::new().unwrap();
     ledger.exchange(initial_command).expect("Credential deployment packet failed.");
+
+    command_data = verification_key_list_length;
+    let verification_key_list_length_command = ApduCommand {
+        cla: 224, // Has to be this value for all commands.
+        ins: 4,   // Credential deployment
+        p1: 10,
+        p2: 0,
+        length: 60,
+        data: command_data
+    };
+    ledger.exchange(verification_key_list_length_command).unwrap();
 
     let mut key_blob = hex::decode("00").unwrap();
     key_blob.append(&mut verification_key);
@@ -131,7 +141,7 @@ fn main() {
 
 
     // Send proof length
-    let proof_length = hex::decode("00000999").unwrap();
+    let proof_length = hex::decode("00000831").unwrap();
     let proof_length_command = ApduCommand {
         cla: 224,
         ins: 4,

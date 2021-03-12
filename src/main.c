@@ -139,7 +139,7 @@ static void concordium_main(void) {
                         handleSignTransferWithSchedule(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_P1], &flags);
                         break;
                     case INS_CREDENTIAL_DEPLOYMENT:
-                        handleSignCredentialDeployment(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_P1], &flags);
+                        handleSignCredentialDeployment(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_P1], G_io_apdu_buffer[OFFSET_P2], &flags);
                         break;
                     case INS_EXPORT_PRIVATE_KEY_SEED:
                         handleExportPrivateKeySeed(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_P1], &flags);

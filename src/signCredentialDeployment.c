@@ -16,6 +16,7 @@ static tx_state_t *tx_state = &global_tx_state;
 void processNextVerificationKey();
 void signCredentialDeployment();
 void declineToSignCredentialDeployment();
+void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, uint8_t p2, volatile unsigned int *flags);
 
 UX_STEP_CB(
     ux_credential_deployment_initial_flow_0_step,
@@ -243,14 +244,9 @@ void parseVerificationKey(uint8_t *buffer) {
     ux_flow_init(0, ux_credential_deployment_verification_key_flow, NULL);
 }
 
-void parseVerificationKeysLength(uint8_t *dataBuffer) {
-    ctx->numberOfVerificationKeys = dataBuffer[0];
-    cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 1, NULL, 0);
-    ux_flow_init(0, ux_credential_deployment_initial_flow, NULL);
-}
-
 // APDU parameters specific to credential deployment transaction (multiple packets protocol).
 #define P1_INITIAL_PACKET           0x00    // Sent for 1st packet of the transfer.
+#define P1_VERIFICATION_KEY_LENGTH  0x0A    // TODO: Move to 0x02
 #define P1_VERIFICATION_KEY         0x01    // Sent for packets containing a verification key.
 #define P1_SIGNATURE_THRESHOLD      0x02    // Sent for the packet containing signature threshold, RegIdCred,
                                             // identity provider identity, anonymity invocation threshold
@@ -271,6 +267,10 @@ void parseVerificationKeysLength(uint8_t *dataBuffer) {
 #define P2_THRESHOLD                0x04
 
 void handleSignUpdateCredential(uint8_t *dataBuffer, uint8_t p1, uint8_t p2, volatile unsigned int *flags) {
+    if (p2 != P2_CREDENTIAL_INITIAL && tx_state->initialized == false) {
+        THROW(SW_INVALID_STATE);
+    }
+
     if (p2 == P2_CREDENTIAL_INITIAL) {
         int bytesRead = parseKeyDerivationPath(dataBuffer);
         dataBuffer += bytesRead;
@@ -279,6 +279,9 @@ void handleSignUpdateCredential(uint8_t *dataBuffer, uint8_t p1, uint8_t p2, vol
         tx_state->initialized = true;
 
         cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, ACCOUNT_TRANSACTION_HEADER_LENGTH + 1, NULL, 0);
+
+        // Validate transaction kind here to ensure it is correct.
+
         dataBuffer += ACCOUNT_TRANSACTION_HEADER_LENGTH + 1;
 
         ctx->credentialDeploymentCount = dataBuffer[0];
@@ -291,10 +294,9 @@ void handleSignUpdateCredential(uint8_t *dataBuffer, uint8_t p1, uint8_t p2, vol
 
         ux_flow_init(0, ux_credential_deployment_initial_flow, NULL);
         *flags |= IO_ASYNCH_REPLY;
-    } else if (p2 == P2_CREDENTIAL_CREDENTIAL) {
-        // TODO Forward calls to the method below
-        
-    } else if (p2 == P2_CREDENTIAL_ID_COUNT) {
+    } else if (p2 == P2_CREDENTIAL_CREDENTIAL && ctx->updateCredentialState == TX_UPDATE_CREDENTIAL_CREDENTIAL) {
+        handleSignCredentialDeployment(dataBuffer, p1, p2, flags);
+    } else if (p2 == P2_CREDENTIAL_ID_COUNT && ctx->updateCredentialState == TX_UPDATE_CREDENTIAL_ID_COUNT) {
         ctx->credentialIdCount = dataBuffer[0];
         cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 1, NULL, 0);
 
@@ -304,18 +306,18 @@ void handleSignUpdateCredential(uint8_t *dataBuffer, uint8_t p1, uint8_t p2, vol
             ctx->updateCredentialState = TX_UPDATE_CREDENTIAL_ID;
         }
         sendSuccessNoIdle();
-    } else if (p2 == P2_CREDENTIAL_ID) {
+    } else if (p2 == P2_CREDENTIAL_ID && ctx->updateCredentialState == TX_UPDATE_CREDENTIAL_ID) {
         cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 48, NULL, 0);
         toHex(dataBuffer, 48, ctx->credentialId);
 
-        ctx->credentialIdCount = ctx->credentialIdCount - 1;
+        ctx->credentialIdCount -= 1;
         if (ctx->credentialIdCount == 0) {
             ctx->updateCredentialState = TX_UPDATE_CREDENTIAL_THRESHOLD;
         }
         
         ux_flow_init(0, ux_sign_credential_update_id, NULL);
         *flags |= IO_ASYNCH_REPLY;
-    } else if (p2 == P2_THRESHOLD) {
+    } else if (p2 == P2_THRESHOLD && ctx->updateCredentialState == TX_UPDATE_CREDENTIAL_THRESHOLD) {
         uint8_t threshold = dataBuffer[0];
         bin2dec(ctx->threshold, threshold);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 1, NULL, 0);
@@ -323,16 +325,15 @@ void handleSignUpdateCredential(uint8_t *dataBuffer, uint8_t p1, uint8_t p2, vol
         ux_flow_init(0, ux_sign_credential_update_threshold, NULL);
         *flags |= IO_ASYNCH_REPLY;
     } else {
-        THROW(SW_INVALID_PARAM);
+        THROW(SW_INVALID_STATE);
     }
 }
 
 // TODO Add improved state checking to disallow a computer stepping outside of the protocol.
-void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, volatile unsigned int *flags) {
+void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, uint8_t p2, volatile unsigned int *flags) {
     if (p1 != P1_INITIAL_PACKET && tx_state->initialized == false) {
         THROW(SW_INVALID_STATE);
     }
-
 
     if (p1 == P1_INITIAL_PACKET) {
         int bytesRead = parseKeyDerivationPath(dataBuffer);
@@ -341,9 +342,14 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, volatile un
         // Initialize values.
         cx_sha256_init(&tx_state->hash);
         tx_state->initialized = true;
-
         ctx->state = 1;
-        parseVerificationKeysLength(dataBuffer);
+
+        ux_flow_init(0, ux_credential_deployment_initial_flow, NULL);
+    } else if (p1 == P1_VERIFICATION_KEY_LENGTH) {
+        ctx->numberOfVerificationKeys = dataBuffer[0];
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 1, NULL, 0);
+        ctx->state = 1;
+        sendSuccessNoIdle();
     } else if (p1 == P1_VERIFICATION_KEY) {
         if (ctx->numberOfVerificationKeys > 0 && ctx->state == TX_VERIFICATION_KEY) {
             if (ctx->numberOfVerificationKeys == 0) {
@@ -491,13 +497,16 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, volatile un
     } else if (p1 == P1_PROOFS) {
         if (ctx->proofLength > MAX_CDATA_LENGTH) {
             cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, MAX_CDATA_LENGTH, NULL, 0);
-            os_memmove(ctx->buffer, dataBuffer, MAX_CDATA_LENGTH);
             ctx->proofLength -= MAX_CDATA_LENGTH;
             sendSuccessNoIdle();
         } else {
             cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, ctx->proofLength, NULL, 0);
-            os_memmove(ctx->buffer, dataBuffer, ctx->proofLength);
-            sendSuccessNoIdle();    
+
+            // If an update credential transaction, then update state to next step.
+            if (p2 == P2_CREDENTIAL_CREDENTIAL && ctx->updateCredentialState == TX_UPDATE_CREDENTIAL_CREDENTIAL) {
+                ctx->updateCredentialState = TX_UPDATE_CREDENTIAL_ID_COUNT;
+            }
+            sendSuccessNoIdle();
         }
     } else if (p1 == P1_NEW_OR_EXISTING) {
         // 0 indicates new, 1 indicates existing
