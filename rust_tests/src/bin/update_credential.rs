@@ -28,7 +28,19 @@ fn main() {
     let ledger = LedgerApp::new().unwrap();
     ledger.exchange(command).unwrap();
 
-    for _i in 0..2 {
+    for i in 0..2 {
+        // Send credential index
+        let command_data = hex::decode(format!("{}{}", 0, i)).unwrap();
+        let credential_index_command = ApduCommand {
+            cla: 224,
+            ins: 49,
+            p1: 0,
+            p2: 1,
+            length: 60,
+            data: command_data
+        };
+        ledger.exchange(credential_index_command).unwrap();
+
         // Send credential deployment.
         let verification_key_list_length = hex::decode("01").unwrap();
         let mut verification_key = hex::decode("f78929ec8a9819f6ae2e10e79522b6b311949635fecc3d924d9d1e23f8e9e1c3").unwrap();
@@ -39,7 +51,7 @@ fn main() {
             cla: 224, // Has to be this value for all commands.
             ins: 49,
             p1: 10,
-            p2: 1,
+            p2: 2,
             length: 60,
             data: command_data
         };
@@ -53,7 +65,7 @@ fn main() {
             cla: 224,
             ins: 49,
             p1: 1,
-            p2: 1,
+            p2: 2,
             length: 0,
             data: key_blob
         };
@@ -75,7 +87,7 @@ fn main() {
             cla: 224,
             ins: 49,
             p1: 2,
-            p2: 1,
+            p2: 2,
             length: 0,
             data: signature_threshold
         };
@@ -90,7 +102,7 @@ fn main() {
             cla: 224,
             ins: 49,
             p1: 3,
-            p2: 1,
+            p2: 2,
             length: 0,
             data: ar_identity
         };
@@ -108,7 +120,7 @@ fn main() {
             cla: 224,
             ins: 49,
             p1: 4,
-            p2: 1,
+            p2: 2,
             length: 0,
             data: valid_to
         };
@@ -125,7 +137,7 @@ fn main() {
             cla: 224,
             ins: 49,
             p1: 5,
-            p2: 1,
+            p2: 2,
             length: 0,
             data: attribute_tag
         };
@@ -137,7 +149,7 @@ fn main() {
             cla: 224,
             ins: 49,
             p1: 6,
-            p2: 1,
+            p2: 2,
             length: 0,
             data: attribute_value
         };
@@ -150,7 +162,7 @@ fn main() {
             cla: 224,
             ins: 49,
             p1: 7,
-            p2: 1,
+            p2: 2,
             length: 0,
             data: proof_length
         };
@@ -165,7 +177,7 @@ fn main() {
                 cla: 224,
                 ins: 49,
                 p1: 8,
-                p2: 1,
+                p2: 2,
                 length: 0,
                 data: proof_input
             };
@@ -187,7 +199,7 @@ fn main() {
         cla: 224,
         ins: 49,
         p1: 0,
-        p2: 2,
+        p2: 3,
         length: command_data.len() as u8,
         data: command_data
     };
@@ -200,7 +212,7 @@ fn main() {
             cla: 224,
             ins: 49,
             p1: 0,
-            p2: 3,
+            p2: 4,
             length: credential_id.len() as u8,
             data: credential_id.to_vec()
         };
@@ -213,7 +225,7 @@ fn main() {
         cla: 224,
         ins: 49,
         p1: 0,
-        p2: 4,
+        p2: 5,
         length: threshold.len() as u8,
         data: threshold
     };

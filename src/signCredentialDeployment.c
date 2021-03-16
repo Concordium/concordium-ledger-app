@@ -260,11 +260,12 @@ void parseVerificationKey(uint8_t *buffer) {
 #define P1_PROOFS                   0x08    // Sent for the packets containing proof bytes.
 #define P1_NEW_OR_EXISTING          0x09
 
-#define P2_CREDENTIAL_INITIAL       0x00
-#define P2_CREDENTIAL_CREDENTIAL    0x01
-#define P2_CREDENTIAL_ID_COUNT      0x02
-#define P2_CREDENTIAL_ID            0x03
-#define P2_THRESHOLD                0x04
+#define P2_CREDENTIAL_INITIAL               0x00
+#define P2_CREDENTIAL_CREDENTIAL_INDEX      0x01
+#define P2_CREDENTIAL_CREDENTIAL            0x02
+#define P2_CREDENTIAL_ID_COUNT              0x03
+#define P2_CREDENTIAL_ID                    0x04
+#define P2_THRESHOLD                        0x05
 
 void handleSignUpdateCredential(uint8_t *dataBuffer, uint8_t p1, uint8_t p2, volatile unsigned int *flags) {
     if (p2 != P2_CREDENTIAL_INITIAL && tx_state->initialized == false) {
@@ -292,11 +293,16 @@ void handleSignUpdateCredential(uint8_t *dataBuffer, uint8_t p1, uint8_t p2, vol
         if (ctx->credentialDeploymentCount == 0) {
             ctx->updateCredentialState = TX_UPDATE_CREDENTIAL_ID_COUNT;
         } else {
-            ctx->updateCredentialState = TX_UPDATE_CREDENTIAL_CREDENTIAL;
+            ctx->updateCredentialState = TX_UPDATE_CREDENTIAL_CREDENTIAL_INDEX;
         }
 
         ux_flow_init(0, ux_credential_deployment_initial_flow, NULL);
         *flags |= IO_ASYNCH_REPLY;
+    } else if (p2 == P2_CREDENTIAL_CREDENTIAL_INDEX && ctx->updateCredentialState == TX_UPDATE_CREDENTIAL_CREDENTIAL_INDEX && ctx->credentialDeploymentCount > 0) {
+        // Add the credential index to the hash
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 1, NULL, 0);
+        ctx->updateCredentialState = TX_UPDATE_CREDENTIAL_CREDENTIAL;
+        sendSuccessNoIdle();
     } else if (p2 == P2_CREDENTIAL_CREDENTIAL && ctx->updateCredentialState == TX_UPDATE_CREDENTIAL_CREDENTIAL && ctx->credentialDeploymentCount > 0) {
         handleSignCredentialDeployment(dataBuffer, p1, p2, flags);
     } else if (p2 == P2_CREDENTIAL_ID_COUNT && ctx->updateCredentialState == TX_UPDATE_CREDENTIAL_ID_COUNT) {
@@ -511,6 +517,8 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, uint8_t p2,
                 if (ctx->credentialDeploymentCount == 0) {
                     ctx->updateCredentialState = TX_UPDATE_CREDENTIAL_ID_COUNT;
                     ctx->state = 0;
+                } else {
+                    ctx->updateCredentialState = TX_UPDATE_CREDENTIAL_CREDENTIAL_INDEX;
                 }
             }
             sendSuccessNoIdle();
