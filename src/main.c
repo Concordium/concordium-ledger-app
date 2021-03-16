@@ -30,7 +30,6 @@
 #include "signPublicInformationForIp.h"
 #include "signTransferToPublic.h"
 #include "signUpdateProtocol.h"
-#include "signChallenge.h"
 #include "signUpdateTransactionFeeDistribution.h"
 #include "signUpdateGasRewards.h"
 #include "signUpdateFoundationAccount.h"
@@ -95,7 +94,6 @@ tx_state_t global_tx_state;
 #define INS_UPDATE_ELECTION_DIFFICULTY  0x26
 #define INS_UPDATE_BAKER_STAKE_THRESHOLD    0x27
 
-#define INS_SIGN_CHALLENGE              0x30
 #define INS_SIGN_UPDATE_CREDENTIAL      0x31
 
 // Main entry of application that listens for APDU commands that will be received from the
@@ -178,9 +176,6 @@ static void concordium_main(void) {
                         break;
                     case INS_UPDATE_MINT_DISTRIBUTION:
                         handleSignUpdateMintDistribution(G_io_apdu_buffer + OFFSET_CDATA, &flags);
-                        break;
-                    case INS_SIGN_CHALLENGE:
-                        handleSignChallenge(G_io_apdu_buffer + OFFSET_CDATA, &flags);
                         break;
                     case INS_UPDATE_ELECTION_DIFFICULTY:
                         handleSignUpdateElectionDifficulty(G_io_apdu_buffer + OFFSET_CDATA, &flags);
