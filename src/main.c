@@ -40,6 +40,7 @@
 #include "signRemoveBaker.h"
 #include "signUpdateBakerStake.h"
 #include "signUpdateBakerRestakeEarnings.h"
+#include "signUpdateBakerStakeThreshold.h"
 #include "ux.h"
 #include <string.h>
 
@@ -92,6 +93,7 @@ tx_state_t global_tx_state;
 #define INS_UPDATE_FOUNDATION_ACCOUNT   0x24
 #define INS_UPDATE_MINT_DISTRIBUTION    0x25
 #define INS_UPDATE_ELECTION_DIFFICULTY  0x26
+#define INS_UPDATE_BAKER_STAKE_THRESHOLD    0x27
 
 #define INS_SIGN_CHALLENGE              0x30
 #define INS_SIGN_UPDATE_CREDENTIAL      0x31
@@ -197,6 +199,9 @@ static void concordium_main(void) {
                         break;
                     case INS_SIGN_UPDATE_CREDENTIAL:
                         handleSignUpdateCredential(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_P1], G_io_apdu_buffer[OFFSET_P2], &flags);
+                        break;
+                    case INS_UPDATE_BAKER_STAKE_THRESHOLD:
+                        handleSignUpdateBakerStakeThreshold(G_io_apdu_buffer + OFFSET_CDATA, &flags);
                         break;
                     default:
                         THROW(0x6D00);

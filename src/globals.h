@@ -176,6 +176,10 @@ typedef struct {
 } signElectionDifficultyContext_t;
 
 typedef struct {
+    uint8_t stakeThreshold[21];
+} signUpdateBakerStakeThresholdContext_t;
+
+typedef struct {
     uint16_t publicKeyListLength;
     uint16_t publicKeyCount;
     uint8_t publicKey[65];
@@ -299,6 +303,7 @@ typedef union {
     signAddBakerContext_t signAddBaker;
     signUpdateBakerStakeContext_t signUpdateBakerStake;
     sigUpdateBakerRestakeEarningsContext_t signUpdateBakerRestakeEarnings;
+    signUpdateBakerStakeThresholdContext_t signUpdateBakerStakeThreshold;
 } instructionContext;
 extern instructionContext global;
 
