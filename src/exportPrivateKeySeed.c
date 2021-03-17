@@ -61,9 +61,9 @@ const char* getPrivateKeyTypeName(uint8_t type) {
 #define NORMAL_ACCOUNTS 0
 #define AR_SUBTREE      1
 
-#define P1_ID_CRED_SEC          0x00    // Get ID_cred_sec private key seed.
-#define P1_PRF_KEY              0x01    // Get PRF key.
-#define P1_AR_DECRYPTION_KEY    0x02    // Get anonymity revocation decryption key.
+#define P1_ID_CRED_SEC          0x00
+#define P1_PRF_KEY              0x01
+#define P1_AR_DECRYPTION_KEY    0x02
 
 void handleExportPrivateKeySeed(uint8_t *dataBuffer, uint8_t p1, volatile unsigned int *flags) {
     os_memmove(ctx->type, "Export ", 7);
