@@ -34,13 +34,15 @@ UX_FLOW(ux_generate_public_flow,
     FLOW_LOOP
 );
 
-// Derive the public-key for the given address, convert it to hex (human readable), and then write it to
-// the APDU buffer to be returned to the computer.
+/**
+ * Derive the public-key for the given path, and then write it to
+ * the APDU buffer to be returned to the caller.
+ */
 void sendPublicKey() {
     uint8_t publicKey[32];
     getPublicKey(publicKey);
 
-    // tx is holding the offset in the buffer we have written to. It is a convention to call this tx for ledger apps.
+    // tx is holding the offset in the buffer we have written to. It is a convention to call this tx for Ledger apps.
     uint8_t tx = 0;
 
     // Write the public-key to the APDU buffer.
@@ -62,16 +64,16 @@ void sendPublicKey() {
     sendSuccess(tx);
 }
 
-// Entry-point from the main class to the handler of public keys.
-void handleGetPublicKey(uint8_t *dataBuffer, uint8_t p1, uint8_t p2, volatile unsigned int *flags) {
-    int bytesRead = parseKeyDerivationPath(dataBuffer);
-    dataBuffer += bytesRead;
+void handleGetPublicKey(uint8_t *cdata, uint8_t p1, uint8_t p2, volatile unsigned int *flags) {
+    int bytesRead = parseKeyDerivationPath(cdata);
+    cdata += bytesRead;
 
-    // If P1 == 02, then the public-key is signed by its corresponding private key, and
-    // appended to the returned public-key.
+    // If P2 == 0x01, then the public-key is signed by its corresponding private key, and
+    // appended to the returned public-key. This is used when it is needed to provide
+    // proof of the knowledge of the corresponding private key.
     ctx->signPublicKey = p2 == 0x01;
 
-    // If P1 == 01, then we skip displaying the key being exported. This is used when it 
+    // If P1 == 0x01, then we skip displaying the key being exported. This is used when it 
     // it is not important for the user to validate the key path, i.e. for governance, 
     // where an unauthorized key will be rejected anyway.
     if (p1 == 0x01) {
