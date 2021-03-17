@@ -133,7 +133,7 @@ static void concordium_main(void) {
                         handleGetPublicKey(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_P1], G_io_apdu_buffer[OFFSET_P2], &flags);
                         break;
                     case INS_SIGN_TRANSFER:
-                        handleSignTransfer(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_LC], &flags);
+                        handleSignTransfer(G_io_apdu_buffer + OFFSET_CDATA, &flags);
                         break;
                     case INS_SIGN_TRANSFER_WITH_SCHEDULE:
                         handleSignTransferWithSchedule(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_P1], &flags);

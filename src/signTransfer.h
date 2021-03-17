@@ -2,8 +2,9 @@
 #include "cx.h"
 #include "globals.h"
 
-void handleSignTransfer(uint8_t *dataBuffer, uint16_t dataLength, volatile unsigned int *flags);
-
-void signTransferHash(uint8_t *transactionHash);
-
-void buildTransferHash(uint8_t *transactionHash, uint8_t *dataBuffer);
+/**
+ * Handles the signing flow, including updating the display, for the 'simple transfer'
+ * account transaction.
+ * @param cdata please see /doc/ins_transfer for details
+ */
+void handleSignTransfer(uint8_t *dataBuffer, volatile unsigned int *flags);

@@ -110,7 +110,6 @@ extern tx_state_t global_tx_state;
 typedef struct {
     unsigned char displayStr[52];
     uint8_t displayAmount[21];
-    tx_state_t tx_state;
 } signTransferContext_t;
 
 typedef struct {
