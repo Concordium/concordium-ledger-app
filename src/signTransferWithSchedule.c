@@ -16,13 +16,6 @@ void processNextScheduledAmount(uint8_t *buffer);
 // UI definitions for displaying the transaction contents of the first packet for verification before continuing
 // to process the scheduled amount pairs that will be received in separate packets.
 UX_STEP_NOCB(
-    ux_scheduled_transfer_initial_flow_0_step,
-    nn,
-    {
-      "Review",
-      "transaction"
-    });
-UX_STEP_NOCB(
     ux_scheduled_transfer_initial_flow_1_step,
     bnnn_paging,
     {
@@ -38,7 +31,7 @@ UX_STEP_VALID(
       "with transaction"
     });
 UX_FLOW(ux_scheduled_transfer_initial_flow,
-    &ux_scheduled_transfer_initial_flow_0_step,
+    &ux_sign_flow_shared_review,
     &ux_scheduled_transfer_initial_flow_1_step,
     &ux_scheduled_transfer_initial_flow_2_step
 );
@@ -77,7 +70,7 @@ void processNextScheduledAmount(uint8_t *buffer) {
     if (ctx->remainingNumberOfScheduledAmounts == 0 && ctx->scheduledAmountsInCurrentPacket == 0) {
         ux_flow_init(0, ux_sign_flow_shared, NULL);
     } else if (ctx->scheduledAmountsInCurrentPacket == 0) {
-        // Current packet has been successfully read, but there are still more data to receive. Ask the computer
+        // Current packet has been successfully read, but there are still more data to receive. Ask the caller
         // for more data.
         sendSuccessNoIdle();
     } else {
@@ -101,71 +94,66 @@ void processNextScheduledAmount(uint8_t *buffer) {
     }
 }
 
-// APDU parameters specific to transfer with schedule transaction (multiple packets protocol).
-#define P1_INITIAL_PACKET           0x00    // Sent for 1st packet of the transfer.
-#define P1_SCHEDULED_TRANSFER_PAIRS 0x01    // Sent for succeeding packets containing (timestamp, amount) pairs.
+#define P1_INITIAL_PACKET           0x00
+#define P1_SCHEDULED_TRANSFER_PAIRS 0x01
 
-void handleSignTransferWithSchedule(uint8_t *dataBuffer, uint8_t p1, volatile unsigned int *flags) {
-    // Send error back to computer if the received APDU parameter is invalid.
-    if (p1 != P1_INITIAL_PACKET && p1 != P1_SCHEDULED_TRANSFER_PAIRS) {
-        THROW(0x6B01);
-    }
-
+void handleSignTransferWithSchedule(uint8_t *cdata, uint8_t p1, volatile unsigned int *flags) {
     // Ensure that the received transaction is well-formed, i.e. that we only receive an initial packet once,
-    // and it was the first packet received. This presents an attack where two transactions are concatenated.
+    // and it was the first packet received. This prevents an attack where two transactions are concatenated.
     if (p1 == P1_INITIAL_PACKET) {
         if (tx_state->initialized) {
-            THROW(0x6B01);
+            THROW(SW_INVALID_STATE);
         }
         tx_state->initialized = true;
     } else {
         if (!tx_state->initialized) {
-            THROW(0x6B01);
+            THROW(SW_INVALID_STATE);
         }
     }
 
     if (p1 == P1_INITIAL_PACKET) {
-        int bytesRead = parseKeyDerivationPath(dataBuffer);
-        dataBuffer += bytesRead;
+        int bytesRead = parseKeyDerivationPath(cdata);
+        cdata += bytesRead;
 
         // Initialize the transaction hash object.
         cx_sha256_init(&tx_state->hash);
 
         // Add transaction header to the hash.
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 60, NULL, 0);
-        dataBuffer += 60;
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, ACCOUNT_TRANSACTION_HEADER_LENGTH, NULL, 0);
+        cdata += ACCOUNT_TRANSACTION_HEADER_LENGTH;
 
         // Transaction payload/body comes right after the transaction header. First byte determines the transaction kind.
-        uint8_t transactionKind[1];
-        os_memmove(transactionKind, dataBuffer, 1);
-        dataBuffer += 1;
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, transactionKind, 1, NULL, 0);
+        uint8_t transactionKind = cdata[0];
+        if (transactionKind != 19) {
+            THROW(SW_INVALID_TRANSACTION);
+        }
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 1, NULL, 0);
+        cdata += 1;
 
         // Extract the destination address and add to hash.
         uint8_t toAddress[32];
-        os_memmove(toAddress, dataBuffer, 32);
-        dataBuffer += 32;
+        os_memmove(toAddress, cdata, 32);
+        cdata += 32;
         cx_hash((cx_hash_t *) &tx_state->hash, 0, toAddress, 32, NULL, 0);
 
         // Used in display of recipient address.
         size_t outputSize = sizeof(ctx->displayStr);
         if (base58check_encode(toAddress, sizeof(toAddress), ctx->displayStr, &outputSize) != 0) {
-            THROW(0x6B01);  // The received address bytes are not valid a valid base58 encoding.
+            THROW(SW_INVALID_TRANSACTION);
         }
         ctx->displayStr[50] = '\0';
 
-        uint8_t numberOfScheduledAmountsArray[1];
-        os_memmove(numberOfScheduledAmountsArray, dataBuffer, 1);
-        ctx->remainingNumberOfScheduledAmounts = numberOfScheduledAmountsArray[0];
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, numberOfScheduledAmountsArray, 1, NULL, 0);
-        dataBuffer += 1;
+        // Store the number of scheduled amounts we are going to receive next.
+        ctx->remainingNumberOfScheduledAmounts = cdata[0];
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 1, NULL, 0);
+        cdata += 1;
 
         // Display the transaction information to the user (recipient address and amount to be sent).
         ux_flow_init(0, ux_scheduled_transfer_initial_flow, NULL);
 
         // Tell the main process to wait for a button press.
         *flags |= IO_ASYNCH_REPLY;
-    } else {
+    } else if (p1 == P1_SCHEDULED_TRANSFER_PAIRS) {
         // Load the scheduled transfer information.
         // First 8 bytes is the timestamp, the following 8 bytes is the amount.
         // We have room for 255 bytes, so 240 = 15 * 16, i.e. 15 pairs in each packet. Determine how many pairs are
@@ -182,10 +170,12 @@ void handleSignTransferWithSchedule(uint8_t *dataBuffer, uint8_t p1, volatile un
         // Reset pointer keeping track of where we are in the current packet being processed.
         ctx->pos = 0;
 
-        os_memmove(ctx->buffer, dataBuffer, ctx->scheduledAmountsInCurrentPacket * 16);
+        os_memmove(ctx->buffer, cdata, ctx->scheduledAmountsInCurrentPacket * 16);
         processNextScheduledAmount(ctx->buffer);
 
         // Tell the main process to wait for a button press.
         *flags |= IO_ASYNCH_REPLY;
+    } else {
+        THROW(SW_INVALID_PARAM);
     }
 }
