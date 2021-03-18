@@ -1,10 +1,5 @@
 #include <os.h>
-#include <os_io_seproxyhal.h>
-#include "cx.h"
-#include <stdint.h>
-#include "menu.h"
 #include "util.h"
-#include <string.h>
 #include "sign.h"
 
 static signTransactionDistributionFeeContext_t *ctx = &global.signTransactionDistributionFeeContext;
@@ -46,8 +41,8 @@ void handleSignUpdateTransactionFeeDistribution(uint8_t *cdata, volatile unsigne
     uint8_t updateType = cdata[0];
     cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 1, NULL, 0);
     cdata += 1;
-    if (updateType != 7) {
-        THROW(0x6B01);
+    if (updateType != UPDATE_TYPE_TRANSACTION_FEE_DISTRIBUTION) {
+        THROW(SW_INVALID_TRANSACTION);
     }
 
     // Baker fee is first 4 bytes

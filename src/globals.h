@@ -33,6 +33,10 @@ typedef enum {
     UPDATE_CREDENTIALS = 20
 } transactionKind_e;
 
+typedef enum {
+    UPDATE_TYPE_TRANSACTION_FEE_DISTRIBUTION = 7
+} updateType_e;
+
 // To add support for additional access structures with the update authorizations
 // transaction, you simply have to add a new item to the enum priot to the 'END' entry,
 // and update the enum -> string method in signUpdateAuthorizations.c.
