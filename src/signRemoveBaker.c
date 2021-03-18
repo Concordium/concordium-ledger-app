@@ -1,12 +1,5 @@
 #include <os.h>
-#include <os_io_seproxyhal.h>
-#include "cx.h"
-#include <stdint.h>
-#include "menu.h"
 #include "util.h"
-#include <string.h>
-#include "base58check.h"
-#include <stdio.h>
 #include "sign.h"
 
 static tx_state_t *tx_state = &global_tx_state;
