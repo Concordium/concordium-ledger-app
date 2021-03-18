@@ -1,7 +1,4 @@
-#include "menu.h"
-#include "os.h"
 #include "ux.h"
-#include "globals.h"
 
 UX_STEP_NOCB(
     ux_menu_idle_flow_1_step,
@@ -10,7 +7,7 @@ UX_STEP_NOCB(
       "Concordium",
       "is ready",
     });
-UX_STEP_VALID(
+UX_STEP_CB(
     ux_menu_idle_flow_2_step,
     pb,
     os_sched_exit(-1),
