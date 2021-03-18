@@ -1,24 +1,10 @@
 #include <os.h>
-#include <os_io_seproxyhal.h>
-#include "cx.h"
-#include <stdint.h>
-#include "menu.h"
 #include "util.h"
-#include <string.h>
-#include "base58check.h"
-#include <stdio.h>
 #include "sign.h"
 
 static sigUpdateBakerRestakeEarningsContext_t *ctx = &global.signUpdateBakerRestakeEarnings;
 static tx_state_t *tx_state = &global_tx_state;
 
-UX_STEP_NOCB(
-    ux_sign_update_baker_restake_earnings_0_step,
-    nn,
-    {
-      "Review",
-      "transaction"
-    });
 UX_STEP_NOCB(
     ux_sign_update_baker_restake_earnings_1_step,
     bn_paging,
@@ -26,29 +12,11 @@ UX_STEP_NOCB(
         .title = "Restake earnings",
         .text = (char *) global.signUpdateBakerRestakeEarnings.restake
     });
-UX_STEP_CB(
-    ux_sign_update_baker_restake_earnings_2_step,
-    pnn,
-    buildAndSignTransactionHash(),
-    {
-      &C_icon_validate_14,
-      "Sign",
-      "transaction"
-    });
-UX_STEP_CB(
-    ux_sign_update_baker_restake_earnings_3_step,
-    pnn,
-    declineToSignTransaction(),
-    {
-      &C_icon_crossmark,
-      "Decline to",
-      "sign transaction"
-    });
 UX_FLOW(ux_sign_update_baker_restake_earnings,
-    &ux_sign_update_baker_restake_earnings_0_step,
+    &ux_sign_flow_shared_review,
     &ux_sign_update_baker_restake_earnings_1_step,
-    &ux_sign_update_baker_restake_earnings_2_step,
-    &ux_sign_update_baker_restake_earnings_3_step
+    &ux_sign_flow_shared_sign,
+    &ux_sign_flow_shared_decline
 );
 
 void handleSignUpdateBakerRestakeEarnings(uint8_t *dataBuffer, volatile unsigned int *flags) {
