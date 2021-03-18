@@ -8,7 +8,7 @@ use ledger::{ApduCommand, LedgerApp};
 /// Therefore it is preferred if they are restricted to the ASCII character set in the UI.
 fn main() {
     let mut key_derivation_path = path::generate_key_derivation_path();
-    let mut update_type = hex::decode("03").unwrap();
+    let mut update_type = hex::decode("01").unwrap();
 
     let message_text = "This is a brief message about the update.";
     let message_length = message_text.as_bytes().len() as u64;

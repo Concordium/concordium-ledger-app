@@ -34,7 +34,16 @@ typedef enum {
 } transactionKind_e;
 
 typedef enum {
-    UPDATE_TYPE_TRANSACTION_FEE_DISTRIBUTION = 7
+    UPDATE_TYPE_AUTHORIZATION = 0,
+    UPDATE_TYPE_PROTOCOL = 1,
+    UPDATE_TYPE_ELECTION_DIFFICULTY = 2,
+    UPDATE_TYPE_EURO_PER_ENERGY = 3,
+    UPDATE_TYPE_MICRO_GTU_PER_EURO = 4,
+    UPDATE_TYPE_FOUNDATION_ACCOUNT = 5,
+    UPDATE_TYPE_MINT_DISTRIBUTION = 6,
+    UPDATE_TYPE_TRANSACTION_FEE_DISTRIBUTION = 7,
+    UPDATE_TYPE_GAS_REWARDS = 8,
+    UPDATE_TYPE_BAKER_STAKE_THRESHOLD = 9
 } updateType_e;
 
 // To add support for additional access structures with the update authorizations
@@ -49,6 +58,17 @@ typedef enum {
     MICRO_GTU_PER_EURO,
     END
 } authorizationType_e;
+
+/**
+ * Used for controlling the state of an 'update protocol' signing flow,
+ * so that the caller cannot step outside the correct sequence of events.
+ */ 
+typedef enum {
+    TX_UPDATE_PROTOCOL_TEXT_LENGTH,
+    TX_UPDATE_PROTOCOL_TEXT,
+    TX_UPDATE_PROTOCOL_SPECIFICATION_HASH,
+    TX_UPDATE_PROTOCOL_AUXILIARY_DATA
+} updateProtocolState_t;
 
 typedef enum {
     MESSAGE,
@@ -241,6 +261,7 @@ typedef struct {
     uint64_t textLength;
     uint8_t buffer[255];
     textState_t textState;
+    updateProtocolState_t state;
     char specificationHash[65];
 } signUpdateProtocolContext_t;
 

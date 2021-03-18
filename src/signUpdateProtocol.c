@@ -1,10 +1,5 @@
 #include <os.h>
-#include <os_io_seproxyhal.h>
-#include "cx.h"
-#include <stdint.h>
-#include "menu.h"
 #include "util.h"
-#include <string.h>
 #include "sign.h"
 
 static signUpdateProtocolContext_t *ctx = &global.signUpdateProtocolContext;
@@ -12,13 +7,6 @@ static tx_state_t *tx_state = &global_tx_state;
 
 void handleText();
 
-UX_STEP_NOCB(
-    ux_sign_protocol_update_0_step,
-    nn,
-    {
-      "Review",
-      "transaction"
-    });
 UX_STEP_CB(
     ux_sign_protocol_update_1_step,
     bn_paging,
@@ -28,7 +16,7 @@ UX_STEP_CB(
         (char *) global.signUpdateProtocolContext.buffer
     });
 UX_FLOW(ux_sign_protocol_update,
-    &ux_sign_protocol_update_0_step,
+    &ux_sign_flow_shared_review,
     &ux_sign_protocol_update_1_step
 );
 
@@ -56,7 +44,7 @@ UX_FLOW(ux_sign_protocol_update_specification_hash,
     &ux_sign_protocol_update_specification_hash_0_step
 );
 
-void handleText() {
+void handleText(void) {
     if (ctx->textLength == 0) {
         ctx->textState += 1;
     }
@@ -64,48 +52,48 @@ void handleText() {
 }
 
 #define P1_INITIAL              0x00
-#define P1_TEXT_LENGTH          0x01        // Used for both the message text and the specificaiton URL.
+#define P1_TEXT_LENGTH          0x01        // Used for both the message text and the specification URL.
 #define P1_TEXT                 0x02        // Used for both the message text and the specification URL.
-#define P1_SPECIFICATION_HASH   0x03  
+#define P1_SPECIFICATION_HASH   0x03
 #define P1_AUXILIARY_DATA       0x04
 
-void handleSignUpdateProtocol(uint8_t *dataBuffer, uint8_t p1, uint8_t dataLength, volatile unsigned int *flags) {
+void handleSignUpdateProtocol(uint8_t *cdata, uint8_t p1, uint8_t dataLength, volatile unsigned int *flags) {
     if (p1 == P1_INITIAL) {
-        int bytesRead = parseKeyDerivationPath(dataBuffer);
-        dataBuffer += bytesRead;
+        int bytesRead = parseKeyDerivationPath(cdata);
+        cdata += bytesRead;
 
         cx_sha256_init(&tx_state->hash);
-
-        // Hash update header and update kind.
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, UPDATE_HEADER_LENGTH + 1, NULL, 0);
-        dataBuffer += UPDATE_HEADER_LENGTH + 1;
+        tx_state->initialized = true;
+        cdata += hashUpdateHeaderAndType(cdata, UPDATE_TYPE_PROTOCOL);
 
         // Read payload length.
-        ctx->payloadLength = U8BE(dataBuffer, 0);
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 8, NULL, 0);
-        dataBuffer += 8;
+        ctx->payloadLength = U8BE(cdata, 0);
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 8, NULL, 0);
+        cdata += 8;
 
         ctx->textState = MESSAGE;
+        ctx->state = TX_UPDATE_PROTOCOL_TEXT_LENGTH;
 
         sendSuccessNoIdle();
-    } else if (p1 == P1_TEXT_LENGTH) {
+    } else if (p1 == P1_TEXT_LENGTH && ctx->state == TX_UPDATE_PROTOCOL_TEXT_LENGTH) {
         
         // Read message text length
-        ctx->textLength = U8BE(dataBuffer, 0);
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 8, NULL, 0);
-        dataBuffer += 8;
+        ctx->textLength = U8BE(cdata, 0);
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 8, NULL, 0);
+        cdata += 8;
 
         // Update payload length to ensure we end up with the length of the auxiliary data.
         ctx->payloadLength -= 8;
 
+        ctx->state = TX_UPDATE_PROTOCOL_TEXT;
         sendSuccessNoIdle();
-    } else if (p1 == P1_TEXT) {
+    } else if (p1 == P1_TEXT && ctx->state == TX_UPDATE_PROTOCOL_TEXT) {
         if (ctx->textLength <= 0) {
             THROW(SW_INVALID_STATE);
         }
 
-        os_memmove(ctx->buffer, dataBuffer, dataLength);
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, dataLength, NULL, 0);
+        os_memmove(ctx->buffer, cdata, dataLength);
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, dataLength, NULL, 0);
         ctx->textLength -= dataLength;
         ctx->payloadLength -= dataLength;
 
@@ -114,27 +102,30 @@ void handleSignUpdateProtocol(uint8_t *dataBuffer, uint8_t p1, uint8_t dataLengt
         }
 
         switch (ctx->textState) {
-            case MESSAGE: 
+            case MESSAGE:
+                ctx->state = TX_UPDATE_PROTOCOL_TEXT_LENGTH;
                 ux_flow_init(0, ux_sign_protocol_update, NULL);
                 break;
             case SPECIFICATION_URL: 
+                ctx->state = TX_UPDATE_PROTOCOL_SPECIFICATION_HASH;
                 ux_flow_init(0, ux_sign_protocol_update_url, NULL);
                 break;
-            default: 
+            default:
                 THROW(SW_INVALID_STATE);
                 break;
         }
 
         *flags |= IO_ASYNCH_REPLY;
-    } else if (p1 == P1_SPECIFICATION_HASH) {
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 32, NULL, 0);
-        toHex(dataBuffer, 32, ctx->specificationHash);
+    } else if (p1 == P1_SPECIFICATION_HASH && ctx->state == TX_UPDATE_PROTOCOL_SPECIFICATION_HASH) {
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 32, NULL, 0);
+        toHex(cdata, 32, ctx->specificationHash);
         ctx->payloadLength -= 32;
 
+        ctx->state = TX_UPDATE_PROTOCOL_AUXILIARY_DATA;
         ux_flow_init(0, ux_sign_protocol_update_specification_hash, NULL);
         *flags |= IO_ASYNCH_REPLY;
-    } else if (p1 == P1_AUXILIARY_DATA) {
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, dataLength, NULL, 0);
+    } else if (p1 == P1_AUXILIARY_DATA && ctx->state == TX_UPDATE_PROTOCOL_AUXILIARY_DATA) {
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, dataLength, NULL, 0);
         ctx->payloadLength -= dataLength;
 
         if (ctx->payloadLength == 0) {

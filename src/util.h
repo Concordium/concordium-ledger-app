@@ -25,3 +25,10 @@ void toHex(uint8_t *byteArray, const uint64_t len, char *asHex);
 int parseKeyDerivationPath(uint8_t *dataBuffer);
 
 void signTransactionHash(uint8_t *transactionHash, uint8_t *signedHash);
+
+/**
+ * Adds the update header and update type to the current transaction hash.
+ * @param cdata the incoming command data pointing to the start of the update header
+ * @param validUpdateType the expected update type used to validate that the transaction is valid
+ */
+int hashUpdateHeaderAndType(uint8_t *cdata, uint8_t validUpdateType);

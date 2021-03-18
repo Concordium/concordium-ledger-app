@@ -6,6 +6,7 @@
 #include "util.h"
 #include "menu.h"
 
+static tx_state_t *tx_state = &global_tx_state;
 static keyDerivationPath_t *keyPath = &path;
 static const uint32_t HARDENED_OFFSET = 0x80000000;
 
@@ -43,6 +44,25 @@ void getIdentityAccountDisplay(uint8_t *dst) {
     offset = offset + 1;
     offset = offset + bin2dec(dst + offset, accountIndex);
     os_memmove(dst + offset, "\0", 1);
+}
+
+/**
+ * Adds the update header and the update type to the hash. The update
+ * type is verified to have the supplied value to prevent processing
+ * invalid transactions.
+ */
+int hashUpdateHeaderAndType(uint8_t *cdata, uint8_t validUpdateType) {
+    cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, UPDATE_HEADER_LENGTH, NULL, 0);
+    cdata += UPDATE_HEADER_LENGTH;
+
+    uint8_t updateType = cdata[0];
+    if (updateType != validUpdateType) {
+        THROW(SW_INVALID_TRANSACTION);
+    }
+    cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 1, NULL, 0);
+    cdata += 1;
+
+    return UPDATE_HEADER_LENGTH + 1;
 }
 
 // Sends back the user rejection error code 0x6985, which indicates that
