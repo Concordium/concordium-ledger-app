@@ -1,12 +1,5 @@
 #include <os.h>
-#include <os_io_seproxyhal.h>
-#include "cx.h"
-#include <stdint.h>
-#include "menu.h"
 #include "util.h"
-#include <string.h>
-#include "base58check.h"
-#include <stdio.h>
 #include "sign.h"
 
 static signTransferToPublic_t *ctx = &global.signTransferToPublic;
@@ -61,7 +54,7 @@ void handleSignTransferToPublic(uint8_t *cdata, uint8_t p1, uint8_t dataLength, 
 
         // Parse size of incoming proofs.
         ctx->proofSize = U2BE(cdata, 0);
-        
+
         ux_flow_init(0, ux_sign_transfer_to_public, NULL);
         *flags |= IO_ASYNCH_REPLY;
     } else if (p1 == P1_PROOF && ctx->state == TX_TRANSFER_TO_PUBLIC_PROOF) {
