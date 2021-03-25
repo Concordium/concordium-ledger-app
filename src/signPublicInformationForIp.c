@@ -1,9 +1,5 @@
 #include <os.h>
-#include <os_io_seproxyhal.h>
-#include "cx.h"
-#include <stdint.h>
 #include "util.h"
-#include <stdio.h>
 #include "sign.h"
 
 static signPublicInformationForIp_t *ctx = &global.signPublicInformationForIp;

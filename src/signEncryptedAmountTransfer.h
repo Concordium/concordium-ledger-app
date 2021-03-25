@@ -1,3 +1,11 @@
-#include <stdint.h>
+#ifndef _CONCORDIUM_APP_ACCOUNT_ENCRYPTED_AMOUNT_TRANSFER_H_
+#define _CONCORDIUM_APP_ACCOUNT_ENCRYPTED_AMOUNT_TRANSFER_H_
 
-void handleSignEncryptedAmountTransfer(uint8_t *dataBuffer, uint8_t p1, uint8_t dataLength, volatile unsigned int *flags);
+/**
+ * Handles the signing flow, including updating the display, for the 'encrypted amount transfer'
+ * account transaction.
+ * @param cdata please see /doc/ins_encrypted_amount_transfer.md
+ */
+void handleSignEncryptedAmountTransfer(uint8_t *cdata, uint8_t p1, uint8_t dataLength, volatile unsigned int *flags);
+
+#endif

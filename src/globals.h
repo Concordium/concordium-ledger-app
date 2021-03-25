@@ -118,6 +118,11 @@ typedef enum {
     TX_TRANSFER_TO_PUBLIC_PROOF
 } transferToPublicState_t;
 
+typedef enum {
+    TX_ENCRYPTED_AMOUNT_TRANSFER_INITIAL,
+    TX_ENCRYPTED_AMOUNT_TRANSFER_PROOFS
+} encryptedAmountTransferState_t;
+
 typedef struct {
     uint8_t identity;
     uint8_t accountIndex;
@@ -235,6 +240,7 @@ typedef struct {
 typedef struct { 
     uint8_t to[52];
     uint16_t proofSize;
+    encryptedAmountTransferState_t state;
 } signEncryptedAmountToTransfer_t;
 
 typedef struct {
