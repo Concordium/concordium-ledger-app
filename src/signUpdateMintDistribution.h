@@ -1,1 +1,11 @@
-void handleSignUpdateMintDistribution(uint8_t *dataBuffer, volatile unsigned int *flags);
+#ifndef _CONCORDIUM_APP_UPDATE_MINT_DISTRIBUTION_H_
+#define _CONCORDIUM_APP_UPDATE_MINT_DISTRIBUTION_H_
+
+/**
+ * Handles the signing flow, including updating the display, for the 'update mint distribution'
+ * update instruction.
+ * @param cdata please see /doc/ins_update_mint_distribution.md for details
+ */
+void handleSignUpdateMintDistribution(uint8_t *cdata, volatile unsigned int *flags);
+
+#endif

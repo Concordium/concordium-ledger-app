@@ -6,6 +6,6 @@
  * update instruction.
  * @param cdata please see /doc/ins_update_protocol.md for details
  */
-void handleSignUpdateProtocol(uint8_t *dataBuffer, uint8_t p1, uint8_t dataLength, volatile unsigned int *flags);
+void handleSignUpdateProtocol(uint8_t *cdata, uint8_t p1, uint8_t dataLength, volatile unsigned int *flags);
 
 #endif

@@ -1,10 +1,5 @@
 #include <os.h>
-#include <os_io_seproxyhal.h>
-#include "cx.h"
-#include <stdint.h>
-#include "menu.h"
 #include "util.h"
-#include <string.h>
 #include "sign.h"
 
 static signUpdateMintDistribution_t *ctx = &global.signUpdateMintDistribution;

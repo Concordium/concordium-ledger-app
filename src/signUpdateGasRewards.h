@@ -1,1 +1,11 @@
-void handleSignUpdateGasRewards(uint8_t *dataBuffer, volatile unsigned int *flags);
+#ifndef _CONCORDIUM_APP_UPDATE_GAS_REWARDS_H_
+#define _CONCORDIUM_APP_UPDATE_GAS_REWARDS_H_
+
+/**
+ * Handles the signing flow, including updating the display, for the 'update GAS rewards'
+ * update instruction.
+ * @param cdata please see /doc/ins_update_gas_rewards.md for details
+ */
+void handleSignUpdateGasRewards(uint8_t *cdata, volatile unsigned int *flags);
+
+#endif
