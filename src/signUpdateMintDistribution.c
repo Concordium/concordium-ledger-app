@@ -11,13 +11,6 @@ static signUpdateMintDistribution_t *ctx = &global.signUpdateMintDistribution;
 static tx_state_t *tx_state = &global_tx_state;
 
 UX_STEP_NOCB(
-    ux_sign_mint_rate_0_step,
-    nn,
-    {
-      "Review",
-      "transaction"
-    });
-UX_STEP_NOCB(
     ux_sign_mint_rate_1_step,
     bn_paging,
     {
@@ -38,58 +31,27 @@ UX_STEP_NOCB(
       .title = "Finalization reward",
       .text = (char *) global.signUpdateMintDistribution.finalizationReward
     });
-UX_STEP_CB(
-    ux_sign_mint_rate_4_step,
-    pnn,
-    buildAndSignTransactionHash(),
-    {
-      &C_icon_validate_14,
-      "Sign",
-      "transaction"
-    });
-UX_STEP_CB(
-    ux_sign_mint_rate_5_step,
-    pnn,
-    declineToSignTransaction(),
-    {
-      &C_icon_crossmark,
-      "Decline to",
-      "sign transaction"
-    });
 UX_FLOW(ux_sign_mint_rate,
-    &ux_sign_mint_rate_0_step,
+    &ux_sign_flow_shared_review,
     &ux_sign_mint_rate_1_step,
     &ux_sign_mint_rate_2_step,
     &ux_sign_mint_rate_3_step,
-    &ux_sign_mint_rate_4_step,
-    &ux_sign_mint_rate_5_step
+    &ux_sign_flow_shared_sign,
+    &ux_sign_flow_shared_decline
 );
 
-void handleSignUpdateMintDistribution(uint8_t *dataBuffer, volatile unsigned int *flags) {
-    int bytesRead = parseKeyDerivationPath(dataBuffer);
-    dataBuffer += bytesRead;
+void handleSignUpdateMintDistribution(uint8_t *cdata, volatile unsigned int *flags) {
+    int bytesRead = parseKeyDerivationPath(cdata);
+    cdata += bytesRead;
 
     cx_sha256_init(&tx_state->hash);
-
-    // Add UpdateHeader to hash.
-    cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, UPDATE_HEADER_LENGTH, NULL, 0);
-    dataBuffer += UPDATE_HEADER_LENGTH;
-
-    // All update transactions are pre-pended by their type.
-    uint8_t updateType = dataBuffer[0];
-    cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 1, NULL, 0);
-    dataBuffer += 1;
-
-    if (updateType != 6) {
-        // Received an incorrect update type byte.
-        THROW(0x6B01);
-    }
+    cdata += hashUpdateHeaderAndType(cdata, UPDATE_TYPE_MINT_DISTRIBUTION);
 
     // Mint rate consists of 4 bytes of mantissa, and a 1 byte exponent.
-    uint32_t mintRateMantissa = U4BE(dataBuffer, 0);
-    uint8_t mintRateExponent = dataBuffer[4];
-    cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 5, NULL, 0);
-    dataBuffer += 5;
+    uint32_t mintRateMantissa = U4BE(cdata, 0);
+    uint8_t mintRateExponent = cdata[4];
+    cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 5, NULL, 0);
+    cdata += 5;
 
     // Build display of the mint rate as 'mintRateMantissa*10^(-mintRateExponent)'
     int mintRateMantissaLength = bin2dec(ctx->mintRate, mintRateMantissa);
@@ -101,17 +63,17 @@ void handleSignUpdateMintDistribution(uint8_t *dataBuffer, volatile unsigned int
 
     // Baker reward
     uint8_t fraction[10] = "/100000";
-    uint32_t bakerReward = U4BE(dataBuffer, 0);
+    uint32_t bakerReward = U4BE(cdata, 0);
     int bakerRewardLength = bin2dec(ctx->bakerReward, bakerReward);
-    cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 4, NULL, 0);
-    dataBuffer += 4;
+    cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 4, NULL, 0);
+    cdata += 4;
     os_memmove(ctx->bakerReward + bakerRewardLength, fraction, 10);
 
     // Finalization reward
-    uint32_t finalizationReward = U4BE(dataBuffer, 0);
+    uint32_t finalizationReward = U4BE(cdata, 0);
     int finalizationRewardLength = bin2dec(ctx->finalizationReward, finalizationReward);
-    cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 4, NULL, 0);
-    dataBuffer += 4;
+    cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 4, NULL, 0);
+    cdata += 4;
     os_memmove(ctx->finalizationReward + finalizationRewardLength, fraction, 10);
 
     ux_flow_init(0, ux_sign_mint_rate, NULL);
