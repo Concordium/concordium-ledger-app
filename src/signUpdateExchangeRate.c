@@ -1,10 +1,5 @@
 #include <os.h>
-#include <os_io_seproxyhal.h>
-#include "cx.h"
-#include <stdint.h>
-#include "menu.h"
 #include "util.h"
-#include <string.h>
 #include "sign.h"
 
 static signExchangeRateContext_t *ctx = &global.signExchangeRateContext;
@@ -36,12 +31,10 @@ void handleSignUpdateExchangeRate(uint8_t *cdata, volatile unsigned int *flags) 
     cdata += bytesRead;
 
     cx_sha256_init(&tx_state->hash);
-
-    // Add UpdateHeader to hash.
+    // Note that this method cannot easily use hashUpdateHeaderAndType from util.h, as 
+    // the UI is built based on the specific update type.
     cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, UPDATE_HEADER_LENGTH, NULL, 0);
     cdata += UPDATE_HEADER_LENGTH;
-
-    // All update transactions are pre-pended by their type.
     uint8_t updateType = cdata[0];
     cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 1, NULL, 0);
     cdata += 1;
@@ -53,7 +46,8 @@ void handleSignUpdateExchangeRate(uint8_t *cdata, volatile unsigned int *flags) 
         os_memmove(ctx->type, "uGTU per Euro", 13);
         ctx->type[13] = '\0';
     } else {
-        THROW(0x6B01);  // Received an unsupported exchange rate transaction.
+        // Received an unsupported exchange rate transaction.
+        THROW(SW_INVALID_TRANSACTION);
     }
 
     // Numerator is the first 8 bytes.

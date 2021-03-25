@@ -1,3 +1,6 @@
+#ifndef _CONCORDIUM_APP_UPDATE_EXCHANGE_RATE_H_
+#define _CONCORDIUM_APP_UPDATE_EXCHANGE_RATE_H_
+
 /**
  * Handles the signing flow, including updating the display, for two different update types
  * that have identical payloads, namely the 'update micro gtu per euro' and 'update euro per energy'
@@ -6,3 +9,5 @@
  * @param cdata please see /doc/ins_update_exchange_rate.md for details
  */
 void handleSignUpdateExchangeRate(uint8_t *cdata, volatile unsigned int *flags);
+
+#endif
