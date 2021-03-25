@@ -1,7 +1,7 @@
-# Update foundation account
+# Update election difficulty
 
-Used for updating the account address of the foundation account, i.e. updating which account is considered the foundation account that will 
-receive foundation rewards.
+Used for updating the election difficulty. The election difficulty is a fraction out of 100000, i.e. the transaction
+determines the numerator in `election_difficulty/100000`.
 
 ## Protocol description
 

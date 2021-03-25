@@ -19,24 +19,15 @@ UX_FLOW(ux_sign_baker_stake_threshold,
     &ux_sign_flow_shared_decline
 );
 
-void handleSignUpdateBakerStakeThreshold(uint8_t *dataBuffer, volatile unsigned int *flags) {
-    int bytesRead = parseKeyDerivationPath(dataBuffer);
-    dataBuffer += bytesRead;
-
+void handleSignUpdateBakerStakeThreshold(uint8_t *cdata, volatile unsigned int *flags) {
+    cdata += parseKeyDerivationPath(cdata);
     cx_sha256_init(&tx_state->hash);
-    cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, UPDATE_HEADER_LENGTH, NULL, 0);
-    dataBuffer += UPDATE_HEADER_LENGTH;
-    uint8_t updateType = dataBuffer[0];
-    if (updateType != 9) {
-        THROW(SW_INVALID_TRANSACTION);
-    }
-    cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 1, NULL, 0);
-    dataBuffer += 1;
+    cdata += hashUpdateHeaderAndType(cdata, UPDATE_TYPE_BAKER_STAKE_THRESHOLD);
 
-    uint64_t bakerThresholdAmount = U8BE(dataBuffer, 0);
+    uint64_t bakerThresholdAmount = U8BE(cdata, 0);
     bin2dec(ctx->stakeThreshold, bakerThresholdAmount);
-    cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 8, NULL, 0);
-    dataBuffer += 8;
+    cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 8, NULL, 0);
+    cdata += 8;
 
     ux_flow_init(0, ux_sign_baker_stake_threshold, NULL);
     *flags |= IO_ASYNCH_REPLY;
