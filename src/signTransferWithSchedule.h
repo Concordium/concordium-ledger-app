@@ -8,6 +8,6 @@
  * transaction kind, recipient address and the number of scheduled transfers to make, 0x01 when
  * sending pairs of scheduled amounts.
  */ 
-void handleSignTransferWithSchedule(uint8_t *dataBuffer, uint8_t p1, volatile unsigned int *flags);
+void handleSignTransferWithSchedule(uint8_t *cdata, uint8_t p1, volatile unsigned int *flags);
 
 #endif
