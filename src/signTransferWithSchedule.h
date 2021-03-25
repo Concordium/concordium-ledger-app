@@ -1,6 +1,5 @@
-#include "os.h"
-#include "cx.h"
-#include "globals.h"
+#ifndef _CONCORDIUM_APP_ACCOUNT_TRANSFER_WITH_SCHEDULE_H_
+#define _CONCORDIUM_APP_ACCOUNT_TRANSFER_WITH_SCHEDULE_H_
 
 /**
  * Handles the signing flow for the transfer with schedule account transaction.
@@ -10,3 +9,5 @@
  * sending pairs of scheduled amounts.
  */ 
 void handleSignTransferWithSchedule(uint8_t *dataBuffer, uint8_t p1, volatile unsigned int *flags);
+
+#endif

@@ -1,11 +1,5 @@
 #include <os.h>
-#include <os_io_seproxyhal.h>
-#include "cx.h"
-#include <stdint.h>
-#include "menu.h"
 #include "util.h"
-#include <string.h>
-#include "base58check.h"
 #include "sign.h"
 
 static signTransferWithScheduleContext_t *ctx = &global.signTransferWithScheduleContext;
