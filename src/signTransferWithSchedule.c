@@ -1,4 +1,5 @@
 #include <os.h>
+#include "base58check.h"
 #include "util.h"
 #include "sign.h"
 
