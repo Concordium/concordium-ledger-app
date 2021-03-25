@@ -27,8 +27,18 @@ int parseKeyDerivationPath(uint8_t *dataBuffer);
 void signTransactionHash(uint8_t *transactionHash, uint8_t *signedHash);
 
 /**
+ * Adds the account transaction header and transaction kind to the current
+ * transaction hash.
+ * @param cdata the incoming command data pointing to the start of the account transaction header
+ * @param validTransactionKind the expected transaction kind, used to validate that the transaction is valid
+ * @return the count of hashed bytes from cdata
+ */
+int hashAccountTransactionHeaderAndKind(uint8_t *cdata, uint8_t validTransactionKind);
+
+/**
  * Adds the update header and update type to the current transaction hash.
  * @param cdata the incoming command data pointing to the start of the update header
  * @param validUpdateType the expected update type used to validate that the transaction is valid
+ * @return the count of hashed bytes from cdata
  */
 int hashUpdateHeaderAndType(uint8_t *cdata, uint8_t validUpdateType);

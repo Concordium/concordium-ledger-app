@@ -47,22 +47,40 @@ void getIdentityAccountDisplay(uint8_t *dst) {
 }
 
 /**
- * Adds the update header and the update type to the hash. The update
- * type is verified to have the supplied value to prevent processing
- * invalid transactions.
- */
-int hashUpdateHeaderAndType(uint8_t *cdata, uint8_t validUpdateType) {
-    cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, UPDATE_HEADER_LENGTH, NULL, 0);
-    cdata += UPDATE_HEADER_LENGTH;
+ * Generic method for hashing and validating header and type for a transaction.
+ * Use hashAccountTransactionHeaderAndKind or hashAccountTransactionHeaderAndKind 
+ * instead of using this method directly.
+ */ 
+int hashHeaderAndType(uint8_t *cdata, uint8_t headerLength, uint8_t validType) {
+    cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, headerLength, NULL, 0);
+    cdata += headerLength;
 
-    uint8_t updateType = cdata[0];
-    if (updateType != validUpdateType) {
+    uint8_t type = cdata[0];
+    if (type != validType) {
         THROW(SW_INVALID_TRANSACTION);
     }
     cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 1, NULL, 0);
     cdata += 1;
 
-    return UPDATE_HEADER_LENGTH + 1;
+    return headerLength + 1;
+}
+
+/**
+ * Adds the account transaction header and the transaction kind to the hash. The 
+ * transaction kind is verified to have the supplied value to prevent processing
+ * invalid transactions.
+ */
+int hashAccountTransactionHeaderAndKind(uint8_t *cdata, uint8_t validTransactionKind) {
+    return hashHeaderAndType(cdata, ACCOUNT_TRANSACTION_HEADER_LENGTH, validTransactionKind);
+}
+
+/**
+ * Adds the update header and the update type to the hash. The update
+ * type is verified to have the supplied value to prevent processing
+ * invalid transactions.
+ */
+int hashUpdateHeaderAndType(uint8_t *cdata, uint8_t validUpdateType) {
+    return hashHeaderAndType(cdata, UPDATE_HEADER_LENGTH, validUpdateType);
 }
 
 // Sends back the user rejection error code 0x6985, which indicates that
