@@ -93,9 +93,9 @@ typedef enum {
 } protocolState_t;
 
 typedef enum {
-    INITIAL,
-    VERIFICATION_KEY,
-    THRESHOLD
+    TX_PUBLIC_INFO_FOR_IP_INITIAL,
+    TX_PUBLIC_INFO_FOR_IP_VERIFICATION_KEY,
+    TX_PUBLIC_INFO_FOR_IP_THRESHOLD
 } publicInfoForIpState_t;
 
 typedef enum {
