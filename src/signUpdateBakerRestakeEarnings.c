@@ -19,21 +19,14 @@ UX_FLOW(ux_sign_update_baker_restake_earnings,
     &ux_sign_flow_shared_decline
 );
 
-void handleSignUpdateBakerRestakeEarnings(uint8_t *dataBuffer, volatile unsigned int *flags) {
-    int bytesRead = parseKeyDerivationPath(dataBuffer);
-    dataBuffer += bytesRead;
-
+void handleSignUpdateBakerRestakeEarnings(uint8_t *cdata, volatile unsigned int *flags) {
+    cdata += parseKeyDerivationPath(cdata);
     cx_sha256_init(&tx_state->hash);
-    cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, ACCOUNT_TRANSACTION_HEADER_LENGTH + 1, NULL, 0);
-    uint8_t transactionKind = dataBuffer[ACCOUNT_TRANSACTION_HEADER_LENGTH];
-    if (transactionKind != UPDATE_BAKER_STAKE_EARNINGS) {
-        THROW(SW_INVALID_TRANSACTION);
-    }
-    dataBuffer += (ACCOUNT_TRANSACTION_HEADER_LENGTH + 1);
+    cdata += hashAccountTransactionHeaderAndKind(cdata, UPDATE_BAKER_RESTAKE_EARNINGS);
 
     // Parse the bool (as 1 byte) of whether to restake earnings.
-    uint8_t restakeEarnings = dataBuffer[0];
-    cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 1, NULL, 0);
+    uint8_t restakeEarnings = cdata[0];
+    cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 1, NULL, 0);
     if (restakeEarnings == 0) {
         os_memmove(ctx->restake, "No\0", 3);
     } else if (restakeEarnings == 1) {
