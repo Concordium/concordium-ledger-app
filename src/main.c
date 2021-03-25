@@ -15,10 +15,10 @@
 *  limitations under the License.
 ********************************************************************************/
 
-#include "getPublicKey.h"
 #include "glyphs.h"
 #include "menu.h"
 #include "os.h"
+#include "getPublicKey.h"
 #include "signTransfer.h"
 #include "signTransferWithSchedule.h"
 #include "signCredentialDeployment.h"
@@ -100,7 +100,6 @@ tx_state_t global_tx_state;
 // computer. The APDU commands control what flow is activated, i.e. which control flow is initiated.
 static void concordium_main(void) {
     // The transaction context is uninitialized when booting up.
-    global.signTransferWithScheduleContext.tx_state.initialized = false;
     global_tx_state.initialized = false;
 
     volatile unsigned int rx = 0;

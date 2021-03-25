@@ -1,6 +1,5 @@
-#include "os.h"
-#include "cx.h"
-#include "globals.h"
+#ifndef _CONCORDIUM_APP_GET_PUBLIC_KEY_H_
+#define _CONCORDIUM_APP_GET_PUBLIC_KEY_H_
 
 /**
  * Handles the derivation and export of account and governance public keys.
@@ -11,3 +10,5 @@
  * export the signature on the public-key signed with the corresponding private-key.
  */ 
 void handleGetPublicKey(uint8_t *cdata, uint8_t p1, uint8_t p2, volatile unsigned int *flags);
+
+#endif

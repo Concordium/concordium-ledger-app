@@ -1,8 +1,6 @@
 #include "os.h"
 #include "ux.h"
-#include "globals.h"
 #include "util.h"
-#include "menu.h"
 
 static keyDerivationPath_t *keyPath = &path;
 static exportPublicKeyContext_t *ctx = &global.exportPublicKeyContext;
@@ -53,9 +51,7 @@ void sendPublicKey() {
 
     if (ctx->signPublicKey) {
         uint8_t signedPublicKey[64];
-        // Note that it is not a hash being signed here, so perhaps the naming of that
-        // method should be generalized. In this case it's the public-key.
-        signTransactionHash(publicKey, signedPublicKey);
+        sign(publicKey, signedPublicKey);
         os_memmove(G_io_apdu_buffer + tx, signedPublicKey, sizeof(signedPublicKey));
         tx += sizeof(signedPublicKey);
     }

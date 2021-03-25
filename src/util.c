@@ -10,26 +10,47 @@ static tx_state_t *tx_state = &global_tx_state;
 static keyDerivationPath_t *keyPath = &path;
 static const uint32_t HARDENED_OFFSET = 0x80000000;
 
-int bin2dec(uint8_t *dst, uint64_t n);
+int parseKeyDerivationPath(uint8_t *cdata) {
+    keyPath->pathLength = cdata[0];
 
-// Parses the key derivation path for the command to be executed. Our current needed max length is 8,
-// and therefore this method will reject requests that specify a depth greater than that.
-int parseKeyDerivationPath(uint8_t *dataBuffer) {
-    uint8_t pathLength[1];
-    os_memmove(pathLength, dataBuffer, 1);
-
-    if (pathLength[0] > 8) {
+    // Concordium does not use key paths with a length greater than 8,
+    // so if that was received, then throw an error.
+    if (keyPath->pathLength > 8) {
         THROW(SW_INVALID_PATH);
     }
 
-    keyPath->pathLength = pathLength[0];
-    for (int i = 0; i < pathLength[0]; ++i) {
-        uint32_t node = U4BE(dataBuffer, 1 + (i * 4));
+    // Each part of a key path is a uint32, parse through each part of the
+    // derivation path. All paths are hardened, but we save a non-hardened
+    // version that can be displayed if needed.
+    for (int i = 0; i < keyPath->pathLength; ++i) {
+        uint32_t node = U4BE(cdata, 1 + (i * 4));
         keyPath->rawKeyDerivationPath[i] = node;
         keyPath->keyDerivationPath[i] = node | HARDENED_OFFSET;
     }
 
     return 1 + (4 * keyPath->pathLength);
+}
+
+int bin2dec(uint8_t *dst, uint64_t number) {
+	if (number == 0) {
+		dst[0] = '0';
+		dst[1] = '\0';
+		return 1;
+	}
+
+	// Determine the length of the text representation.
+	int len = 0;
+	for (uint64_t nn = number; nn != 0; nn /= 10) {
+		len++;
+	}
+
+	// Build the number in big-endian order.
+	for (int i = len - 1; i >= 0; i--) {
+		dst[i] = (number % 10) + '0';
+		number /= 10;
+	}
+	dst[len] = '\0';
+	return len;
 }
 
 // Builds a display version of the identity/account path. A pre-condition
@@ -83,8 +104,6 @@ int hashUpdateHeaderAndType(uint8_t *cdata, uint8_t validUpdateType) {
     return hashHeaderAndType(cdata, UPDATE_HEADER_LENGTH, validUpdateType);
 }
 
-// Sends back the user rejection error code 0x6985, which indicates that
-// the user has rejected the incoming command at some step in the process.
 void sendUserRejection() {
     G_io_apdu_buffer[0] = 0x69;
     G_io_apdu_buffer[1] = 0x85;
@@ -92,9 +111,6 @@ void sendUserRejection() {
     ui_idle();
 }
 
-// Writes the provided data into the APDU buffer and appends a success code 0x9000 to indicate
-// that the command was executed successfully. The result data should already have been written
-// to the APDU buffer before calling this method, and the caller should provide the correct tx offset.
 void sendSuccess(uint8_t tx) {
     G_io_apdu_buffer[tx++] = 0x90;
     G_io_apdu_buffer[tx++] = 0x00;
@@ -102,17 +118,12 @@ void sendSuccess(uint8_t tx) {
     ui_idle();
 }
 
-// Send success back to the computer, but do not return to the idle screen.
 void sendSuccessNoIdle() {
-    uint8_t tx = 0;
-    G_io_apdu_buffer[tx++] = 0x90;
-    G_io_apdu_buffer[tx++] = 0x00;
-    io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, tx);
+    G_io_apdu_buffer[0] = 0x90;
+    G_io_apdu_buffer[1] = 0x00;
+    io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, 2);
 }
 
-// Helper method that converts a byte array into a character array with the bytes translated
-// into their hexadecimal representation. This is used to have a human readable representation of the
-// different keys and addresses.
 void toHex(uint8_t *byteArray, const uint64_t len, char *asHex) {
     static uint8_t const hex[] = "0123456789abcdef";
     for (uint64_t i = 0; i < len; i++) {
@@ -120,29 +131,6 @@ void toHex(uint8_t *byteArray, const uint64_t len, char *asHex) {
         asHex[2 * i + 1] = hex[(byteArray[i]>>0) & 0x0F];
     }
     asHex[2 * len] = '\0';
-}
-
-// Helper method that writes the input integer to the binary format that the device can display.
-int bin2dec(uint8_t *dst, uint64_t n) {
-	if (n == 0) {
-		dst[0] = '0';
-		dst[1] = '\0';
-		return 1;
-	}
-
-	// Determine the length
-	int len = 0;
-	for (uint64_t nn = n; nn != 0; nn /= 10) {
-		len++;
-	}
-
-	// Build in big-endian order.
-	for (int i = len-1; i >= 0; i--) {
-		dst[i] = (n % 10) + '0';
-		n /= 10;
-	}
-	dst[len] = '\0';
-	return len;
 }
 
 void getPrivateKey(uint32_t *keyPath, uint8_t keyPathLength, cx_ecfp_private_key_t *privateKey) {
@@ -163,8 +151,6 @@ void getPrivateKey(uint32_t *keyPath, uint8_t keyPathLength, cx_ecfp_private_key
     END_TRY;
 }
 
-// Gets the derived public-key for the path that has been loaded into keyPath. The public-key is written to the provided
-// byte array that must have an exact size of 32 bytes.
 void getPublicKey(uint8_t *publicKeyArray) {
     cx_ecfp_private_key_t privateKey;
     cx_ecfp_public_key_t publicKey;
@@ -193,15 +179,15 @@ void getPublicKey(uint8_t *publicKeyArray) {
     }
 }
 
-// Generic method that signs a transaction hash with the key given by the derivation path that
+// Generic method that signs the input with the key given by the derivation path that
 // has been loaded into keyPath.
-void signTransactionHash(uint8_t *transactionHash, uint8_t *signedHash) {
+void sign(uint8_t *input, uint8_t *signatureOnInput) {
     cx_ecfp_private_key_t privateKey;
 
     BEGIN_TRY {
         TRY {
             getPrivateKey(keyPath->keyDerivationPath, keyPath->pathLength, &privateKey);
-            cx_eddsa_sign(&privateKey, CX_RND_RFC6979 | CX_LAST, CX_SHA512, transactionHash, 32, NULL, 0, signedHash, 64, NULL);
+            cx_eddsa_sign(&privateKey, CX_RND_RFC6979 | CX_LAST, CX_SHA512, input, 32, NULL, 0, signatureOnInput, 64, NULL);
         }
         FINALLY {
             // Clean up the private key, so that we cannot leak it.
@@ -210,4 +196,3 @@ void signTransactionHash(uint8_t *transactionHash, uint8_t *signedHash) {
     }
     END_TRY;
 }
-

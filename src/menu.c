@@ -1,4 +1,7 @@
 #include "ux.h"
+#include "globals.h"
+
+static tx_state_t *tx_state = &global_tx_state;
 
 UX_STEP_NOCB(
     ux_menu_idle_flow_1_step,
@@ -22,6 +25,7 @@ UX_FLOW(ux_menu_idle_flow,
 );
 
 void ui_idle(void) {
+    tx_state->initialized = false;
     if (G_ux.stack_count == 0) {
         ux_stack_push();
     }

@@ -21,7 +21,7 @@ UX_STEP_NOCB(
     });
 
 // Common signature flow for all transactions allowing the user to either sign the transaction hash
-// that is currently being processed, or declining to do so (sending back a user rejection error to the computer).
+// that is currently being processed, or declining to do so (sending back a user rejection error to the caller).
 UX_STEP_CB(
     ux_sign_flow_shared_sign,
     pnn,
@@ -50,13 +50,10 @@ void buildAndSignTransactionHash() {
     cx_hash((cx_hash_t *) &tx_state->hash, CX_LAST, NULL, 0, tx_state->transactionHash, 32);
 
     uint8_t signedHash[64];
-    signTransactionHash(tx_state->transactionHash, signedHash);
+    sign(tx_state->transactionHash, signedHash);
 
     os_memmove(G_io_apdu_buffer, signedHash, sizeof(signedHash));
-    sendSuccess(sizeof(signedHash));
-
-    // Reset initialization status, as we are done processing the current transaction.
-    tx_state->initialized = false;
+    sendSuccess(sizeof(signedHash));    
 }
 
 // Send user rejection and make sure to reset context (otherwise a new request would be rejected).

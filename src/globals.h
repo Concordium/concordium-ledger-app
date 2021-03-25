@@ -161,8 +161,6 @@ typedef struct {
     // Buffer to hold the incoming databuffer so that we can iterate over it.
     uint8_t buffer[255];
     uint8_t pos;
-
-    tx_state_t tx_state;
 } signTransferWithScheduleContext_t;
 
 typedef struct {
