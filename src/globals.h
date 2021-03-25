@@ -286,7 +286,7 @@ typedef struct {
 
 typedef struct {
     char type[20];
-    char display[15];
+    uint8_t display[15];
     uint32_t path[6];
     uint32_t arPath[5];
     uint8_t pathLength;
