@@ -1,3 +1,11 @@
-#include <stdint.h>
+#ifndef _CONCORDIUM_APP_ACCOUNT_TRANSFER_TO_ENCRYPTED_H_
+#define _CONCORDIUM_APP_ACCOUNT_TRANSFER_TO_ENCRYPTED_H_
 
-void handleSignTransferToEncrypted(uint8_t *dataBuffer, volatile unsigned int *flags);
+/**
+ * Handles the signing flow, including updating the display, for the 'transfer to encrypted'
+ * account transaction.
+ * @param cdata please see /doc/ins_transfer_to_encrypted.md
+ */
+void handleSignTransferToEncrypted(uint8_t *cdata, volatile unsigned int *flags);
+
+#endif
