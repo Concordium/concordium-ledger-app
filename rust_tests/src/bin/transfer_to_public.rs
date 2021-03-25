@@ -5,7 +5,7 @@ use hex;
 use ledger::{ApduCommand, LedgerApp};
 
 fn main() {
-    let transaction_kind = "10";
+    let transaction_kind = "12";
 
     // These values should be encrypted amounts, and not just random bytes like in this test.
     let remaining_amount = hex::decode("97a9558421515a34f7c27c3b55c8dc561ed8c45a983387edf4f95ef834c5fd12d4fc5bb772490cb5653d249926bd9fc9938768d3921a4aa2361ae620e294637beb2d052cb0351745d81e2b34fee677c1e37cd8fedd1e4afbd66557d08f827db6803e57a7473ee78c7ba2db84c6910d355f497d257f89588a5e7176265b890841add54085462b35c3d0a01d562a29023db80fbac86061bf8970ceb5cf0889cc762e0cc6720ffac0b932c6168038aaec96e824c68cdb95e8cea823fa32792f4360").unwrap();

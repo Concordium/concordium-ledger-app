@@ -12,23 +12,21 @@
 static signTransferToPublic_t *ctx = &global.signTransferToPublic;
 static tx_state_t *tx_state = &global_tx_state;
 
-UX_STEP_NOCB(
-    ux_sign_transfer_to_public_0_step,
-    nn,
-    {
-      "Review",
-      "transaction"
-    });
+void sendSuccessAndUpdateState(void) {
+    ctx->state = TX_TRANSFER_TO_PUBLIC_PROOF;
+    sendSuccessNoIdle();
+}
+
 UX_STEP_CB(
     ux_sign_transfer_to_public_1_step,
     bn_paging,
-    sendSuccessNoIdle(),
+    sendSuccessAndUpdateState(),
     {
       .title = "Amount to public",
       .text = (char *) global.signTransferToPublic.amount
     });
 UX_FLOW(ux_sign_transfer_to_public,
-    &ux_sign_transfer_to_public_0_step,
+    &ux_sign_flow_shared_review,
     &ux_sign_transfer_to_public_1_step
 );
 
@@ -36,41 +34,38 @@ UX_FLOW(ux_sign_transfer_to_public,
 #define P1_REMAINING_AMOUNT 0x01
 #define P1_PROOF            0x02
 
-void handleSignTransferToPublic(uint8_t *dataBuffer, uint8_t p1, uint8_t dataLength, volatile unsigned int *flags) {
+void handleSignTransferToPublic(uint8_t *cdata, uint8_t p1, uint8_t dataLength, volatile unsigned int *flags) {
     if (p1 == P1_INITIAL) {
-        int bytesRead = parseKeyDerivationPath(dataBuffer);
-        dataBuffer += bytesRead;
-        
-        // Initialize hashing and add transaction header and transaction kind to the hash.
+        cdata += parseKeyDerivationPath(cdata);
         cx_sha256_init(&tx_state->hash);
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, ACCOUNT_TRANSACTION_HEADER_LENGTH + 1, NULL, 0);
-        dataBuffer += ACCOUNT_TRANSACTION_HEADER_LENGTH + 1;
+        tx_state->initialized = true;
+        cdata += hashAccountTransactionHeaderAndKind(cdata, TRANSFER_TO_PUBLIC);
 
-        // Ask the computer to continue with the protocol
+        // Ask the caller for the next command.
+        ctx->state = TX_TRANSFER_TO_PUBLIC_REMAINING_AMOUNT;
         sendSuccessNoIdle();
-    } else if (p1 == P1_REMAINING_AMOUNT) {
-        // Hash remaining amount
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 192, NULL, 0);
-        dataBuffer += 192;
+    } else if (p1 == P1_REMAINING_AMOUNT && ctx->state == TX_TRANSFER_TO_PUBLIC_REMAINING_AMOUNT) {
+        // Hash remaining amount. Remaining amount is encrypted, and so we cannot display it.
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 192, NULL, 0);
+        cdata += 192;
 
         // Parse transaction amount so it can be displayed.
-        uint64_t amountToEncrypted = U8BE(dataBuffer, 0);
-        bin2dec(ctx->amount, amountToEncrypted);
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 8, NULL, 0);
-        dataBuffer += 8;
+        uint64_t amountToPublic = U8BE(cdata, 0);
+        bin2dec(ctx->amount, amountToPublic);
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 8, NULL, 0);
+        cdata += 8;
 
         // Hash amount index
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 8, NULL, 0);
-        dataBuffer += 8;
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 8, NULL, 0);
+        cdata += 8;
 
         // Parse size of incoming proofs.
-        ctx->proofSize = U2BE(dataBuffer, 0);
-
+        ctx->proofSize = U2BE(cdata, 0);
+        
         ux_flow_init(0, ux_sign_transfer_to_public, NULL);
         *flags |= IO_ASYNCH_REPLY;
-    } else if (p1 == P1_PROOF) {
-        // FIXME: This is duplicated code, this could probably be moved to a shared class.
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, dataLength, NULL, 0);
+    } else if (p1 == P1_PROOF && ctx->state == TX_TRANSFER_TO_PUBLIC_PROOF) {
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, dataLength, NULL, 0);
         ctx->proofSize -= dataLength;
 
         if (ctx->proofSize == 0) {
@@ -78,10 +73,12 @@ void handleSignTransferToPublic(uint8_t *dataBuffer, uint8_t p1, uint8_t dataLen
             ux_flow_init(0, ux_sign_flow_shared, NULL);
             *flags |= IO_ASYNCH_REPLY;
         } else if (ctx->proofSize < 0) {
-            // We received more proof bytes than expected.
-            THROW(SW_INVALID_STATE);    
+            // We received more proof bytes than expected, and so the received
+            // transaction is invalid.
+            THROW(SW_INVALID_TRANSACTION);
         } else {
-            // There are more bytes to be received. Ask the computer for more.
+            // There are additional bytes to be received, so ask the caller
+            // for more data.
             sendSuccessNoIdle();
         }
     } else {

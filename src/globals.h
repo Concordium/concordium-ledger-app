@@ -21,15 +21,19 @@
 #define UPDATE_HEADER_LENGTH 28
 
 typedef enum {
-    DEPLOY_MODULE,
-    INIT_CONTRACT,
-    UPDATE,
-    TRANSFER,
-    ADD_BAKER,
-    REMOVE_BAKER,
-    UPDATE_BAKER_STAKE,
-    UPDATE_BAKER_RESTAKE_EARNINGS,
-    UPDATE_BAKER_KEYS,
+    DEPLOY_MODULE = 0,
+    INIT_CONTRACT = 1,
+    UPDATE = 2,
+    TRANSFER = 3,
+    ADD_BAKER = 4,
+    REMOVE_BAKER = 5,
+    UPDATE_BAKER_STAKE = 6,
+    UPDATE_BAKER_RESTAKE_EARNINGS = 7,
+    UPDATE_BAKER_KEYS = 8,
+    UPDATE_CREDENTIAL_KEYS = 13,
+    ENCRYPTED_AMOUNT_TRANSFER = 16,
+    TRANSFER_TO_ENCRYPTED = 17,
+    TRANSFER_TO_PUBLIC = 18,
     UPDATE_CREDENTIALS = 20
 } transactionKind_e;
 
@@ -108,6 +112,11 @@ typedef enum {
     TX_UPDATE_CREDENTIAL_ID,
     TX_UPDATE_CREDENTIAL_THRESHOLD
 } updateCredentialState_t;
+
+typedef enum {
+    TX_TRANSFER_TO_PUBLIC_REMAINING_AMOUNT,
+    TX_TRANSFER_TO_PUBLIC_PROOF
+} transferToPublicState_t;
 
 typedef struct {
     uint8_t identity;
@@ -240,6 +249,7 @@ typedef struct {
 typedef struct {
     uint8_t amount[20];
     uint16_t proofSize;
+    transferToPublicState_t state;
 } signTransferToPublic_t;
 
 typedef struct {
