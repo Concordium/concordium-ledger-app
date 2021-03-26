@@ -37,6 +37,12 @@ typedef enum {
     UPDATE_CREDENTIALS = 20
 } transactionKind_e;
 
+/**
+ * Enumeration of all available update types. The exact numbering has 
+ * to correspond with the on-chain values as it is used as part of the
+ * transaction serialization, and it is used to validate that a received
+ * transaction has a valid type.
+ */
 typedef enum {
     UPDATE_TYPE_AUTHORIZATION = 0,
     UPDATE_TYPE_PROTOCOL = 1,
@@ -47,8 +53,29 @@ typedef enum {
     UPDATE_TYPE_MINT_DISTRIBUTION = 6,
     UPDATE_TYPE_TRANSACTION_FEE_DISTRIBUTION = 7,
     UPDATE_TYPE_GAS_REWARDS = 8,
-    UPDATE_TYPE_BAKER_STAKE_THRESHOLD = 9
+    UPDATE_TYPE_BAKER_STAKE_THRESHOLD = 9,
+    UPDATE_TYPE_UPDATE_ROOT_KEYS_WITH_ROOT_KEYS = 10,
+    UPDATE_TYPE_UPDATE_LEVEL_1_KEYS_WITH_ROOT_KEYS = 11,
+    UPDATE_TYPE_UPDATE_LEVEL_2_KEYS_WITH_ROOT_KEYS = 12,
+    UPDATE_TYPE_UPDATE_LEVEL_1_KEYS_WITH_LEVEL_1_KEYS = 13,
+    UPDATE_TYPE_UPDATE_LEVEL_2_KEYS_WITH_LEVEL_1_KEYS = 14
 } updateType_e;
+
+/**
+ * The 'RootUpdate' update instruction payload is prefixed by
+ * a byte depending on the type of key update, which is represented
+ * by this enum.
+ */
+typedef enum {
+    ROOT_UPDATE_ROOT,
+    ROOT_UPDATE_LEVEL_1,
+    ROOT_UPDATE_LEVEL_2
+} rootUpdatePrefix_e;
+
+typedef enum {
+    LEVEL1_UPDATE_LEVEL_1,
+    LEVEL1_UPDATE_LEVEL_2
+} level1UpdatePrefix_e;
 
 // To add support for additional access structures with the update authorizations
 // transaction, you simply have to add a new item to the enum priot to the 'END' entry,
@@ -122,6 +149,12 @@ typedef enum {
     TX_ENCRYPTED_AMOUNT_TRANSFER_INITIAL,
     TX_ENCRYPTED_AMOUNT_TRANSFER_PROOFS
 } encryptedAmountTransferState_t;
+
+typedef enum {
+    TX_UPDATE_KEYS_INITIAL,
+    TX_UPDATE_KEYS_KEY,
+    TX_UPDATE_KEYS_THRESHOLD
+} updateKeysState_t;
 
 typedef struct {
     uint8_t identity;
@@ -318,8 +351,19 @@ typedef struct {
     uint8_t finalizationReward[17];
 } signUpdateMintDistribution_t;
 
-// As the Ledger device is very limited on memory, the context of each instruction is stored in a
-// shared global union, so that we use no more memory than that of the most space using instruction context.
+typedef struct {
+    uint8_t type[25];
+    uint16_t numberOfUpdateKeys;
+    char updateVerificationKey[65];
+    uint8_t threshold[6];
+    updateKeysState_t state;
+} signUpdateKeysWithRootKeysContext_t;
+
+/**
+ * As the memory we have available is very limited, the context for each instruction is stored
+ * in a shared global union, so that we do not use more memory than that of the most memory
+ * consuming instruction context.
+ */
 typedef union {
     exportPublicKeyContext_t exportPublicKeyContext;
     signTransferWithScheduleContext_t signTransferWithScheduleContext;
@@ -343,6 +387,7 @@ typedef union {
     signUpdateBakerStakeContext_t signUpdateBakerStake;
     sigUpdateBakerRestakeEarningsContext_t signUpdateBakerRestakeEarnings;
     signUpdateBakerStakeThresholdContext_t signUpdateBakerStakeThreshold;
+    signUpdateKeysWithRootKeysContext_t signUpdateKeysWithRootKeysContext;
 } instructionContext;
 extern instructionContext global;
 

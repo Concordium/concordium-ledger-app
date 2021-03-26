@@ -40,6 +40,7 @@
 #include "signUpdateBakerStake.h"
 #include "signUpdateBakerRestakeEarnings.h"
 #include "signUpdateBakerStakeThreshold.h"
+#include "signRootKeysUpdate.h"
 #include "ux.h"
 #include <string.h>
 
@@ -93,6 +94,11 @@ tx_state_t global_tx_state;
 #define INS_UPDATE_MINT_DISTRIBUTION    0x25
 #define INS_UPDATE_ELECTION_DIFFICULTY  0x26
 #define INS_UPDATE_BAKER_STAKE_THRESHOLD    0x27
+#define INS_UPDATE_ROOT_KEYS_WITH_ROOT_KEYS 0x28
+#define INS_UPDATE_LEVEL1_KEYS_WITH_ROOT_KEYS 0x29
+#define INS_UPDATE_LEVEL2_KEYS_WITH_ROOT_KEYS 0x2A
+#define INS_UPDATE_LEVEL1_KEYS_LEVEL1_KEYS 0x2B
+#define INS_UPDATE_LEVEL2_KEYS_LEVEL1_KEYS 0x2C
 
 #define INS_SIGN_UPDATE_CREDENTIAL      0x31
 
@@ -196,6 +202,15 @@ static void concordium_main(void) {
                         break;
                     case INS_UPDATE_BAKER_STAKE_THRESHOLD:
                         handleSignUpdateBakerStakeThreshold(G_io_apdu_buffer + OFFSET_CDATA, &flags);
+                        break;
+                    case INS_UPDATE_ROOT_KEYS_WITH_ROOT_KEYS:
+                        handleSignHigherLevelKeys(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_P1], UPDATE_TYPE_UPDATE_ROOT_KEYS_WITH_ROOT_KEYS, ROOT_UPDATE_ROOT, &flags);
+                        break;
+                    case INS_UPDATE_LEVEL1_KEYS_WITH_ROOT_KEYS:
+                        handleSignHigherLevelKeys(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_P1], UPDATE_TYPE_UPDATE_LEVEL_1_KEYS_WITH_ROOT_KEYS, ROOT_UPDATE_LEVEL_1, &flags);
+                        break;
+                    case INS_UPDATE_LEVEL1_KEYS_LEVEL1_KEYS:
+                        handleSignHigherLevelKeys(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_P1], UPDATE_TYPE_UPDATE_LEVEL_1_KEYS_WITH_LEVEL_1_KEYS, LEVEL1_UPDATE_LEVEL_1, &flags);
                         break;
                     default:
                         THROW(0x6D00);

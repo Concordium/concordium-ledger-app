@@ -1,6 +1,7 @@
 #include <os.h>
 #include "util.h"
 #include "sign.h"
+#include "base58check.h"
 
 static signUpdateFoundationAccountContext_t *ctx = &global.signUpdateFoundationAccountContext;
 static tx_state_t *tx_state = &global_tx_state;
