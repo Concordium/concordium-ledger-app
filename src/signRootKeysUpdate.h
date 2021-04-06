@@ -8,4 +8,4 @@
  * They are all handled together with a shared function, as their serializations are almost
  * equal.
  */
-void handleSignHigherLevelKeys(uint8_t *cdata, uint8_t p1, uint8_t updateType, uint8_t expectedKeyUpdateType, volatile unsigned int *flags);
+void handleSignHigherLevelKeys(uint8_t *cdata, uint8_t p1, uint8_t updateType, volatile unsigned int *flags);

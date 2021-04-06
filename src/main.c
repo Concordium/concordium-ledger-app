@@ -75,7 +75,6 @@ tx_state_t global_tx_state;
 
 #define INS_EXPORT_PRIVATE_KEY_SEED     0x05
 #define INS_UPDATE_EXCHANGE_RATE        0x06
-#define INS_UPDATE_AUTHORIZATIONS       0x08
 
 #define INS_ENCRYPTED_AMOUNT_TRANSFER   0x10
 #define INS_TRANSFER_TO_ENCRYPTED       0x11
@@ -152,9 +151,6 @@ static void concordium_main(void) {
                     case INS_UPDATE_EXCHANGE_RATE:
                         handleSignUpdateExchangeRate(G_io_apdu_buffer + OFFSET_CDATA, &flags);
                         break;
-                    case INS_UPDATE_AUTHORIZATIONS:
-                        handleSignUpdateAuthorizations(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_P1], &flags);
-                        break;
                     case INS_TRANSFER_TO_ENCRYPTED:
                         handleSignTransferToEncrypted(G_io_apdu_buffer + OFFSET_CDATA, &flags);
                         break;
@@ -204,13 +200,19 @@ static void concordium_main(void) {
                         handleSignUpdateBakerStakeThreshold(G_io_apdu_buffer + OFFSET_CDATA, &flags);
                         break;
                     case INS_UPDATE_ROOT_KEYS_WITH_ROOT_KEYS:
-                        handleSignHigherLevelKeys(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_P1], UPDATE_TYPE_UPDATE_ROOT_KEYS_WITH_ROOT_KEYS, ROOT_UPDATE_ROOT, &flags);
+                        handleSignHigherLevelKeys(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_P1], UPDATE_TYPE_UPDATE_ROOT_KEYS_WITH_ROOT_KEYS, &flags);
                         break;
                     case INS_UPDATE_LEVEL1_KEYS_WITH_ROOT_KEYS:
-                        handleSignHigherLevelKeys(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_P1], UPDATE_TYPE_UPDATE_LEVEL_1_KEYS_WITH_ROOT_KEYS, ROOT_UPDATE_LEVEL_1, &flags);
+                        handleSignHigherLevelKeys(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_P1], UPDATE_TYPE_UPDATE_LEVEL_1_KEYS_WITH_ROOT_KEYS, &flags);
                         break;
                     case INS_UPDATE_LEVEL1_KEYS_LEVEL1_KEYS:
-                        handleSignHigherLevelKeys(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_P1], UPDATE_TYPE_UPDATE_LEVEL_1_KEYS_WITH_LEVEL_1_KEYS, LEVEL1_UPDATE_LEVEL_1, &flags);
+                        handleSignHigherLevelKeys(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_P1], UPDATE_TYPE_UPDATE_LEVEL_1_KEYS_WITH_LEVEL_1_KEYS, &flags);
+                        break;
+                    case INS_UPDATE_LEVEL2_KEYS_WITH_ROOT_KEYS:
+                        handleSignUpdateAuthorizations(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_P1], UPDATE_TYPE_UPDATE_LEVEL_2_KEYS_WITH_ROOT_KEYS, &flags);
+                        break;
+                    case INS_UPDATE_LEVEL2_KEYS_LEVEL1_KEYS:
+                        handleSignUpdateAuthorizations(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_P1], UPDATE_TYPE_UPDATE_LEVEL_2_KEYS_WITH_LEVEL_1_KEYS, &flags);
                         break;
                     default:
                         THROW(0x6D00);

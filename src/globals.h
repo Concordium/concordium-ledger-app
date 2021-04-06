@@ -78,16 +78,20 @@ typedef enum {
 } level1UpdatePrefix_e;
 
 // To add support for additional access structures with the update authorizations
-// transaction, you simply have to add a new item to the enum priot to the 'END' entry,
+// transaction, you simply have to add a new item to the enum prior to the 'END' entry,
 // and update the enum -> string method in signUpdateAuthorizations.c.
 typedef enum {
-    EMERGENCY,
-    AUTHORIZATION,
-    PROTOCOL,
-    ELECTION_DIFFICULTY,
-    EURO_PER_ENERGY,
-    MICRO_GTU_PER_EURO,
-    END
+    AUTHORIZATION_EMERGENCY,
+    AUTHORIZATION_PROTOCOL,
+    AUTHORIZATION_ELECTION_DIFFICULTY,
+    AUTHORIZATION_EURO_PER_ENERGY,
+    AUTHORIZATION_MICRO_GTU_PER_EURO,
+    AUTHORIZATION_FOUNDATION_ACCOUNT,
+    AUTHORIZATION_MINT_DISTRIBUTION,
+    AUTHORIZATION_TRANSACTION_FEE_DISTRIBUTION,
+    AUTHORIZATION_GAS_REWARDS,
+    AUTHORIZATION_BAKER_STAKE_THRESHOLD,
+    AUTHORIZATION_END
 } authorizationType_e;
 
 /**
@@ -155,6 +159,15 @@ typedef enum {
     TX_UPDATE_KEYS_KEY,
     TX_UPDATE_KEYS_THRESHOLD
 } updateKeysState_t;
+
+typedef enum {
+    TX_UPDATE_AUTHORIZATIONS_INITIAL,
+    TX_UPDATE_AUTHORIZATIONS_PUBLIC_KEY_COUNT,
+    TX_UPDATE_AUTHORIZATIONS_PUBLIC_KEY,
+    TX_UPDATE_AUTHORIZATIONS_ACCESS_STRUCTURE_SIZE,
+    TX_UPDATE_AUTHORIZATIONS_ACCESS_STRUCTURE_INDEX,
+    TX_UPDATE_AUTHORIZATIONS_ACCESS_STRUCTURE_THRESHOLD
+} updateAuthorizationsState_t;
 
 typedef struct {
     uint8_t identity;
@@ -251,16 +264,18 @@ typedef struct {
 typedef struct {
     uint16_t publicKeyListLength;
     uint16_t publicKeyCount;
-    uint8_t publicKey[65];
+    char publicKey[65];
     uint16_t accessStructureSize;
-    uint8_t title[20];
+    uint8_t title[29];
     uint8_t displayKeyIndex[6];
+    uint8_t type[24];
 
     uint8_t processedCount;
     
     uint8_t buffer[255];
     int bufferPointer;
     
+    updateAuthorizationsState_t state;
     authorizationType_e authorizationType;
 } signUpdateAuthorizations_t;
 
