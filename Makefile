@@ -2,6 +2,8 @@
 #   Ledger Blue
 #   (c) 2016 Ledger
 #
+#	Modifications (c) 2021 Concordium
+#
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -14,6 +16,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #*******************************************************************************
+
+export BOLOS_SDK = nanos-secure-sdk
 
 ifeq ($(BOLOS_SDK),)
 $(error BOLOS_SDK is not set)
@@ -35,7 +39,6 @@ APP_LOAD_PARAMS = --appFlags 0x00 $(COMMON_LOAD_PARAMS)
 APP_LOAD_PARAMS += --curve ed25519
 
 # Build configuration
-
 APP_SOURCE_PATH += src
 SDK_SOURCE_PATH += lib_stusb lib_stusb_impl
 
