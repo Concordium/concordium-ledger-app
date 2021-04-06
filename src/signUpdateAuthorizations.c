@@ -132,12 +132,11 @@ void processKeyIndices() {
     }
 }
 
-#define P1_INITIAL                      0x00    // Contains key derivation path, update header and update kind.
-#define P1_PUBLIC_KEY_INITIAL           0x01    // Contains the number of public-keys to update authorizations with.
-#define P1_PUBLIC_KEY                   0x02    // Contains one public-key per command.
-#define P1_ACCESS_STRUCTURE_INITIAL     0x03    // Contains the number of public-key indices for the current access.
-#define P1_ACCESS_STRUCTURE             0x04    // Contains the public-key indices for the current access structure.
-#define P1_ACCESS_STRUCTURE_THRESHOLD   0x05    // Contains the threshold for the current access structure.
+#define P1_INITIAL                      0x00    // Contains key derivation path, update header and update kind, update key type and count of incoming public update keys.
+#define P1_PUBLIC_KEY                   0x01    // Contains one public-key per command.
+#define P1_ACCESS_STRUCTURE_INITIAL     0x02    // Contains the number of public-key indices for the current access.
+#define P1_ACCESS_STRUCTURE             0x03    // Contains the public-key indices for the current access structure.
+#define P1_ACCESS_STRUCTURE_THRESHOLD   0x04    // Contains the threshold for the current access structure.
 
 void handleSignUpdateAuthorizations(uint8_t *cdata, uint8_t p1, uint8_t updateType, volatile unsigned int *flags) {
     if (p1 != P1_INITIAL && tx_state->initialized != true) {
@@ -170,15 +169,12 @@ void handleSignUpdateAuthorizations(uint8_t *cdata, uint8_t p1, uint8_t updateTy
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 1, NULL, 0);
         cdata += 1;
 
-        ctx->state = TX_UPDATE_AUTHORIZATIONS_PUBLIC_KEY_COUNT;
-        ux_flow_init(0, ux_sign_update_authorizations_review, NULL);
-        *flags |= IO_ASYNCH_REPLY;
-    } else if (p1 == P1_PUBLIC_KEY_INITIAL && ctx->state == TX_UPDATE_AUTHORIZATIONS_PUBLIC_KEY_COUNT) {
         ctx->publicKeyListLength = U2BE(cdata, 0);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 2, NULL, 0);
 
         ctx->state = TX_UPDATE_AUTHORIZATIONS_PUBLIC_KEY;
-        sendSuccessNoIdle();
+        ux_flow_init(0, ux_sign_update_authorizations_review, NULL);
+        *flags |= IO_ASYNCH_REPLY;
     } else if (p1 == P1_PUBLIC_KEY && ctx->state == TX_UPDATE_AUTHORIZATIONS_PUBLIC_KEY && ctx->publicKeyListLength > 0) {
         // Hash the schemeId
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 1, NULL, 0);

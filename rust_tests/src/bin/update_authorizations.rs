@@ -8,6 +8,7 @@ fn main() {
     let mut key_derivation_path = path::generate_key_derivation_path();
     let mut update_type = hex::decode("0C").unwrap();
     let mut prefix = hex::decode("02").unwrap();
+    let mut public_key_list_length = hex::decode("0002").unwrap();
 
     let ledger = LedgerApp::new().unwrap();
     
@@ -16,6 +17,7 @@ fn main() {
     cdata.append(&mut update_transaction_header::generate_update_transaction_header());
     cdata.append(&mut update_type);
     cdata.append(&mut prefix);
+    cdata.append(&mut public_key_list_length);
 
     let command = ApduCommand {
         cla: 224, // Has to be this value for all commands.
@@ -23,19 +25,6 @@ fn main() {
         p1: 0,
         p2: 0,
         length: cdata.len() as u8,
-        data: cdata
-    };
-    ledger.exchange(command).unwrap();
-
-    // Send the length of the list of public-keys.
-    let public_key_list_length = hex::decode("0002").unwrap();
-    cdata = public_key_list_length;
-    let command = ApduCommand {
-        cla: 224,
-        ins: 0x2A,
-        p1: 1,
-        p2: 0,
-        length: 0,
         data: cdata
     };
     ledger.exchange(command).unwrap();
@@ -49,7 +38,7 @@ fn main() {
         let command = ApduCommand {
             cla: 224,
             ins: 0x2A,
-            p1: 2,
+            p1: 1,
             p2: 0,
             length: 0,
             data: public_key.clone()
@@ -67,7 +56,7 @@ fn main() {
         let command = ApduCommand {
             cla: 224, // Has to be this value for all commands.
             ins: 0x2A,   // Sign update authorizations
-            p1: 3,
+            p1: 2,
             p2: 0,
             length: command_data.len() as u8,
             data: command_data
@@ -88,7 +77,7 @@ fn main() {
         let command = ApduCommand {
             cla: 224,
             ins: 0x2A,
-            p1: 4,
+            p1: 3,
             p2: 0,
             length: 0,
             data: access_structure_cdata
@@ -103,7 +92,7 @@ fn main() {
         let command = ApduCommand {
             cla: 224,
             ins: 0x2A,
-            p1: 5,
+            p1: 4,
             p2: 0,
             length: 0,
             data: threshold_cdata

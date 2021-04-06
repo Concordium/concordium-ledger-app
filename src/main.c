@@ -40,7 +40,7 @@
 #include "signUpdateBakerStake.h"
 #include "signUpdateBakerRestakeEarnings.h"
 #include "signUpdateBakerStakeThreshold.h"
-#include "signRootKeysUpdate.h"
+#include "signHigherLevelKeyUpdate.h"
 #include "ux.h"
 #include <string.h>
 
