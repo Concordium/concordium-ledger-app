@@ -34,6 +34,15 @@ void sendSuccessNoIdle();
 void sendSuccess(uint8_t tx);
 
 /**
+ * Writes the input amount of µGTU to the supplied destination as its value in
+ * GTU with thousand separators. 
+ * @param dst where to write the thousand separated representation of the µGTU
+ * @param number the integer µGTU amount to convert to a GTU display version
+ * @return number of bytes written to 'dst'
+ */ 
+int amountToGtuDisplay(uint8_t *dst, uint64_t microGtuAmount);
+
+/**
  * Helper method that writes the input integer to a format that the device can 
  * display on the screen.
  * @param dst where to write the text representation of the integer

@@ -8,9 +8,9 @@ static tx_state_t *tx_state = &global_tx_state;
 
 UX_STEP_NOCB(
     ux_sign_flow_1_step,
-    bn,
+    bn_paging,
     {
-      "Amount (uGTU)",
+      "Amount (GTU)",
       (char *) global.signTransferContext.displayAmount,
     });
 UX_STEP_NOCB(
@@ -56,7 +56,7 @@ void handleSignTransfer(uint8_t *cdata, volatile unsigned int *flags) {
 
     // Build display value of the amount to transfer, and also add the bytes to the hash.
     uint64_t amount = U8BE(cdata, 0);
-    bin2dec(ctx->displayAmount, amount);
+    amountToGtuDisplay(ctx->displayAmount, amount);
     cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 8, NULL, 0);
 
     // Display the transaction information to the user (recipient address and amount to be sent).

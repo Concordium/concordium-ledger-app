@@ -8,7 +8,7 @@ use base58check::*;
 fn main() {
     let transaction_kind = "03";
     
-    let mut amount = hex::decode("00000000000F4240").unwrap();
+    let mut amount = hex::decode("FFFFFFFFFFFFFFFF").unwrap();
     let sender_address = "3C8N65hBwc2cNtJkGmVyGeWYxhZ6R3X77mLWTwAKsnAnyworTq";
     let mut receiver_address = sender_address.from_base58check().unwrap().1;
 

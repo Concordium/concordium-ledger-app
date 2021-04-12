@@ -192,7 +192,7 @@ extern tx_state_t global_tx_state;
 // into each handler file having its own struct here.
 typedef struct {
     unsigned char displayStr[52];
-    uint8_t displayAmount[21];
+    uint8_t displayAmount[26];
 } signTransferContext_t;
 
 typedef struct {
