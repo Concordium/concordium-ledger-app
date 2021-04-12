@@ -69,7 +69,6 @@ void handleSignEncryptedAmountTransfer(uint8_t *cdata, uint8_t p1, uint8_t dataL
         // Save proof size so that we know when we are done processing the 
         // proof bytes that we are going to receive.
         ctx->proofSize = U2BE(cdata, 0);
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 2, NULL, 0);
 
         ctx->state = TX_ENCRYPTED_AMOUNT_TRANSFER_PROOFS;
         sendSuccessNoIdle();
