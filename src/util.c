@@ -122,16 +122,21 @@ int amountToGtuDisplay(uint8_t *dst, uint64_t microGtuAmount) {
     if (wholeNumberLength % 3 == 0) {
         separatorCount -= 1;
     }
-
+    
     // The first 6 digits should be without thousand separators,
     // as they are part of the decimal part of the number. Write those
     // characters first to the destination output and separate with ','
     uint8_t decimalSeparatorCount = 0;
+    int decimalPartLength = 0;
     uint64_t decimalPart = microGtuAmount % 1000000;
     if (decimalPart != 0) {
-        decimalAmountToGtuDisplay(dst + wholeNumberLength + separatorCount + 1, decimalPart);
+        decimalPartLength = decimalAmountToGtuDisplay(dst + wholeNumberLength + separatorCount + 1, decimalPart);
         dst[wholeNumberLength + separatorCount] = ',';
         decimalSeparatorCount = 1;
+
+        // Adjust length, as we might not have exactly 6 decimals anymore, as we have removed
+        // non-significant zeroes at the end of the number.
+        length -= 6 - decimalPartLength;
     } else {
         // The number does not have any decimals (they are all 0), so we reduce the total
         // length of the number to remove the decimals, as we don't need them to display the number.
