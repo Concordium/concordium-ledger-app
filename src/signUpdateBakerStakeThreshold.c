@@ -25,7 +25,7 @@ void handleSignUpdateBakerStakeThreshold(uint8_t *cdata, volatile unsigned int *
     cdata += hashUpdateHeaderAndType(cdata, UPDATE_TYPE_BAKER_STAKE_THRESHOLD);
 
     uint64_t bakerThresholdAmount = U8BE(cdata, 0);
-    bin2dec(ctx->stakeThreshold, bakerThresholdAmount);
+    amountToGtuDisplay(ctx->stakeThreshold, bakerThresholdAmount);
     cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 8, NULL, 0);
     cdata += 8;
 

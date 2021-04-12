@@ -79,7 +79,7 @@ void processNextScheduledAmount(uint8_t *buffer) {
         uint64_t amount = U8BE(ctx->buffer, ctx->pos);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, buffer + ctx->pos, 8, NULL, 0);
         ctx->pos += 8;
-        bin2dec(ctx->displayAmount, amount);
+        amountToGtuDisplay(ctx->displayAmount, amount);
 
         // We read one more scheduled amount, so count down to keep track of remaining to process.
         ctx->scheduledAmountsInCurrentPacket -= 1;

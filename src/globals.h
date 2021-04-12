@@ -200,7 +200,7 @@ typedef struct {
     uint8_t remainingNumberOfScheduledAmounts;
     uint8_t scheduledAmountsInCurrentPacket;
 
-    uint8_t displayAmount[21];
+    uint8_t displayAmount[26];
     uint8_t displayTimestamp[25];
 
     // Buffer to hold the incoming databuffer so that we can iterate over it.
@@ -257,7 +257,7 @@ typedef struct {
 } signElectionDifficultyContext_t;
 
 typedef struct {
-    uint8_t stakeThreshold[21];
+    uint8_t stakeThreshold[26];
 } signUpdateBakerStakeThresholdContext_t;
 
 typedef struct {
@@ -279,7 +279,7 @@ typedef struct {
 } signUpdateAuthorizations_t;
 
 typedef struct {
-    uint8_t amount[9];
+    uint8_t amount[26];
 } signTransferToEncrypted_t;
 
 typedef struct { 
@@ -298,19 +298,19 @@ typedef struct {
 } signPublicInformationForIp_t;
 
 typedef struct {
-    uint8_t amount[20];
+    uint8_t amount[26];
     uint16_t proofSize;
     transferToPublicState_t state;
 } signTransferToPublic_t;
 
 typedef struct {
-    uint8_t amount[20];
+    uint8_t amount[26];
     uint8_t restake[4];
     addBakerState_t state;
 } signAddBakerContext_t;
 
 typedef struct {
-    uint8_t amount[20];
+    uint8_t amount[26];
 } signUpdateBakerStakeContext_t;
 
 typedef struct {
