@@ -94,6 +94,10 @@ void handleSignHigherLevelKeys(uint8_t *cdata, uint8_t p1, uint8_t updateType, v
             THROW(SW_INVALID_TRANSACTION);
         }
 
+        // Hash the index
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 1, NULL, 0);
+        cdata += 1;
+
         // Hash the schemeId
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 1, NULL, 0);
         cdata += 1;
