@@ -93,11 +93,10 @@ tx_state_t global_tx_state;
 #define INS_UPDATE_MINT_DISTRIBUTION    0x25
 #define INS_UPDATE_ELECTION_DIFFICULTY  0x26
 #define INS_UPDATE_BAKER_STAKE_THRESHOLD    0x27
-#define INS_UPDATE_ROOT_KEYS_WITH_ROOT_KEYS 0x28
-#define INS_UPDATE_LEVEL1_KEYS_WITH_ROOT_KEYS 0x29
-#define INS_UPDATE_LEVEL2_KEYS_WITH_ROOT_KEYS 0x2A
-#define INS_UPDATE_LEVEL1_KEYS_LEVEL1_KEYS 0x2B
-#define INS_UPDATE_LEVEL2_KEYS_LEVEL1_KEYS 0x2C
+
+#define INS_UPDATE_ROOT_KEYS 0x28
+#define INS_UPDATE_LEVEL1_KEYS 0x29
+#define INS_UPDATE_LEVEL2_KEYS 0x2A
 
 #define INS_SIGN_UPDATE_CREDENTIAL      0x31
 
@@ -199,20 +198,14 @@ static void concordium_main(void) {
                     case INS_UPDATE_BAKER_STAKE_THRESHOLD:
                         handleSignUpdateBakerStakeThreshold(G_io_apdu_buffer + OFFSET_CDATA, &flags);
                         break;
-                    case INS_UPDATE_ROOT_KEYS_WITH_ROOT_KEYS:
-                        handleSignHigherLevelKeys(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_P1], UPDATE_TYPE_UPDATE_ROOT_KEYS_WITH_ROOT_KEYS, &flags);
+                    case INS_UPDATE_ROOT_KEYS:
+                        handleSignHigherLevelKeys(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_P1], UPDATE_TYPE_UPDATE_ROOT_KEYS, &flags);
                         break;
-                    case INS_UPDATE_LEVEL1_KEYS_WITH_ROOT_KEYS:
-                        handleSignHigherLevelKeys(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_P1], UPDATE_TYPE_UPDATE_LEVEL_1_KEYS_WITH_ROOT_KEYS, &flags);
+                    case INS_UPDATE_LEVEL1_KEYS:
+                        handleSignHigherLevelKeys(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_P1], UPDATE_TYPE_UPDATE_LEVEL1_KEYS, &flags);
                         break;
-                    case INS_UPDATE_LEVEL1_KEYS_LEVEL1_KEYS:
-                        handleSignHigherLevelKeys(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_P1], UPDATE_TYPE_UPDATE_LEVEL_1_KEYS_WITH_LEVEL_1_KEYS, &flags);
-                        break;
-                    case INS_UPDATE_LEVEL2_KEYS_WITH_ROOT_KEYS:
-                        handleSignUpdateAuthorizations(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_P1], UPDATE_TYPE_UPDATE_LEVEL_2_KEYS_WITH_ROOT_KEYS, &flags);
-                        break;
-                    case INS_UPDATE_LEVEL2_KEYS_LEVEL1_KEYS:
-                        handleSignUpdateAuthorizations(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_P1], UPDATE_TYPE_UPDATE_LEVEL_2_KEYS_WITH_LEVEL_1_KEYS, &flags);
+                    case INS_UPDATE_LEVEL2_KEYS:
+                        handleSignUpdateAuthorizations(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_P1], UPDATE_TYPE_UPDATE_LEVEL2_KEYS, &flags);
                         break;
                     default:
                         THROW(0x6D00);

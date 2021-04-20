@@ -150,20 +150,12 @@ void handleSignUpdateAuthorizations(uint8_t *cdata, uint8_t p1, uint8_t updateTy
         ctx->authorizationType = 0;
         tx_state->initialized = true;
 
-        // Determine the epected key update type from the update type. This is used
-        // to validate that the transaction is correct.
-        uint8_t expectedKeyUpdateType;
-        if (updateType == UPDATE_TYPE_UPDATE_LEVEL_2_KEYS_WITH_ROOT_KEYS) {
-            os_memmove(ctx->type, "Level 2 w. root keys\0", 21);
-            expectedKeyUpdateType = ROOT_UPDATE_LEVEL_2;
-        } else if (updateType == UPDATE_TYPE_UPDATE_LEVEL_2_KEYS_WITH_LEVEL_1_KEYS) {
-            os_memmove(ctx->type, "Level 2 w. level 1 keys\0", 24);
-            expectedKeyUpdateType = LEVEL1_UPDATE_LEVEL_2;
-        } else {
-            THROW(SW_INVALID_TRANSACTION);
-        }
         uint8_t keyUpdateType = cdata[0];
-        if (keyUpdateType != expectedKeyUpdateType) {
+        if (keyUpdateType == ROOT_UPDATE_LEVEL_2) {
+            os_memmove(ctx->type, "Level 2 w. root keys\0", 21);
+        } else if (keyUpdateType == LEVEL1_UPDATE_LEVEL_2) {
+            os_memmove(ctx->type, "Level 2 w. level 1 keys\0", 24);
+        } else {
             THROW(SW_INVALID_TRANSACTION);
         }
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 1, NULL, 0);

@@ -54,28 +54,21 @@ void handleSignHigherLevelKeys(uint8_t *cdata, uint8_t p1, uint8_t updateType, v
         tx_state->initialized = true;
         cdata += hashUpdateHeaderAndType(cdata, updateType);
 
-        // Display the type of transaction (root updating root, root updating level1 or level1 updating level 1).
-        // Also determine the expected key update type, which is the next byte in the transaction, so that we can
-        // use it to validate.
-        uint8_t expectedKeyUpdateType;
-        if (updateType == UPDATE_TYPE_UPDATE_ROOT_KEYS_WITH_ROOT_KEYS) {
-            os_memmove(ctx->type, "Root w. root keys\0", 18);
-            expectedKeyUpdateType = ROOT_UPDATE_ROOT;
-        } else if (updateType == UPDATE_TYPE_UPDATE_LEVEL_1_KEYS_WITH_ROOT_KEYS) {
-            os_memmove(ctx->type, "Level 1 w. root keys\0", 21);
-            expectedKeyUpdateType = ROOT_UPDATE_LEVEL_1;
-        } else if (updateType == UPDATE_TYPE_UPDATE_LEVEL_1_KEYS_WITH_LEVEL_1_KEYS) { 
-            os_memmove(ctx->type, "Level 1 w. level 1 keys\0", 25);
-            expectedKeyUpdateType = LEVEL1_UPDATE_LEVEL_1;
-        } else {
-            THROW(SW_INVALID_TRANSACTION);
-        }
-
-        // Validate that the transaction contains the expected key update type, if not then the received
-        // transaction was invalid so we should fail.
+        // The specific type of key update is determined by this byte.
         uint8_t keyUpdateType = cdata[0];
-        if (keyUpdateType != expectedKeyUpdateType) {
-            THROW(SW_INVALID_TRANSACTION);
+        if (updateType == UPDATE_TYPE_UPDATE_ROOT_KEYS) {
+            if (keyUpdateType != ROOT_UPDATE_ROOT) {
+                THROW(SW_INVALID_TRANSACTION);
+            }
+            os_memmove(ctx->type, "Root w. root keys\0", 18);
+        } else if (updateType == UPDATE_TYPE_UPDATE_LEVEL1_KEYS) {
+            if (keyUpdateType == ROOT_UPDATE_LEVEL_1) {
+                os_memmove(ctx->type, "Level 1 w. root keys\0", 21);
+            } else if (keyUpdateType == LEVEL1_UPDATE_LEVEL_1) {
+                os_memmove(ctx->type, "Level 1 w. level 1 keys\0", 25);
+            } else {
+                THROW(SW_INVALID_TRANSACTION);
+            }
         }
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 1, NULL, 0);
         cdata += 1;
