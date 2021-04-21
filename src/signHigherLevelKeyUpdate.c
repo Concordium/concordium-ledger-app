@@ -57,13 +57,15 @@ void handleSignHigherLevelKeys(uint8_t *cdata, uint8_t p1, uint8_t updateType, v
         // The specific type of key update is determined by this byte.
         uint8_t keyUpdateType = cdata[0];
         if (updateType == UPDATE_TYPE_UPDATE_ROOT_KEYS) {
-            if (keyUpdateType != ROOT_UPDATE_ROOT) {
+            if (keyUpdateType == ROOT_UPDATE_ROOT) {
+                os_memmove(ctx->type, "Root w. root keys\0", 18);   
+            } else if (keyUpdateType == ROOT_UPDATE_LEVEL_1) {
+                os_memmove(ctx->type, "Level 1 w. root keys\0", 21);
+            } else {
                 THROW(SW_INVALID_TRANSACTION);
             }
-            os_memmove(ctx->type, "Root w. root keys\0", 18);
         } else if (updateType == UPDATE_TYPE_UPDATE_LEVEL1_KEYS) {
             if (keyUpdateType == ROOT_UPDATE_LEVEL_1) {
-                os_memmove(ctx->type, "Level 1 w. root keys\0", 21);
             } else if (keyUpdateType == LEVEL1_UPDATE_LEVEL_1) {
                 os_memmove(ctx->type, "Level 1 w. level 1 keys\0", 25);
             } else {
