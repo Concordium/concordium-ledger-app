@@ -6,7 +6,7 @@ use ledger::{ApduCommand, LedgerApp};
 
 fn main() {
     let mut key_derivation_path = path::generate_key_derivation_path();
-    let mut update_type = hex::decode("0B").unwrap();
+    let mut update_type = hex::decode("0A").unwrap();
     let mut root_key_update_type = hex::decode("01").unwrap();
     let mut number_of_update_keys = hex::decode("0002").unwrap();
 
@@ -19,7 +19,7 @@ fn main() {
 
     let command = ApduCommand {
         cla: 224,
-        ins: 0x29,
+        ins: 0x28,
         p1: 0,
         p2: 0,
         length: command_data.len() as u8,
@@ -37,7 +37,7 @@ fn main() {
     for verification_key in verification_keys {
         let command = ApduCommand {
             cla: 224,
-            ins: 0x29,
+            ins: 0x28,
             p1: 1,
             p2: 0,
             length: verification_key.len() as u8,
@@ -49,7 +49,7 @@ fn main() {
     let threshold = hex::decode("0002").unwrap();
     let command = ApduCommand {
         cla: 224,
-        ins: 0x29,
+        ins: 0x28,
         p1: 2,
         p2: 0,
         length: threshold.len() as u8,
