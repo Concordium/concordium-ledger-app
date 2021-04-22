@@ -26,6 +26,12 @@ void sendUserRejection();
 void sendSuccessNoIdle();
 
 /**
+ * Send a success with a result back to the caller without returning the display to the 
+ * idle menu.
+ */
+void sendSuccessResultNoIdle(uint8_t tx);
+
+/**
  * Sends a success back to the caller, and then returns to the menu screen. The result data
  * should already have been written to the APDU buffer before calling this method, and the caller
  * should provide the correct tx offset, i.e. the number of bytes already written to the APDU buffer.

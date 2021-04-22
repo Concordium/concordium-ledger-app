@@ -327,7 +327,8 @@ typedef struct {
 } signUpdateProtocolContext_t;
 
 typedef struct { 
-    uint8_t display[64];
+    uint8_t display[14];
+    char publicKey[64];
     bool signPublicKey;
 } exportPublicKeyContext_t;
 

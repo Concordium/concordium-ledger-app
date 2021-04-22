@@ -1,18 +1,19 @@
 #include "os.h"
 #include "ux.h"
 #include "util.h"
+#include "menu.h"
 
 static keyDerivationPath_t *keyPath = &path;
 static exportPublicKeyContext_t *ctx = &global.exportPublicKeyContext;
 
-void sendPublicKey();
+void sendPublicKey(bool compare);
 
 // UI definitions for the approval of the generation of a public-key. This prompts the user to accept that
 // a public-key will be generated and returned to the computer.
 UX_STEP_VALID(
     ux_generate_public_flow_0_step,
     pnn,
-    sendPublicKey(),
+    sendPublicKey(true),
     {
       &C_icon_validate_14,
       "Public-key",
@@ -32,11 +33,26 @@ UX_FLOW(ux_generate_public_flow,
     FLOW_LOOP
 );
 
+// UI definitions for comparison of public-key on the device
+// with the public-key that the caller received.
+UX_STEP_VALID(
+    ux_sign_compare_public_key_0_step,
+    bnnn_paging,
+    ui_idle(),
+    {
+      .title = "Compare",
+      .text = (char *) global.exportPublicKeyContext.publicKey
+    });
+UX_FLOW(ux_sign_compare_public_key,
+    &ux_sign_compare_public_key_0_step
+);
+
+
 /**
  * Derive the public-key for the given path, and then write it to
  * the APDU buffer to be returned to the caller.
  */
-void sendPublicKey() {
+void sendPublicKey(bool compare) {
     uint8_t publicKey[32];
     getPublicKey(publicKey);
 
@@ -56,8 +72,16 @@ void sendPublicKey() {
         tx += sizeof(signedPublicKey);
     }
 
+
     // Send back success response including the public-key (and signature, if wanted).
-    sendSuccess(tx);
+    if (compare) {
+        // Show the public-key so that the user can verify the public-key.
+        sendSuccessResultNoIdle(tx);
+        toHex(publicKey, sizeof(publicKey), ctx->publicKey);
+        ux_flow_init(0, ux_sign_compare_public_key, NULL);    
+    } else {
+        sendSuccess(tx);
+    }
 }
 
 void handleGetPublicKey(uint8_t *cdata, uint8_t p1, uint8_t p2, volatile unsigned int *flags) {
@@ -70,10 +94,9 @@ void handleGetPublicKey(uint8_t *cdata, uint8_t p1, uint8_t p2, volatile unsigne
     ctx->signPublicKey = p2 == 0x01;
 
     // If P1 == 0x01, then we skip displaying the key being exported. This is used when it 
-    // it is not important for the user to validate the key path, i.e. for governance, 
-    // where an unauthorized key will be rejected anyway.
+    // it is not important for the user to validate the key.
     if (p1 == 0x01) {
-        sendPublicKey();
+        sendPublicKey(false);
     } else {
         // If the key path is of length 5, then it is a request for a governance key.
         if (keyPath->pathLength == 5) {

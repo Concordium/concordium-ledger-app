@@ -227,9 +227,13 @@ void sendSuccess(uint8_t tx) {
 }
 
 void sendSuccessNoIdle() {
-    G_io_apdu_buffer[0] = 0x90;
-    G_io_apdu_buffer[1] = 0x00;
-    io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, 2);
+    sendSuccessResultNoIdle(0);
+}
+
+void sendSuccessResultNoIdle(uint8_t tx) {
+    G_io_apdu_buffer[tx++] = 0x90;
+    G_io_apdu_buffer[tx++] = 0x00;
+    io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, tx);
 }
 
 void toHex(uint8_t *byteArray, const uint64_t len, char *asHex) {
