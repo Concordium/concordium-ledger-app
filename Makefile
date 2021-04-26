@@ -97,12 +97,14 @@ release: all
 	@echo
 	@echo $(APPNAME)
 	@echo "Version $(APPVERSION)" 
-	python -m ledgerblue.loadApp $(APP_LOAD_PARAMS) --offline signed_app.apdu --signApp --signPrivateKey $(LEDGER_SIGNING_KEY)
+	python3 -m ledgerblue.loadApp $(APP_LOAD_PARAMS) --offline signed_app.apdu --signApp --signPrivateKey $(LEDGER_SIGNING_KEY)
 	@echo 
 	@echo "Signing and packaging application for release"
-	@echo "python -m ledgerblue.loadApp $(APP_LOAD_PARAMS) --signature `cat signed_app.apdu | tail -1 | cut -c15-`" >> install.sh
+	@echo "#!/bin/bash" >> install.sh
+	@echo "python3 -m ledgerblue.loadApp $(APP_LOAD_PARAMS) --signature `cat signed_app.apdu | tail -1 | cut -c15-`" >> install.sh
 	@chmod +x install.sh
-	@echo "python -m ledgerblue.deleteApp $(COMMON_DELETE_PARAMS)" >> uninstall.sh
+	@echo "#!/bin/bash" >> uninstall.sh
+	@echo "python3 -m ledgerblue.deleteApp $(COMMON_DELETE_PARAMS)" >> uninstall.sh
 	@chmod +x uninstall.sh
 	@chmod +x bin/app.hex
 	@zip concordium-ledger-app-$(APPVERSION).zip \
@@ -116,10 +118,10 @@ release: all
 	@echo "Application was successfully signed and packaged to concordium-ledger-app-$(APPVERSION).zip"
 
 load: all
-	python -m ledgerblue.loadApp $(APP_LOAD_PARAMS)
+	python3 -m ledgerblue.loadApp $(APP_LOAD_PARAMS)
 
 delete:
-	python -m ledgerblue.deleteApp $(COMMON_DELETE_PARAMS)
+	python3 -m ledgerblue.deleteApp $(COMMON_DELETE_PARAMS)
 
 # Import rules to compile the glyphs supplied in the glyphs/ directory
 include $(BOLOS_SDK)/Makefile.glyphs
