@@ -4,6 +4,7 @@
 /dep
 /src/glyphs.c
 /src/glyphs.h
+concordium-ledger-app-*
 .vscode
 .idea
 **/target/

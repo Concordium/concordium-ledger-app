@@ -9,7 +9,7 @@ has been added as a git submodule. Make sure to initialize submodules when check
 
 ```git submodule update --init```
 
-## Deploying application to Ledger Nano S
+## Building and deploying application to Ledger Nano S
 
 Start by following the [official guide](https://ledger.readthedocs.io/en/latest/userspace/getting_started.html) to 
 set your environment up correctly with the required dependencies.
@@ -40,3 +40,17 @@ device, make sure to deploy a custom certificate to the device. See the "PIN Byp
 
 For documentation of the exposed functionality and how to integrate with the Concordium specific 
 applications, please take a look [here](doc/api.md).
+
+## Building a release
+
+To make a new release of the Concordium Ledger application you must have set up the build
+environment like described in the [official guide](https://ledger.readthedocs.io/en/latest/userspace/getting_started.html).
+Additionally you must set the following environment variable
+```
+LEDGER_SIGNING_KEY=private_key_used_for_signing_releases
+```
+To build a new release make sure that `APPVERSION` has been bumped correctly, and then run
+```
+make release
+```
+The release will be packaged into a `.zip` archive with the required binary and the corresponding install scripts.

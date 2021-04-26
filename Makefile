@@ -18,17 +18,13 @@
 #*******************************************************************************
 
 export BOLOS_SDK = nanos-secure-sdk
-
-ifeq ($(BOLOS_SDK),)
-$(error BOLOS_SDK is not set)
-endif
 include $(BOLOS_SDK)/Makefile.defines
 
 # Main app configuration
-
 APPNAME = "Concordium"
 ICONNAME = nanos-concordium-icon.gif
 APPVERSION = 0.1.0
+
 APP_LOAD_PARAMS = --appFlags 0x00 $(COMMON_LOAD_PARAMS)
 
 # Restrict derivation paths to the Concordium specific path.
@@ -36,7 +32,7 @@ APP_LOAD_PARAMS = --appFlags 0x00 $(COMMON_LOAD_PARAMS)
 # APP_LOAD_PARAMS += --path "44'/691'"
 
 # Restrict derivation to only be able to use ed25519
-APP_LOAD_PARAMS += --curve ed25519
+APP_LOAD_PARAMS +=--curve ed25519
 
 # Build configuration
 APP_SOURCE_PATH += src
@@ -50,16 +46,13 @@ DEFINES += PRINTF\(...\)=
 
 DEFINES += HAVE_IO_USB HAVE_L4_USBLIB IO_USB_MAX_ENDPOINTS=7 IO_HID_EP_LENGTH=64 HAVE_USB_APDU
 
-#DEFINES += CX_COMPLIANCE_141
-
 # Both nano S and X benefit from the flow.
 DEFINES += HAVE_UX_FLOW
 
 # Use stack canary for development. Will reboot device if a stack overflow is detected.
-DEFINES += HAVE_BOLOS_APP_STACK_CANARY
+# DEFINES += HAVE_BOLOS_APP_STACK_CANARY
 
 # Compiler, assembler, and linker
-
 ifneq ($(BOLOS_ENV),)
 $(info BOLOS_ENV=$(BOLOS_ENV))
 CLANGPATH := $(BOLOS_ENV)/clang-arm-fropi/bin/
@@ -84,8 +77,43 @@ LD := $(GCCPATH)arm-none-eabi-gcc
 LDFLAGS += -O3 -Os
 LDLIBS += -lm -lgcc -lc
 
+# If a test signing key has been set, then use that to sign when loading
+# the application for development. Otherwise load it without signing.
+ifdef TEST_LEDGER_SIGNING_KEY
+load: APP_LOAD_PARAMS +=--signApp --signPrivateKey $(TEST_LEDGER_SIGNING_KEY) --rootPrivateKey $(TEST_LEDGER_SIGNING_KEY)
+endif
+
+# Pre-requisities for building a release
+ifndef LEDGER_SIGNING_KEY
+release: $(error The release signing key must be set when building a release.)
+endif
+
 # Main rules
 all: default
+
+release: all
+	@echo
+	@echo "CONCORDIUM LEDGER APP RELEASE BUILD"
+	@echo
+	@echo $(APPNAME)
+	@echo "Version $(APPVERSION)" 
+	python -m ledgerblue.loadApp $(APP_LOAD_PARAMS) --offline signed_app.apdu --signApp --signPrivateKey $(LEDGER_SIGNING_KEY)
+	@echo 
+	@echo "Signing and packaging application for release"
+	@echo "python -m ledgerblue.loadApp $(APP_LOAD_PARAMS) --signature `cat signed_app.apdu | tail -1 | cut -c15-`" >> install.sh
+	@chmod +x install.sh
+	@echo "python -m ledgerblue.deleteApp $(COMMON_DELETE_PARAMS)" >> uninstall.sh
+	@chmod +x uninstall.sh
+	@chmod +x bin/app.hex
+	@zip concordium-ledger-app-$(APPVERSION).zip \
+		install.sh \
+		uninstall.sh \
+		bin/app.hex
+	@rm -f install.sh
+	@rm -f uninstall.sh
+	@rm -f signed_app.apdu
+	@echo
+	@echo "Application was successfully signed and packaged to concordium-ledger-app-$(APPVERSION).zip"
 
 load: all
 	python -m ledgerblue.loadApp $(APP_LOAD_PARAMS)
