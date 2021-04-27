@@ -442,7 +442,7 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, uint8_t p2,
         os_memmove(temp, dataBuffer, 1);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 1, NULL, 0);
         dataBuffer += 1;
-        bin2dec(ctx->validTo, validToYear);
+        numberToText(ctx->validTo, validToYear);
         ctx->validTo[4] = ' ';
         bin2dec(ctx->validTo + 5, temp[0]);
 
@@ -453,7 +453,7 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, uint8_t p2,
         os_memmove(temp, dataBuffer, 1);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 1, NULL, 0);
         dataBuffer += 1;
-        bin2dec(ctx->createdAt, createdAtYear);
+        numberToText(ctx->createdAt, createdAtYear);
         ctx->createdAt[4] = ' ';
         bin2dec(ctx->createdAt + 5, temp[0]);
 

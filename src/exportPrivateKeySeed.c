@@ -100,7 +100,7 @@ void handleExportPrivateKeySeed(uint8_t *dataBuffer, uint8_t p1, volatile unsign
 
         uint8_t lengthCount = 5;
         os_memmove(ctx->display, "IDP #", lengthCount);
-        lengthCount += bin2dec(ctx->display + lengthCount, idp);
+        lengthCount += numberToText(ctx->display + lengthCount, idp);
         os_memmove(ctx->display + lengthCount, " ", 1);
         lengthCount += 1;
         os_memmove(ctx->display + lengthCount, "AR #", 4);

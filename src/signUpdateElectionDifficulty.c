@@ -34,7 +34,7 @@ void handleSignUpdateElectionDifficulty(uint8_t *cdata, volatile unsigned int *f
     if (numerator > 100000) {
         THROW(SW_INVALID_TRANSACTION);
     }
-    int numeratorLength = bin2dec(ctx->electionDifficulty, numerator);
+    int numeratorLength = numberToText(ctx->electionDifficulty, numerator);
     cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 4, NULL, 0);
     cdata += 4;
     os_memmove(ctx->electionDifficulty + numeratorLength, fraction, 10);

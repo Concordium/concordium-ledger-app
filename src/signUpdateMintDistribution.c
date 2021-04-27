@@ -49,24 +49,24 @@ void handleSignUpdateMintDistribution(uint8_t *cdata, volatile unsigned int *fla
     cdata += 5;
 
     // Build display of the mint rate as 'mintRateMantissa*10^(-mintRateExponent)'
-    int mintRateMantissaLength = bin2dec(ctx->mintRate, mintRateMantissa);
+    int mintRateMantissaLength = numberToText(ctx->mintRate, mintRateMantissa);
     uint8_t multiplication[6] = "*10^(-";
     os_memmove(ctx->mintRate + mintRateMantissaLength, multiplication, 6);
-    int mintRateExponentLength = bin2dec(ctx->mintRate + mintRateMantissaLength + 6, mintRateExponent);
+    int mintRateExponentLength = numberToText(ctx->mintRate + mintRateMantissaLength + 6, mintRateExponent);
     uint8_t end_paranthesis[2] = ")\0";
     os_memmove(ctx->mintRate + mintRateMantissaLength + 6 + mintRateExponentLength, end_paranthesis, 2);
 
     // Baker reward
     uint8_t fraction[10] = "/100000";
     uint32_t bakerReward = U4BE(cdata, 0);
-    int bakerRewardLength = bin2dec(ctx->bakerReward, bakerReward);
+    int bakerRewardLength = numberToText(ctx->bakerReward, bakerReward);
     cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 4, NULL, 0);
     cdata += 4;
     os_memmove(ctx->bakerReward + bakerRewardLength, fraction, 10);
 
     // Finalization reward
     uint32_t finalizationReward = U4BE(cdata, 0);
-    int finalizationRewardLength = bin2dec(ctx->finalizationReward, finalizationReward);
+    int finalizationRewardLength = numberToText(ctx->finalizationReward, finalizationReward);
     cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 4, NULL, 0);
     cdata += 4;
     os_memmove(ctx->finalizationReward + finalizationRewardLength, fraction, 10);

@@ -49,6 +49,15 @@ void sendSuccess(uint8_t tx);
 int amountToGtuDisplay(uint8_t *dst, uint64_t microGtuAmount);
 
 /**
+ * Helper method that writes the input integer to a format that the device
+ * can display on screen. The result is not string terminated.
+ * @param dst where to write the text representation of the integer
+ * @param number the integer to convert to characters
+ * @return number of bytes written to 'dst', i.e. the number of characters in the integer 'number'
+ */
+int numberToText(uint8_t *dst, uint64_t number);
+
+/**
  * Helper method that writes the input integer to a format that the device can 
  * display on the screen.
  * @param dst where to write the text representation of the integer
