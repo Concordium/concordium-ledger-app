@@ -43,7 +43,7 @@ UX_STEP_NOCB(
     ux_sign_scheduled_transfer_pair_flow_1_step,
     bn,
     {
-        "Amount (uGTU)",
+        "Amount",
         (char *) global.signTransferWithScheduleContext.displayAmount
     });
 UX_STEP_CB(
