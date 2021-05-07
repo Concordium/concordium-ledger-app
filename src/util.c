@@ -170,7 +170,7 @@ void getIdentityAccountDisplay(uint8_t *dst) {
     uint32_t accountIndex = keyPath->rawKeyDerivationPath[6];
 
     int offset = bin2dec(dst, identityIndex) - 1;
-    os_memmove(dst + offset, "/", 1);
+    memmove(dst + offset, "/", 1);
     offset = offset + 1;
     offset = offset + bin2dec(dst + offset, accountIndex);
 }

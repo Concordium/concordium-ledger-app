@@ -37,7 +37,7 @@ void handleSignUpdateElectionDifficulty(uint8_t *cdata, volatile unsigned int *f
     int numeratorLength = numberToText(ctx->electionDifficulty, numerator);
     cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 4, NULL, 0);
     cdata += 4;
-    os_memmove(ctx->electionDifficulty + numeratorLength, fraction, 10);
+    memmove(ctx->electionDifficulty + numeratorLength, fraction, 10);
 
     ux_flow_init(0, ux_sign_election_difficulty, NULL);
     *flags |= IO_ASYNCH_REPLY;

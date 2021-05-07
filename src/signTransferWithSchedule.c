@@ -127,7 +127,7 @@ void handleSignTransferWithSchedule(uint8_t *cdata, uint8_t p1, volatile unsigne
 
         // Extract the destination address and add to hash.
         uint8_t toAddress[32];
-        os_memmove(toAddress, cdata, 32);
+        memmove(toAddress, cdata, 32);
         cdata += 32;
         cx_hash((cx_hash_t *) &tx_state->hash, 0, toAddress, 32, NULL, 0);
 
@@ -165,7 +165,7 @@ void handleSignTransferWithSchedule(uint8_t *cdata, uint8_t p1, volatile unsigne
         // Reset pointer keeping track of where we are in the current packet being processed.
         ctx->pos = 0;
 
-        os_memmove(ctx->buffer, cdata, ctx->scheduledAmountsInCurrentPacket * 16);
+        memmove(ctx->buffer, cdata, ctx->scheduledAmountsInCurrentPacket * 16);
         processNextScheduledAmount(ctx->buffer);
 
         // Tell the main process to wait for a button press.

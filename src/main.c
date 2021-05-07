@@ -16,8 +16,10 @@
 ********************************************************************************/
 
 #include "glyphs.h"
-#include "menu.h"
 #include "os.h"
+#include "cx.h"
+#include "os_io_seproxyhal.h"
+#include "menu.h"
 #include "getPublicKey.h"
 #include "signTransfer.h"
 #include "signTransferWithSchedule.h"
@@ -43,6 +45,7 @@
 #include "signHigherLevelKeyUpdate.h"
 #include "ux.h"
 #include <string.h>
+#include "seproxyhal_protocol.h"
 
 // Global variable definitions
 instructionContext global;
@@ -160,7 +163,7 @@ static void concordium_main(void) {
                         handleSignTransferToPublic(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_P1], G_io_apdu_buffer[OFFSET_LC], &flags);
                         break;
                     case INS_PUBLIC_INFO_FOR_IP:
-                        handleSignPublicInformationForIp(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_P1], G_io_apdu_buffer[OFFSET_LC], &flags);
+                        handleSignPublicInformationForIp(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_P1], &flags);
                         break;
                     case INS_UPDATE_PROTOCOL:
                         handleSignUpdateProtocol(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_P1], G_io_apdu_buffer[OFFSET_LC], &flags);
@@ -247,35 +250,35 @@ void io_seproxyhal_display(const bagl_element_t *element) {
 unsigned char io_event(unsigned char channel) {
 	// can't have more than one tag in the reply, not supported yet.
 	switch (G_io_seproxyhal_spi_buffer[0]) {
-	case SEPROXYHAL_TAG_FINGER_EVENT:
-		UX_FINGER_EVENT(G_io_seproxyhal_spi_buffer);
-		break;
+        case SEPROXYHAL_TAG_FINGER_EVENT:
+    		UX_FINGER_EVENT(G_io_seproxyhal_spi_buffer);
+	    	break;
 
-	case SEPROXYHAL_TAG_BUTTON_PUSH_EVENT:
-		UX_BUTTON_PUSH_EVENT(G_io_seproxyhal_spi_buffer);
-		break;
+        case SEPROXYHAL_TAG_BUTTON_PUSH_EVENT:
+            UX_BUTTON_PUSH_EVENT(G_io_seproxyhal_spi_buffer);
+            break;
 
-	case SEPROXYHAL_TAG_STATUS_EVENT:
-		if (G_io_apdu_media == IO_APDU_MEDIA_USB_HID &&
-			!(U4BE(G_io_seproxyhal_spi_buffer, 3) &
-			  SEPROXYHAL_TAG_STATUS_EVENT_FLAG_USB_POWERED)) {
-			THROW(EXCEPTION_IO_RESET);
-		}
-		UX_DEFAULT_EVENT();
-		break;
+        case SEPROXYHAL_TAG_STATUS_EVENT:
+            if (G_io_apdu_media == IO_APDU_MEDIA_USB_HID &&
+                !(U4BE(G_io_seproxyhal_spi_buffer, 3) &
+                SEPROXYHAL_TAG_STATUS_EVENT_FLAG_USB_POWERED)) {
+                THROW(EXCEPTION_IO_RESET);
+            }
+            UX_DEFAULT_EVENT();
+            break;
 
-	case SEPROXYHAL_TAG_DISPLAY_PROCESSED_EVENT:
-		UX_DISPLAYED_EVENT({});
-		break;
+        case SEPROXYHAL_TAG_DISPLAY_PROCESSED_EVENT:
+            UX_DISPLAYED_EVENT({});
+            break;
 
-	case SEPROXYHAL_TAG_TICKER_EVENT:
-		UX_TICKER_EVENT(G_io_seproxyhal_spi_buffer, {});
-		break;
+        case SEPROXYHAL_TAG_TICKER_EVENT:
+            UX_TICKER_EVENT(G_io_seproxyhal_spi_buffer, {});
+            break;
 
-	default:
-		UX_DEFAULT_EVENT();
-		break;
-	}
+        default:
+            UX_DEFAULT_EVENT();
+            break;
+    }
 
 	// close the event if not done previously (by a display or whatever)
 	if (!io_seproxyhal_spi_is_status_sent()) {

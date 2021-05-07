@@ -43,7 +43,7 @@ void handleSignEncryptedAmountTransfer(uint8_t *cdata, uint8_t p1, uint8_t dataL
 
         // To account address
         uint8_t toAddress[32];
-        os_memmove(toAddress, cdata, 32);
+        memmove(toAddress, cdata, 32);
         cdata += 32;
         cx_hash((cx_hash_t *) &tx_state->hash, 0, toAddress, 32, NULL, 0);
         size_t outputSize = sizeof(ctx->to);

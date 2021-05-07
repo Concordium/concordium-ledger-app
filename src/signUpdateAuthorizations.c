@@ -124,7 +124,7 @@ void processKeyIndices() {
     } else {
         uint16_t keyIndex = U2BE(ctx->buffer, ctx->bufferPointer);
         bin2dec(ctx->displayKeyIndex, keyIndex);
-        os_memmove(ctx->title, getAuthorizationName(ctx->authorizationType), 29);
+        memmove(ctx->title, getAuthorizationName(ctx->authorizationType), 29);
         ctx->bufferPointer += 2;
         ctx->accessStructureSize -= 1;
         ctx->processedCount -= 1;
@@ -152,9 +152,9 @@ void handleSignUpdateAuthorizations(uint8_t *cdata, uint8_t p1, uint8_t updateTy
 
         uint8_t keyUpdateType = cdata[0];
         if (keyUpdateType == ROOT_UPDATE_LEVEL_2) {
-            os_memmove(ctx->type, "Level 2 w. root keys\0", 21);
+            memmove(ctx->type, "Level 2 w. root keys\0", 21);
         } else if (keyUpdateType == LEVEL1_UPDATE_LEVEL_2) {
-            os_memmove(ctx->type, "Level 2 w. level 1 keys\0", 24);
+            memmove(ctx->type, "Level 2 w. level 1 keys\0", 24);
         } else {
             THROW(SW_INVALID_TRANSACTION);
         }
@@ -173,7 +173,7 @@ void handleSignUpdateAuthorizations(uint8_t *cdata, uint8_t p1, uint8_t updateTy
         cdata += 1;
 
         uint8_t publicKeyInput[32];
-        os_memmove(publicKeyInput, cdata, 32);
+        memmove(publicKeyInput, cdata, 32);
         toHex(publicKeyInput, 32, ctx->publicKey);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, publicKeyInput, 32, NULL, 0);
 
@@ -193,7 +193,7 @@ void handleSignUpdateAuthorizations(uint8_t *cdata, uint8_t p1, uint8_t updateTy
         ctx->processedCount = 0;
         while (ctx->accessStructureSize > 0 && ctx->processedCount < 127) {
             cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata + (2 * ctx->processedCount), 2, NULL, 0);
-            os_memmove(ctx->buffer + (2 * ctx->processedCount), cdata + (2 * ctx->processedCount), 2);
+            memmove(ctx->buffer + (2 * ctx->processedCount), cdata + (2 * ctx->processedCount), 2);
             ctx->processedCount += 1;
         }
         processKeyIndices();
@@ -203,7 +203,7 @@ void handleSignUpdateAuthorizations(uint8_t *cdata, uint8_t p1, uint8_t updateTy
         uint16_t threshold = U2BE(cdata, 0);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 2, NULL, 0);
         bin2dec(ctx->displayKeyIndex, threshold);
-        os_memmove(ctx->title, "Threshold", 10);
+        memmove(ctx->title, "Threshold", 10);
 
         ux_flow_init(0, ux_update_authorizations_threshold, NULL);
         *flags |= IO_ASYNCH_REPLY;

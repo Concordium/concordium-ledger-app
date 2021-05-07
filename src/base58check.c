@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #include "os.h"
 #include "cx.h"
+#include <string.h>
 
 #define MAX_ENC_INPUT_SIZE 120
 
@@ -52,7 +53,7 @@ int base58_encode(const unsigned char *in, size_t length, unsigned char *out, si
         return -1;
     }
 
-    os_memset(out, 0, outputSize);
+    memset(out, 0, outputSize);
     stopAt = outputSize - 1;
     for (startAt = zeroCount; startAt < length; startAt++) {
         int carry = in[startAt];
@@ -91,7 +92,7 @@ int base58_encode(const unsigned char *in, size_t length, unsigned char *out, si
         }
     }
 
-    os_memset(out, BASE58ALPHABET[0], zeroCount);
+    memset(out, BASE58ALPHABET[0], zeroCount);
     return 0;
 }
 
@@ -103,13 +104,13 @@ int base58check_encode(const unsigned char *in, size_t length, unsigned char *ou
     // Concordium uses a hardcoded version value of '1', therefore this byte is not received from the computer.
     buffer[0] = 1;
 
-    os_memmove(&buffer[1], in, length);
+    memmove(&buffer[1], in, length);
 
     // Calculate SHA256(SHA256(version + in)), and append the first 4 bytes to the (version + in) bytes.
     uint8_t hash[32];
     cx_hash_sha256(buffer, length + 1, hash, sizeof(hash));
     cx_hash_sha256(hash, sizeof(hash), hash, sizeof(hash));
-    os_memmove(&buffer[1 + length], hash, 4);
+    memmove(&buffer[1 + length], hash, 4);
 
     // The encoding input is the version + original input + 4 first bytes of double SHA256.
     return base58_encode(buffer, 1 + length + 4, out, outlen);

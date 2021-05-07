@@ -28,9 +28,9 @@ void handleSignUpdateBakerRestakeEarnings(uint8_t *cdata, volatile unsigned int 
     uint8_t restakeEarnings = cdata[0];
     cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 1, NULL, 0);
     if (restakeEarnings == 0) {
-        os_memmove(ctx->restake, "No\0", 3);
+        memmove(ctx->restake, "No\0", 3);
     } else if (restakeEarnings == 1) {
-        os_memmove(ctx->restake, "Yes\0", 4);
+        memmove(ctx->restake, "Yes\0", 4);
     } else {
         THROW(SW_INVALID_TRANSACTION);
     }

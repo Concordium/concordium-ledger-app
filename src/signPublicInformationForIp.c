@@ -57,7 +57,7 @@ UX_FLOW(ux_sign_public_info_for_ip_threshold,
 #define P1_VERIFICATION_KEY     0x01
 #define P1_THRESHOLD            0x02
 
-void handleSignPublicInformationForIp(uint8_t *cdata, uint8_t p1, uint8_t dataLength, volatile unsigned int *flags) {
+void handleSignPublicInformationForIp(uint8_t *cdata, uint8_t p1, volatile unsigned int *flags) {
     if (p1 != P1_INITIAL && tx_state->initialized == false) {
         THROW(SW_INVALID_STATE);
     }
@@ -69,14 +69,14 @@ void handleSignPublicInformationForIp(uint8_t *cdata, uint8_t p1, uint8_t dataLe
 
         // Parse id_cred_pub so it can be displayed.
         uint8_t idCredPub[48];
-        os_memmove(idCredPub, cdata, 48);
+        memmove(idCredPub, cdata, 48);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, idCredPub, 48, NULL, 0);
         cdata += 48;
         toHex(idCredPub, 48, ctx->idCredPub);
 
         // Parse cred_id so it can be displayed.
         uint8_t credId[48];
-        os_memmove(credId, cdata, 48);
+        memmove(credId, cdata, 48);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, credId, 48, NULL, 0);
         cdata += 48;
         toHex(credId, 48, ctx->credId);
@@ -102,7 +102,7 @@ void handleSignPublicInformationForIp(uint8_t *cdata, uint8_t p1, uint8_t dataLe
         cdata += 1;
 
         uint8_t publicKey[32];
-        os_memmove(publicKey, cdata, 32);
+        memmove(publicKey, cdata, 32);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, publicKey, 32, NULL, 0);
         cdata += 32;
         toHex(publicKey, 32, ctx->publicKey);

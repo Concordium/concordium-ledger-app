@@ -92,13 +92,13 @@ void handleSignUpdateProtocol(uint8_t *cdata, uint8_t p1, uint8_t dataLength, vo
             THROW(SW_INVALID_STATE);
         }
 
-        os_memmove(ctx->buffer, cdata, dataLength);
+        memmove(ctx->buffer, cdata, dataLength);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, dataLength, NULL, 0);
         ctx->textLength -= dataLength;
         ctx->payloadLength -= dataLength;
 
         if (dataLength < 255) {
-            os_memmove(ctx->buffer + dataLength, "\0", 1);
+            memmove(ctx->buffer + dataLength, "\0", 1);
         }
 
         switch (ctx->textState) {

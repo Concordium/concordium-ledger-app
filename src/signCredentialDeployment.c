@@ -232,7 +232,7 @@ void parseVerificationKey(uint8_t *buffer) {
     buffer += 1;
 
     uint8_t verificationKey[32];
-    os_memmove(verificationKey, buffer, 32);
+    memmove(verificationKey, buffer, 32);
     buffer += 32;
     cx_hash((cx_hash_t *) &tx_state->hash, 0, verificationKey, 32, NULL, 0);
 
@@ -375,28 +375,28 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, uint8_t p2,
 
         // Parse signature threshold.
         uint8_t temp[1];
-        os_memmove(temp, dataBuffer, 1);
+        memmove(temp, dataBuffer, 1);
         bin2dec(ctx->signatureThreshold, temp[0]);
         dataBuffer += 1;
         cx_hash((cx_hash_t *) &tx_state->hash, 0, temp, 1, NULL, 0);
 
         // Parse RegIdCred and make it displayable as hex.
         uint8_t regIdCred[48];
-        os_memmove(regIdCred, dataBuffer, 48);
+        memmove(regIdCred, dataBuffer, 48);
         dataBuffer += 48;
         toHex(regIdCred, sizeof(regIdCred), ctx->regIdCred);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, regIdCred, 48, NULL, 0);
 
         // Parse identity provider identity.
         uint8_t identityProviderIdentity[4];
-        os_memmove(identityProviderIdentity, dataBuffer, sizeof(identityProviderIdentity));
+        memmove(identityProviderIdentity, dataBuffer, sizeof(identityProviderIdentity));
         uint32_t identityProviderValue = U4BE(identityProviderIdentity, 0);
         bin2dec(ctx->identityProviderIdentity, identityProviderValue);
         dataBuffer += 4;
         cx_hash((cx_hash_t *) &tx_state->hash, 0, identityProviderIdentity, 4, NULL, 0);
 
         // Parse anonymity revocation threshold.
-        os_memmove(temp, dataBuffer, 1);
+        memmove(temp, dataBuffer, 1);
         bin2dec(ctx->anonymityRevocationThreshold, temp[0]);
         dataBuffer += 1;
         cx_hash((cx_hash_t *) &tx_state->hash, 0, temp, 1, NULL, 0);
@@ -424,7 +424,7 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, uint8_t p2,
 
         // Parse enc_id_cred_pub_share
         uint8_t encIdCredPubShare[96];
-        os_memmove(encIdCredPubShare, dataBuffer, 96);
+        memmove(encIdCredPubShare, dataBuffer, 96);
         toHex(encIdCredPubShare, sizeof(encIdCredPubShare), ctx->encIdCredPubShare);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, encIdCredPubShare, 96, NULL, 0);
         dataBuffer += 96;
@@ -439,7 +439,7 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, uint8_t p2,
         uint16_t validToYear = U2BE(dataBuffer, 0);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 2, NULL, 0);
         dataBuffer += 2;
-        os_memmove(temp, dataBuffer, 1);
+        memmove(temp, dataBuffer, 1);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 1, NULL, 0);
         dataBuffer += 1;
         numberToText(ctx->validTo, validToYear);
@@ -450,7 +450,7 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, uint8_t p2,
         uint16_t createdAtYear = U2BE(dataBuffer, 0);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 2, NULL, 0);
         dataBuffer += 2;
-        os_memmove(temp, dataBuffer, 1);
+        memmove(temp, dataBuffer, 1);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 1, NULL, 0);
         dataBuffer += 1;
         numberToText(ctx->createdAt, createdAtYear);
@@ -470,14 +470,14 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, uint8_t p2,
 
         // Parse attribute tag, and map it the attribute name (the display text).
         uint8_t attributeTag[1];
-        os_memmove(attributeTag, dataBuffer, 1);
+        memmove(attributeTag, dataBuffer, 1);
         dataBuffer += 1;
         cx_hash((cx_hash_t *) &attributeHash, 0, attributeTag, 1, NULL, 0);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, attributeTag, 1, NULL, 0);
 
         // Parse attribute length, so we know how much to parse in next packet.
         uint8_t attributeValueLength[1];
-        os_memmove(attributeValueLength, dataBuffer, 1);
+        memmove(attributeValueLength, dataBuffer, 1);
         ctx->attributeValueLength = attributeValueLength[0];
         cx_hash((cx_hash_t *) &attributeHash, 0, attributeValueLength, 1, NULL, 0);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, attributeValueLength, 1, NULL, 0);
@@ -538,7 +538,7 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, uint8_t p2,
             ux_flow_init(0, ux_sign_flow_shared, NULL);
         } else if (newOrExisting == 1) {
             uint8_t accountAddress[32];
-            os_memmove(accountAddress, dataBuffer, 32);
+            memmove(accountAddress, dataBuffer, 32);
 
             // Used to display account address.
             size_t outputSize = sizeof(ctx->accountAddress);

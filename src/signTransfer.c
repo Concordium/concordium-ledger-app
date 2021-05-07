@@ -40,7 +40,7 @@ void handleSignTransfer(uint8_t *cdata, volatile unsigned int *flags) {
 
     // Extract the recipient address and add to the hash.
     uint8_t toAddress[32];
-    os_memmove(toAddress, cdata, 32);
+    memmove(toAddress, cdata, 32);
     cdata += 32;
     cx_hash((cx_hash_t *) &tx_state->hash, 0, toAddress, 32, NULL, 0);
 

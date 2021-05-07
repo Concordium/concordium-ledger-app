@@ -96,7 +96,8 @@ release: all
 	@echo "CONCORDIUM LEDGER APP RELEASE BUILD"
 	@echo
 	@echo $(APPNAME)
-	@echo "Version $(APPVERSION)" 
+	@echo "Version $(APPVERSION)"
+	@echo "Target firmware version $(TARGET_VERSION)"
 	python3 -m ledgerblue.loadApp $(APP_LOAD_PARAMS) --offline signed_app.apdu --signApp --signPrivateKey $(LEDGER_SIGNING_KEY)
 	@echo 
 	@echo "Signing and packaging application for release"
@@ -107,7 +108,7 @@ release: all
 	@echo "python3 -m ledgerblue.deleteApp $(COMMON_DELETE_PARAMS)" >> uninstall.sh
 	@chmod +x uninstall.sh
 	@chmod +x bin/app.hex
-	@zip concordium-ledger-app-$(APPVERSION).zip \
+	@zip concordium-ledger-app-$(APPVERSION)-target-$(TARGET_VERSION).zip \
 		install.sh \
 		uninstall.sh \
 		bin/app.hex
@@ -115,7 +116,7 @@ release: all
 	@rm -f uninstall.sh
 	@rm -f signed_app.apdu
 	@echo
-	@echo "Application was successfully signed and packaged to concordium-ledger-app-$(APPVERSION).zip"
+	@echo "Application was successfully signed and packaged to concordium-ledger-app-$(APPVERSION)-target-$(TARGET_VERSION).zip"
 
 load: all
 	python3 -m ledgerblue.loadApp $(APP_LOAD_PARAMS)

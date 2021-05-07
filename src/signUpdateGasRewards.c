@@ -57,28 +57,28 @@ void handleSignUpdateGasRewards(uint8_t *cdata, volatile unsigned int *flags) {
     int gasBakerLength = numberToText(ctx->gasBaker, gasBaker);
     cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 4, NULL, 0);
     cdata += 4;
-    os_memmove(ctx->gasBaker + gasBakerLength, fraction, 10);
+    memmove(ctx->gasBaker + gasBakerLength, fraction, 10);
 
     // Finalization proof GAS bytes
     uint32_t gasFinalizationProof = U4BE(cdata, 0);
     int gasFinalizationProofLength = numberToText(ctx->gasFinalization, gasFinalizationProof);
     cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 4, NULL, 0);
     cdata += 4;
-    os_memmove(ctx->gasFinalization + gasFinalizationProofLength, fraction, 10);
+    memmove(ctx->gasFinalization + gasFinalizationProofLength, fraction, 10);
 
     // Account creation GAS bytes
     uint32_t gasAccountCreation = U4BE(cdata, 0);
     int gasAccountCreationLength = numberToText(ctx->gasAccountCreation, gasAccountCreation);
     cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 4, NULL, 0);
     cdata += 4;
-    os_memmove(ctx->gasAccountCreation + gasAccountCreationLength, fraction, 10);
+    memmove(ctx->gasAccountCreation + gasAccountCreationLength, fraction, 10);
 
     // Chain update GAS bytes
     uint32_t gasChainUpdate = U4BE(cdata, 0);
     int gasChainUpdateLength = numberToText(ctx->gasChainUpdate, gasChainUpdate);
     cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 4, NULL, 0);
     cdata += 4;
-    os_memmove(ctx->gasChainUpdate + gasChainUpdateLength, fraction, 10);
+    memmove(ctx->gasChainUpdate + gasChainUpdateLength, fraction, 10);
 
     ux_flow_init(0, ux_sign_gas_rewards, NULL);
     *flags |= IO_ASYNCH_REPLY;

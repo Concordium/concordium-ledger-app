@@ -68,7 +68,7 @@ void sendPublicKey(bool compare) {
     if (ctx->signPublicKey) {
         uint8_t signedPublicKey[64];
         sign(publicKey, signedPublicKey);
-        os_memmove(G_io_apdu_buffer + tx, signedPublicKey, sizeof(signedPublicKey));
+        memmove(G_io_apdu_buffer + tx, signedPublicKey, sizeof(signedPublicKey));
         tx += sizeof(signedPublicKey);
     }
 
@@ -104,13 +104,13 @@ void handleGetPublicKey(uint8_t *cdata, uint8_t p1, uint8_t p2, volatile unsigne
 
             switch (purpose) {
                 case 0:
-                    os_memmove(ctx->display, "Gov. root", 10);
+                    memmove(ctx->display, "Gov. root", 10);
                     break;
                 case 1:
-                    os_memmove(ctx->display, "Gov. level 1", 13);
+                    memmove(ctx->display, "Gov. level 1", 13);
                     break;
                 case 2:
-                    os_memmove(ctx->display, "Gov. level 2", 13);
+                    memmove(ctx->display, "Gov. level 2", 13);
                     break;
                 default:
                     THROW(SW_INVALID_PATH);
