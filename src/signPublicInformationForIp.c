@@ -11,7 +11,7 @@ UX_STEP_NOCB(
     ux_sign_public_info_for_ip_1_step,
     bn_paging,
     {
-      .title = "Id Cred Pub",
+      .title = "IdCredPub",
       .text = (char *) global.signPublicInformationForIp.idCredPub
     });
 UX_STEP_CB(
@@ -19,7 +19,7 @@ UX_STEP_CB(
     bn_paging,
     sendSuccessNoIdle(),
     {
-      .title = "CredId",
+      .title = "RegId",
       .text = (char *) global.signPublicInformationForIp.credId
     });
 UX_FLOW(ux_sign_public_info_for_ip,
