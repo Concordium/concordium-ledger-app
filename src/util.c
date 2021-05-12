@@ -108,7 +108,7 @@ int amountToGtuDisplay(uint8_t *dst, uint64_t microGtuAmount) {
     // of the decimals.
     if (microGtuAmount < 1000000) {
         dst[0] = '0';
-        dst[1] = ',';
+        dst[1] = '.';
         int length = decimalAmountToGtuDisplay(dst + 2, microGtuAmount) + 2;
         dst[length] = '\0';
         return length + 1;
@@ -131,7 +131,7 @@ int amountToGtuDisplay(uint8_t *dst, uint64_t microGtuAmount) {
     uint64_t decimalPart = microGtuAmount % 1000000;
     if (decimalPart != 0) {
         decimalPartLength = decimalAmountToGtuDisplay(dst + wholeNumberLength + separatorCount + 1, decimalPart);
-        dst[wholeNumberLength + separatorCount] = ',';
+        dst[wholeNumberLength + separatorCount] = '.';
         decimalSeparatorCount = 1;
 
         // Adjust length, as we might not have exactly 6 decimals anymore, as we have removed
@@ -152,7 +152,7 @@ int amountToGtuDisplay(uint8_t *dst, uint64_t microGtuAmount) {
         
         current += 1;
         if (current == 3) {
-            dst[i - 1] = '.';
+            dst[i - 1] = ',';
             i--;
             current = 0;
         }
