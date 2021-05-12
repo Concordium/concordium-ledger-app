@@ -99,7 +99,12 @@ void handleGetPublicKey(uint8_t *cdata, uint8_t p1, uint8_t p2, volatile unsigne
         sendPublicKey(false);
     } else {
         // If the key path is of length 5, then it is a request for a governance key.
+        // Also it has to be in the governance subtree, which starts with 1.
         if (keyPath->pathLength == 5) {
+            if (keyPath->rawKeyDerivationPath[2] != 1) {
+                THROW(SW_INVALID_PATH);
+            }
+
             uint32_t purpose = keyPath->rawKeyDerivationPath[3];
 
             switch (purpose) {
