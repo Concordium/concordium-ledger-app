@@ -23,7 +23,7 @@ include $(BOLOS_SDK)/Makefile.defines
 # Main app configuration
 APPNAME = "Concordium"
 ICONNAME = nanos-concordium-icon.gif
-APPVERSION = 0.1.0
+APPVERSION = 0.2.0
 
 APP_LOAD_PARAMS = --appFlags 0x00 $(COMMON_LOAD_PARAMS)
 
