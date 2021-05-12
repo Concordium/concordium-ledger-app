@@ -28,8 +28,7 @@ APPVERSION = 0.2.0
 APP_LOAD_PARAMS = --appFlags 0x00 $(COMMON_LOAD_PARAMS)
 
 # Restrict derivation paths to the Concordium specific path.
-# FIXME: Update 691 to the final coin_type we get in SLIP44 and add this pack. Allow for the list of paths we need.
-# APP_LOAD_PARAMS += --path "44'/691'"
+APP_LOAD_PARAMS += --path "1105'/0'"
 
 # Restrict derivation to only be able to use ed25519
 APP_LOAD_PARAMS +=--curve ed25519
@@ -88,6 +87,9 @@ ifndef LEDGER_SIGNING_KEY
 release: $(error The release signing key must be set when building a release.)
 endif
 
+# The public-key should be taken from an env variable, and should match the used signing key.
+export PUBLIC_KEY=047ea50b13442984a4cb9bab86016812aa023c25f542a1e727ec5908a65c78d6582d19efe88e96ae4150dea09b0c8b5767524db4afc98ee2bafeed1cc2f8382743
+
 # Main rules
 all: default
 
@@ -101,18 +103,29 @@ release: all
 	python3 -m ledgerblue.loadApp $(APP_LOAD_PARAMS) --offline signed_app.apdu --signApp --signPrivateKey $(LEDGER_SIGNING_KEY)
 	@echo 
 	@echo "Signing and packaging application for release"
+	@echo "python3 -m ledgerblue.loadApp $(APP_LOAD_PARAMS) --signature `cat signed_app.apdu | tail -1 | cut -c15-`" >> install.bat
+	@echo "python3 -m ledgerblue.setupCustomCA --targetId $(TARGET_ID) --public $(PUBLIC_KEY) --name concordium" >> loadcertificate.bat
 	@echo "#!/bin/bash" >> install.sh
 	@echo "python3 -m ledgerblue.loadApp $(APP_LOAD_PARAMS) --signature `cat signed_app.apdu | tail -1 | cut -c15-`" >> install.sh
 	@chmod +x install.sh
+	@echo "#!/bin/bash" >> loadcertificate.sh
+	@echo "python3 -m ledgerblue.setupCustomCA --targetId $(TARGET_ID) --public $(PUBLIC_KEY) --name concordium" >> loadcertificate.sh
+	@chmod +x loadcertificate.sh
 	@echo "#!/bin/bash" >> uninstall.sh
 	@echo "python3 -m ledgerblue.deleteApp $(COMMON_DELETE_PARAMS)" >> uninstall.sh
 	@chmod +x uninstall.sh
 	@chmod +x bin/app.hex
 	@zip concordium-ledger-app-$(APPVERSION)-target-$(TARGET_VERSION).zip \
+		install.bat \
+		loadcertificate.bat \
 		install.sh \
+		loadcertificate.sh \
 		uninstall.sh \
 		bin/app.hex
+	@rm -f install.bat
+	@rm -f loadcertificate.bat
 	@rm -f install.sh
+	@rm -f loadcertificate.sh
 	@rm -f uninstall.sh
 	@rm -f signed_app.apdu
 	@echo

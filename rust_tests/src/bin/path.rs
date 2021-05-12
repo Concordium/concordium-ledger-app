@@ -12,11 +12,11 @@ pub fn generate_key_derivation_path() -> Vec<u8> {
 }
 
 fn build_key_derivation_path() -> Vec<u8> {
-    // Purpose = 583.
-    let mut purpose = hex::decode("00000247").unwrap();
+    // Purpose = 1105.
+    let mut purpose = hex::decode("00000451").unwrap();
 
-    // Coin type = 691.
-    let mut coin_type = hex::decode("000002B3").unwrap();
+    // Coin type = 0.
+    let mut coin_type = hex::decode("00000000").unwrap();
 
     // Subtree
     let mut account_subtree = hex::decode("00000000").unwrap();

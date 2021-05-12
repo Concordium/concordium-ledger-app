@@ -6,9 +6,8 @@
 #ifndef _GLOBALS_H_
 #define _GLOBALS_H_
 
-// TODO: The concordium coin type value has to be set to the value we get in SLIP44.
-#define CONCORDIUM_COIN_TYPE 691
-#define CONCORDIUM_PURPOSE 583
+#define CONCORDIUM_PURPOSE 1105
+#define CONCORDIUM_COIN_TYPE 0
 
 #define SW_INVALID_STATE       0x6B01
 #define SW_INVALID_PATH        0x6B02
