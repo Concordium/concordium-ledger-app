@@ -28,7 +28,7 @@ APPVERSION = 0.3.0
 APP_LOAD_PARAMS = --appFlags 0x00 $(COMMON_LOAD_PARAMS)
 
 # Restrict derivation paths to the Concordium specific path.
-APP_LOAD_PARAMS += --path "1105'/0'"
+APP_LOAD_PARAMS += --path 1105'/0'
 
 # Restrict derivation to only be able to use ed25519
 APP_LOAD_PARAMS +=--curve ed25519
