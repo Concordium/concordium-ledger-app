@@ -23,12 +23,12 @@ include $(BOLOS_SDK)/Makefile.defines
 # Main app configuration
 APPNAME = "Concordium"
 ICONNAME = nanos-concordium-icon.gif
-APPVERSION = 0.3.0
+APPVERSION = 0.4.0
 
 APP_LOAD_PARAMS = --appFlags 0x00 $(COMMON_LOAD_PARAMS)
 
 # Restrict derivation paths to the Concordium specific path.
-APP_LOAD_PARAMS += --path "1105'/0'"
+# APP_LOAD_PARAMS += --path 1105/0
 
 # Restrict derivation to only be able to use ed25519
 APP_LOAD_PARAMS +=--curve ed25519
