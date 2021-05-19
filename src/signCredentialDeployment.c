@@ -35,7 +35,7 @@ UX_STEP_CB(
     bnnn_paging,
     processNextVerificationKey(),
     {
-      .title = "Verification key",
+      .title = "Public-key",
       .text = (char *) global.signCredentialDeploymentContext.accountVerificationKey
     });
 UX_FLOW(ux_credential_deployment_verification_key_flow,
