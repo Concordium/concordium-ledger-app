@@ -23,7 +23,13 @@ include $(BOLOS_SDK)/Makefile.defines
 # Main app configuration
 APPNAME = "Concordium"
 ICONNAME = nanos-concordium-icon.gif
-APPVERSION = 0.4.0
+
+# Version must be no greater than 99.99.999, otherwise
+# extra memory must be allocated in menu.c.
+APPVERSION_MAJOR=0
+APPVERSION_MINOR=5
+APPVERSION_PATCH=0
+APPVERSION=$(APPVERSION_MAJOR).$(APPVERSION_MINOR).$(APPVERSION_PATCH)
 
 APP_LOAD_PARAMS = --appFlags 0x00 $(COMMON_LOAD_PARAMS)
 
@@ -47,6 +53,11 @@ DEFINES += HAVE_IO_USB HAVE_L4_USBLIB IO_USB_MAX_ENDPOINTS=7 IO_HID_EP_LENGTH=64
 
 # Both nano S and X benefit from the flow.
 DEFINES += HAVE_UX_FLOW
+
+# Make the version parameters accessible from the app.
+DEFINES += APPVERSION_MAJOR=$(APPVERSION_MAJOR)
+DEFINES += APPVERSION_MINOR=$(APPVERSION_MINOR)
+DEFINES += APPVERSION_PATCH=$(APPVERSION_PATCH)
 
 # Use stack canary for development. Will reboot device if a stack overflow is detected.
 # DEFINES += HAVE_BOLOS_APP_STACK_CANARY
