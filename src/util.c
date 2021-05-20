@@ -252,7 +252,7 @@ void getPrivateKey(uint32_t *keyPath, uint8_t keyPathLength, cx_ecfp_private_key
     // Wrap in try/finally to ensure that private key information is cleaned up, even if a system call fails.
     BEGIN_TRY {
         TRY {
-            os_perso_derive_node_bip32_seed_key(HDW_ED25519_SLIP10, CX_CURVE_Ed25519, keyPath, keyPathLength, privateKeyData, NULL, NULL, 0);
+            os_perso_derive_node_bip32_seed_key(HDW_ED25519_SLIP10, CX_CURVE_Ed25519, keyPath, keyPathLength, privateKeyData, NULL, (unsigned char*) "ed25519 seed", 12);
             cx_ecfp_init_private_key(CX_CURVE_Ed25519, privateKeyData, 32, privateKey);
         }
         FINALLY {
