@@ -28,7 +28,7 @@ APPVERSION = 0.4.0
 APP_LOAD_PARAMS = --appFlags 0x00 $(COMMON_LOAD_PARAMS)
 
 # Restrict derivation paths to the Concordium specific path.
-# APP_LOAD_PARAMS += --path 1105/0
+APP_LOAD_PARAMS += --path "1105'/0'"
 
 # Restrict derivation to only be able to use ed25519
 APP_LOAD_PARAMS +=--curve ed25519
@@ -90,11 +90,16 @@ endif
 # The public-key should be taken from an env variable, and should match the used signing key.
 export PUBLIC_KEY=047ea50b13442984a4cb9bab86016812aa023c25f542a1e727ec5908a65c78d6582d19efe88e96ae4150dea09b0c8b5767524db4afc98ee2bafeed1cc2f8382743
 
+# The load parameters must be evaluated before being put in the release installation
+# scripts, other wise the application will fail loading (in particular the --path parameter)
+# makes things fail as it has to be enclosed with "".
+APP_LOAD_PARAMS_EVAL=$(shell printf '\\"%s\\" ' $(APP_LOAD_PARAMS))
+
 # Main rules
 all: default
 
 release: all
-	@echo
+	@echo 
 	@echo "CONCORDIUM LEDGER APP RELEASE BUILD"
 	@echo
 	@echo $(APPNAME)
@@ -103,10 +108,10 @@ release: all
 	python3 -m ledgerblue.loadApp $(APP_LOAD_PARAMS) --offline signed_app.apdu --signApp --signPrivateKey $(LEDGER_SIGNING_KEY)
 	@echo 
 	@echo "Signing and packaging application for release"
-	@echo "python3 -m ledgerblue.loadApp $(APP_LOAD_PARAMS) --signature `cat signed_app.apdu | tail -1 | cut -c15-`" >> install.bat
+	@echo "python3 -m ledgerblue.loadApp $(APP_LOAD_PARAMS_EVAL) --signature `cat signed_app.apdu | tail -1 | cut -c15-`" >> install.bat
 	@echo "python3 -m ledgerblue.setupCustomCA --targetId $(TARGET_ID) --public $(PUBLIC_KEY) --name concordium" >> loadcertificate.bat
 	@echo "#!/bin/bash" >> install.sh
-	@echo "python3 -m ledgerblue.loadApp $(APP_LOAD_PARAMS) --signature `cat signed_app.apdu | tail -1 | cut -c15-`" >> install.sh
+	@echo "python3 -m ledgerblue.loadApp $(APP_LOAD_PARAMS_EVAL) --signature `cat signed_app.apdu | tail -1 | cut -c15-`" >> install.sh
 	@chmod +x install.sh
 	@echo "#!/bin/bash" >> loadcertificate.sh
 	@echo "python3 -m ledgerblue.setupCustomCA --targetId $(TARGET_ID) --public $(PUBLIC_KEY) --name concordium" >> loadcertificate.sh
