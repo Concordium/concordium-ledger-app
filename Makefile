@@ -98,8 +98,9 @@ ifndef LEDGER_SIGNING_KEY
 release: $(error The release signing key must be set when building a release.)
 endif
 
-# The public-key should be taken from an env variable, and should match the used signing key.
-export PUBLIC_KEY=047ea50b13442984a4cb9bab86016812aa023c25f542a1e727ec5908a65c78d6582d19efe88e96ae4150dea09b0c8b5767524db4afc98ee2bafeed1cc2f8382743
+ifndef LEDGER_PUBLIC_KEY
+release: $(error The release public key must be set when building a release.)
+endif
 
 # The load parameters must be evaluated before being put in the release installation
 # scripts, other wise the application will fail loading (in particular the --path parameter)
@@ -120,12 +121,12 @@ release: all
 	@echo 
 	@echo "Signing and packaging application for release"
 	@echo "python3 -m ledgerblue.loadApp $(APP_LOAD_PARAMS_EVAL) --signature `cat signed_app.apdu | tail -1 | cut -c15-`" >> install.bat
-	@echo "python3 -m ledgerblue.setupCustomCA --targetId $(TARGET_ID) --public $(PUBLIC_KEY) --name concordium" >> loadcertificate.bat
+	@echo "python3 -m ledgerblue.setupCustomCA --targetId $(TARGET_ID) --public $(LEDGER_PUBLIC_KEY) --name concordium" >> loadcertificate.bat
 	@echo "#!/bin/bash" >> install.sh
 	@echo "python3 -m ledgerblue.loadApp $(APP_LOAD_PARAMS_EVAL) --signature `cat signed_app.apdu | tail -1 | cut -c15-`" >> install.sh
 	@chmod +x install.sh
 	@echo "#!/bin/bash" >> loadcertificate.sh
-	@echo "python3 -m ledgerblue.setupCustomCA --targetId $(TARGET_ID) --public $(PUBLIC_KEY) --name concordium" >> loadcertificate.sh
+	@echo "python3 -m ledgerblue.setupCustomCA --targetId $(TARGET_ID) --public $(LEDGER_PUBLIC_KEY) --name concordium" >> loadcertificate.sh
 	@chmod +x loadcertificate.sh
 	@echo "#!/bin/bash" >> uninstall.sh
 	@echo "python3 -m ledgerblue.deleteApp $(COMMON_DELETE_PARAMS)" >> uninstall.sh
