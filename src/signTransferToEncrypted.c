@@ -1,5 +1,6 @@
 #include <os.h>
 #include "util.h"
+#include "accountSenderView.h"
 #include "sign.h"
 
 static signTransferToEncrypted_t *ctx = &global.signTransferToEncrypted;
@@ -14,6 +15,7 @@ UX_STEP_NOCB(
     });
 UX_FLOW(ux_sign_transfer_to_encrypted,
     &ux_sign_flow_shared_review,
+    &ux_sign_flow_account_sender_view,
     &ux_sign_transfer_to_encrypted_1_step,
     &ux_sign_flow_shared_sign,
     &ux_sign_flow_shared_decline

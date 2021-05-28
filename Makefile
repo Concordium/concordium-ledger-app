@@ -27,7 +27,7 @@ ICONNAME = nanos-concordium-icon.gif
 # Version must be no greater than 99.99.999, otherwise
 # extra memory must be allocated in menu.c.
 APPVERSION_MAJOR=0
-APPVERSION_MINOR=5
+APPVERSION_MINOR=6
 APPVERSION_PATCH=0
 APPVERSION=$(APPVERSION_MAJOR).$(APPVERSION_MINOR).$(APPVERSION_PATCH)
 

@@ -5,9 +5,11 @@
 #include <string.h>
 #include "util.h"
 #include "menu.h"
+#include "base58check.h"
 
 static tx_state_t *tx_state = &global_tx_state;
 static keyDerivationPath_t *keyPath = &path;
+static accountSender_t *accountSender = &global_account_sender;
 static const uint32_t HARDENED_OFFSET = 0x80000000;
 
 int parseKeyDerivationPath(uint8_t *cdata) {
@@ -177,7 +179,7 @@ void getIdentityAccountDisplay(uint8_t *dst) {
 
 /**
  * Generic method for hashing and validating header and type for a transaction.
- * Use hashAccountTransactionHeaderAndKind or hashAccountTransactionHeaderAndKind 
+ * Use hashAccountTransactionHeaderAndKind or hashUpdateHeaderAndType 
  * instead of using this method directly.
  */ 
 int hashHeaderAndType(uint8_t *cdata, uint8_t headerLength, uint8_t validType) {
@@ -198,8 +200,20 @@ int hashHeaderAndType(uint8_t *cdata, uint8_t headerLength, uint8_t validType) {
  * Adds the account transaction header and the transaction kind to the hash. The 
  * transaction kind is verified to have the supplied value to prevent processing
  * invalid transactions.
+ * 
+ * A side effect of this method is that the sender address from the transaction header
+ * is parsed and saved in a global variable, so that it is available to be displayed
+ * for all account transactions.
  */
 int hashAccountTransactionHeaderAndKind(uint8_t *cdata, uint8_t validTransactionKind) {
+    // Parse the account sender address from the transaction header, so it can be shown.
+    size_t outputSize = sizeof(accountSender->sender);
+    if (base58check_encode(cdata, 32, accountSender->sender, &outputSize) != 0) {
+        // The received address bytes are not a valid base58 encoding.
+        THROW(SW_INVALID_TRANSACTION);  
+    }
+    accountSender->sender[50] = '\0';
+
     return hashHeaderAndType(cdata, ACCOUNT_TRANSACTION_HEADER_LENGTH, validTransactionKind);
 }
 

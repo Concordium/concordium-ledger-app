@@ -8,6 +8,7 @@
 #include "base58check.h"
 #include <stdio.h>
 #include "sign.h"
+#include "accountSenderView.h"
 
 static signCredentialDeploymentContext_t *ctx = &global.signCredentialDeploymentContext;
 static cx_sha256_t attributeHash;
@@ -26,8 +27,18 @@ UX_STEP_CB(
       "Review",
       "transaction"
     });
+UX_STEP_CB(
+    ux_credential_deployment_initial_flow_1_step,
+    nn,
+    sendSuccessNoIdle(),
+    {
+      "Continue",
+      "with transaction"
+    });
 UX_FLOW(ux_credential_deployment_initial_flow,
-    &ux_credential_deployment_initial_flow_0_step
+    &ux_credential_deployment_initial_flow_0_step,
+    &ux_sign_flow_account_sender_view,
+    &ux_credential_deployment_initial_flow_1_step
 );
 
 UX_STEP_CB(
@@ -278,15 +289,7 @@ void handleSignUpdateCredential(uint8_t *dataBuffer, uint8_t p1, uint8_t p2, vol
 
         cx_sha256_init(&tx_state->hash);
         tx_state->initialized = true;
-
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, ACCOUNT_TRANSACTION_HEADER_LENGTH, NULL, 0);
-        dataBuffer += ACCOUNT_TRANSACTION_HEADER_LENGTH;
-        uint8_t transactionKind = dataBuffer[0];
-        if (transactionKind != UPDATE_CREDENTIALS) {
-            THROW(SW_INVALID_TRANSACTION);
-        }
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 1, NULL, 0);
-        dataBuffer += 1;
+        dataBuffer += hashAccountTransactionHeaderAndKind(dataBuffer, UPDATE_CREDENTIALS);
 
         ctx->credentialDeploymentCount = dataBuffer[0];
         cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 1, NULL, 0);

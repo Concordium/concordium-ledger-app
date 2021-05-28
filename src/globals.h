@@ -33,6 +33,7 @@ typedef enum {
     ENCRYPTED_AMOUNT_TRANSFER = 16,
     TRANSFER_TO_ENCRYPTED = 17,
     TRANSFER_TO_PUBLIC = 18,
+    TRANSFER_WITH_SCHEDULE = 19,
     UPDATE_CREDENTIALS = 20
 } transactionKind_e;
 
@@ -186,6 +187,13 @@ typedef struct {
     bool initialized;
 } tx_state_t;
 extern tx_state_t global_tx_state;
+
+// Helper struct that is used to hold the account sender
+// address from an account transaction header.
+typedef struct {
+    uint8_t sender[52];
+} accountSender_t;
+extern accountSender_t global_account_sender;
 
 // Each instruction's state has to have its own struct here that is put in the global union below. This translates
 // into each handler file having its own struct here.
