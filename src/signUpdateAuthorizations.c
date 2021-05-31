@@ -87,6 +87,8 @@ const char* getAuthorizationName(authorizationType_e type) {
         case AUTHORIZATION_TRANSACTION_FEE_DISTRIBUTION: return "Transaction fee distribution";
         case AUTHORIZATION_GAS_REWARDS: return "GAS rewards";
         case AUTHORIZATION_BAKER_STAKE_THRESHOLD: return "Baker stake threshold";
+        case AUTHORIZATION_ADD_ANONYMITY_REVOKER: return "Add anonymity revoker";
+        case AUTHORIZATION_ADD_IDENTITY_PROVIDER: return "Add identity provider";
         case AUTHORIZATION_END: THROW(SW_INVALID_STATE);
     }
 }
