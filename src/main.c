@@ -209,7 +209,7 @@ static void concordium_main(void) {
                         handleSignHigherLevelKeys(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_P1], UPDATE_TYPE_UPDATE_LEVEL1_KEYS, &flags);
                         break;
                     case INS_UPDATE_LEVEL2_KEYS:
-                        handleSignUpdateAuthorizations(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_P1], UPDATE_TYPE_UPDATE_LEVEL2_KEYS, &flags);
+                        handleSignUpdateAuthorizations(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_P1], 10, G_io_apdu_buffer[OFFSET_LC], &flags);
                         break;
                     default:
                         THROW(0x6D00);

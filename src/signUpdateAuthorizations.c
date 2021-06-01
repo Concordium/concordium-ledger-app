@@ -140,7 +140,7 @@ void processKeyIndices() {
 #define P1_ACCESS_STRUCTURE             0x03    // Contains the public-key indices for the current access structure.
 #define P1_ACCESS_STRUCTURE_THRESHOLD   0x04    // Contains the threshold for the current access structure.
 
-void handleSignUpdateAuthorizations(uint8_t *cdata, uint8_t p1, uint8_t updateType, volatile unsigned int *flags) {
+void handleSignUpdateAuthorizations(uint8_t *cdata, uint8_t p1, uint8_t updateType, uint8_t dataLength, volatile unsigned int *flags) {
     if (p1 != P1_INITIAL && tx_state->initialized != true) {
         THROW(SW_INVALID_STATE);
     }
@@ -193,7 +193,7 @@ void handleSignUpdateAuthorizations(uint8_t *cdata, uint8_t p1, uint8_t updateTy
     } else if (p1 == P1_ACCESS_STRUCTURE && ctx->state == TX_UPDATE_AUTHORIZATIONS_ACCESS_STRUCTURE_INDEX) {
         ctx->bufferPointer = 0;
         ctx->processedCount = 0;
-        while (ctx->accessStructureSize > 0 && ctx->processedCount < 127) {
+        while (2 * ctx->processedCount < dataLength) {
             cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata + (2 * ctx->processedCount), 2, NULL, 0);
             memmove(ctx->buffer + (2 * ctx->processedCount), cdata + (2 * ctx->processedCount), 2);
             ctx->processedCount += 1;
