@@ -148,7 +148,7 @@ UX_STEP_NOCB(
     ux_sign_credential_deployment_0_step,
     bn_paging,
     {
-      .title = "Account address",
+      .title = "Address",
       .text = (char *) global.signCredentialDeploymentContext.accountAddress
     });
 UX_STEP_CB(
