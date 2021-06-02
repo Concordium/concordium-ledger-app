@@ -100,7 +100,8 @@ accountSender_t global_account_sender;
 
 #define INS_UPDATE_ROOT_KEYS 0x28
 #define INS_UPDATE_LEVEL1_KEYS 0x29
-#define INS_UPDATE_LEVEL2_KEYS 0x2A
+#define INS_UPDATE_LEVEL2_KEYS_ROOT 0x2A
+#define INS_UPDATE_LEVEL2_KEYS_LEVEL1 0x2B
 
 #define INS_SIGN_UPDATE_CREDENTIAL      0x31
 
@@ -208,8 +209,11 @@ static void concordium_main(void) {
                     case INS_UPDATE_LEVEL1_KEYS:
                         handleSignHigherLevelKeys(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_P1], UPDATE_TYPE_UPDATE_LEVEL1_KEYS, &flags);
                         break;
-                    case INS_UPDATE_LEVEL2_KEYS:
-                        handleSignUpdateAuthorizations(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_P1], 10, G_io_apdu_buffer[OFFSET_LC], &flags);
+                    case INS_UPDATE_LEVEL2_KEYS_ROOT:
+                        handleSignUpdateAuthorizations(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_P1], UPDATE_TYPE_UPDATE_ROOT_KEYS, G_io_apdu_buffer[OFFSET_LC], &flags);
+                        break;
+                    case INS_UPDATE_LEVEL2_KEYS_LEVEL1:
+                        handleSignUpdateAuthorizations(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_P1], UPDATE_TYPE_UPDATE_LEVEL1_KEYS, G_io_apdu_buffer[OFFSET_LC], &flags);
                         break;
                     default:
                         THROW(0x6D00);
