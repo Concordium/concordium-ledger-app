@@ -2,7 +2,8 @@
 
 ## 0.6.1
 
-* Fixed bug in hashing of authorization keys update that made signature invalid.
+* Fixed an issue with parsing of GTU amounts that could break on certain amounts.
+* Fixed bug in hashing of authorization keys update that made the signature invalid.
 
 ## 0.6.0
 

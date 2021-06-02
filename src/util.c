@@ -124,6 +124,8 @@ int amountToGtuDisplay(uint8_t *dst, uint64_t microGtuAmount) {
     if (wholeNumberLength % 3 == 0) {
         separatorCount -= 1;
     }
+
+    // 100,000
     
     // The first 6 digits should be without thousand separators,
     // as they are part of the decimal part of the number. Write those
@@ -153,7 +155,7 @@ int amountToGtuDisplay(uint8_t *dst, uint64_t microGtuAmount) {
 		microGtuAmount /= 10;
         
         current += 1;
-        if (current == 3) {
+        if (current == 3 && i != 0) {
             dst[i - 1] = ',';
             i--;
             current = 0;
