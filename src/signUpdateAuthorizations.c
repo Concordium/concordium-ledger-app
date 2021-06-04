@@ -59,7 +59,7 @@ UX_STEP_CB(
     bn_paging,
     sendSuccessNoIdle(),
     {
-        "Public-key",
+        "Public key",
         (char *) global.signUpdateAuthorizations.publicKey
     });
 UX_FLOW(ux_update_authorizations_public_key,

@@ -33,7 +33,7 @@ UX_STEP_CB(
     bn_paging,
     sendSuccessNoIdle(),
     {
-      .title = "Public-key",
+      .title = "Public key",
       .text = (char *) global.signPublicInformationForIp.publicKey
     });
 UX_FLOW(ux_sign_public_info_for_i_public_key,

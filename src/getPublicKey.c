@@ -16,7 +16,7 @@ UX_STEP_VALID(
     sendPublicKey(true),
     {
       &C_icon_validate_14,
-      "Public-key",
+      "Public key",
       (char *) global.exportPublicKeyContext.display
     });
 UX_STEP_VALID(

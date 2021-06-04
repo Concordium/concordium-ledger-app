@@ -36,6 +36,10 @@ UX_STEP_CB(
       "with transaction"
     });
 UX_FLOW(ux_credential_deployment_initial_flow,
+    &ux_credential_deployment_initial_flow_0_step
+);
+
+UX_FLOW(ux_update_credential_deployment_initial_flow,
     &ux_credential_deployment_initial_flow_0_step,
     &ux_sign_flow_account_sender_view,
     &ux_credential_deployment_initial_flow_1_step
@@ -46,7 +50,7 @@ UX_STEP_CB(
     bnnn_paging,
     processNextVerificationKey(),
     {
-      .title = "Public-key",
+      .title = "Public key",
       .text = (char *) global.signCredentialDeploymentContext.accountVerificationKey
     });
 UX_FLOW(ux_credential_deployment_verification_key_flow,
@@ -79,7 +83,7 @@ UX_STEP_CB(
     bn,
     sendSuccessNoIdle(),
     {
-      "Revocation threshold",
+      "Revoke threshold",
       (char *) global.signCredentialDeploymentContext.anonymityRevocationThreshold
     });
 UX_FLOW(ux_credential_deployment_threshold_flow,
@@ -299,7 +303,7 @@ void handleSignUpdateCredential(uint8_t *dataBuffer, uint8_t p1, uint8_t p2, vol
             ctx->updateCredentialState = TX_UPDATE_CREDENTIAL_CREDENTIAL_INDEX;
         }
 
-        ux_flow_init(0, ux_credential_deployment_initial_flow, NULL);
+        ux_flow_init(0, ux_update_credential_deployment_initial_flow, NULL);
         *flags |= IO_ASYNCH_REPLY;
     } else if (p2 == P2_CREDENTIAL_CREDENTIAL_INDEX && ctx->updateCredentialState == TX_UPDATE_CREDENTIAL_CREDENTIAL_INDEX && ctx->credentialDeploymentCount > 0) {
         // Add the credential index to the hash
