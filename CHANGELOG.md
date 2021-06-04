@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.6.2
+
+* Fixed bug in credential deployment where the application version was shown as being the sender, when no sender should be shown.
+
 ## 0.6.1
 
 * Fixed an issue with parsing of GTU amounts that could break on certain amounts.
