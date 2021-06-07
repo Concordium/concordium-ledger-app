@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.0
+
+Release candidate.
+
+* Stopped showing the hash of attributes for credential deployments.
+
 ## 0.6.2
 
 * Fixed bug in credential deployment where the application version was shown as being the sender, when no sender should be shown.
