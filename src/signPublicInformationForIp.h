@@ -7,6 +7,6 @@
  * 
  * @param cdata please see /doc/ins_public_info_for_ip.md for details
  */
-void handleSignPublicInformationForIp(uint8_t *cdata, uint8_t p1, uint8_t dataLength, volatile unsigned int *flags);
+void handleSignPublicInformationForIp(uint8_t *cdata, uint8_t p1, volatile unsigned int *flags);
 
 #endif

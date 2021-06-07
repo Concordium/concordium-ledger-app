@@ -48,6 +48,7 @@ environment like described in the [official guide](https://ledger.readthedocs.io
 Additionally you must set the following environment variable
 ```
 LEDGER_SIGNING_KEY=private_key_used_for_signing_releases
+LEDGER_PUBLIC_KEY=public_key_matching_the_signing_key
 ```
 To build a new release make sure that `APPVERSION` has been bumped correctly, and then run
 ```

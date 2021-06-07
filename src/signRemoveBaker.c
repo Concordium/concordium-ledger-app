@@ -1,5 +1,6 @@
 #include <os.h>
 #include "util.h"
+#include "accountSenderView.h"
 #include "sign.h"
 
 static tx_state_t *tx_state = &global_tx_state;
@@ -14,6 +15,7 @@ UX_STEP_CB(
     });
 UX_FLOW(ux_sign_remove_baker,
     &ux_sign_flow_shared_review,
+    &ux_sign_flow_account_sender_view,
     &ux_sign_remove_baker_1_step,
     &ux_sign_flow_shared_sign,
     &ux_sign_flow_shared_decline

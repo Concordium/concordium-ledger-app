@@ -40,10 +40,10 @@ void handleSignUpdateExchangeRate(uint8_t *cdata, volatile unsigned int *flags) 
     cdata += 1;
 
     if (updateType == 3) {
-        os_memmove(ctx->type, "Euro per energy", 15);
+        memmove(ctx->type, "Euro per energy", 15);
         ctx->type[15] = '\0';
     } else if (updateType == 4) {
-        os_memmove(ctx->type, "uGTU per Euro", 13);
+        memmove(ctx->type, "uGTU per Euro", 13);
         ctx->type[13] = '\0';
     } else {
         // Received an unsupported exchange rate transaction.
@@ -57,7 +57,7 @@ void handleSignUpdateExchangeRate(uint8_t *cdata, volatile unsigned int *flags) 
     cdata += 8;
 
     uint8_t slash[3] = " / ";
-    os_memmove(ctx->ratio + numeratorLength, slash, 3);
+    memmove(ctx->ratio + numeratorLength, slash, 3);
 
     // Denominator is the last 8 bytes.
     uint64_t denominator = U8BE(cdata, 0);

@@ -66,8 +66,8 @@ const char* getPrivateKeyTypeName(uint8_t type) {
 #define P1_AR_DECRYPTION_KEY    0x02
 
 void handleExportPrivateKeySeed(uint8_t *dataBuffer, uint8_t p1, volatile unsigned int *flags) {
-    os_memmove(ctx->type, "Export ", 7);
-    os_memmove(ctx->type + 7, getPrivateKeyTypeName(p1), 12);
+    memmove(ctx->type, "Export ", 7);
+    memmove(ctx->type + 7, getPrivateKeyTypeName(p1), 12);
     
     if (p1 == P1_ID_CRED_SEC || p1 == P1_PRF_KEY) {
         uint32_t identity = U4BE(dataBuffer, 0);
@@ -80,10 +80,10 @@ void handleExportPrivateKeySeed(uint8_t *dataBuffer, uint8_t p1, volatile unsign
             identity | HARDENED_OFFSET,
             typeOfKey | HARDENED_OFFSET
         };
-        os_memmove(ctx->path, keyDerivationPath, sizeof(keyDerivationPath) * 6);
+        memmove(ctx->path, keyDerivationPath, sizeof(keyDerivationPath) * 6);
         ctx->pathLength = 6;
 
-        os_memmove(ctx->display, "ID #", 4);
+        memmove(ctx->display, "ID #", 4);
         bin2dec(ctx->display + 4, identity);
     } else if (p1 == P1_AR_DECRYPTION_KEY) {
         uint32_t idp = U4BE(dataBuffer, 0);
@@ -95,15 +95,15 @@ void handleExportPrivateKeySeed(uint8_t *dataBuffer, uint8_t p1, volatile unsign
             idp | HARDENED_OFFSET,
             ar_index | HARDENED_OFFSET,
         };
-        os_memmove(ctx->arPath, keyDerivationPath, sizeof(keyDerivationPath) * 5);
+        memmove(ctx->arPath, keyDerivationPath, sizeof(keyDerivationPath) * 5);
         ctx->pathLength = 5;
 
         uint8_t lengthCount = 5;
-        os_memmove(ctx->display, "IDP #", lengthCount);
+        memmove(ctx->display, "IDP #", lengthCount);
         lengthCount += numberToText(ctx->display + lengthCount, idp);
-        os_memmove(ctx->display + lengthCount, " ", 1);
+        memmove(ctx->display + lengthCount, " ", 1);
         lengthCount += 1;
-        os_memmove(ctx->display + lengthCount, "AR #", 4);
+        memmove(ctx->display + lengthCount, "AR #", 4);
         lengthCount += 4;
         bin2dec(ctx->display + lengthCount, ar_index);
     } else {

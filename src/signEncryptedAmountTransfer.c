@@ -1,5 +1,6 @@
 #include <os.h>
 #include "util.h"
+#include "accountSenderView.h"
 #include "sign.h"
 #include "base58check.h"
 
@@ -26,7 +27,10 @@ UX_STEP_CB(
 UX_FLOW(ux_sign_encrypted_amount_transfer,
     &ux_sign_flow_shared_review,
     &ux_sign_encrypted_amount_transfer_1_step,
-    &ux_sign_encrypted_amount_transfer_2_step
+    &ux_sign_flow_account_sender_view,
+    &ux_sign_encrypted_amount_transfer_2_step,
+    &ux_sign_flow_shared_sign,
+    &ux_sign_flow_shared_decline
 );
 
 #define P1_INITIAL                              0x00
@@ -43,7 +47,7 @@ void handleSignEncryptedAmountTransfer(uint8_t *cdata, uint8_t p1, uint8_t dataL
 
         // To account address
         uint8_t toAddress[32];
-        os_memmove(toAddress, cdata, 32);
+        memmove(toAddress, cdata, 32);
         cdata += 32;
         cx_hash((cx_hash_t *) &tx_state->hash, 0, toAddress, 32, NULL, 0);
         size_t outputSize = sizeof(ctx->to);
@@ -54,8 +58,7 @@ void handleSignEncryptedAmountTransfer(uint8_t *cdata, uint8_t p1, uint8_t dataL
         ctx->to[50] = '\0';
 
         ctx->state = TX_ENCRYPTED_AMOUNT_TRANSFER_REMAINING_AMOUNT;
-        ux_flow_init(0, ux_sign_encrypted_amount_transfer, NULL);
-        *flags |= IO_ASYNCH_REPLY;
+        sendSuccessNoIdle();
     } else if (p1 == P1_REMAINING_AMOUNT && ctx->state == TX_ENCRYPTED_AMOUNT_TRANSFER_REMAINING_AMOUNT) {
         // Hash remaining amount. Remaining amount is encrypted, and so we cannot display it.
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 192, NULL, 0);
@@ -78,7 +81,7 @@ void handleSignEncryptedAmountTransfer(uint8_t *cdata, uint8_t p1, uint8_t dataL
 
         if (ctx->proofSize == 0) {
             // We have received all proof bytes, continue to signing flow.
-            ux_flow_init(0, ux_sign_flow_shared, NULL);
+            ux_flow_init(0, ux_sign_encrypted_amount_transfer, NULL);
             *flags |= IO_ASYNCH_REPLY;
         } else if (ctx->proofSize < 0) {
             // We received more proof bytes than expected.

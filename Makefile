@@ -23,13 +23,18 @@ include $(BOLOS_SDK)/Makefile.defines
 # Main app configuration
 APPNAME = "Concordium"
 ICONNAME = nanos-concordium-icon.gif
-APPVERSION = 0.1.0
+
+# Version must be no greater than 99.99.999, otherwise
+# extra memory must be allocated in menu.c.
+APPVERSION_MAJOR=1
+APPVERSION_MINOR=0
+APPVERSION_PATCH=0
+APPVERSION=$(APPVERSION_MAJOR).$(APPVERSION_MINOR).$(APPVERSION_PATCH)
 
 APP_LOAD_PARAMS = --appFlags 0x00 $(COMMON_LOAD_PARAMS)
 
 # Restrict derivation paths to the Concordium specific path.
-# FIXME: Update 691 to the final coin_type we get in SLIP44 and add this pack. Allow for the list of paths we need.
-# APP_LOAD_PARAMS += --path "44'/691'"
+APP_LOAD_PARAMS += --path "1105'/0'"
 
 # Restrict derivation to only be able to use ed25519
 APP_LOAD_PARAMS +=--curve ed25519
@@ -48,6 +53,11 @@ DEFINES += HAVE_IO_USB HAVE_L4_USBLIB IO_USB_MAX_ENDPOINTS=7 IO_HID_EP_LENGTH=64
 
 # Both nano S and X benefit from the flow.
 DEFINES += HAVE_UX_FLOW
+
+# Make the version parameters accessible from the app.
+DEFINES += APPVERSION_MAJOR=$(APPVERSION_MAJOR)
+DEFINES += APPVERSION_MINOR=$(APPVERSION_MINOR)
+DEFINES += APPVERSION_PATCH=$(APPVERSION_PATCH)
 
 # Use stack canary for development. Will reboot device if a stack overflow is detected.
 # DEFINES += HAVE_BOLOS_APP_STACK_CANARY
@@ -88,34 +98,55 @@ ifndef LEDGER_SIGNING_KEY
 release: $(error The release signing key must be set when building a release.)
 endif
 
+ifndef LEDGER_PUBLIC_KEY
+release: $(error The release public key must be set when building a release.)
+endif
+
+# The load parameters must be evaluated before being put in the release installation
+# scripts, other wise the application will fail loading (in particular the --path parameter)
+# makes things fail as it has to be enclosed with "".
+APP_LOAD_PARAMS_EVAL=$(shell printf '\\"%s\\" ' $(APP_LOAD_PARAMS))
+
 # Main rules
 all: default
 
 release: all
-	@echo
+	@echo 
 	@echo "CONCORDIUM LEDGER APP RELEASE BUILD"
 	@echo
 	@echo $(APPNAME)
-	@echo "Version $(APPVERSION)" 
+	@echo "Version $(APPVERSION)"
+	@echo "Target firmware version $(TARGET_VERSION)"
 	python3 -m ledgerblue.loadApp $(APP_LOAD_PARAMS) --offline signed_app.apdu --signApp --signPrivateKey $(LEDGER_SIGNING_KEY)
 	@echo 
 	@echo "Signing and packaging application for release"
+	@echo "python3 -m ledgerblue.loadApp $(APP_LOAD_PARAMS_EVAL) --signature `cat signed_app.apdu | tail -1 | cut -c15-`" >> install.bat
+	@echo "python3 -m ledgerblue.setupCustomCA --targetId $(TARGET_ID) --public $(LEDGER_PUBLIC_KEY) --name concordium" >> loadcertificate.bat
 	@echo "#!/bin/bash" >> install.sh
-	@echo "python3 -m ledgerblue.loadApp $(APP_LOAD_PARAMS) --signature `cat signed_app.apdu | tail -1 | cut -c15-`" >> install.sh
+	@echo "python3 -m ledgerblue.loadApp $(APP_LOAD_PARAMS_EVAL) --signature `cat signed_app.apdu | tail -1 | cut -c15-`" >> install.sh
 	@chmod +x install.sh
+	@echo "#!/bin/bash" >> loadcertificate.sh
+	@echo "python3 -m ledgerblue.setupCustomCA --targetId $(TARGET_ID) --public $(LEDGER_PUBLIC_KEY) --name concordium" >> loadcertificate.sh
+	@chmod +x loadcertificate.sh
 	@echo "#!/bin/bash" >> uninstall.sh
 	@echo "python3 -m ledgerblue.deleteApp $(COMMON_DELETE_PARAMS)" >> uninstall.sh
 	@chmod +x uninstall.sh
 	@chmod +x bin/app.hex
-	@zip concordium-ledger-app-$(APPVERSION).zip \
+	@zip concordium-ledger-app-$(APPVERSION)-target-$(TARGET_VERSION).zip \
+		install.bat \
+		loadcertificate.bat \
 		install.sh \
+		loadcertificate.sh \
 		uninstall.sh \
 		bin/app.hex
+	@rm -f install.bat
+	@rm -f loadcertificate.bat
 	@rm -f install.sh
+	@rm -f loadcertificate.sh
 	@rm -f uninstall.sh
 	@rm -f signed_app.apdu
 	@echo
-	@echo "Application was successfully signed and packaged to concordium-ledger-app-$(APPVERSION).zip"
+	@echo "Application was successfully signed and packaged to concordium-ledger-app-$(APPVERSION)-target-$(TARGET_VERSION).zip"
 
 load: all
 	python3 -m ledgerblue.loadApp $(APP_LOAD_PARAMS)

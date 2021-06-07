@@ -6,9 +6,8 @@
 #ifndef _GLOBALS_H_
 #define _GLOBALS_H_
 
-// TODO: The concordium coin type value has to be set to the value we get in SLIP44.
-#define CONCORDIUM_COIN_TYPE 691
-#define CONCORDIUM_PURPOSE 583
+#define CONCORDIUM_PURPOSE 1105
+#define CONCORDIUM_COIN_TYPE 0
 
 #define SW_INVALID_STATE       0x6B01
 #define SW_INVALID_PATH        0x6B02
@@ -34,6 +33,7 @@ typedef enum {
     ENCRYPTED_AMOUNT_TRANSFER = 16,
     TRANSFER_TO_ENCRYPTED = 17,
     TRANSFER_TO_PUBLIC = 18,
+    TRANSFER_WITH_SCHEDULE = 19,
     UPDATE_CREDENTIALS = 20
 } transactionKind_e;
 
@@ -89,6 +89,8 @@ typedef enum {
     AUTHORIZATION_TRANSACTION_FEE_DISTRIBUTION,
     AUTHORIZATION_GAS_REWARDS,
     AUTHORIZATION_BAKER_STAKE_THRESHOLD,
+    AUTHORIZATION_ADD_ANONYMITY_REVOKER,
+    AUTHORIZATION_ADD_IDENTITY_PROVIDER,
     AUTHORIZATION_END
 } authorizationType_e;
 
@@ -187,6 +189,13 @@ typedef struct {
     bool initialized;
 } tx_state_t;
 extern tx_state_t global_tx_state;
+
+// Helper struct that is used to hold the account sender
+// address from an account transaction header.
+typedef struct {
+    uint8_t sender[52];
+} accountSender_t;
+extern accountSender_t global_account_sender;
 
 // Each instruction's state has to have its own struct here that is put in the global union below. This translates
 // into each handler file having its own struct here.

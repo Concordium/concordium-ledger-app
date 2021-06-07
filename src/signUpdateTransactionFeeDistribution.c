@@ -51,14 +51,14 @@ void handleSignUpdateTransactionFeeDistribution(uint8_t *cdata, volatile unsigne
     cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 4, NULL, 0);
     cdata += 4;
     uint8_t fraction[10] = "/100000";
-    os_memmove(ctx->baker + bakerFeeLength, fraction, 10);
+    memmove(ctx->baker + bakerFeeLength, fraction, 10);
 
     // Gas account fee is the next 4 bytes
     uint32_t gasAccountFee = U4BE(cdata, 0);
     int gasAccountFeeLength = numberToText(ctx->gasAccount, gasAccountFee);
     cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 4, NULL, 0);
     cdata += 4;
-    os_memmove(ctx->gasAccount + gasAccountFeeLength, fraction, 9);
+    memmove(ctx->gasAccount + gasAccountFeeLength, fraction, 9);
 
     ux_flow_init(0, ux_sign_transaction_dist, NULL);
     *flags |= IO_ASYNCH_REPLY;

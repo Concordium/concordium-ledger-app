@@ -5,9 +5,11 @@
 #include <string.h>
 #include "util.h"
 #include "menu.h"
+#include "base58check.h"
 
 static tx_state_t *tx_state = &global_tx_state;
 static keyDerivationPath_t *keyPath = &path;
+static accountSender_t *accountSender = &global_account_sender;
 static const uint32_t HARDENED_OFFSET = 0x80000000;
 
 int parseKeyDerivationPath(uint8_t *cdata) {
@@ -108,7 +110,7 @@ int amountToGtuDisplay(uint8_t *dst, uint64_t microGtuAmount) {
     // of the decimals.
     if (microGtuAmount < 1000000) {
         dst[0] = '0';
-        dst[1] = ',';
+        dst[1] = '.';
         int length = decimalAmountToGtuDisplay(dst + 2, microGtuAmount) + 2;
         dst[length] = '\0';
         return length + 1;
@@ -122,6 +124,8 @@ int amountToGtuDisplay(uint8_t *dst, uint64_t microGtuAmount) {
     if (wholeNumberLength % 3 == 0) {
         separatorCount -= 1;
     }
+
+    // 100,000
     
     // The first 6 digits should be without thousand separators,
     // as they are part of the decimal part of the number. Write those
@@ -131,7 +135,7 @@ int amountToGtuDisplay(uint8_t *dst, uint64_t microGtuAmount) {
     uint64_t decimalPart = microGtuAmount % 1000000;
     if (decimalPart != 0) {
         decimalPartLength = decimalAmountToGtuDisplay(dst + wholeNumberLength + separatorCount + 1, decimalPart);
-        dst[wholeNumberLength + separatorCount] = ',';
+        dst[wholeNumberLength + separatorCount] = '.';
         decimalSeparatorCount = 1;
 
         // Adjust length, as we might not have exactly 6 decimals anymore, as we have removed
@@ -151,8 +155,8 @@ int amountToGtuDisplay(uint8_t *dst, uint64_t microGtuAmount) {
 		microGtuAmount /= 10;
         
         current += 1;
-        if (current == 3) {
-            dst[i - 1] = '.';
+        if (current == 3 && i != 0) {
+            dst[i - 1] = ',';
             i--;
             current = 0;
         }
@@ -170,14 +174,14 @@ void getIdentityAccountDisplay(uint8_t *dst) {
     uint32_t accountIndex = keyPath->rawKeyDerivationPath[6];
 
     int offset = bin2dec(dst, identityIndex) - 1;
-    os_memmove(dst + offset, "/", 1);
+    memmove(dst + offset, "/", 1);
     offset = offset + 1;
     offset = offset + bin2dec(dst + offset, accountIndex);
 }
 
 /**
  * Generic method for hashing and validating header and type for a transaction.
- * Use hashAccountTransactionHeaderAndKind or hashAccountTransactionHeaderAndKind 
+ * Use hashAccountTransactionHeaderAndKind or hashUpdateHeaderAndType 
  * instead of using this method directly.
  */ 
 int hashHeaderAndType(uint8_t *cdata, uint8_t headerLength, uint8_t validType) {
@@ -198,8 +202,20 @@ int hashHeaderAndType(uint8_t *cdata, uint8_t headerLength, uint8_t validType) {
  * Adds the account transaction header and the transaction kind to the hash. The 
  * transaction kind is verified to have the supplied value to prevent processing
  * invalid transactions.
+ * 
+ * A side effect of this method is that the sender address from the transaction header
+ * is parsed and saved in a global variable, so that it is available to be displayed
+ * for all account transactions.
  */
 int hashAccountTransactionHeaderAndKind(uint8_t *cdata, uint8_t validTransactionKind) {
+    // Parse the account sender address from the transaction header, so it can be shown.
+    size_t outputSize = sizeof(accountSender->sender);
+    if (base58check_encode(cdata, 32, accountSender->sender, &outputSize) != 0) {
+        // The received address bytes are not a valid base58 encoding.
+        THROW(SW_INVALID_TRANSACTION);  
+    }
+    accountSender->sender[50] = '\0';
+
     return hashHeaderAndType(cdata, ACCOUNT_TRANSACTION_HEADER_LENGTH, validTransactionKind);
 }
 
@@ -252,7 +268,7 @@ void getPrivateKey(uint32_t *keyPath, uint8_t keyPathLength, cx_ecfp_private_key
     // Wrap in try/finally to ensure that private key information is cleaned up, even if a system call fails.
     BEGIN_TRY {
         TRY {
-            os_perso_derive_node_bip32_seed_key(HDW_ED25519_SLIP10, CX_CURVE_Ed25519, keyPath, keyPathLength, privateKeyData, NULL, NULL, 0);
+            os_perso_derive_node_bip32_seed_key(HDW_ED25519_SLIP10, CX_CURVE_Ed25519, keyPath, keyPathLength, privateKeyData, NULL, (unsigned char*) "ed25519 seed", 12);
             cx_ecfp_init_private_key(CX_CURVE_Ed25519, privateKeyData, 32, privateKey);
         }
         FINALLY {

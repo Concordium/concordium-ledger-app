@@ -16,7 +16,7 @@ UX_STEP_VALID(
     sendPublicKey(true),
     {
       &C_icon_validate_14,
-      "Public-key",
+      "Public key",
       (char *) global.exportPublicKeyContext.display
     });
 UX_STEP_VALID(
@@ -68,7 +68,7 @@ void sendPublicKey(bool compare) {
     if (ctx->signPublicKey) {
         uint8_t signedPublicKey[64];
         sign(publicKey, signedPublicKey);
-        os_memmove(G_io_apdu_buffer + tx, signedPublicKey, sizeof(signedPublicKey));
+        memmove(G_io_apdu_buffer + tx, signedPublicKey, sizeof(signedPublicKey));
         tx += sizeof(signedPublicKey);
     }
 
@@ -99,18 +99,23 @@ void handleGetPublicKey(uint8_t *cdata, uint8_t p1, uint8_t p2, volatile unsigne
         sendPublicKey(false);
     } else {
         // If the key path is of length 5, then it is a request for a governance key.
+        // Also it has to be in the governance subtree, which starts with 1.
         if (keyPath->pathLength == 5) {
+            if (keyPath->rawKeyDerivationPath[2] != 1) {
+                THROW(SW_INVALID_PATH);
+            }
+
             uint32_t purpose = keyPath->rawKeyDerivationPath[3];
 
             switch (purpose) {
                 case 0:
-                    os_memmove(ctx->display, "Gov. root", 10);
+                    memmove(ctx->display, "Gov. root", 10);
                     break;
                 case 1:
-                    os_memmove(ctx->display, "Gov. level 1", 13);
+                    memmove(ctx->display, "Gov. level 1", 13);
                     break;
                 case 2:
-                    os_memmove(ctx->display, "Gov. level 2", 13);
+                    memmove(ctx->display, "Gov. level 2", 13);
                     break;
                 default:
                     THROW(SW_INVALID_PATH);

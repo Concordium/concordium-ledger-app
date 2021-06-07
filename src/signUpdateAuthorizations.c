@@ -59,7 +59,7 @@ UX_STEP_CB(
     bn_paging,
     sendSuccessNoIdle(),
     {
-        "Public-key",
+        "Public key",
         (char *) global.signUpdateAuthorizations.publicKey
     });
 UX_FLOW(ux_update_authorizations_public_key,
@@ -87,6 +87,8 @@ const char* getAuthorizationName(authorizationType_e type) {
         case AUTHORIZATION_TRANSACTION_FEE_DISTRIBUTION: return "Transaction fee distribution";
         case AUTHORIZATION_GAS_REWARDS: return "GAS rewards";
         case AUTHORIZATION_BAKER_STAKE_THRESHOLD: return "Baker stake threshold";
+        case AUTHORIZATION_ADD_ANONYMITY_REVOKER: return "Add anonymity revoker";
+        case AUTHORIZATION_ADD_IDENTITY_PROVIDER: return "Add identity provider";
         case AUTHORIZATION_END: THROW(SW_INVALID_STATE);
     }
 }
@@ -124,7 +126,7 @@ void processKeyIndices() {
     } else {
         uint16_t keyIndex = U2BE(ctx->buffer, ctx->bufferPointer);
         bin2dec(ctx->displayKeyIndex, keyIndex);
-        os_memmove(ctx->title, getAuthorizationName(ctx->authorizationType), 29);
+        memmove(ctx->title, getAuthorizationName(ctx->authorizationType), 29);
         ctx->bufferPointer += 2;
         ctx->accessStructureSize -= 1;
         ctx->processedCount -= 1;
@@ -138,7 +140,7 @@ void processKeyIndices() {
 #define P1_ACCESS_STRUCTURE             0x03    // Contains the public-key indices for the current access structure.
 #define P1_ACCESS_STRUCTURE_THRESHOLD   0x04    // Contains the threshold for the current access structure.
 
-void handleSignUpdateAuthorizations(uint8_t *cdata, uint8_t p1, uint8_t updateType, volatile unsigned int *flags) {
+void handleSignUpdateAuthorizations(uint8_t *cdata, uint8_t p1, uint8_t updateType, uint8_t dataLength, volatile unsigned int *flags) {
     if (p1 != P1_INITIAL && tx_state->initialized != true) {
         THROW(SW_INVALID_STATE);
     }
@@ -152,9 +154,9 @@ void handleSignUpdateAuthorizations(uint8_t *cdata, uint8_t p1, uint8_t updateTy
 
         uint8_t keyUpdateType = cdata[0];
         if (keyUpdateType == ROOT_UPDATE_LEVEL_2) {
-            os_memmove(ctx->type, "Level 2 w. root keys\0", 21);
+            memmove(ctx->type, "Level 2 w. root keys\0", 21);
         } else if (keyUpdateType == LEVEL1_UPDATE_LEVEL_2) {
-            os_memmove(ctx->type, "Level 2 w. level 1 keys\0", 24);
+            memmove(ctx->type, "Level 2 w. level 1 keys\0", 24);
         } else {
             THROW(SW_INVALID_TRANSACTION);
         }
@@ -173,7 +175,7 @@ void handleSignUpdateAuthorizations(uint8_t *cdata, uint8_t p1, uint8_t updateTy
         cdata += 1;
 
         uint8_t publicKeyInput[32];
-        os_memmove(publicKeyInput, cdata, 32);
+        memmove(publicKeyInput, cdata, 32);
         toHex(publicKeyInput, 32, ctx->publicKey);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, publicKeyInput, 32, NULL, 0);
 
@@ -191,9 +193,9 @@ void handleSignUpdateAuthorizations(uint8_t *cdata, uint8_t p1, uint8_t updateTy
     } else if (p1 == P1_ACCESS_STRUCTURE && ctx->state == TX_UPDATE_AUTHORIZATIONS_ACCESS_STRUCTURE_INDEX) {
         ctx->bufferPointer = 0;
         ctx->processedCount = 0;
-        while (ctx->accessStructureSize > 0 && ctx->processedCount < 127) {
+        while (2 * ctx->processedCount < dataLength) {
             cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata + (2 * ctx->processedCount), 2, NULL, 0);
-            os_memmove(ctx->buffer + (2 * ctx->processedCount), cdata + (2 * ctx->processedCount), 2);
+            memmove(ctx->buffer + (2 * ctx->processedCount), cdata + (2 * ctx->processedCount), 2);
             ctx->processedCount += 1;
         }
         processKeyIndices();
@@ -203,7 +205,7 @@ void handleSignUpdateAuthorizations(uint8_t *cdata, uint8_t p1, uint8_t updateTy
         uint16_t threshold = U2BE(cdata, 0);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 2, NULL, 0);
         bin2dec(ctx->displayKeyIndex, threshold);
-        os_memmove(ctx->title, "Threshold", 10);
+        memmove(ctx->title, "Threshold", 10);
 
         ux_flow_init(0, ux_update_authorizations_threshold, NULL);
         *flags |= IO_ASYNCH_REPLY;

@@ -6,7 +6,7 @@ use ledger::{ApduCommand, LedgerApp};
 
 fn main() {
     let mut key_derivation_path = path::generate_key_derivation_path();
-    let mut update_type = hex::decode("0C").unwrap();
+    let mut update_type = hex::decode("0A").unwrap();
     let mut prefix = hex::decode("02").unwrap();
     let mut public_key_list_length = hex::decode("0002").unwrap();
 
@@ -46,7 +46,7 @@ fn main() {
         ledger.exchange(command).unwrap();
     }
 
-    for i in 0..10 {
+    for i in 0..12 {
         // Access structure
         let mut size = hex::decode("0003").unwrap();
 
@@ -98,7 +98,7 @@ fn main() {
             data: threshold_cdata
         };
         let result = ledger.exchange(command).unwrap();
-        if i == 9 {
+        if i == 11 {
             println!("Signature: {}", hex::encode(result.data));
         }
     }

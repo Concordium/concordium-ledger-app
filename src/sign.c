@@ -52,7 +52,7 @@ void buildAndSignTransactionHash() {
     uint8_t signedHash[64];
     sign(tx_state->transactionHash, signedHash);
 
-    os_memmove(G_io_apdu_buffer, signedHash, sizeof(signedHash));
+    memmove(G_io_apdu_buffer, signedHash, sizeof(signedHash));
     sendSuccess(sizeof(signedHash));    
 }
 

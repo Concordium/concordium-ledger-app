@@ -1,5 +1,6 @@
 #include <os.h>
 #include "util.h"
+#include "accountSenderView.h"
 #include "sign.h"
 
 static signAddBakerContext_t *ctx = &global.signAddBaker;
@@ -23,6 +24,7 @@ UX_STEP_CB(
     });
 UX_FLOW(ux_sign_add_baker,
     &ux_sign_flow_shared_review,
+    &ux_sign_flow_account_sender_view,
     &ux_sign_add_baker_1_step,
     &ux_sign_add_baker_2_step,
     &ux_sign_flow_shared_sign,
@@ -38,6 +40,7 @@ UX_STEP_NOCB(
     });
 UX_FLOW(ux_sign_update_baker_keys,
     &ux_sign_flow_shared_review,
+    &ux_sign_flow_account_sender_view,
     &ux_sign_update_baker_keys_0_step,
     &ux_sign_flow_shared_sign,
     &ux_sign_flow_shared_decline
@@ -114,9 +117,9 @@ void handleSignAddBakerOrUpdateBakerKeys(uint8_t *cdata, uint8_t p1, uint8_t p2,
             uint8_t restakeEarnings = cdata[0];
             cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 1, NULL, 0);
             if (restakeEarnings == 0) {
-                os_memmove(ctx->restake, "No\0", 3);
+                memmove(ctx->restake, "No\0", 3);
             } else if (restakeEarnings == 1) {
-                os_memmove(ctx->restake, "Yes\0", 4);
+                memmove(ctx->restake, "Yes\0", 4);
             } else {
                 THROW(SW_INVALID_TRANSACTION);
             }

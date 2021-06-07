@@ -1,6 +1,7 @@
 #include <os.h>
 #include "util.h"
 #include "sign.h"
+#include "accountSenderView.h"
 #include "base58check.h"
 
 static signTransferContext_t *ctx = &global.signTransferContext;
@@ -22,6 +23,7 @@ UX_STEP_NOCB(
     });
 UX_FLOW(ux_sign_flow,
     &ux_sign_flow_shared_review,
+    &ux_sign_flow_account_sender_view,
     &ux_sign_flow_1_step,
     &ux_sign_flow_2_step,
     &ux_sign_flow_shared_sign,
@@ -40,7 +42,7 @@ void handleSignTransfer(uint8_t *cdata, volatile unsigned int *flags) {
 
     // Extract the recipient address and add to the hash.
     uint8_t toAddress[32];
-    os_memmove(toAddress, cdata, 32);
+    memmove(toAddress, cdata, 32);
     cdata += 32;
     cx_hash((cx_hash_t *) &tx_state->hash, 0, toAddress, 32, NULL, 0);
 

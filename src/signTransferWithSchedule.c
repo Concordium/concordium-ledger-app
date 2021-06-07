@@ -1,6 +1,7 @@
 #include <os.h>
 #include "base58check.h"
 #include "util.h"
+#include "accountSenderView.h"
 #include "sign.h"
 
 static signTransferWithScheduleContext_t *ctx = &global.signTransferWithScheduleContext;
@@ -27,6 +28,7 @@ UX_STEP_VALID(
     });
 UX_FLOW(ux_scheduled_transfer_initial_flow,
     &ux_sign_flow_shared_review,
+    &ux_sign_flow_account_sender_view,
     &ux_scheduled_transfer_initial_flow_1_step,
     &ux_scheduled_transfer_initial_flow_2_step
 );
@@ -34,14 +36,14 @@ UX_FLOW(ux_scheduled_transfer_initial_flow,
 // UI definitions for displaying a timestamp and an amount of a scheduled transfer.
 UX_STEP_NOCB(
     ux_sign_scheduled_transfer_pair_flow_0_step,
-    bn,
+    bn_paging,
     {
-        "Timestamp",
+        "Release time",
         (char *) global.signTransferWithScheduleContext.displayTimestamp
     });
 UX_STEP_NOCB(
     ux_sign_scheduled_transfer_pair_flow_1_step,
-    bn,
+    bn_paging,
     {
         "Amount",
         (char *) global.signTransferWithScheduleContext.displayAmount
@@ -112,22 +114,11 @@ void handleSignTransferWithSchedule(uint8_t *cdata, uint8_t p1, volatile unsigne
 
         // Initialize the transaction hash object.
         cx_sha256_init(&tx_state->hash);
-
-        // Add transaction header to the hash.
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, ACCOUNT_TRANSACTION_HEADER_LENGTH, NULL, 0);
-        cdata += ACCOUNT_TRANSACTION_HEADER_LENGTH;
-
-        // Transaction payload/body comes right after the transaction header. First byte determines the transaction kind.
-        uint8_t transactionKind = cdata[0];
-        if (transactionKind != 19) {
-            THROW(SW_INVALID_TRANSACTION);
-        }
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 1, NULL, 0);
-        cdata += 1;
+        cdata += hashAccountTransactionHeaderAndKind(cdata, TRANSFER_WITH_SCHEDULE);
 
         // Extract the destination address and add to hash.
         uint8_t toAddress[32];
-        os_memmove(toAddress, cdata, 32);
+        memmove(toAddress, cdata, 32);
         cdata += 32;
         cx_hash((cx_hash_t *) &tx_state->hash, 0, toAddress, 32, NULL, 0);
 
@@ -165,7 +156,7 @@ void handleSignTransferWithSchedule(uint8_t *cdata, uint8_t p1, volatile unsigne
         // Reset pointer keeping track of where we are in the current packet being processed.
         ctx->pos = 0;
 
-        os_memmove(ctx->buffer, cdata, ctx->scheduledAmountsInCurrentPacket * 16);
+        memmove(ctx->buffer, cdata, ctx->scheduledAmountsInCurrentPacket * 16);
         processNextScheduledAmount(ctx->buffer);
 
         // Tell the main process to wait for a button press.
