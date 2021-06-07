@@ -94,29 +94,6 @@ UX_FLOW(ux_credential_deployment_threshold_flow,
 );
 
 UX_STEP_NOCB(
-    ux_credential_deployment_aridentity_key_flow_0_step,
-    bn,
-    {
-      "ArIdentity",
-      (char *) global.signCredentialDeploymentContext.arIdentity
-    });
-
-// TODO Consider if it is necessary to show the encrypted id cred pub shares. I assume that the transaction is rejected
-// TODO if they are invalid anyway? And the user has no real chance of validating it anyhow?
-UX_STEP_CB(
-    ux_credential_deployment_aridentity_key_flow_1_step,
-    bn_paging,
-    sendSuccessNoIdle(),
-    {
-      "EncIdCred",
-      (char *) global.signCredentialDeploymentContext.encIdCredPubShare
-    });
-UX_FLOW(ux_credential_deployment_aridentity_key_flow,
-    &ux_credential_deployment_aridentity_key_flow_0_step,
-    &ux_credential_deployment_aridentity_key_flow_1_step
-);
-
-UX_STEP_NOCB(
     ux_credential_deployment_dates_0_step,
     bn,
     {
@@ -134,18 +111,6 @@ UX_STEP_CB(
 UX_FLOW(ux_credential_deployment_dates,
     &ux_credential_deployment_dates_0_step,
     &ux_credential_deployment_dates_1_step
-);
-
-UX_STEP_CB(
-    ux_credential_deployment_attributes_0_step,
-    bn_paging,
-    sendSuccessNoIdle(),
-    {
-        "Attributes hash",
-        (char *) global.signCredentialDeploymentContext.attributeHashDisplay
-    });
-UX_FLOW(ux_credential_deployment_attributes,
-    &ux_credential_deployment_attributes_0_step
 );
 
 UX_STEP_NOCB(
@@ -345,7 +310,6 @@ void handleSignUpdateCredential(uint8_t *dataBuffer, uint8_t p1, uint8_t p2, vol
     }
 }
 
-// TODO Add improved state checking to disallow a computer stepping outside of the protocol.
 void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, uint8_t p2, volatile unsigned int *flags) {
     if (p1 != P1_INITIAL_PACKET && tx_state->initialized == false) {
         THROW(SW_INVALID_STATE);
@@ -437,8 +401,9 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, uint8_t p2,
         dataBuffer += 96;
 
         sendSuccessNoIdle();
-        // Display the loaded data.
-        // ux_flow_init(0, ux_credential_deployment_aridentity_key_flow, NULL);
+
+        // We do not show encrypted shares, as they are not possible for a user
+        // to validate.
     } else if (p1 == P1_CREDENTIAL_DATES) {
         uint8_t temp[1];
 
@@ -497,12 +462,12 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, uint8_t p2,
         cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, ctx->attributeValueLength, NULL, 0);
         ctx->attributeListLength -= 1;
 
-        // We have processed all attributes, so display the attribute hash value.
+        // We have processed all attributes
         if (ctx->attributeListLength == 0) {
             uint8_t attributeHashBytes[32];
             cx_hash((cx_hash_t *) &attributeHash, CX_LAST, NULL, 0, attributeHashBytes, 32);
             toHex(attributeHashBytes, sizeof(attributeHashBytes), ctx->attributeHashDisplay);
-            ux_flow_init(0, ux_credential_deployment_attributes, NULL);
+            sendSuccessNoIdle();
         } else {
             // There are additional attributes to be read, so ask for more.
             sendSuccessNoIdle();
