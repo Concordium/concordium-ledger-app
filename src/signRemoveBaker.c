@@ -5,10 +5,9 @@
 
 static tx_state_t *tx_state = &global_tx_state;
 
-UX_STEP_CB(
+UX_STEP_NOCB(
     ux_sign_remove_baker_1_step,
     nn,
-    sendSuccessNoIdle(),
     {
       "Remove baker",
       "from pool"
