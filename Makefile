@@ -2,7 +2,7 @@
 #   Ledger Blue
 #   (c) 2016 Ledger
 #
-#	Modifications (c) 2021 Concordium
+#	Modifications (c) 2021 Concordium Software ApS
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -132,7 +132,8 @@ release: all
 	@echo "python3 -m ledgerblue.deleteApp $(COMMON_DELETE_PARAMS)" >> uninstall.sh
 	@chmod +x uninstall.sh
 	@chmod +x bin/app.hex
-	@zip concordium-ledger-app-$(APPVERSION)-target-$(TARGET_VERSION).zip \
+	@zip -r concordium-ledger-app-$(APPVERSION)-target-$(TARGET_VERSION).zip \
+		licenses \
 		install.bat \
 		loadcertificate.bat \
 		install.sh \
