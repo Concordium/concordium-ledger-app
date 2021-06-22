@@ -1,6 +1,7 @@
 #include "os.h"
 #include "ux.h"
 #include "cx.h"
+#include "time.h"
 #include <stdbool.h>
 
 #ifndef _GLOBALS_H_
@@ -211,6 +212,8 @@ typedef struct {
 
     uint8_t displayAmount[26];
     uint8_t displayTimestamp[25];
+
+    tm time;
 
     // Buffer to hold the incoming databuffer so that we can iterate over it.
     uint8_t buffer[255];

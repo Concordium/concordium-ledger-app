@@ -1,8 +1,9 @@
 #include <os.h>
 #include "base58check.h"
-#include "util.h"
 #include "accountSenderView.h"
 #include "sign.h"
+#include "time.h"  
+
 
 static signTransferWithScheduleContext_t *ctx = &global.signTransferWithScheduleContext;
 static tx_state_t *tx_state = &global_tx_state;
@@ -73,10 +74,34 @@ void processNextScheduledAmount(uint8_t *buffer) {
     } else {
         // The current packet still has additional timestamp/amount pairs to be added to the hash and
         // displayed for the user.
-        uint64_t timestamp = U8BE(ctx->buffer, ctx->pos);
+        uint64_t timestamp = U8BE(ctx->buffer, ctx->pos) / 1000;
         cx_hash((cx_hash_t *) &tx_state->hash, 0, buffer + ctx->pos, 8, NULL, 0);
         ctx->pos += 8;
-        bin2dec(ctx->displayTimestamp, timestamp);
+
+        // TODO Refactor this into a separate method to make it all a bit nicer.
+        seconds_to_tm(timestamp, &ctx->time );
+        int offset = numberToText(ctx->displayTimestamp, ctx->time.tm_year + 1900);
+        memmove(ctx->displayTimestamp + offset, "-", 1);
+        offset = offset + 1;
+
+        // Prefix with '0' if the month is less than 10, i.e. 6 -> 06
+        if (ctx->time.tm_mon < 10) {
+            memmove(ctx->displayTimestamp + offset, "0", 1);
+            offset = offset + 1;
+        }
+        offset = offset + numberToText(ctx->displayTimestamp + offset, ctx->time.tm_mon + 1);
+        memmove(ctx->displayTimestamp + offset, "-", 1);
+        offset = offset + 1;
+        offset = offset + numberToText(ctx->displayTimestamp + offset, ctx->time.tm_mday);
+        memmove(ctx->displayTimestamp + offset, " ", 1);
+        offset = offset + 1;
+        offset = offset + numberToText(ctx->displayTimestamp + offset, ctx->time.tm_hour);
+        memmove(ctx->displayTimestamp + offset, ":", 1);
+        offset = offset + 1;
+        offset = offset + numberToText(ctx->displayTimestamp + offset, ctx->time.tm_min);
+        memmove(ctx->displayTimestamp + offset, ":", 1);
+        offset = offset + 1;
+        offset = offset + bin2dec(ctx->displayTimestamp + offset, ctx->time.tm_sec);
 
         uint64_t amount = U8BE(ctx->buffer, ctx->pos);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, buffer + ctx->pos, 8, NULL, 0);
