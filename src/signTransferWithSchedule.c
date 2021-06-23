@@ -39,7 +39,7 @@ UX_STEP_NOCB(
     ux_sign_scheduled_transfer_pair_flow_0_step,
     bn_paging,
     {
-        "Release time",
+        "Release time (UTC)",
         (char *) global.signTransferWithScheduleContext.displayTimestamp
     });
 UX_STEP_NOCB(
@@ -77,32 +77,16 @@ void processNextScheduledAmount(uint8_t *buffer) {
         uint64_t timestamp = U8BE(ctx->buffer, ctx->pos) / 1000;
         cx_hash((cx_hash_t *) &tx_state->hash, 0, buffer + ctx->pos, 8, NULL, 0);
         ctx->pos += 8;
+        secondsToTm(timestamp, &ctx->time);
 
-        // TODO Refactor this into a separate method to make it all a bit nicer.
-        seconds_to_tm(timestamp, &ctx->time );
-        int offset = numberToText(ctx->displayTimestamp, ctx->time.tm_year + 1900);
-        memmove(ctx->displayTimestamp + offset, "-", 1);
-        offset = offset + 1;
-
-        // Prefix with '0' if the month is less than 10, i.e. 6 -> 06
-        if (ctx->time.tm_mon < 10) {
-            memmove(ctx->displayTimestamp + offset, "0", 1);
-            offset = offset + 1;
+        // If the year is too far into the future, then just fail. This is needed so
+        // that we know how space to reserve to display the date time.
+        if (ctx->time.tm_year > 9999) {
+            THROW(SW_INVALID_PARAM);
         }
-        offset = offset + numberToText(ctx->displayTimestamp + offset, ctx->time.tm_mon + 1);
-        memmove(ctx->displayTimestamp + offset, "-", 1);
-        offset = offset + 1;
-        offset = offset + numberToText(ctx->displayTimestamp + offset, ctx->time.tm_mday);
-        memmove(ctx->displayTimestamp + offset, " ", 1);
-        offset = offset + 1;
-        offset = offset + numberToText(ctx->displayTimestamp + offset, ctx->time.tm_hour);
-        memmove(ctx->displayTimestamp + offset, ":", 1);
-        offset = offset + 1;
-        offset = offset + numberToText(ctx->displayTimestamp + offset, ctx->time.tm_min);
-        memmove(ctx->displayTimestamp + offset, ":", 1);
-        offset = offset + 1;
-        offset = offset + bin2dec(ctx->displayTimestamp + offset, ctx->time.tm_sec);
 
+        timeToDisplayText(ctx->time, ctx->displayTimestamp);
+        
         uint64_t amount = U8BE(ctx->buffer, ctx->pos);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, buffer + ctx->pos, 8, NULL, 0);
         ctx->pos += 8;

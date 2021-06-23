@@ -41,7 +41,7 @@ fn main() {
 
     println!("The final result received contains the signature.");
     for i in 1..4 {
-        let mut scheduled_timestamp = hex::decode("0000017A33782EC2").unwrap();
+        let mut scheduled_timestamp = hex::decode("0100017A396883D9").unwrap();
         let mut amount = hex::decode("0000000005F5E100").unwrap();
 
         command_data.append(&mut scheduled_timestamp);

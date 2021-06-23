@@ -8,6 +8,7 @@
  *  The musl LICENSE is provided in licenses/musl-MIT.txt
  */
 #include "time.h"
+#include "util.h"
 #include <limits.h>
 
 /* 2000-03-01 (mod 400 year, immediately after feb29 */
@@ -17,7 +18,7 @@
 #define DAYS_PER_100Y (365*100 + 24)
 #define DAYS_PER_4Y   (365*4   + 1)
 
-int seconds_to_tm(long long t, tm *tm) {
+int secondsToTm(long long t, tm *tm) {
 	long long days, secs;
 	int remdays, remsecs, remyears;
 	int qc_cycles, c_cycles, q_cycles;
@@ -86,4 +87,54 @@ int seconds_to_tm(long long t, tm *tm) {
 	tm->tm_sec = remsecs % 60;
 
 	return 0;
+}
+
+/**
+ * Helper function for prepending numbers that are 
+ * less than 10 with a '0', so that 5 results in 05.
+ */
+int prefixWithZero(uint8_t *dst, int value) {
+	if (value < 10) {
+		memmove(dst, "0", 1);
+		return 1;
+	}
+	return 0;
+}
+
+int timeToDisplayText(tm time, uint8_t *dst) {
+	int offset = 0;
+
+	offset += numberToText(dst, time.tm_year + 1900);
+	
+	memmove(dst + offset, "-", 1);
+	offset += 1;
+
+	offset += prefixWithZero(dst + offset, time.tm_mon);
+	offset += numberToText(dst + offset, time.tm_mon + 1);
+
+	memmove(dst + offset, "-", 1);
+	offset += 1;
+
+	offset += prefixWithZero(dst + offset, time.tm_mday);
+	offset += numberToText(dst + offset, time.tm_mday);
+
+	memmove(dst + offset, " ", 1);
+	offset += 1;
+
+	offset += prefixWithZero(dst + offset, time.tm_hour);
+	offset += numberToText(dst + offset, time.tm_hour);
+
+	memmove(dst + offset, ":", 1);
+	offset += 1;
+
+	offset += prefixWithZero(dst + offset, time.tm_min);
+	offset += numberToText(dst + offset, time.tm_min);
+
+	memmove(dst + offset, ":", 1);
+	offset += 1;
+
+	offset += prefixWithZero(dst + offset, time.tm_sec);
+	offset += bin2dec(dst + offset, time.tm_sec);
+
+	return offset;
 }

@@ -14,6 +14,15 @@ typedef struct {
    int tm_yday;        /* day in the year, range 0 to 365  */
 } tm;
 
-int seconds_to_tm(long long, tm *);
+/**
+ * Converts seconds since epoch to a time struct.
+ */
+int secondsToTm(long long, tm *);
+
+/**
+ * Writes a time struct to dst as human readable text in
+ * the format yyyy-mm-dd hh:mm:ss.
+ */
+int timeToDisplayText(tm time, uint8_t *dst);
 
 #endif
