@@ -14,7 +14,7 @@ fn main() {
 
     // For scheduled amounts we have to split the transaction into multiple packages, as we can
     // only move 255 bytes at a time.
-    let mut number_of_scheduled_amounts = hex::decode("03").unwrap();
+    let mut number_of_scheduled_amounts = hex::decode("0F").unwrap();
 
     // Send initial command.
     // let initial_command_data = format!("{}{}{}{}{}", &path_prefix, &number_of_scheduled_amounts, &transaction_header, &transaction_kind, &to_address);
@@ -40,8 +40,8 @@ fn main() {
     let mut command_data: Vec<u8> = Vec::new();
 
     println!("The final result received contains the signature.");
-    for i in 1..4 {
-        let mut scheduled_timestamp = hex::decode("0100017A396883D9").unwrap();
+    for i in 1..16 {
+        let mut scheduled_timestamp = hex::decode("0000017A396883D9").unwrap();
         let mut amount = hex::decode("0000000005F5E100").unwrap();
 
         command_data.append(&mut scheduled_timestamp);
@@ -49,7 +49,7 @@ fn main() {
 
         // Send APDU 15 pairs at a time, or when done iterating.
         // Note that the packets containing the scheduled amounts must set P1 = 0x01.
-        if i % 15 == 0 || i == 3 {
+        if i % 15 == 0 {
             println!("{}", &command_data.len());
             let command = ApduCommand {
                 cla: 224,
