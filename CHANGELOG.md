@@ -1,5 +1,10 @@
 # Changelog
 
+# 1.0.1
+
+* Scheduled transfers now display the release time as a human readable date time string.
+* Fixed UI bug in remove baker transaction.
+
 ## 1.0.0
 
 Release candidate.

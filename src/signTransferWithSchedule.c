@@ -1,8 +1,9 @@
 #include <os.h>
 #include "base58check.h"
 #include "util.h"
-#include "accountSenderView.h"
 #include "sign.h"
+#include "accountSenderView.h"
+#include "time.h"
 
 static signTransferWithScheduleContext_t *ctx = &global.signTransferWithScheduleContext;
 static tx_state_t *tx_state = &global_tx_state;
@@ -38,7 +39,7 @@ UX_STEP_NOCB(
     ux_sign_scheduled_transfer_pair_flow_0_step,
     bn_paging,
     {
-        "Release time",
+        "Release time (UTC)",
         (char *) global.signTransferWithScheduleContext.displayTimestamp
     });
 UX_STEP_NOCB(
@@ -73,11 +74,21 @@ void processNextScheduledAmount(uint8_t *buffer) {
     } else {
         // The current packet still has additional timestamp/amount pairs to be added to the hash and
         // displayed for the user.
-        uint64_t timestamp = U8BE(ctx->buffer, ctx->pos);
+        uint64_t timestamp = U8BE(ctx->buffer, ctx->pos) / 1000;
         cx_hash((cx_hash_t *) &tx_state->hash, 0, buffer + ctx->pos, 8, NULL, 0);
         ctx->pos += 8;
-        bin2dec(ctx->displayTimestamp, timestamp);
-
+        int valid = secondsToTm(timestamp, &ctx->time);
+        if (valid != 0) {
+            THROW(SW_INVALID_PARAM);
+        }
+        
+        // If the year is too far into the future, then just fail. This is needed so
+        // that we know how much space to reserve to display the date time.
+        if (ctx->time.tm_year > 9999) {
+            THROW(SW_INVALID_PARAM);
+        }
+        timeToDisplayText(ctx->time, ctx->displayTimestamp);
+        
         uint64_t amount = U8BE(ctx->buffer, ctx->pos);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, buffer + ctx->pos, 8, NULL, 0);
         ctx->pos += 8;
