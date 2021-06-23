@@ -77,14 +77,16 @@ void processNextScheduledAmount(uint8_t *buffer) {
         uint64_t timestamp = U8BE(ctx->buffer, ctx->pos) / 1000;
         cx_hash((cx_hash_t *) &tx_state->hash, 0, buffer + ctx->pos, 8, NULL, 0);
         ctx->pos += 8;
-        secondsToTm(timestamp, &ctx->time);
-
+        int valid = secondsToTm(timestamp, &ctx->time);
+        if (valid != 0) {
+            THROW(SW_INVALID_PARAM);
+        }
+        
         // If the year is too far into the future, then just fail. This is needed so
-        // that we know how space to reserve to display the date time.
+        // that we know how much space to reserve to display the date time.
         if (ctx->time.tm_year > 9999) {
             THROW(SW_INVALID_PARAM);
         }
-
         timeToDisplayText(ctx->time, ctx->displayTimestamp);
         
         uint64_t amount = U8BE(ctx->buffer, ctx->pos);
