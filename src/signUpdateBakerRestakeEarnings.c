@@ -8,7 +8,7 @@ static tx_state_t *tx_state = &global_tx_state;
 
 UX_STEP_NOCB(
     ux_sign_update_baker_restake_earnings_1_step,
-    bn_paging,
+    bnnn_paging,
     {
         .title = "Restake earnings",
         .text = (char *) global.signUpdateBakerRestakeEarnings.restake

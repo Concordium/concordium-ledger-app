@@ -12,7 +12,7 @@ static tx_state_t *tx_state = &global_tx_state;
 
 UX_STEP_NOCB(
     ux_sign_election_difficulty_1_step,
-    bn_paging,
+    bnnn_paging,
     {
       .title = "Election difficulty",
       .text = (char *) global.signElectionDifficulty.electionDifficulty

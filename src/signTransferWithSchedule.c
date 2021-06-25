@@ -37,14 +37,14 @@ UX_FLOW(ux_scheduled_transfer_initial_flow,
 // UI definitions for displaying a timestamp and an amount of a scheduled transfer.
 UX_STEP_NOCB(
     ux_sign_scheduled_transfer_pair_flow_0_step,
-    bn_paging,
+    bnnn_paging,
     {
         "Release time (UTC)",
         (char *) global.signTransferWithScheduleContext.displayTimestamp
     });
 UX_STEP_NOCB(
     ux_sign_scheduled_transfer_pair_flow_1_step,
-    bn_paging,
+    bnnn_paging,
     {
         "Amount",
         (char *) global.signTransferWithScheduleContext.displayAmount

@@ -8,7 +8,7 @@ static tx_state_t *tx_state = &global_tx_state;
 
 UX_STEP_CB(
     ux_sign_add_baker_1_step,
-    bn_paging,
+    bnnn_paging,
     sendSuccessNoIdle(),
     {
       .title = "Amount to stake",
@@ -16,7 +16,7 @@ UX_STEP_CB(
     });
 UX_STEP_CB(
     ux_sign_add_baker_2_step,
-    bn_paging,
+    bnnn_paging,
     sendSuccessNoIdle(),
     {
         .title = "Restake earnings",

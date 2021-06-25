@@ -17,7 +17,10 @@
 #  limitations under the License.
 #*******************************************************************************
 
-export BOLOS_SDK = nanos-secure-sdk
+# BOLOS_SDK has to point to nanos-secure-sdk or nanox-secure-sdk
+ifndef BOLOS_SDK
+$(error Environment variable BOLOS_SDK is not set.)
+endif
 include $(BOLOS_SDK)/Makefile.defines
 
 # Main app configuration
@@ -43,9 +46,20 @@ APP_LOAD_PARAMS +=--curve ed25519
 APP_SOURCE_PATH += src
 SDK_SOURCE_PATH += lib_stusb lib_stusb_impl
 
-DEFINES += APPVERSION=\"$(APPVERSION)\"
+ifeq ($(TARGET_NAME),TARGET_NANOX)
+	SDK_SOURCE_PATH += lib_ux
+	DEFINES += IO_SEPROXYHAL_BUFFER_SIZE_B=300
+	DEFINES += HAVE_GLO096
+	DEFINES += HAVE_BAGL BAGL_WIDTH=128 BAGL_HEIGHT=64
+	DEFINES += HAVE_BAGL_ELLIPSIS # long label truncation feature
+	DEFINES += HAVE_BAGL_FONT_OPEN_SANS_REGULAR_11PX
+	DEFINES += HAVE_BAGL_FONT_OPEN_SANS_EXTRABOLD_11PX
+	DEFINES += HAVE_BAGL_FONT_OPEN_SANS_LIGHT_16PX
+else
+	DEFINES += IO_SEPROXYHAL_BUFFER_SIZE_B=128
+endif
 
-DEFINES += OS_IO_SEPROXYHAL IO_SEPROXYHAL_BUFFER_SIZE_B=128
+DEFINES += OS_IO_SEPROXYHAL
 DEFINES += HAVE_BAGL HAVE_SPRINTF
 DEFINES += PRINTF\(...\)=
 
@@ -54,13 +68,14 @@ DEFINES += HAVE_IO_USB HAVE_L4_USBLIB IO_USB_MAX_ENDPOINTS=7 IO_HID_EP_LENGTH=64
 # Both nano S and X benefit from the flow.
 DEFINES += HAVE_UX_FLOW
 
+DEFINES += APPVERSION=\"$(APPVERSION)\"
 # Make the version parameters accessible from the app.
 DEFINES += APPVERSION_MAJOR=$(APPVERSION_MAJOR)
 DEFINES += APPVERSION_MINOR=$(APPVERSION_MINOR)
 DEFINES += APPVERSION_PATCH=$(APPVERSION_PATCH)
 
-# Use stack canary for development. Will reboot device if a stack overflow is detected.
-# DEFINES += HAVE_BOLOS_APP_STACK_CANARY
+# Stop execution after a stack overflow
+DEFINES += HAVE_BOLOS_APP_STACK_CANARY
 
 # Compiler, assembler, and linker
 ifneq ($(BOLOS_ENV),)
@@ -93,7 +108,8 @@ ifdef TEST_LEDGER_SIGNING_KEY
 load: APP_LOAD_PARAMS +=--signApp --signPrivateKey $(TEST_LEDGER_SIGNING_KEY) --rootPrivateKey $(TEST_LEDGER_SIGNING_KEY)
 endif
 
-# Pre-requisities for building a release
+# Require a public and private key pair when creating a release, and 
+# fail if they are not available
 ifndef LEDGER_SIGNING_KEY
 release: $(error The release signing key must be set when building a release.)
 endif
@@ -103,12 +119,17 @@ release: $(error The release public key must be set when building a release.)
 endif
 
 # The load parameters must be evaluated before being put in the release installation
-# scripts, other wise the application will fail loading (in particular the --path parameter)
+# scripts, otherwise the application will fail loading (in particular the --path parameter)
 # makes things fail as it has to be enclosed with "".
 APP_LOAD_PARAMS_EVAL=$(shell printf '\\"%s\\" ' $(APP_LOAD_PARAMS))
 
+# Extract the target device (NANOS/NANOX)
+TARGET_DEVICE = $(subst TARGET_,,$(TARGET_NAME))
+
 # Main rules
 all: default
+
+# TODO Do not include app.elf in the output for nanos builds. It is only needed for speculus emulation
 
 release: all
 	@echo 
@@ -116,6 +137,7 @@ release: all
 	@echo
 	@echo $(APPNAME)
 	@echo "Version $(APPVERSION)"
+	@echo "Target device $(TARGET_DEVICE)"
 	@echo "Target firmware version $(TARGET_VERSION)"
 	python3 -m ledgerblue.loadApp $(APP_LOAD_PARAMS) --offline signed_app.apdu --signApp --signPrivateKey $(LEDGER_SIGNING_KEY)
 	@echo 
@@ -132,14 +154,15 @@ release: all
 	@echo "python3 -m ledgerblue.deleteApp $(COMMON_DELETE_PARAMS)" >> uninstall.sh
 	@chmod +x uninstall.sh
 	@chmod +x bin/app.hex
-	@zip -r concordium-ledger-app-$(APPVERSION)-target-$(TARGET_VERSION).zip \
+	@zip -r concordium-ledger-app-$(APPVERSION)-$(TARGET_DEVICE)-$(TARGET_VERSION).zip \
 		licenses \
 		install.bat \
 		loadcertificate.bat \
 		install.sh \
 		loadcertificate.sh \
 		uninstall.sh \
-		bin/app.hex
+		bin/app.hex \
+		bin/app.elf
 	@rm -f install.bat
 	@rm -f loadcertificate.bat
 	@rm -f install.sh
@@ -147,7 +170,7 @@ release: all
 	@rm -f uninstall.sh
 	@rm -f signed_app.apdu
 	@echo
-	@echo "Application was successfully signed and packaged to concordium-ledger-app-$(APPVERSION)-target-$(TARGET_VERSION).zip"
+	@echo "Application was successfully signed and packaged to concordium-ledger-app-$(APPVERSION)-$(TARGET_DEVICE)-$(TARGET_VERSION).zip"
 
 load: all
 	python3 -m ledgerblue.loadApp $(APP_LOAD_PARAMS)
