@@ -1,5 +1,5 @@
 /*
- *  The code in this file is from the musl project (https://git.musl-libc.org/cgit/musl/),
+ *  The code in the function secondsToTm is from the musl project (https://git.musl-libc.org/cgit/musl/),
  *  specifically taken from https://git.musl-libc.org/cgit/musl/tree/src/time/__secs_to_tm.c.
  *  The code has been edited slightly in the following way:
  *   - renamed the method to 'seconds_to_tm'.
@@ -109,7 +109,7 @@ int timeToDisplayText(tm time, uint8_t *dst) {
 	memmove(dst + offset, "-", 1);
 	offset += 1;
 
-	offset += prefixWithZero(dst + offset, time.tm_mon);
+	offset += prefixWithZero(dst + offset, time.tm_mon + 1);
 	offset += numberToText(dst + offset, time.tm_mon + 1);
 
 	memmove(dst + offset, "-", 1);
