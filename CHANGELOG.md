@@ -1,5 +1,9 @@
 # Changelog
 
+# 1.0.2
+
+* Scheduled transfer release time now shows October as '10' instead of '010'.
+
 # 1.0.1
 
 * Scheduled transfers now display the release time as a human readable date time string.
