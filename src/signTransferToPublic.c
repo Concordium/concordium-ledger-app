@@ -10,7 +10,7 @@ UX_STEP_NOCB(
     ux_sign_transfer_to_public_1_step,
     bn_paging,
     {
-      .title = "Amount to public",
+      .title = "Amount to unshield",
       .text = (char *) global.signTransferToPublic.amount
     });
 UX_FLOW(ux_sign_transfer_to_public,

@@ -13,7 +13,7 @@ UX_STEP_NOCB(
     ux_sign_encrypted_amount_transfer_1_step,
     nn,
     {
-      "Encrypted amount",
+      "Shielded",
       "transfer"
     });
 UX_STEP_CB(
