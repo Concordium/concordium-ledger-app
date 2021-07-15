@@ -3,6 +3,9 @@
 # 1.1.0 (Work in progress)
 
 * Support building for the Ledger Nano X.
+# 1.0.2
+
+* Scheduled transfer release time now shows October as '10' instead of '010'.
 
 # 1.0.1
 
