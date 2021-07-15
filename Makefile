@@ -105,17 +105,7 @@ LDLIBS += -lm -lgcc -lc
 # If a test signing key has been set, then use that to sign when loading
 # the application for development. Otherwise load it without signing.
 ifdef TEST_LEDGER_SIGNING_KEY
-load: APP_LOAD_PARAMS +=--signApp --signPrivateKey $(TEST_LEDGER_SIGNING_KEY) --rootPrivateKey $(TEST_LEDGER_SIGNING_KEY)
-endif
-
-# Require a public and private key pair when creating a release, and 
-# fail if they are not available
-ifndef LEDGER_SIGNING_KEY
-release: $(error The release signing key must be set when building a release.)
-endif
-
-ifndef LEDGER_PUBLIC_KEY
-release: $(error The release public key must be set when building a release.)
+APP_LOAD_PARAMS +=--signApp --signPrivateKey $(TEST_LEDGER_SIGNING_KEY) --rootPrivateKey $(TEST_LEDGER_SIGNING_KEY)
 endif
 
 # The load parameters must be evaluated before being put in the release installation
@@ -129,9 +119,22 @@ TARGET_DEVICE = $(subst TARGET_,,$(TARGET_NAME))
 # Main rules
 all: default
 
-# TODO Do not include app.elf in the output for nanos builds. It is only needed for speculus emulation
-
 release: all
+# Fail if trying to build a nano x release, as sideloading is not supported.
+ifeq ($(BOLOS_SDK),nanox-secure-sdk)
+release: fail_nanox_release
+endif
+ifeq ($(BOLOS_SDK),nanox-secure-sdk/)
+release: fail_nanox_release
+endif
+# Require a public and private key pair when creating a release, and 
+# fail if they are not available
+ifndef LEDGER_SIGNING_KEY
+release: fail_release_no_signing_key
+endif
+ifndef LEDGER_PUBLIC_KEY
+release: fail_release_no_public_key
+endif
 	@echo 
 	@echo "CONCORDIUM LEDGER APP RELEASE BUILD"
 	@echo
@@ -154,15 +157,14 @@ release: all
 	@echo "python3 -m ledgerblue.deleteApp $(COMMON_DELETE_PARAMS)" >> uninstall.sh
 	@chmod +x uninstall.sh
 	@chmod +x bin/app.hex
-	@zip -r concordium-ledger-app-$(APPVERSION)-$(TARGET_DEVICE)-$(TARGET_VERSION).zip \
+	@zip -r concordium-ledger-app-$(APPVERSION)-$(TARGET_VERSION).zip \
 		licenses \
 		install.bat \
 		loadcertificate.bat \
 		install.sh \
 		loadcertificate.sh \
 		uninstall.sh \
-		bin/app.hex \
-		bin/app.elf
+		bin/app.hex
 	@rm -f install.bat
 	@rm -f loadcertificate.bat
 	@rm -f install.sh
@@ -170,7 +172,26 @@ release: all
 	@rm -f uninstall.sh
 	@rm -f signed_app.apdu
 	@echo
-	@echo "Application was successfully signed and packaged to concordium-ledger-app-$(APPVERSION)-$(TARGET_DEVICE)-$(TARGET_VERSION).zip"
+	@echo "Application was successfully signed and packaged to concordium-ledger-app-$(APPVERSION)-$(TARGET_VERSION).zip"
+
+fail_release_no_public_key:
+	$(error A public key must set as LEDGER_PUBLIC_KEY)
+
+fail_release_no_signing_key:
+	$(error A signing key must set as LEDGER_SIGNING_KEY)
+
+fail_nanox_release:
+	$(error The release can only be built for Nano S, as Nano X does not support sideloading.)
+
+emulator: all
+	@echo 
+	@echo "CONCORDIUM LEDGER APP EMULATOR TESTING BUILD"
+	@echo $(APPNAME)
+	@echo "Version $(APPVERSION)"
+	@echo "Target device $(TARGET_DEVICE)"
+	@echo "Target firmware version $(TARGET_VERSION)"
+	@echo
+	@echo "The binary used by the emulator is available at bin/app.elf"
 
 load: all
 	python3 -m ledgerblue.loadApp $(APP_LOAD_PARAMS)
