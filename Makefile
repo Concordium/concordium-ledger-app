@@ -157,7 +157,7 @@ endif
 	@echo "python3 -m ledgerblue.deleteApp $(COMMON_DELETE_PARAMS)" >> uninstall.sh
 	@chmod +x uninstall.sh
 	@chmod +x bin/app.hex
-	@zip -r concordium-ledger-app-$(APPVERSION)-$(TARGET_VERSION).zip \
+	@zip -r concordium-ledger-app-$(APPVERSION)-target-$(TARGET_VERSION).zip \
 		licenses \
 		install.bat \
 		loadcertificate.bat \
@@ -172,7 +172,7 @@ endif
 	@rm -f uninstall.sh
 	@rm -f signed_app.apdu
 	@echo
-	@echo "Application was successfully signed and packaged to concordium-ledger-app-$(APPVERSION)-$(TARGET_VERSION).zip"
+	@echo "Application was successfully signed and packaged to concordium-ledger-app-$(APPVERSION)-target-$(TARGET_VERSION).zip"
 
 fail_release_no_public_key:
 	$(error A public key must set as LEDGER_PUBLIC_KEY)
