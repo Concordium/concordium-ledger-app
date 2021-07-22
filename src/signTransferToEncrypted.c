@@ -10,7 +10,7 @@ UX_STEP_NOCB(
     ux_sign_transfer_to_encrypted_1_step,
     bn_paging,
     {
-      .title = "Amount to enc.",
+      .title = "Shield amount",
       .text = (char *) global.signTransferToEncrypted.amount
     });
 UX_FLOW(ux_sign_transfer_to_encrypted,
