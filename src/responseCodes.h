@@ -6,6 +6,7 @@ enum {
     SUCCESS = 0x9000,
 
     // Error codes
+    ERROR_NO_APDU_RECEIVED = 0x6982,
     ERROR_REJECTED_BY_USER = 0x6985,
     ERROR_INVALID_CLA = 0x6E00,
     

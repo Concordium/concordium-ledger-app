@@ -128,7 +128,7 @@ static void concordium_main(void) {
                 // no apdu received, well, reset the session, and reset the
                 // bootloader configuration
                 if (rx == 0) {
-                    THROW(0x6982);
+                    THROW(ERROR_NO_APDU_RECEIVED);
                 }
 
                 if (G_io_apdu_buffer[OFFSET_CLA] != CLA) {
@@ -241,6 +241,7 @@ static void concordium_main(void) {
             
             CATCH_OTHER(e) {
                 switch (e) {
+                    case ERROR_NO_APDU_RECEIVED:
                     case ERROR_REJECTED_BY_USER:
                     case ERROR_INVALID_STATE:
                     case ERROR_INVALID_PATH:
@@ -250,19 +251,16 @@ static void concordium_main(void) {
                     case ERROR_INVALID_CLA:
                         global_tx_state.currentInstruction = -1;
                         sw = e;
-                        break;
-                    case 0x6000:
-                    case 0x9000:
-                        sw = e;
+                        G_io_apdu_buffer[tx] = sw >> 8;
+                        G_io_apdu_buffer[tx + 1] = sw;
+                        tx += 2;
                         break;
                     default:
-                        sw = 0x6800 | (e & 0x7FF);
+                        // An unknown error was thrown. Reset the device if 
+                        // this happens.
+                        io_seproxyhal_se_reset();
                         break;
                 }
-                // Unexpected exception => report
-                G_io_apdu_buffer[tx] = sw >> 8;
-                G_io_apdu_buffer[tx + 1] = sw;
-                tx += 2;
             }
             FINALLY {
             }
