@@ -181,7 +181,7 @@ void handleSignUpdateAuthorizations(uint8_t *cdata, uint8_t p1, uint8_t updateTy
 
         ctx->publicKeyListLength -= 1;
         if (ctx->publicKeyListLength == 0) {
-            ctx->state   = TX_UPDATE_AUTHORIZATIONS_ACCESS_STRUCTURE_SIZE;
+            ctx->state = TX_UPDATE_AUTHORIZATIONS_ACCESS_STRUCTURE_SIZE;
         }
         ux_flow_init(0, ux_update_authorizations_public_key, NULL);
         *flags |= IO_ASYNCH_REPLY;
