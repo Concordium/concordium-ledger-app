@@ -9,10 +9,10 @@
 void handleSignEncryptedAmountTransfer(uint8_t *cdata, uint8_t p1, uint8_t dataLength, volatile unsigned int *flags, bool isInitialCall);
 
 typedef enum {
-    TX_ENCRYPTED_AMOUNT_TRANSFER_INITIAL = 0,
-    TX_ENCRYPTED_AMOUNT_TRANSFER_REMAINING_AMOUNT = 6, 
-    TX_ENCRYPTED_AMOUNT_TRANSFER_TRANSFER_AMOUNT = 7,
-    TX_ENCRYPTED_AMOUNT_TRANSFER_PROOFS = 8
+    TX_ENCRYPTED_AMOUNT_TRANSFER_INITIAL = 15,
+    TX_ENCRYPTED_AMOUNT_TRANSFER_REMAINING_AMOUNT = 16,
+    TX_ENCRYPTED_AMOUNT_TRANSFER_TRANSFER_AMOUNT = 17,
+    TX_ENCRYPTED_AMOUNT_TRANSFER_PROOFS = 18
 } encryptedAmountTransferState_t;
 
 typedef struct { 

@@ -58,7 +58,11 @@ UX_FLOW(ux_sign_public_info_for_ip_threshold,
 #define P1_VERIFICATION_KEY     0x01
 #define P1_THRESHOLD            0x02
 
-void handleSignPublicInformationForIp(uint8_t *cdata, uint8_t p1, volatile unsigned int *flags) {
+void handleSignPublicInformationForIp(uint8_t *cdata, uint8_t p1, volatile unsigned int *flags, bool isInitialCall) {
+    if (isInitialCall) {
+        ctx->state = TX_PUBLIC_INFO_FOR_IP_INITIAL;
+    }
+    
     if (p1 == P1_INITIAL && ctx->state == TX_PUBLIC_INFO_FOR_IP_INITIAL) {
         cdata += parseKeyDerivationPath(cdata);
         cx_sha256_init(&tx_state->hash);

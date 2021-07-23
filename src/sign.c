@@ -9,7 +9,6 @@
 static tx_state_t *tx_state = &global_tx_state;
 
 void buildAndSignTransactionHash();
-void declineToSignTransaction();
 
 // Common initial view for signing flows.
 UX_STEP_NOCB(
@@ -34,7 +33,7 @@ UX_STEP_CB(
 UX_STEP_CB(
     ux_sign_flow_shared_decline,
     pnn,
-    declineToSignTransaction(),
+    sendUserRejection(),
     {
       &C_icon_crossmark,
       "Decline to",

@@ -183,7 +183,7 @@ static void concordium_main(void) {
                         handleSignTransferToPublic(cdata, p1, lc, &flags, isInitialCall);
                         break;
                     case INS_PUBLIC_INFO_FOR_IP:
-                        handleSignPublicInformationForIp(cdata, p1, &flags);
+                        handleSignPublicInformationForIp(cdata, p1, &flags, isInitialCall);
                         break;
                     case INS_UPDATE_PROTOCOL:
                         handleSignUpdateProtocol(cdata, p1, lc, &flags, isInitialCall);

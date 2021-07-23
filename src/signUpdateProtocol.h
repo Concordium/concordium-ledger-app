@@ -9,11 +9,11 @@
 void handleSignUpdateProtocol(uint8_t *cdata, uint8_t p1, uint8_t dataLength, volatile unsigned int *flags, bool isInitialCall);
 
 typedef enum {
-    TX_UPDATE_PROTOCOL_INITIAL = 0,
-    TX_UPDATE_PROTOCOL_TEXT_LENGTH = 13,
-    TX_UPDATE_PROTOCOL_TEXT = 14,
-    TX_UPDATE_PROTOCOL_SPECIFICATION_HASH = 15,
-    TX_UPDATE_PROTOCOL_AUXILIARY_DATA = 16
+    TX_UPDATE_PROTOCOL_INITIAL = 35,
+    TX_UPDATE_PROTOCOL_TEXT_LENGTH = 36,
+    TX_UPDATE_PROTOCOL_TEXT = 37,
+    TX_UPDATE_PROTOCOL_SPECIFICATION_HASH = 38,
+    TX_UPDATE_PROTOCOL_AUXILIARY_DATA = 39
 } updateProtocolState_t;
 
 typedef enum {

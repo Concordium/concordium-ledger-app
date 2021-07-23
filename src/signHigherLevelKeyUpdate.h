@@ -34,9 +34,9 @@ typedef enum {
 } level1UpdatePrefix_e;
 
 typedef enum {
-    TX_UPDATE_KEYS_INITIAL = 0,
-    TX_UPDATE_KEYS_KEY = 19,
-    TX_UPDATE_KEYS_THRESHOLD = 20
+    TX_UPDATE_KEYS_INITIAL = 19,
+    TX_UPDATE_KEYS_KEY = 20,
+    TX_UPDATE_KEYS_THRESHOLD = 21
 } updateKeysState_t;
 
 typedef struct {

@@ -13,8 +13,8 @@
 void handleSignTransferWithSchedule(uint8_t *cdata, uint8_t p1, volatile unsigned int *flags, bool isInitialCall);
 
 typedef enum {
-    TX_TRANSFER_WITH_SCHEDULE_INITIAL = 0,
-    TX_TRANSFER_WITH_SCHEDULE_TRANSFER_PAIRS = 1,
+    TX_TRANSFER_WITH_SCHEDULE_INITIAL = 28,
+    TX_TRANSFER_WITH_SCHEDULE_TRANSFER_PAIRS = 29,
 } transferWithScheduleState_t;
 
 typedef struct {

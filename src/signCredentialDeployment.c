@@ -133,7 +133,7 @@ UX_STEP_CB(
 UX_STEP_CB(
     ux_sign_credential_deployment_2_step,
     pnn,
-    declineToSignTransaction(),
+    sendUserRejection(),
     {
       &C_icon_crossmark,
       "Decline to",
@@ -181,7 +181,7 @@ UX_STEP_CB(
 UX_STEP_CB(
     ux_sign_credential_update_threshold_2_step,
     pnn,
-    declineToSignTransaction(),
+    sendUserRejection(),
     {
       &C_icon_crossmark,
       "Decline to",

@@ -11,9 +11,9 @@
 void handleSignAddBakerOrUpdateBakerKeys(uint8_t *cdata, uint8_t p1, uint8_t p2, volatile unsigned int *flags, bool isInitialCall);
 
 typedef enum {
-    ADD_BAKER_INITIAL = 0,
-    ADD_BAKER_VERIFY_KEYS = 17,
-    ADD_BAKER_PROOFS_AMOUNT_RESTAKE = 18
+    ADD_BAKER_INITIAL = 1,
+    ADD_BAKER_VERIFY_KEYS = 2,
+    ADD_BAKER_PROOFS_AMOUNT_RESTAKE = 3
 } addBakerState_t;
 
 typedef struct {

@@ -14,11 +14,11 @@
 void handleSignUpdateAuthorizations(uint8_t *cdata, uint8_t p1, uint8_t updateType, uint8_t dataLength, volatile unsigned int *flags, bool isInitialCall);
 
 typedef enum {
-    TX_UPDATE_AUTHORIZATIONS_INITIAL = 0,
-    TX_UPDATE_AUTHORIZATIONS_PUBLIC_KEY = 2,
-    TX_UPDATE_AUTHORIZATIONS_ACCESS_STRUCTURE_SIZE = 3,
-    TX_UPDATE_AUTHORIZATIONS_ACCESS_STRUCTURE_INDEX = 4,
-    TX_UPDATE_AUTHORIZATIONS_ACCESS_STRUCTURE_THRESHOLD = 5
+    TX_UPDATE_AUTHORIZATIONS_INITIAL = 30,
+    TX_UPDATE_AUTHORIZATIONS_PUBLIC_KEY = 31,
+    TX_UPDATE_AUTHORIZATIONS_ACCESS_STRUCTURE_SIZE = 32,
+    TX_UPDATE_AUTHORIZATIONS_ACCESS_STRUCTURE_INDEX = 33,
+    TX_UPDATE_AUTHORIZATIONS_ACCESS_STRUCTURE_THRESHOLD = 34
 } updateAuthorizationsState_t;
 
 // To add support for additional access structures with the update authorizations
