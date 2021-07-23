@@ -2,6 +2,7 @@
 #include "util.h"
 #include "accountSenderView.h"
 #include "sign.h"
+#include "responseCodes.h"
 
 static signTransferToPublic_t *ctx = &global.signTransferToPublic;
 static tx_state_t *tx_state = &global_tx_state;
@@ -25,11 +26,14 @@ UX_FLOW(ux_sign_transfer_to_public,
 #define P1_REMAINING_AMOUNT 0x01
 #define P1_PROOF            0x02
 
-void handleSignTransferToPublic(uint8_t *cdata, uint8_t p1, uint8_t dataLength, volatile unsigned int *flags) {
-    if (p1 == P1_INITIAL) {
+void handleSignTransferToPublic(uint8_t *cdata, uint8_t p1, uint8_t dataLength, volatile unsigned int *flags, bool isInitialCall) {
+    if (isInitialCall) {
+        ctx->state = TX_TRANSFER_TO_PUBLIC_INITIAL;
+    }
+
+    if (p1 == P1_INITIAL && ctx->state == TX_TRANSFER_TO_PUBLIC_INITIAL) {
         cdata += parseKeyDerivationPath(cdata);
         cx_sha256_init(&tx_state->hash);
-        tx_state->initialized = true;
         cdata += hashAccountTransactionHeaderAndKind(cdata, TRANSFER_TO_PUBLIC);
 
         // Ask the caller for the next command.
@@ -66,13 +70,13 @@ void handleSignTransferToPublic(uint8_t *cdata, uint8_t p1, uint8_t dataLength, 
         } else if (ctx->proofSize < 0) {
             // We received more proof bytes than expected, and so the received
             // transaction is invalid.
-            THROW(SW_INVALID_TRANSACTION);
+            THROW(ERROR_INVALID_TRANSACTION);
         } else {
             // There are additional bytes to be received, so ask the caller
             // for more data.
             sendSuccessNoIdle();
         }
     } else {
-        THROW(SW_INVALID_STATE);
+        THROW(ERROR_INVALID_STATE);
     }
 }

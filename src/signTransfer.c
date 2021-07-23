@@ -3,6 +3,7 @@
 #include "sign.h"
 #include "accountSenderView.h"
 #include "base58check.h"
+#include "responseCodes.h"
 
 static signTransferContext_t *ctx = &global.signTransferContext;
 static tx_state_t *tx_state = &global_tx_state;
@@ -52,7 +53,7 @@ void handleSignTransfer(uint8_t *cdata, volatile unsigned int *flags) {
     size_t outputSize = sizeof(ctx->displayStr);
     if (base58check_encode(toAddress, sizeof(toAddress), ctx->displayStr, &outputSize) != 0) {
       // The received address bytes are not a valid base58 encoding.
-        THROW(SW_INVALID_TRANSACTION);  
+        THROW(ERROR_INVALID_TRANSACTION);  
     }
     ctx->displayStr[50] = '\0';
 

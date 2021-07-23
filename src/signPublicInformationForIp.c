@@ -1,6 +1,7 @@
 #include <os.h>
 #include "util.h"
 #include "sign.h"
+#include "responseCodes.h"
 
 static signPublicInformationForIp_t *ctx = &global.signPublicInformationForIp;
 static tx_state_t *tx_state = &global_tx_state;
@@ -58,14 +59,9 @@ UX_FLOW(ux_sign_public_info_for_ip_threshold,
 #define P1_THRESHOLD            0x02
 
 void handleSignPublicInformationForIp(uint8_t *cdata, uint8_t p1, volatile unsigned int *flags) {
-    if (p1 != P1_INITIAL && tx_state->initialized == false) {
-        THROW(SW_INVALID_STATE);
-    }
-    
-    if (p1 == P1_INITIAL) {
+    if (p1 == P1_INITIAL && ctx->state == TX_PUBLIC_INFO_FOR_IP_INITIAL) {
         cdata += parseKeyDerivationPath(cdata);
         cx_sha256_init(&tx_state->hash);
-        tx_state->initialized = true;
 
         // Parse id_cred_pub so it can be displayed.
         uint8_t idCredPub[48];
@@ -89,9 +85,9 @@ void handleSignPublicInformationForIp(uint8_t *cdata, uint8_t p1, volatile unsig
         ctx->state = TX_PUBLIC_INFO_FOR_IP_VERIFICATION_KEY;
         ux_flow_init(0, ux_sign_public_info_for_ip, NULL);
         *flags |= IO_ASYNCH_REPLY;
-    } else if (p1 == P1_VERIFICATION_KEY) {
-        if (ctx->publicKeysLength <= 0 || ctx->state != TX_PUBLIC_INFO_FOR_IP_VERIFICATION_KEY) {
-            THROW(SW_INVALID_STATE);
+    } else if (p1 == P1_VERIFICATION_KEY && ctx->state == TX_PUBLIC_INFO_FOR_IP_VERIFICATION_KEY) {
+        if (ctx->publicKeysLength <= 0) {
+            THROW(ERROR_INVALID_STATE);
         }
         // Hash key index
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 1, NULL, 0);
@@ -113,11 +109,7 @@ void handleSignPublicInformationForIp(uint8_t *cdata, uint8_t p1, volatile unsig
         }
         ux_flow_init(0, ux_sign_public_info_for_i_public_key, NULL);
         *flags |= IO_ASYNCH_REPLY;
-    } else if (p1 == P1_THRESHOLD) {
-        if (ctx->state != TX_PUBLIC_INFO_FOR_IP_THRESHOLD) {
-            THROW(SW_INVALID_STATE);
-        }
-
+    } else if (p1 == P1_THRESHOLD && ctx->state == TX_PUBLIC_INFO_FOR_IP_THRESHOLD) {
         // Read the threshold byte and parse it to display it.
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 1, NULL, 0);
         bin2dec(ctx->threshold, cdata[0]);
@@ -126,6 +118,6 @@ void handleSignPublicInformationForIp(uint8_t *cdata, uint8_t p1, volatile unsig
         ux_flow_init(0, ux_sign_public_info_for_ip_threshold, NULL);
         *flags |= IO_ASYNCH_REPLY;
     } else {
-        THROW(SW_INVALID_STATE);
+        THROW(ERROR_INVALID_STATE);
     }
 }

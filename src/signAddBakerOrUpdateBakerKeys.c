@@ -2,6 +2,7 @@
 #include "util.h"
 #include "accountSenderView.h"
 #include "sign.h"
+#include "responseCodes.h"
 
 static signAddBakerContext_t *ctx = &global.signAddBaker;
 static tx_state_t *tx_state = &global_tx_state;
@@ -53,17 +54,16 @@ UX_FLOW(ux_sign_update_baker_keys,
 #define P2_ADD_BAKER                0x00    // Sign an add baker transaction.
 #define P2_UPDATE_BAKER_KEYS        0x01    // Sign an update baker keys transaction.
 
-void handleSignAddBakerOrUpdateBakerKeys(uint8_t *cdata, uint8_t p1, uint8_t p2, volatile unsigned int *flags) {
-    if (p1 != P1_INITIAL && !tx_state->initialized) {
-        THROW(SW_INVALID_STATE);
-    }
-
+void handleSignAddBakerOrUpdateBakerKeys(uint8_t *cdata, uint8_t p1, uint8_t p2, volatile unsigned int *flags, bool isInitialCall) {
     if (p2 != P2_ADD_BAKER && p2 != P2_UPDATE_BAKER_KEYS) {
-        THROW(SW_INVALID_PARAM);
+        THROW(ERROR_INVALID_PARAM);
     }
 
-    if (p1 == P1_INITIAL) {
-        tx_state->initialized = true;
+    if (isInitialCall) {
+        ctx->state = ADD_BAKER_INITIAL;
+    }
+
+    if (p1 == P1_INITIAL && ctx->state == ADD_BAKER_INITIAL) {
         cdata += parseKeyDerivationPath(cdata);
 
         cx_sha256_init(&tx_state->hash);
@@ -72,7 +72,7 @@ void handleSignAddBakerOrUpdateBakerKeys(uint8_t *cdata, uint8_t p1, uint8_t p2,
         } else if (p2 == P2_UPDATE_BAKER_KEYS) {
             cdata += hashAccountTransactionHeaderAndKind(cdata, UPDATE_BAKER_KEYS);
         } else {
-            THROW(SW_INVALID_TRANSACTION);
+            THROW(ERROR_INVALID_TRANSACTION);
         }
 
         ctx->state = ADD_BAKER_VERIFY_KEYS;
@@ -121,15 +121,15 @@ void handleSignAddBakerOrUpdateBakerKeys(uint8_t *cdata, uint8_t p1, uint8_t p2,
             } else if (restakeEarnings == 1) {
                 memmove(ctx->restake, "Yes\0", 4);
             } else {
-                THROW(SW_INVALID_TRANSACTION);
+                THROW(ERROR_INVALID_TRANSACTION);
             }
 
             ux_flow_init(0, ux_sign_add_baker, NULL);
             *flags |= IO_ASYNCH_REPLY;
         } else {
-            THROW(SW_INVALID_PARAM);
+            THROW(ERROR_INVALID_PARAM);
         }
     } else {
-        THROW(SW_INVALID_STATE);
+        THROW(ERROR_INVALID_STATE);
     }
 }

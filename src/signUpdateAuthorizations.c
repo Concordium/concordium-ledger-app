@@ -6,6 +6,7 @@
 #include "util.h"
 #include <string.h>
 #include "sign.h"
+#include "responseCodes.h"
 
 static signUpdateAuthorizations_t *ctx = &global.signUpdateAuthorizations;
 static tx_state_t *tx_state = &global_tx_state;
@@ -89,7 +90,7 @@ const char* getAuthorizationName(authorizationType_e type) {
         case AUTHORIZATION_BAKER_STAKE_THRESHOLD: return "Baker stake threshold";
         case AUTHORIZATION_ADD_ANONYMITY_REVOKER: return "Add anonymity revoker";
         case AUTHORIZATION_ADD_IDENTITY_PROVIDER: return "Add identity provider";
-        case AUTHORIZATION_END: THROW(SW_INVALID_STATE);
+        case AUTHORIZATION_END: THROW(ERROR_INVALID_STATE);
     }
 }
 
@@ -140,17 +141,16 @@ void processKeyIndices() {
 #define P1_ACCESS_STRUCTURE             0x03    // Contains the public-key indices for the current access structure.
 #define P1_ACCESS_STRUCTURE_THRESHOLD   0x04    // Contains the threshold for the current access structure.
 
-void handleSignUpdateAuthorizations(uint8_t *cdata, uint8_t p1, uint8_t updateType, uint8_t dataLength, volatile unsigned int *flags) {
-    if (p1 != P1_INITIAL && tx_state->initialized != true) {
-        THROW(SW_INVALID_STATE);
+void handleSignUpdateAuthorizations(uint8_t *cdata, uint8_t p1, uint8_t updateType, uint8_t dataLength, volatile unsigned int *flags, bool isInitialCall) {
+    if (isInitialCall) {
+        ctx->state = TX_UPDATE_AUTHORIZATIONS_INITIAL;
     }
 
-    if (p1 == P1_INITIAL && tx_state->initialized == false) {
+    if (p1 == P1_INITIAL && ctx->state == TX_UPDATE_AUTHORIZATIONS_INITIAL) {
         cdata += parseKeyDerivationPath(cdata);
         cx_sha256_init(&tx_state->hash);
         cdata += hashUpdateHeaderAndType(cdata, updateType);
         ctx->authorizationType = 0;
-        tx_state->initialized = true;
 
         uint8_t keyUpdateType = cdata[0];
         if (keyUpdateType == ROOT_UPDATE_LEVEL_2) {
@@ -158,7 +158,7 @@ void handleSignUpdateAuthorizations(uint8_t *cdata, uint8_t p1, uint8_t updateTy
         } else if (keyUpdateType == LEVEL1_UPDATE_LEVEL_2) {
             memmove(ctx->type, "Level 2 w. level 1 keys\0", 24);
         } else {
-            THROW(SW_INVALID_TRANSACTION);
+            THROW(ERROR_INVALID_TRANSACTION);
         }
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 1, NULL, 0);
         cdata += 1;
@@ -181,7 +181,7 @@ void handleSignUpdateAuthorizations(uint8_t *cdata, uint8_t p1, uint8_t updateTy
 
         ctx->publicKeyListLength -= 1;
         if (ctx->publicKeyListLength == 0) {
-            ctx->state = TX_UPDATE_AUTHORIZATIONS_ACCESS_STRUCTURE_SIZE;
+            ctx->state   = TX_UPDATE_AUTHORIZATIONS_ACCESS_STRUCTURE_SIZE;
         }
         ux_flow_init(0, ux_update_authorizations_public_key, NULL);
         *flags |= IO_ASYNCH_REPLY;
@@ -210,6 +210,6 @@ void handleSignUpdateAuthorizations(uint8_t *cdata, uint8_t p1, uint8_t updateTy
         ux_flow_init(0, ux_update_authorizations_threshold, NULL);
         *flags |= IO_ASYNCH_REPLY;
     } else {
-        THROW(SW_INVALID_STATE);
+        THROW(ERROR_INVALID_STATE);
     }
 }

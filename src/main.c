@@ -46,12 +46,17 @@
 #include "ux.h"
 #include <string.h>
 #include "seproxyhal_protocol.h"
+#include "globals.h"
+#include "responseCodes.h"
 
 // Global variable definitions
 instructionContext global;
 keyDerivationPath_t path;
 tx_state_t global_tx_state;
 accountSender_t global_account_sender;
+
+// The initializing command of a multi command flow must have P1 == 0x00.
+#define INITIALIZING_P1 0x00
 
 // The expected CLA byte
 #define CLA 0xE0
@@ -108,9 +113,6 @@ accountSender_t global_account_sender;
 // Main entry of application that listens for APDU commands that will be received from the
 // computer. The APDU commands control what flow is activated, i.e. which control flow is initiated.
 static void concordium_main(void) {
-    // The transaction context is uninitialized when booting up.
-    global_tx_state.initialized = false;
-
     volatile unsigned int rx = 0;
     volatile unsigned int tx = 0;
     volatile unsigned int flags = 0;
@@ -133,7 +135,7 @@ static void concordium_main(void) {
                 }
 
                 if (G_io_apdu_buffer[OFFSET_CLA] != CLA) {
-                    THROW(0x6E00);
+                    THROW(ERROR_INVALID_CLA);
                 }
 
                 uint8_t INS = G_io_apdu_buffer[OFFSET_INS];
@@ -142,7 +144,20 @@ static void concordium_main(void) {
                 uint8_t lc = G_io_apdu_buffer[OFFSET_LC];
                 uint8_t* cdata = G_io_apdu_buffer + OFFSET_CDATA;
 
-                switch (G_io_apdu_buffer[OFFSET_INS]) {
+                bool isInitialCall = false;
+                if (global_tx_state.currentInstruction == -1) {
+                    memset(&global, 0, sizeof(global));
+                    global_tx_state.currentInstruction = INS;
+                    isInitialCall = true;
+                } else if (global_tx_state.currentInstruction != INS) {
+                    // Caller attempted to switch instruction in the middle
+                    // of a multi command flow. This is not allowed, as in the 
+                    // worst case, an attacker could trick a user to sign a mixed
+                    // transaction.
+                    THROW(ERROR_INVALID_STATE);
+                }
+
+                switch (INS) {
                     case INS_GET_PUBLIC_KEY:
                         handleGetPublicKey(cdata, p1, p2, &flags);
                         break;
@@ -150,10 +165,10 @@ static void concordium_main(void) {
                         handleSignTransfer(cdata, &flags);
                         break;
                     case INS_SIGN_TRANSFER_WITH_SCHEDULE:
-                        handleSignTransferWithSchedule(cdata, p1, &flags);
+                        handleSignTransferWithSchedule(cdata, p1, &flags, isInitialCall);
                         break;
                     case INS_CREDENTIAL_DEPLOYMENT:
-                        handleSignCredentialDeployment(cdata, p1, p2, &flags);
+                        handleSignCredentialDeployment(cdata, p1, p2, &flags, isInitialCall);
                         break;
                     case INS_EXPORT_PRIVATE_KEY_SEED:
                         handleExportPrivateKeySeed(cdata, p1, &flags);
@@ -165,16 +180,16 @@ static void concordium_main(void) {
                         handleSignTransferToEncrypted(cdata, &flags);
                         break;
                     case INS_ENCRYPTED_AMOUNT_TRANSFER:
-                        handleSignEncryptedAmountTransfer(cdata, p1, lc, &flags);
+                        handleSignEncryptedAmountTransfer(cdata, p1, lc, &flags, isInitialCall);
                         break;
                     case INS_TRANSFER_TO_PUBLIC:
-                        handleSignTransferToPublic(cdata, p1, lc, &flags);
+                        handleSignTransferToPublic(cdata, p1, lc, &flags, isInitialCall);
                         break;
                     case INS_PUBLIC_INFO_FOR_IP:
                         handleSignPublicInformationForIp(cdata, p1, &flags);
                         break;
                     case INS_UPDATE_PROTOCOL:
-                        handleSignUpdateProtocol(cdata, p1, lc, &flags);
+                        handleSignUpdateProtocol(cdata, p1, lc, &flags, isInitialCall);
                         break;
                     case INS_UPDATE_TRANSACTION_FEE_DIST:
                         handleSignUpdateTransactionFeeDistribution(cdata, &flags);
@@ -192,7 +207,7 @@ static void concordium_main(void) {
                         handleSignUpdateElectionDifficulty(cdata, &flags);
                         break;
                     case INS_ADD_BAKER_OR_UPDATE_KEYS:
-                        handleSignAddBakerOrUpdateBakerKeys(cdata, p1, p2, &flags);
+                        handleSignAddBakerOrUpdateBakerKeys(cdata, p1, p2, &flags, isInitialCall);
                         break;
                     case INS_REMOVE_BAKER:
                         handleSignRemoveBaker(cdata, &flags);
@@ -204,37 +219,48 @@ static void concordium_main(void) {
                         handleSignUpdateBakerRestakeEarnings(cdata, &flags);
                         break;
                     case INS_SIGN_UPDATE_CREDENTIAL:
-                        handleSignUpdateCredential(cdata, p1, p2, &flags);
+                        handleSignUpdateCredential(cdata, p1, p2, &flags, isInitialCall);
                         break;
                     case INS_UPDATE_BAKER_STAKE_THRESHOLD:
                         handleSignUpdateBakerStakeThreshold(cdata, &flags);
                         break;
                     case INS_UPDATE_ROOT_KEYS:
-                        handleSignHigherLevelKeys(cdata, p1, UPDATE_TYPE_UPDATE_ROOT_KEYS, &flags);
+                        handleSignHigherLevelKeys(cdata, p1, UPDATE_TYPE_UPDATE_ROOT_KEYS, &flags, isInitialCall);
                         break;
                     case INS_UPDATE_LEVEL1_KEYS:
-                        handleSignHigherLevelKeys(cdata, p1, UPDATE_TYPE_UPDATE_LEVEL1_KEYS, &flags);
+                        handleSignHigherLevelKeys(cdata, p1, UPDATE_TYPE_UPDATE_LEVEL1_KEYS, &flags, isInitialCall);
                         break;
                     case INS_UPDATE_LEVEL2_KEYS_ROOT:
-                        handleSignUpdateAuthorizations(cdata, p1, UPDATE_TYPE_UPDATE_ROOT_KEYS, lc, &flags);
+                        handleSignUpdateAuthorizations(cdata, p1, UPDATE_TYPE_UPDATE_ROOT_KEYS, lc, &flags, isInitialCall);
                         break;
                     case INS_UPDATE_LEVEL2_KEYS_LEVEL1:
-                        handleSignUpdateAuthorizations(cdata, p1, UPDATE_TYPE_UPDATE_LEVEL1_KEYS, lc, &flags);
+                        handleSignUpdateAuthorizations(cdata, p1, UPDATE_TYPE_UPDATE_LEVEL1_KEYS, lc, &flags, isInitialCall);
                         break;
                     default:
-                        THROW(0x6D00);
+                        THROW(ERROR_INVALID_INSTRUCTION);
                         break;
                 }
             }
+            
             CATCH_OTHER(e) {
-                switch (e & 0xF000) {
-                case 0x6000:
-                case 0x9000:
-                    sw = e;
-                    break;
-                default:
-                    sw = 0x6800 | (e & 0x7FF);
-                    break;
+                switch (e) {
+                    case ERROR_REJECTED_BY_USER:
+                    case ERROR_INVALID_STATE:
+                    case ERROR_INVALID_PATH:
+                    case ERROR_INVALID_PARAM:
+                    case ERROR_INVALID_TRANSACTION:
+                    case ERROR_INVALID_INSTRUCTION:
+                    case ERROR_INVALID_CLA:
+                    	global_tx_state.currentInstruction = -1;
+                        sw = e;
+                        break;
+                    case 0x6000:
+                    case 0x9000:
+                        sw = e;
+                        break;
+                    default:
+                        sw = 0x6800 | (e & 0x7FF);
+                        break;
                 }
                 // Unexpected exception => report
                 G_io_apdu_buffer[tx] = sw >> 8;

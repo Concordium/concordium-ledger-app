@@ -1,6 +1,7 @@
 #include <os.h>
 #include "util.h"
 #include "sign.h"
+#include "responseCodes.h"
 
 static signExchangeRateContext_t *ctx = &global.signExchangeRateContext;
 static tx_state_t *tx_state = &global_tx_state;
@@ -47,7 +48,7 @@ void handleSignUpdateExchangeRate(uint8_t *cdata, volatile unsigned int *flags) 
         ctx->type[13] = '\0';
     } else {
         // Received an unsupported exchange rate transaction.
-        THROW(SW_INVALID_TRANSACTION);
+        THROW(ERROR_INVALID_TRANSACTION);
     }
 
     // Numerator is the first 8 bytes.

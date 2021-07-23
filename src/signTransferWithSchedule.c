@@ -4,11 +4,17 @@
 #include "sign.h"
 #include "accountSenderView.h"
 #include "time.h"
+#include "responseCodes.h"
 
 static signTransferWithScheduleContext_t *ctx = &global.signTransferWithScheduleContext;
 static tx_state_t *tx_state = &global_tx_state;
 
 void processNextScheduledAmount(uint8_t *buffer);
+
+void updateStateAndSendSuccess() {
+    ctx->state = TX_TRANSFER_WITH_SCHEDULE_TRANSFER_PAIRS;
+    sendSuccessNoIdle();
+}
 
 // UI definitions for displaying the transaction contents of the first packet for verification before continuing
 // to process the scheduled amount pairs that will be received in separate packets.
@@ -22,7 +28,7 @@ UX_STEP_NOCB(
 UX_STEP_VALID(
     ux_scheduled_transfer_initial_flow_2_step,
     nn,
-    sendSuccessNoIdle(),
+    updateStateAndSendSuccess(),
     {
       "Continue",
       "with transaction"
@@ -79,13 +85,13 @@ void processNextScheduledAmount(uint8_t *buffer) {
         ctx->pos += 8;
         int valid = secondsToTm(timestamp, &ctx->time);
         if (valid != 0) {
-            THROW(SW_INVALID_PARAM);
+            THROW(ERROR_INVALID_PARAM);
         }
         
         // If the year is too far into the future, then just fail. This is needed so
         // that we know how much space to reserve to display the date time.
         if (ctx->time.tm_year > 9999) {
-            THROW(SW_INVALID_PARAM);
+            THROW(ERROR_INVALID_PARAM);
         }
         timeToDisplayText(ctx->time, ctx->displayTimestamp);
         
@@ -105,21 +111,12 @@ void processNextScheduledAmount(uint8_t *buffer) {
 #define P1_INITIAL_PACKET           0x00
 #define P1_SCHEDULED_TRANSFER_PAIRS 0x01
 
-void handleSignTransferWithSchedule(uint8_t *cdata, uint8_t p1, volatile unsigned int *flags) {
-    // Ensure that the received transaction is well-formed, i.e. that we only receive an initial packet once,
-    // and it was the first packet received. This prevents an attack where two transactions are concatenated.
-    if (p1 == P1_INITIAL_PACKET) {
-        if (tx_state->initialized) {
-            THROW(SW_INVALID_STATE);
-        }
-        tx_state->initialized = true;
-    } else {
-        if (!tx_state->initialized) {
-            THROW(SW_INVALID_STATE);
-        }
+void handleSignTransferWithSchedule(uint8_t *cdata, uint8_t p1, volatile unsigned int *flags, bool isInitialCall) {
+    if (isInitialCall) {
+        ctx->state = TX_TRANSFER_WITH_SCHEDULE_INITIAL;
     }
 
-    if (p1 == P1_INITIAL_PACKET) {
+    if (p1 == P1_INITIAL_PACKET && ctx->state == TX_TRANSFER_WITH_SCHEDULE_INITIAL) {
         int bytesRead = parseKeyDerivationPath(cdata);
         cdata += bytesRead;
 
@@ -136,7 +133,7 @@ void handleSignTransferWithSchedule(uint8_t *cdata, uint8_t p1, volatile unsigne
         // Used in display of recipient address.
         size_t outputSize = sizeof(ctx->displayStr);
         if (base58check_encode(toAddress, sizeof(toAddress), ctx->displayStr, &outputSize) != 0) {
-            THROW(SW_INVALID_TRANSACTION);
+            THROW(ERROR_INVALID_TRANSACTION);
         }
         ctx->displayStr[50] = '\0';
 
@@ -150,7 +147,7 @@ void handleSignTransferWithSchedule(uint8_t *cdata, uint8_t p1, volatile unsigne
 
         // Tell the main process to wait for a button press.
         *flags |= IO_ASYNCH_REPLY;
-    } else if (p1 == P1_SCHEDULED_TRANSFER_PAIRS) {
+    } else if (p1 == P1_SCHEDULED_TRANSFER_PAIRS && ctx->state == TX_TRANSFER_WITH_SCHEDULE_TRANSFER_PAIRS) {
         // Load the scheduled transfer information.
         // First 8 bytes is the timestamp, the following 8 bytes is the amount.
         // We have room for 255 bytes, so 240 = 15 * 16, i.e. 15 pairs in each packet. Determine how many pairs are
@@ -173,6 +170,6 @@ void handleSignTransferWithSchedule(uint8_t *cdata, uint8_t p1, volatile unsigne
         // Tell the main process to wait for a button press.
         *flags |= IO_ASYNCH_REPLY;
     } else {
-        THROW(SW_INVALID_PARAM);
+        THROW(ERROR_INVALID_PARAM);
     }
 }

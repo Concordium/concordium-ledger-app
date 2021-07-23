@@ -58,6 +58,5 @@ void buildAndSignTransactionHash() {
 
 // Send user rejection and make sure to reset context (otherwise a new request would be rejected).
 void declineToSignTransaction() {
-    tx_state->initialized = false;
     sendUserRejection();
 }

@@ -4,6 +4,7 @@
 #include "util.h"
 #include "globals.h"
 #include <string.h>
+#include "responseCodes.h"
 
 // This class allows for the export of a number of very specific private keys. These private keys are made
 // exportable as they are used in computations that are not feasible to carry out on the Ledger device.
@@ -33,7 +34,7 @@ void exportPrivateKey() {
             if (ctx->pathLength == 6) {
                 getPrivateKey(ctx->path, ctx->pathLength, &privateKey);
             } else {
-                getPrivateKey(ctx->arPath, ctx->pathLength, &privateKey);
+                THROW(ERROR_INVALID_PATH);
             }
             uint8_t tx = 0;
             for (int i = 0; i < 32; i++) {
@@ -52,18 +53,15 @@ const char* getPrivateKeyTypeName(uint8_t type) {
     switch (type) {
         case 0: return "IdCredSec";
         case 1: return "PRF key";
-        case 2: return "AR dec. key";
-        default: THROW(SW_INVALID_PARAM);
+        default: THROW(ERROR_INVALID_PARAM);
     }
 }
 
 #define ACCOUNT_SUBTREE 0
 #define NORMAL_ACCOUNTS 0
-#define AR_SUBTREE      1
 
 #define P1_ID_CRED_SEC          0x00
 #define P1_PRF_KEY              0x01
-#define P1_AR_DECRYPTION_KEY    0x02
 
 void handleExportPrivateKeySeed(uint8_t *dataBuffer, uint8_t p1, volatile unsigned int *flags) {
     memmove(ctx->type, "Export ", 7);
@@ -85,29 +83,8 @@ void handleExportPrivateKeySeed(uint8_t *dataBuffer, uint8_t p1, volatile unsign
 
         memmove(ctx->display, "ID #", 4);
         bin2dec(ctx->display + 4, identity);
-    } else if (p1 == P1_AR_DECRYPTION_KEY) {
-        uint32_t idp = U4BE(dataBuffer, 0);
-        uint32_t ar_index = U4BE(dataBuffer, 4);
-        uint32_t keyDerivationPath[] = {
-            CONCORDIUM_PURPOSE | HARDENED_OFFSET,
-            CONCORDIUM_COIN_TYPE | HARDENED_OFFSET,
-            AR_SUBTREE | HARDENED_OFFSET,
-            idp | HARDENED_OFFSET,
-            ar_index | HARDENED_OFFSET,
-        };
-        memmove(ctx->arPath, keyDerivationPath, sizeof(keyDerivationPath) * 5);
-        ctx->pathLength = 5;
-
-        uint8_t lengthCount = 5;
-        memmove(ctx->display, "IDP #", lengthCount);
-        lengthCount += numberToText(ctx->display + lengthCount, idp);
-        memmove(ctx->display + lengthCount, " ", 1);
-        lengthCount += 1;
-        memmove(ctx->display + lengthCount, "AR #", 4);
-        lengthCount += 4;
-        bin2dec(ctx->display + lengthCount, ar_index);
     } else {
-        THROW(SW_INVALID_PARAM);
+        THROW(ERROR_INVALID_PARAM);
     }
 
     ux_flow_init(0, ux_export_private_key, NULL);

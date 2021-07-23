@@ -3,6 +3,7 @@
 #include "accountSenderView.h"
 #include "sign.h"
 #include "base58check.h"
+#include "responseCodes.h"
 
 static signEncryptedAmountToTransfer_t *ctx = &global.signEncryptedAmountToTransfer;
 static tx_state_t *tx_state = &global_tx_state;
@@ -38,11 +39,14 @@ UX_FLOW(ux_sign_encrypted_amount_transfer,
 #define P1_TRANSFER_AMOUNT_AGG_INDEX_PROOF_SIZE 0x02
 #define P1_PROOF                                0x03
 
-void handleSignEncryptedAmountTransfer(uint8_t *cdata, uint8_t p1, uint8_t dataLength, volatile unsigned int *flags) {
-    if (p1 == P1_INITIAL && tx_state->initialized == false) {
+void handleSignEncryptedAmountTransfer(uint8_t *cdata, uint8_t p1, uint8_t dataLength, volatile unsigned int *flags, bool isInitialCall) {
+    if (isInitialCall) {
+        ctx->state = TX_ENCRYPTED_AMOUNT_TRANSFER_INITIAL;
+    }
+
+    if (p1 == P1_INITIAL && ctx->state == TX_ENCRYPTED_AMOUNT_TRANSFER_INITIAL) {
         cdata += parseKeyDerivationPath(cdata);
         cx_sha256_init(&tx_state->hash);
-        tx_state->initialized = true;
         cdata += hashAccountTransactionHeaderAndKind(cdata, ENCRYPTED_AMOUNT_TRANSFER);
 
         // To account address
@@ -53,7 +57,7 @@ void handleSignEncryptedAmountTransfer(uint8_t *cdata, uint8_t p1, uint8_t dataL
         size_t outputSize = sizeof(ctx->to);
         if (base58check_encode(toAddress, sizeof(toAddress), ctx->to, &outputSize) != 0) {
             // The received address bytes are not valid a valid base58 encoding.
-            THROW(SW_INVALID_TRANSACTION);
+            THROW(ERROR_INVALID_TRANSACTION);
         }
         ctx->to[50] = '\0';
 
@@ -85,12 +89,12 @@ void handleSignEncryptedAmountTransfer(uint8_t *cdata, uint8_t p1, uint8_t dataL
             *flags |= IO_ASYNCH_REPLY;
         } else if (ctx->proofSize < 0) {
             // We received more proof bytes than expected.
-            THROW(SW_INVALID_STATE);    
+            THROW(ERROR_INVALID_STATE);    
         } else {
             // There are more bytes to be received. Ask the computer for more.
             sendSuccessNoIdle();
         }
     } else {
-        THROW(SW_INVALID_STATE);
+        THROW(ERROR_INVALID_STATE);
     }
 }

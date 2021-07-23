@@ -9,4 +9,19 @@
  */
 void handleSignPublicInformationForIp(uint8_t *cdata, uint8_t p1, volatile unsigned int *flags);
 
+typedef enum {
+    TX_PUBLIC_INFO_FOR_IP_INITIAL = 0,
+    TX_PUBLIC_INFO_FOR_IP_VERIFICATION_KEY = 11,
+    TX_PUBLIC_INFO_FOR_IP_THRESHOLD = 12
+} publicInfoForIpState_t;
+
+typedef struct {
+    char credId[97];
+    char idCredPub[97];
+    uint8_t publicKeysLength;
+    char publicKey[65];
+    uint8_t threshold[4];
+    publicInfoForIpState_t state;
+} signPublicInformationForIp_t;
+
 #endif

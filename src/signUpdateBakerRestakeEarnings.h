@@ -8,4 +8,8 @@
  */
 void handleSignUpdateBakerRestakeEarnings(uint8_t *cdata, volatile unsigned int *flags);
 
+typedef struct {
+    uint8_t restake[4];
+} signUpdateBakerRestakeEarningsContext_t;
+
 #endif

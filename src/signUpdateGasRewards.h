@@ -8,4 +8,11 @@
  */
 void handleSignUpdateGasRewards(uint8_t *cdata, volatile unsigned int *flags);
 
+typedef struct {
+    uint8_t gasBaker[17];
+    uint8_t gasFinalization[17];
+    uint8_t gasAccountCreation[17];
+    uint8_t gasChainUpdate[17];
+} signUpdateGasRewardsContext_t;
+
 #endif

@@ -6,6 +6,7 @@
 #include "util.h"
 #include <string.h>
 #include "sign.h"
+#include "responseCodes.h"
 
 static signElectionDifficultyContext_t *ctx = &global.signElectionDifficulty;
 static tx_state_t *tx_state = &global_tx_state;
@@ -32,7 +33,7 @@ void handleSignUpdateElectionDifficulty(uint8_t *cdata, volatile unsigned int *f
     uint8_t fraction[10] = "/100000";
     uint32_t numerator = U4BE(cdata, 0);
     if (numerator > 100000) {
-        THROW(SW_INVALID_TRANSACTION);
+        THROW(ERROR_INVALID_TRANSACTION);
     }
     int numeratorLength = numberToText(ctx->electionDifficulty, numerator);
     cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 4, NULL, 0);

@@ -1,6 +1,7 @@
 #include <os.h>
 #include "util.h"
 #include "sign.h"
+#include "responseCodes.h"
 
 static signTransactionDistributionFeeContext_t *ctx = &global.signTransactionDistributionFeeContext;
 static tx_state_t *tx_state = &global_tx_state;
@@ -42,7 +43,7 @@ void handleSignUpdateTransactionFeeDistribution(uint8_t *cdata, volatile unsigne
     cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 1, NULL, 0);
     cdata += 1;
     if (updateType != UPDATE_TYPE_TRANSACTION_FEE_DISTRIBUTION) {
-        THROW(SW_INVALID_TRANSACTION);
+        THROW(ERROR_INVALID_TRANSACTION);
     }
 
     // Baker fee is first 4 bytes
