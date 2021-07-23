@@ -60,8 +60,4 @@ fn main() {
         Ok(_v) => assert!(false),
         Err(e) => println!("An error was thrown as expected: {}", e)
     }
-
-    // TODO But if we re-run this, then we get a different error at an earlier place. So something is not
-    // working as expected.
-    // State is not being reset between calls for some reason or other.
 }

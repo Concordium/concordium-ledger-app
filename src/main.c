@@ -55,9 +55,6 @@ keyDerivationPath_t path;
 tx_state_t global_tx_state;
 accountSender_t global_account_sender;
 
-// The initializing command of a multi command flow must have P1 == 0x00.
-#define INITIALIZING_P1 0x00
-
 // The expected CLA byte
 #define CLA 0xE0
 
@@ -251,7 +248,7 @@ static void concordium_main(void) {
                     case ERROR_INVALID_TRANSACTION:
                     case ERROR_INVALID_INSTRUCTION:
                     case ERROR_INVALID_CLA:
-                    	global_tx_state.currentInstruction = -1;
+                        global_tx_state.currentInstruction = -1;
                         sw = e;
                         break;
                     case 0x6000:

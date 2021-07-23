@@ -2,7 +2,7 @@
 #define _CONCORDIUM_APP_ERROR_CODES_H_
 
 enum {
-    // Successfull codes
+    // Successful codes
     SUCCESS = 0x9000,
 
     // Error codes
@@ -17,4 +17,3 @@ enum {
 };
 
 #endif
-

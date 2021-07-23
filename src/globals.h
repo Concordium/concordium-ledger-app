@@ -1,7 +1,6 @@
 #include "os.h"
 #include "ux.h"
 #include "cx.h"
-#include "time.h"
 #include <stdbool.h>
 
 #include "getPublicKey.h"
