@@ -381,8 +381,9 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, uint8_t p2,
         // Display the loaded data.
         ux_flow_init(0, ux_credential_deployment_threshold_flow, NULL);
     } else if (p1 == P1_AR_IDENTITY && ctx->state == TX_CREDENTIAL_DEPLOYMENT_AR_IDENTITY) {
-        if (ctx->anonymityRevocationListLength <= 0) {
-            THROW(ERROR_INVALID_STATE);  // Invalid state, sender says ar identity pair is incoming, but we already received all.
+        if (ctx->anonymityRevocationListLength == 0) {
+             // Invalid state, sender says ar identity pair is incoming, but we already received all.
+            THROW(ERROR_INVALID_STATE); 
         }
 
         // Parse ArIdentity
@@ -398,7 +399,10 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, uint8_t p2,
         cx_hash((cx_hash_t *) &tx_state->hash, 0, encIdCredPubShare, 96, NULL, 0);
         dataBuffer += 96;
 
-        ctx->state = TX_CREDENTIAL_DEPLOYMENT_CREDENTIAL_DATES;
+        if (ctx->anonymityRevocationListLength == 1) {
+            ctx->state = TX_CREDENTIAL_DEPLOYMENT_CREDENTIAL_DATES;
+        }
+        ctx->anonymityRevocationListLength -= 1;
         sendSuccessNoIdle();
 
         // We do not show encrypted shares, as they are not possible for a user
@@ -433,7 +437,12 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, uint8_t p2,
         cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 2, NULL, 0);
         dataBuffer += 2;
 
-        ctx->state = TX_CREDENTIAL_DEPLOYMENT_ATTRIBUTE_TAG;
+        if (ctx->attributeListLength == 0) {
+            ctx->state = TX_CREDENTIAL_DEPLOYMENT_LENGTH_OF_PROOFS;
+        } else {
+            ctx->state = TX_CREDENTIAL_DEPLOYMENT_ATTRIBUTE_TAG;
+        }
+
         ux_flow_init(0, ux_credential_deployment_dates, NULL);
     } else if (p1 == P1_ATTRIBUTE_TAG && ctx->state == TX_CREDENTIAL_DEPLOYMENT_ATTRIBUTE_TAG) {
         if (ctx->attributeListLength <= 0) {
