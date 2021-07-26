@@ -4,7 +4,7 @@ An application for the Ledger Nano S and Ledger Nano X devices for retrieving ke
 
 ## Secure SDK dependency
 
-We depend on the [Nano S Secure SDK](https://github.com/LedgerHQ/nanos-secure-sdk/releases/tag/nanos-1612) and the 
+We depend on the [Nano S Secure SDK](https://github.com/LedgerHQ/nanos-secure-sdk/) and the 
 [Nano X Secure SDK](https://github.com/LedgerHQ/nanox-secure-sdk), which 
 have been added as git submodules. Make sure to initialize submodules when checking out this repository:
 ```
@@ -13,8 +13,11 @@ git submodule update --init
 
 ## Building and deploying application to Ledger Nano S
 
-Start by following the [official guide](https://ledger.readthedocs.io/en/latest/userspace/getting_started.html) to 
-set your environment up correctly with the required dependencies.
+Start by following the [official guide](https://developers.ledger.com/docs/nano-app/quickstart/) to 
+set your environment up correctly with the required dependencies. Note that it is important to use the correct 
+version of `clang` for the build to work (currently 9.0.0, as linked by Ledger [here](https://developers.ledger.com/docs/nano-app/deepdive/)). 
+If your version is incompatible, then it is quite likely that you will see an error stating that 
+`ld.lld doesn't exist`.
 
 The Makefile is responsible for loading the application onto the device. This is done with the load
 target, while the device is connected via USB.
@@ -33,6 +36,14 @@ make delete
 
 Both scripts require you to respond to the installation UI on the device for the installation or deletion
 to complete.
+
+### Switching the SDK
+
+Please note that it is necessary to run
+```
+make clean
+```
+when switching the SDK used to build the application.
 
 ## Developing for the Ledger
 
