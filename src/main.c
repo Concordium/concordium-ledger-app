@@ -46,6 +46,8 @@
 #include "ux.h"
 #include <string.h>
 #include "seproxyhal_protocol.h"
+#include "globals.h"
+#include "responseCodes.h"
 
 // Global variable definitions
 instructionContext global;
@@ -108,9 +110,6 @@ accountSender_t global_account_sender;
 // Main entry of application that listens for APDU commands that will be received from the
 // computer. The APDU commands control what flow is activated, i.e. which control flow is initiated.
 static void concordium_main(void) {
-    // The transaction context is uninitialized when booting up.
-    global_tx_state.initialized = false;
-
     volatile unsigned int rx = 0;
     volatile unsigned int tx = 0;
     volatile unsigned int flags = 0;
@@ -129,111 +128,139 @@ static void concordium_main(void) {
                 // no apdu received, well, reset the session, and reset the
                 // bootloader configuration
                 if (rx == 0) {
-                    THROW(0x6982);
+                    THROW(ERROR_NO_APDU_RECEIVED);
                 }
 
                 if (G_io_apdu_buffer[OFFSET_CLA] != CLA) {
-                    THROW(0x6E00);
+                    THROW(ERROR_INVALID_CLA);
                 }
 
-                switch (G_io_apdu_buffer[OFFSET_INS]) {
+                uint8_t INS = G_io_apdu_buffer[OFFSET_INS];
+                uint8_t p1 = G_io_apdu_buffer[OFFSET_P1];
+                uint8_t p2 = G_io_apdu_buffer[OFFSET_P2];
+                uint8_t lc = G_io_apdu_buffer[OFFSET_LC];
+                uint8_t* cdata = G_io_apdu_buffer + OFFSET_CDATA;
+
+                bool isInitialCall = false;
+                if (global_tx_state.currentInstruction == -1) {
+                    memset(&global, 0, sizeof(global));
+                    global_tx_state.currentInstruction = INS;
+                    isInitialCall = true;
+                } else if (global_tx_state.currentInstruction != INS) {
+                    // Caller attempted to switch instruction in the middle
+                    // of a multi command flow. This is not allowed, as in the 
+                    // worst case, an attacker could trick a user to sign a mixed
+                    // transaction.
+                    THROW(ERROR_INVALID_STATE);
+                }
+
+                switch (INS) {
                     case INS_GET_PUBLIC_KEY:
-                        handleGetPublicKey(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_P1], G_io_apdu_buffer[OFFSET_P2], &flags);
+                        handleGetPublicKey(cdata, p1, p2, &flags);
                         break;
                     case INS_SIGN_TRANSFER:
-                        handleSignTransfer(G_io_apdu_buffer + OFFSET_CDATA, &flags);
+                        handleSignTransfer(cdata, &flags);
                         break;
                     case INS_SIGN_TRANSFER_WITH_SCHEDULE:
-                        handleSignTransferWithSchedule(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_P1], &flags);
+                        handleSignTransferWithSchedule(cdata, p1, &flags, isInitialCall);
                         break;
                     case INS_CREDENTIAL_DEPLOYMENT:
-                        handleSignCredentialDeployment(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_P1], G_io_apdu_buffer[OFFSET_P2], &flags);
+                        handleSignCredentialDeployment(cdata, p1, p2, &flags, isInitialCall);
                         break;
                     case INS_EXPORT_PRIVATE_KEY_SEED:
-                        handleExportPrivateKeySeed(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_P1], &flags);
+                        handleExportPrivateKeySeed(cdata, p1, &flags);
                         break;
                     case INS_UPDATE_EXCHANGE_RATE:
-                        handleSignUpdateExchangeRate(G_io_apdu_buffer + OFFSET_CDATA, &flags);
+                        handleSignUpdateExchangeRate(cdata, &flags);
                         break;
                     case INS_TRANSFER_TO_ENCRYPTED:
-                        handleSignTransferToEncrypted(G_io_apdu_buffer + OFFSET_CDATA, &flags);
+                        handleSignTransferToEncrypted(cdata, &flags);
                         break;
                     case INS_ENCRYPTED_AMOUNT_TRANSFER:
-                        handleSignEncryptedAmountTransfer(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_P1], G_io_apdu_buffer[OFFSET_LC], &flags);
+                        handleSignEncryptedAmountTransfer(cdata, p1, lc, &flags, isInitialCall);
                         break;
                     case INS_TRANSFER_TO_PUBLIC:
-                        handleSignTransferToPublic(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_P1], G_io_apdu_buffer[OFFSET_LC], &flags);
+                        handleSignTransferToPublic(cdata, p1, lc, &flags, isInitialCall);
                         break;
                     case INS_PUBLIC_INFO_FOR_IP:
-                        handleSignPublicInformationForIp(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_P1], &flags);
+                        handleSignPublicInformationForIp(cdata, p1, &flags, isInitialCall);
                         break;
                     case INS_UPDATE_PROTOCOL:
-                        handleSignUpdateProtocol(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_P1], G_io_apdu_buffer[OFFSET_LC], &flags);
+                        handleSignUpdateProtocol(cdata, p1, lc, &flags, isInitialCall);
                         break;
                     case INS_UPDATE_TRANSACTION_FEE_DIST:
-                        handleSignUpdateTransactionFeeDistribution(G_io_apdu_buffer + OFFSET_CDATA, &flags);
+                        handleSignUpdateTransactionFeeDistribution(cdata, &flags);
                         break;
                     case INS_UPDATE_GAS_REWARDS:
-                        handleSignUpdateGasRewards(G_io_apdu_buffer + OFFSET_CDATA, &flags);
+                        handleSignUpdateGasRewards(cdata, &flags);
                         break;
                     case INS_UPDATE_FOUNDATION_ACCOUNT:
-                        handleSignUpdateFoundationAccount(G_io_apdu_buffer + OFFSET_CDATA, &flags);
+                        handleSignUpdateFoundationAccount(cdata, &flags);
                         break;
                     case INS_UPDATE_MINT_DISTRIBUTION:
-                        handleSignUpdateMintDistribution(G_io_apdu_buffer + OFFSET_CDATA, &flags);
+                        handleSignUpdateMintDistribution(cdata, &flags);
                         break;
                     case INS_UPDATE_ELECTION_DIFFICULTY:
-                        handleSignUpdateElectionDifficulty(G_io_apdu_buffer + OFFSET_CDATA, &flags);
+                        handleSignUpdateElectionDifficulty(cdata, &flags);
                         break;
                     case INS_ADD_BAKER_OR_UPDATE_KEYS:
-                        handleSignAddBakerOrUpdateBakerKeys(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_P1], G_io_apdu_buffer[OFFSET_P2], &flags);
+                        handleSignAddBakerOrUpdateBakerKeys(cdata, p1, p2, &flags, isInitialCall);
                         break;
                     case INS_REMOVE_BAKER:
-                        handleSignRemoveBaker(G_io_apdu_buffer + OFFSET_CDATA, &flags);
+                        handleSignRemoveBaker(cdata, &flags);
                         break;
                     case INS_UPDATE_BAKER_STAKE:
-                        handleSignUpdateBakerStake(G_io_apdu_buffer + OFFSET_CDATA, &flags);
+                        handleSignUpdateBakerStake(cdata, &flags);
                         break;
                     case INS_UPDATE_BAKER_RESTAKE_EARNINGS:
-                        handleSignUpdateBakerRestakeEarnings(G_io_apdu_buffer + OFFSET_CDATA, &flags);
+                        handleSignUpdateBakerRestakeEarnings(cdata, &flags);
                         break;
                     case INS_SIGN_UPDATE_CREDENTIAL:
-                        handleSignUpdateCredential(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_P1], G_io_apdu_buffer[OFFSET_P2], &flags);
+                        handleSignUpdateCredential(cdata, p1, p2, &flags, isInitialCall);
                         break;
                     case INS_UPDATE_BAKER_STAKE_THRESHOLD:
-                        handleSignUpdateBakerStakeThreshold(G_io_apdu_buffer + OFFSET_CDATA, &flags);
+                        handleSignUpdateBakerStakeThreshold(cdata, &flags);
                         break;
                     case INS_UPDATE_ROOT_KEYS:
-                        handleSignHigherLevelKeys(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_P1], UPDATE_TYPE_UPDATE_ROOT_KEYS, &flags);
+                        handleSignHigherLevelKeys(cdata, p1, UPDATE_TYPE_UPDATE_ROOT_KEYS, &flags, isInitialCall);
                         break;
                     case INS_UPDATE_LEVEL1_KEYS:
-                        handleSignHigherLevelKeys(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_P1], UPDATE_TYPE_UPDATE_LEVEL1_KEYS, &flags);
+                        handleSignHigherLevelKeys(cdata, p1, UPDATE_TYPE_UPDATE_LEVEL1_KEYS, &flags, isInitialCall);
                         break;
                     case INS_UPDATE_LEVEL2_KEYS_ROOT:
-                        handleSignUpdateAuthorizations(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_P1], UPDATE_TYPE_UPDATE_ROOT_KEYS, G_io_apdu_buffer[OFFSET_LC], &flags);
+                        handleSignUpdateAuthorizations(cdata, p1, UPDATE_TYPE_UPDATE_ROOT_KEYS, lc, &flags, isInitialCall);
                         break;
                     case INS_UPDATE_LEVEL2_KEYS_LEVEL1:
-                        handleSignUpdateAuthorizations(G_io_apdu_buffer + OFFSET_CDATA, G_io_apdu_buffer[OFFSET_P1], UPDATE_TYPE_UPDATE_LEVEL1_KEYS, G_io_apdu_buffer[OFFSET_LC], &flags);
+                        handleSignUpdateAuthorizations(cdata, p1, UPDATE_TYPE_UPDATE_LEVEL1_KEYS, lc, &flags, isInitialCall);
                         break;
                     default:
-                        THROW(0x6D00);
+                        THROW(ERROR_INVALID_INSTRUCTION);
                         break;
                 }
             }
+            
             CATCH_OTHER(e) {
-                switch (e & 0xF000) {
-                case 0x6000:
-                case 0x9000:
-                    sw = e;
-                    break;
-                default:
-                    sw = 0x6800 | (e & 0x7FF);
-                    break;
+                switch (e) {
+                    case ERROR_NO_APDU_RECEIVED:
+                    case ERROR_REJECTED_BY_USER:
+                    case ERROR_INVALID_STATE:
+                    case ERROR_INVALID_PATH:
+                    case ERROR_INVALID_PARAM:
+                    case ERROR_INVALID_TRANSACTION:
+                    case ERROR_INVALID_INSTRUCTION:
+                    case ERROR_INVALID_CLA:
+                        global_tx_state.currentInstruction = -1;
+                        sw = e;
+                        G_io_apdu_buffer[tx] = sw >> 8;
+                        G_io_apdu_buffer[tx + 1] = sw;
+                        tx += 2;
+                        break;
+                    default:
+                        // An unknown error was thrown. Reset the device if 
+                        // this happens.
+                        io_seproxyhal_se_reset();
+                        break;
                 }
-                // Unexpected exception => report
-                G_io_apdu_buffer[tx] = sw >> 8;
-                G_io_apdu_buffer[tx + 1] = sw;
-                tx += 2;
             }
             FINALLY {
             }

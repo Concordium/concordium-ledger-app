@@ -11,4 +11,10 @@
  */ 
 void handleGetPublicKey(uint8_t *cdata, uint8_t p1, uint8_t p2, volatile unsigned int *flags);
 
+typedef struct { 
+    uint8_t display[14];
+    char publicKey[64];
+    bool signPublicKey;
+} exportPublicKeyContext_t;
+
 #endif

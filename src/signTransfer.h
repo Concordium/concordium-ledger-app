@@ -8,4 +8,9 @@
  */
 void handleSignTransfer(uint8_t *cdata, volatile unsigned int *flags);
 
+typedef struct {
+    unsigned char displayStr[52];
+    uint8_t displayAmount[26];
+} signTransferContext_t;
+
 #endif

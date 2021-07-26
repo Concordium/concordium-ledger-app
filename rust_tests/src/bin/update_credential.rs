@@ -66,7 +66,7 @@ fn main() {
             ins: 49,
             p1: 1,
             p2: 2,
-            length: 0,
+            length: key_blob.len() as u8,
             data: key_blob
         };
         ledger.exchange(verification_key_command).unwrap();

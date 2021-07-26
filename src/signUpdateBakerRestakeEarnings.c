@@ -2,8 +2,9 @@
 #include "util.h"
 #include "accountSenderView.h"
 #include "sign.h"
+#include "responseCodes.h"
 
-static sigUpdateBakerRestakeEarningsContext_t *ctx = &global.signUpdateBakerRestakeEarnings;
+static signUpdateBakerRestakeEarningsContext_t *ctx = &global.signUpdateBakerRestakeEarnings;
 static tx_state_t *tx_state = &global_tx_state;
 
 UX_STEP_NOCB(
@@ -34,7 +35,7 @@ void handleSignUpdateBakerRestakeEarnings(uint8_t *cdata, volatile unsigned int 
     } else if (restakeEarnings == 1) {
         memmove(ctx->restake, "Yes\0", 4);
     } else {
-        THROW(SW_INVALID_TRANSACTION);
+        THROW(ERROR_INVALID_TRANSACTION);
     }
 
     ux_flow_init(0, ux_sign_update_baker_restake_earnings, NULL);

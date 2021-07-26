@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include "sign.h"
 #include "accountSenderView.h"
+#include "responseCodes.h"
 
 static signCredentialDeploymentContext_t *ctx = &global.signCredentialDeploymentContext;
 static cx_sha256_t attributeHash;
@@ -17,7 +18,7 @@ static tx_state_t *tx_state = &global_tx_state;
 void processNextVerificationKey();
 void signCredentialDeployment();
 void declineToSignCredentialDeployment();
-void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, uint8_t p2, volatile unsigned int *flags);
+void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, uint8_t p2, volatile unsigned int *flags, bool isInitialCall);
 
 UX_STEP_CB(
     ux_credential_deployment_initial_flow_0_step,
@@ -132,7 +133,7 @@ UX_STEP_CB(
 UX_STEP_CB(
     ux_sign_credential_deployment_2_step,
     pnn,
-    declineToSignTransaction(),
+    sendUserRejection(),
     {
       &C_icon_crossmark,
       "Decline to",
@@ -157,7 +158,6 @@ UX_FLOW(ux_sign_credential_update_id,
     &ux_sign_credential_update_id_0_step
 );
 
-
 /*
  * The UI flow for the final part of the update credential, which displays
  * the threshold and allows the user to either sign or decline.
@@ -181,7 +181,7 @@ UX_STEP_CB(
 UX_STEP_CB(
     ux_sign_credential_update_threshold_2_step,
     pnn,
-    declineToSignTransaction(),
+    sendUserRejection(),
     {
       &C_icon_crossmark,
       "Decline to",
@@ -195,7 +195,7 @@ UX_FLOW(ux_sign_credential_update_threshold,
 
 void processNextVerificationKey() {
     if (ctx->numberOfVerificationKeys == 0) {
-        // TODO Update state here. That is why there are two branches here that currently do the same.
+        ctx->state = TX_CREDENTIAL_DEPLOYMENT_SIGNATURE_THRESHOLD;
         sendSuccessNoIdle();
     } else {
         sendSuccessNoIdle();   // Request more data from the computer.
@@ -247,17 +247,17 @@ void parseVerificationKey(uint8_t *buffer) {
 #define P2_CREDENTIAL_ID                    0x04
 #define P2_THRESHOLD                        0x05
 
-void handleSignUpdateCredential(uint8_t *dataBuffer, uint8_t p1, uint8_t p2, volatile unsigned int *flags) {
-    if (p2 != P2_CREDENTIAL_INITIAL && tx_state->initialized == false) {
-        THROW(SW_INVALID_STATE);
+void handleSignUpdateCredential(uint8_t *dataBuffer, uint8_t p1, uint8_t p2, volatile unsigned int *flags, bool isInitialCall) {
+    if (isInitialCall) {
+        ctx->updateCredentialState = TX_UPDATE_CREDENTIAL_INITIAL;
+        ctx->state = TX_CREDENTIAL_DEPLOYMENT_VERIFICATION_KEYS_LENGTH;
     }
 
-    if (p2 == P2_CREDENTIAL_INITIAL) {
+    if (p2 == P2_CREDENTIAL_INITIAL && ctx->updateCredentialState == TX_UPDATE_CREDENTIAL_INITIAL) {
         int bytesRead = parseKeyDerivationPath(dataBuffer);
         dataBuffer += bytesRead;
 
         cx_sha256_init(&tx_state->hash);
-        tx_state->initialized = true;
         dataBuffer += hashAccountTransactionHeaderAndKind(dataBuffer, UPDATE_CREDENTIALS);
 
         ctx->credentialDeploymentCount = dataBuffer[0];
@@ -276,7 +276,7 @@ void handleSignUpdateCredential(uint8_t *dataBuffer, uint8_t p1, uint8_t p2, vol
         ctx->updateCredentialState = TX_UPDATE_CREDENTIAL_CREDENTIAL;
         sendSuccessNoIdle();
     } else if (p2 == P2_CREDENTIAL_CREDENTIAL && ctx->updateCredentialState == TX_UPDATE_CREDENTIAL_CREDENTIAL && ctx->credentialDeploymentCount > 0) {
-        handleSignCredentialDeployment(dataBuffer, p1, p2, flags);
+        handleSignCredentialDeployment(dataBuffer, p1, p2, flags, false);
     } else if (p2 == P2_CREDENTIAL_ID_COUNT && ctx->updateCredentialState == TX_UPDATE_CREDENTIAL_ID_COUNT) {
         ctx->credentialIdCount = dataBuffer[0];
         cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 1, NULL, 0);
@@ -306,42 +306,38 @@ void handleSignUpdateCredential(uint8_t *dataBuffer, uint8_t p1, uint8_t p2, vol
         ux_flow_init(0, ux_sign_credential_update_threshold, NULL);
         *flags |= IO_ASYNCH_REPLY;
     } else {
-        THROW(SW_INVALID_STATE);
+        THROW(ERROR_INVALID_STATE);
     }
 }
 
-void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, uint8_t p2, volatile unsigned int *flags) {
-    if (p1 != P1_INITIAL_PACKET && tx_state->initialized == false) {
-        THROW(SW_INVALID_STATE);
+void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, uint8_t p2, volatile unsigned int *flags, bool isInitialCall) {
+    if (isInitialCall) {
+        ctx->state = TX_CREDENTIAL_DEPLOYMENT_INITIAL;
     }
 
-    if (p1 == P1_INITIAL_PACKET) {
+    if (p1 == P1_INITIAL_PACKET && ctx->state == TX_CREDENTIAL_DEPLOYMENT_INITIAL) {
         int bytesRead = parseKeyDerivationPath(dataBuffer);
         dataBuffer += bytesRead;
 
         // Initialize values.
         cx_sha256_init(&tx_state->hash);
-        tx_state->initialized = true;
-        ctx->state = 1;
+        ctx->state = TX_CREDENTIAL_DEPLOYMENT_VERIFICATION_KEYS_LENGTH;
 
         ux_flow_init(0, ux_credential_deployment_initial_flow, NULL);
-    } else if (p1 == P1_VERIFICATION_KEY_LENGTH) {
+    } else if (p1 == P1_VERIFICATION_KEY_LENGTH && ctx->state == TX_CREDENTIAL_DEPLOYMENT_VERIFICATION_KEYS_LENGTH) {
         ctx->numberOfVerificationKeys = dataBuffer[0];
         cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 1, NULL, 0);
-        ctx->state = 1;
+        ctx->state = TX_CREDENTIAL_DEPLOYMENT_VERIFICATION_KEY;
         sendSuccessNoIdle();
     } else if (p1 == P1_VERIFICATION_KEY) {
-        if (ctx->numberOfVerificationKeys > 0 && ctx->state == TX_VERIFICATION_KEY) {
-            if (ctx->numberOfVerificationKeys == 0) {
-                ctx->state += 1;
-            }
+        if (ctx->numberOfVerificationKeys > 0 && ctx->state == TX_CREDENTIAL_DEPLOYMENT_VERIFICATION_KEY) {
             parseVerificationKey(dataBuffer);
         } else {
-            THROW(SW_INVALID_STATE);
+            THROW(ERROR_INVALID_STATE);
         }
-    } else if (p1 == P1_SIGNATURE_THRESHOLD) {
+    } else if (p1 == P1_SIGNATURE_THRESHOLD && ctx->state == TX_CREDENTIAL_DEPLOYMENT_SIGNATURE_THRESHOLD) {
         if (ctx->numberOfVerificationKeys != 0) {
-            THROW(SW_INVALID_STATE);  // Invalid state, the sender has not sent all verification keys before moving on.
+            THROW(ERROR_INVALID_STATE);  // Invalid state, the sender has not sent all verification keys before moving on.
         }
 
         // Parse signature threshold.
@@ -380,11 +376,14 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, uint8_t p2,
         // Initialize values for later.
         cx_sha256_init(&attributeHash);
 
+        ctx->state = TX_CREDENTIAL_DEPLOYMENT_AR_IDENTITY;
+
         // Display the loaded data.
         ux_flow_init(0, ux_credential_deployment_threshold_flow, NULL);
-    } else if (p1 == P1_AR_IDENTITY) {
-        if (ctx->anonymityRevocationListLength <= 0) {
-            THROW(SW_INVALID_STATE);  // Invalid state, sender says ar identity pair is incoming, but we already received all.
+    } else if (p1 == P1_AR_IDENTITY && ctx->state == TX_CREDENTIAL_DEPLOYMENT_AR_IDENTITY) {
+        if (ctx->anonymityRevocationListLength == 0) {
+             // Invalid state, sender says ar identity pair is incoming, but we already received all.
+            THROW(ERROR_INVALID_STATE); 
         }
 
         // Parse ArIdentity
@@ -400,11 +399,15 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, uint8_t p2,
         cx_hash((cx_hash_t *) &tx_state->hash, 0, encIdCredPubShare, 96, NULL, 0);
         dataBuffer += 96;
 
+        if (ctx->anonymityRevocationListLength == 1) {
+            ctx->state = TX_CREDENTIAL_DEPLOYMENT_CREDENTIAL_DATES;
+        }
+        ctx->anonymityRevocationListLength -= 1;
         sendSuccessNoIdle();
 
         // We do not show encrypted shares, as they are not possible for a user
         // to validate.
-    } else if (p1 == P1_CREDENTIAL_DATES) {
+    } else if (p1 == P1_CREDENTIAL_DATES && ctx->state == TX_CREDENTIAL_DEPLOYMENT_CREDENTIAL_DATES) {
         uint8_t temp[1];
 
         // Build display of valid to
@@ -434,10 +437,16 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, uint8_t p2,
         cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 2, NULL, 0);
         dataBuffer += 2;
 
+        if (ctx->attributeListLength == 0) {
+            ctx->state = TX_CREDENTIAL_DEPLOYMENT_LENGTH_OF_PROOFS;
+        } else {
+            ctx->state = TX_CREDENTIAL_DEPLOYMENT_ATTRIBUTE_TAG;
+        }
+
         ux_flow_init(0, ux_credential_deployment_dates, NULL);
-    } else if (p1 == P1_ATTRIBUTE_TAG) {
+    } else if (p1 == P1_ATTRIBUTE_TAG && ctx->state == TX_CREDENTIAL_DEPLOYMENT_ATTRIBUTE_TAG) {
         if (ctx->attributeListLength <= 0) {
-            THROW(SW_INVALID_STATE);
+            THROW(ERROR_INVALID_STATE);
         }
 
         // Parse attribute tag, and map it the attribute name (the display text).
@@ -454,9 +463,10 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, uint8_t p2,
         cx_hash((cx_hash_t *) &attributeHash, 0, attributeValueLength, 1, NULL, 0);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, attributeValueLength, 1, NULL, 0);
 
+        ctx->state = TX_CREDENTIAL_DEPLOYMENT_ATTRIBUTE_VALUE;
         // Ask computer for the attribute value.
         sendSuccessNoIdle();
-    } else if (p1 == P1_ATTRIBUTE_VALUE) {
+    } else if (p1 == P1_ATTRIBUTE_VALUE && ctx->state == TX_CREDENTIAL_DEPLOYMENT_ATTRIBUTE_VALUE) {
         // Add attribute value to the hash.
         cx_hash((cx_hash_t *) &attributeHash, 0, dataBuffer, ctx->attributeValueLength, NULL, 0);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, ctx->attributeValueLength, NULL, 0);
@@ -467,19 +477,21 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, uint8_t p2,
             uint8_t attributeHashBytes[32];
             cx_hash((cx_hash_t *) &attributeHash, CX_LAST, NULL, 0, attributeHashBytes, 32);
             toHex(attributeHashBytes, sizeof(attributeHashBytes), ctx->attributeHashDisplay);
+            ctx->state = TX_CREDENTIAL_DEPLOYMENT_LENGTH_OF_PROOFS;
             sendSuccessNoIdle();
         } else {
             // There are additional attributes to be read, so ask for more.
+            ctx->state = TX_CREDENTIAL_DEPLOYMENT_ATTRIBUTE_TAG;
             sendSuccessNoIdle();
         }
-    } else if (p1 == P1_LENGTH_OF_PROOFS) {
+    } else if (p1 == P1_LENGTH_OF_PROOFS && ctx->state == TX_CREDENTIAL_DEPLOYMENT_LENGTH_OF_PROOFS) {
         ctx->proofLength = U4BE(dataBuffer, 0);
         if (p2 == P2_CREDENTIAL_CREDENTIAL) {
             cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 4, NULL, 0);
         }
-
+        ctx->state = TX_CREDENTIAL_DEPLOYMENT_PROOFS;
         sendSuccessNoIdle();
-    } else if (p1 == P1_PROOFS) {
+    } else if (p1 == P1_PROOFS && ctx->state == TX_CREDENTIAL_DEPLOYMENT_PROOFS) {
         if (ctx->proofLength > MAX_CDATA_LENGTH) {
             cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, MAX_CDATA_LENGTH, NULL, 0);
             ctx->proofLength -= MAX_CDATA_LENGTH;
@@ -495,11 +507,14 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, uint8_t p2,
                     ctx->state = 0;
                 } else {
                     ctx->updateCredentialState = TX_UPDATE_CREDENTIAL_CREDENTIAL_INDEX;
+                    ctx->state = TX_CREDENTIAL_DEPLOYMENT_VERIFICATION_KEYS_LENGTH;
                 }
+            } else {
+                ctx->state = TX_CREDENTIAL_DEPLOYMENT_NEW_OR_EXISTING;
             }
             sendSuccessNoIdle();
         }
-    } else if (p1 == P1_NEW_OR_EXISTING) {
+    } else if (p1 == P1_NEW_OR_EXISTING && ctx->state == TX_CREDENTIAL_DEPLOYMENT_NEW_OR_EXISTING) {
         // 0 indicates new, 1 indicates existing
         uint8_t newOrExisting = dataBuffer[0];
         cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 1, NULL, 0);
@@ -516,15 +531,17 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, uint8_t p2,
             size_t outputSize = sizeof(ctx->accountAddress);
             if (base58check_encode(accountAddress, sizeof(accountAddress), ctx->accountAddress, &outputSize) != 0) {
             // The received address bytes are not a valid base58 encoding.
-                THROW(SW_INVALID_TRANSACTION);  
+                THROW(ERROR_INVALID_TRANSACTION);  
             }
             ctx->accountAddress[50] = '\0';
 
             cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 32, NULL, 0);
             ux_flow_init(0, ux_sign_credential_deployment, NULL);
         } else {
-            THROW(SW_INVALID_TRANSACTION);
+            THROW(ERROR_INVALID_TRANSACTION);
         }
+    } else {
+        THROW(ERROR_INVALID_STATE);
     }
 
     *flags |= IO_ASYNCH_REPLY;

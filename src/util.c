@@ -6,6 +6,7 @@
 #include "util.h"
 #include "menu.h"
 #include "base58check.h"
+#include "responseCodes.h"
 
 static tx_state_t *tx_state = &global_tx_state;
 static keyDerivationPath_t *keyPath = &path;
@@ -18,7 +19,7 @@ int parseKeyDerivationPath(uint8_t *cdata) {
     // Concordium does not use key paths with a length greater than 8,
     // so if that was received, then throw an error.
     if (keyPath->pathLength > 8) {
-        THROW(SW_INVALID_PATH);
+        THROW(ERROR_INVALID_PATH);
     }
 
     // Each part of a key path is a uint32, parse through each part of the
@@ -190,7 +191,7 @@ int hashHeaderAndType(uint8_t *cdata, uint8_t headerLength, uint8_t validType) {
 
     uint8_t type = cdata[0];
     if (type != validType) {
-        THROW(SW_INVALID_TRANSACTION);
+        THROW(ERROR_INVALID_TRANSACTION);
     }
     cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 1, NULL, 0);
     cdata += 1;
@@ -212,7 +213,7 @@ int hashAccountTransactionHeaderAndKind(uint8_t *cdata, uint8_t validTransaction
     size_t outputSize = sizeof(accountSender->sender);
     if (base58check_encode(cdata, 32, accountSender->sender, &outputSize) != 0) {
         // The received address bytes are not a valid base58 encoding.
-        THROW(SW_INVALID_TRANSACTION);  
+        THROW(ERROR_INVALID_TRANSACTION);  
     }
     accountSender->sender[50] = '\0';
 
@@ -229,15 +230,15 @@ int hashUpdateHeaderAndType(uint8_t *cdata, uint8_t validUpdateType) {
 }
 
 void sendUserRejection() {
-    G_io_apdu_buffer[0] = 0x69;
-    G_io_apdu_buffer[1] = 0x85;
+    G_io_apdu_buffer[0] = ERROR_REJECTED_BY_USER >> 8;
+    G_io_apdu_buffer[1] = ERROR_REJECTED_BY_USER & 0xFF;
     io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, 2);
     ui_idle();
 }
 
 void sendSuccess(uint8_t tx) {
-    G_io_apdu_buffer[tx++] = 0x90;
-    G_io_apdu_buffer[tx++] = 0x00;
+    G_io_apdu_buffer[tx++] = SUCCESS >> 8;
+    G_io_apdu_buffer[tx++] = SUCCESS & 0xFF;
     io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, tx);
     ui_idle();
 }
@@ -247,8 +248,8 @@ void sendSuccessNoIdle() {
 }
 
 void sendSuccessResultNoIdle(uint8_t tx) {
-    G_io_apdu_buffer[tx++] = 0x90;
-    G_io_apdu_buffer[tx++] = 0x00;
+    G_io_apdu_buffer[tx++] = SUCCESS >> 8;
+    G_io_apdu_buffer[tx++] = SUCCESS & 0xFF;
     io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, tx);
 }
 

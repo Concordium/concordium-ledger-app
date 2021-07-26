@@ -1,6 +1,7 @@
 #include <os.h>
 #include "util.h"
 #include "sign.h"
+#include "responseCodes.h"
 
 static signUpdateProtocolContext_t *ctx = &global.signUpdateProtocolContext;
 static tx_state_t *tx_state = &global_tx_state;
@@ -57,13 +58,16 @@ void handleText(void) {
 #define P1_SPECIFICATION_HASH   0x03
 #define P1_AUXILIARY_DATA       0x04
 
-void handleSignUpdateProtocol(uint8_t *cdata, uint8_t p1, uint8_t dataLength, volatile unsigned int *flags) {
-    if (p1 == P1_INITIAL) {
+void handleSignUpdateProtocol(uint8_t *cdata, uint8_t p1, uint8_t dataLength, volatile unsigned int *flags, bool isInitialCall) {
+    if (isInitialCall) {
+        ctx->state = TX_UPDATE_PROTOCOL_INITIAL;
+    }
+
+    if (p1 == P1_INITIAL && ctx->state == TX_UPDATE_PROTOCOL_INITIAL) {
         int bytesRead = parseKeyDerivationPath(cdata);
         cdata += bytesRead;
 
         cx_sha256_init(&tx_state->hash);
-        tx_state->initialized = true;
         cdata += hashUpdateHeaderAndType(cdata, UPDATE_TYPE_PROTOCOL);
 
         // Read payload length.
@@ -89,7 +93,7 @@ void handleSignUpdateProtocol(uint8_t *cdata, uint8_t p1, uint8_t dataLength, vo
         sendSuccessNoIdle();
     } else if (p1 == P1_TEXT && ctx->state == TX_UPDATE_PROTOCOL_TEXT) {
         if (ctx->textLength <= 0) {
-            THROW(SW_INVALID_STATE);
+            THROW(ERROR_INVALID_STATE);
         }
 
         memmove(ctx->buffer, cdata, dataLength);
@@ -111,7 +115,7 @@ void handleSignUpdateProtocol(uint8_t *cdata, uint8_t p1, uint8_t dataLength, vo
                 ux_flow_init(0, ux_sign_protocol_update_url, NULL);
                 break;
             default:
-                THROW(SW_INVALID_STATE);
+                THROW(ERROR_INVALID_STATE);
                 break;
         }
 
@@ -136,9 +140,9 @@ void handleSignUpdateProtocol(uint8_t *cdata, uint8_t p1, uint8_t dataLength, vo
             // Ask for more bytes as we have not received all of them yet.
             sendSuccessNoIdle();
         } else {
-            THROW(SW_INVALID_STATE);
+            THROW(ERROR_INVALID_STATE);
         }
     } else {
-        THROW(SW_INVALID_STATE);
+        THROW(ERROR_INVALID_STATE);
     }
 }

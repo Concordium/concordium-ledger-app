@@ -1,19 +1,38 @@
 #include "os.h"
 #include "ux.h"
 #include "cx.h"
-#include "time.h"
 #include <stdbool.h>
+
+#include "getPublicKey.h"
+#include "exportPrivateKeySeed.h"
+
+#include "signCredentialDeployment.h"
+#include "signPublicInformationForIp.h"
+
+#include "signTransfer.h"
+#include "signTransferToEncrypted.h"
+#include "signTransferToPublic.h"
+#include "signTransferWithSchedule.h"
+#include "signEncryptedAmountTransfer.h"
+#include "signAddBakerOrUpdateBakerKeys.h"
+#include "signUpdateBakerRestakeEarnings.h"
+
+#include "signUpdateExchangeRate.h"
+#include "signUpdateAuthorizations.h"
+#include "signUpdateProtocol.h"
+#include "signUpdateTransactionFeeDistribution.h"
+#include "signUpdateGasRewards.h"
+#include "signUpdateFoundationAccount.h"
+#include "signUpdateMintDistribution.h"
+#include "signUpdateElectionDifficulty.h"
+#include "signUpdateBakerStakeThreshold.h"
+#include "signHigherLevelKeyUpdate.h"
 
 #ifndef _GLOBALS_H_
 #define _GLOBALS_H_
 
 #define CONCORDIUM_PURPOSE 1105
 #define CONCORDIUM_COIN_TYPE 0
-
-#define SW_INVALID_STATE       0x6B01
-#define SW_INVALID_PATH        0x6B02
-#define SW_INVALID_PARAM       0x6B03
-#define SW_INVALID_TRANSACTION 0x6B04
 
 #define MAX_CDATA_LENGTH 255
 
@@ -60,117 +79,6 @@ typedef enum {
     UPDATE_TYPE_UPDATE_LEVEL2_KEYS = 12
 } updateType_e;
 
-/**
- * The 'RootUpdate' update instruction payload is prefixed by
- * a byte depending on the type of key update, which is represented
- * by this enum.
- */
-typedef enum {
-    ROOT_UPDATE_ROOT,
-    ROOT_UPDATE_LEVEL_1,
-    ROOT_UPDATE_LEVEL_2
-} rootUpdatePrefix_e;
-
-typedef enum {
-    LEVEL1_UPDATE_LEVEL_1,
-    LEVEL1_UPDATE_LEVEL_2
-} level1UpdatePrefix_e;
-
-// To add support for additional access structures with the update authorizations
-// transaction, you simply have to add a new item to the enum prior to the 'END' entry,
-// and update the enum -> string method in signUpdateAuthorizations.c.
-typedef enum {
-    AUTHORIZATION_EMERGENCY,
-    AUTHORIZATION_PROTOCOL,
-    AUTHORIZATION_ELECTION_DIFFICULTY,
-    AUTHORIZATION_EURO_PER_ENERGY,
-    AUTHORIZATION_MICRO_GTU_PER_EURO,
-    AUTHORIZATION_FOUNDATION_ACCOUNT,
-    AUTHORIZATION_MINT_DISTRIBUTION,
-    AUTHORIZATION_TRANSACTION_FEE_DISTRIBUTION,
-    AUTHORIZATION_GAS_REWARDS,
-    AUTHORIZATION_BAKER_STAKE_THRESHOLD,
-    AUTHORIZATION_ADD_ANONYMITY_REVOKER,
-    AUTHORIZATION_ADD_IDENTITY_PROVIDER,
-    AUTHORIZATION_END
-} authorizationType_e;
-
-/**
- * Used for controlling the state of an 'update protocol' signing flow,
- * so that the caller cannot step outside the correct sequence of events.
- */ 
-typedef enum {
-    TX_UPDATE_PROTOCOL_TEXT_LENGTH,
-    TX_UPDATE_PROTOCOL_TEXT,
-    TX_UPDATE_PROTOCOL_SPECIFICATION_HASH,
-    TX_UPDATE_PROTOCOL_AUXILIARY_DATA
-} updateProtocolState_t;
-
-typedef enum {
-    MESSAGE,
-    SPECIFICATION_URL,
-    TEXT_STATE_END
-} textState_t;
-
-typedef enum {
-    TX_INITIAL,
-    TX_VERIFICATION_KEY,
-    TX_SIGNATURE_THRESHOLD,
-    TX_AR_IDENTITY,
-    TX_CREDENTIAL_DATES,
-    TX_ATTRIBUTE_TAG,
-    TX_ATTRIBUTE_VALUE,
-    TX_LENGTH_OF_PROOFS,
-    TX_PROOFS
-} protocolState_t;
-
-typedef enum {
-    TX_PUBLIC_INFO_FOR_IP_INITIAL,
-    TX_PUBLIC_INFO_FOR_IP_VERIFICATION_KEY,
-    TX_PUBLIC_INFO_FOR_IP_THRESHOLD
-} publicInfoForIpState_t;
-
-typedef enum {
-    ADD_BAKER_INITIAL,
-    ADD_BAKER_VERIFY_KEYS,
-    ADD_BAKER_PROOFS_AMOUNT_RESTAKE
-} addBakerState_t;
-
-typedef enum {
-    TX_UPDATE_CREDENTIAL_INITIAL,
-    TX_UPDATE_CREDENTIAL_CREDENTIAL_INDEX,
-    TX_UPDATE_CREDENTIAL_CREDENTIAL,
-    TX_UPDATE_CREDENTIAL_ID_COUNT,
-    TX_UPDATE_CREDENTIAL_ID,
-    TX_UPDATE_CREDENTIAL_THRESHOLD
-} updateCredentialState_t;
-
-typedef enum {
-    TX_TRANSFER_TO_PUBLIC_REMAINING_AMOUNT,
-    TX_TRANSFER_TO_PUBLIC_PROOF
-} transferToPublicState_t;
-
-typedef enum {
-    TX_ENCRYPTED_AMOUNT_TRANSFER_INITIAL,
-    TX_ENCRYPTED_AMOUNT_TRANSFER_REMAINING_AMOUNT,
-    TX_ENCRYPTED_AMOUNT_TRANSFER_TRANSFER_AMOUNT,
-    TX_ENCRYPTED_AMOUNT_TRANSFER_PROOFS
-} encryptedAmountTransferState_t;
-
-typedef enum {
-    TX_UPDATE_KEYS_INITIAL,
-    TX_UPDATE_KEYS_KEY,
-    TX_UPDATE_KEYS_THRESHOLD
-} updateKeysState_t;
-
-typedef enum {
-    TX_UPDATE_AUTHORIZATIONS_INITIAL,
-    TX_UPDATE_AUTHORIZATIONS_PUBLIC_KEY,
-    TX_UPDATE_AUTHORIZATIONS_ACCESS_STRUCTURE_SIZE,
-    TX_UPDATE_AUTHORIZATIONS_ACCESS_STRUCTURE_INDEX,
-    TX_UPDATE_AUTHORIZATIONS_ACCESS_STRUCTURE_THRESHOLD
-} updateAuthorizationsState_t;
-
 typedef struct {
     uint8_t identity;
     uint8_t accountIndex;
@@ -183,11 +91,12 @@ typedef struct {
 } keyDerivationPath_t;
 extern keyDerivationPath_t path;
 
-// Helper object used when computing the hash of a transaction.
+// Helper object used when computing the hash of a transaction,
+// and to keep track of the state of a multi command APDU flow.
 typedef struct {
     cx_sha256_t hash;
     uint8_t transactionHash[32];
-    bool initialized;
+    int currentInstruction;
 } tx_state_t;
 extern tx_state_t global_tx_state;
 
@@ -198,221 +107,35 @@ typedef struct {
 } accountSender_t;
 extern accountSender_t global_account_sender;
 
-// Each instruction's state has to have its own struct here that is put in the global union below. This translates
-// into each handler file having its own struct here.
-typedef struct {
-    unsigned char displayStr[52];
-    uint8_t displayAmount[26];
-} signTransferContext_t;
-
-typedef struct {
-    unsigned char displayStr[52];
-    uint8_t remainingNumberOfScheduledAmounts;
-    uint8_t scheduledAmountsInCurrentPacket;
-
-    uint8_t displayAmount[26];
-    uint8_t displayTimestamp[25];
-
-    tm time;
-
-    // Buffer to hold the incoming databuffer so that we can iterate over it.
-    uint8_t buffer[255];
-    uint8_t pos;
-} signTransferWithScheduleContext_t;
-
-typedef struct {
-    uint8_t type;
-    uint8_t numberOfVerificationKeys;
-
-    uint8_t credentialDeploymentCount;
-    uint8_t credentialIdCount;
-    char credentialId[97];
-    uint8_t threshold[4];
-    updateCredentialState_t updateCredentialState;
-
-
-    char accountVerificationKey[65];
-
-    uint8_t signatureThreshold[4];
-    char regIdCred[97];
-
-    uint8_t identityProviderIdentity[4];
-    uint8_t anonymityRevocationThreshold[4];
-
-    uint16_t anonymityRevocationListLength;
-
-    uint8_t arIdentity[11];
-    char encIdCredPubShare[192];
-
-    uint8_t validTo[8];
-    uint8_t createdAt[8];
-
-    uint16_t attributeListLength;
-
-    cx_sha256_t attributeHash;
-    uint8_t attributeValueLength;
-    char attributeHashDisplay[65];
-
-    uint32_t proofLength;
-    uint8_t accountAddress[52];
-
-    protocolState_t state;
-} signCredentialDeploymentContext_t;
-
-typedef struct {
-    uint8_t ratio[43];
-    uint8_t type[16];
-} signExchangeRateContext_t;
-
-typedef struct {
-    uint8_t electionDifficulty[17];
-} signElectionDifficultyContext_t;
-
-typedef struct {
-    uint8_t stakeThreshold[26];
-} signUpdateBakerStakeThresholdContext_t;
-
-typedef struct {
-    uint16_t publicKeyListLength;
-    uint16_t publicKeyCount;
-    char publicKey[65];
-    uint16_t accessStructureSize;
-    uint8_t title[29];
-    uint8_t displayKeyIndex[6];
-    uint8_t type[24];
-
-    uint8_t processedCount;
-    
-    uint8_t buffer[255];
-    int bufferPointer;
-    
-    updateAuthorizationsState_t state;
-    authorizationType_e authorizationType;
-} signUpdateAuthorizations_t;
-
-typedef struct {
-    uint8_t amount[26];
-} signTransferToEncrypted_t;
-
-typedef struct { 
-    uint8_t to[52];
-    uint16_t proofSize;
-    encryptedAmountTransferState_t state;
-} signEncryptedAmountToTransfer_t;
-
-typedef struct {
-    char credId[97];
-    char idCredPub[97];
-    uint8_t publicKeysLength;
-    char publicKey[65];
-    uint8_t threshold[4];
-    publicInfoForIpState_t state;
-} signPublicInformationForIp_t;
-
-typedef struct {
-    uint8_t amount[26];
-    uint16_t proofSize;
-    transferToPublicState_t state;
-} signTransferToPublic_t;
-
-typedef struct {
-    uint8_t amount[26];
-    uint8_t restake[4];
-    addBakerState_t state;
-} signAddBakerContext_t;
-
-typedef struct {
-    uint8_t amount[26];
-} signUpdateBakerStakeContext_t;
-
-typedef struct {
-    uint8_t restake[4];
-} sigUpdateBakerRestakeEarningsContext_t;
-
-typedef struct {
-    uint64_t payloadLength;
-    uint64_t textLength;
-    uint8_t buffer[255];
-    textState_t textState;
-    updateProtocolState_t state;
-    char specificationHash[65];
-} signUpdateProtocolContext_t;
-
-typedef struct { 
-    uint8_t display[14];
-    char publicKey[64];
-    bool signPublicKey;
-} exportPublicKeyContext_t;
-
-typedef struct {
-    char type[20];
-    uint8_t display[15];
-    uint32_t path[6];
-    uint32_t arPath[5];
-    uint8_t pathLength;
-} exportPrivateKeySeedContext_t;
-
-typedef struct {
-    uint8_t challenge[32];
-} signAccountChallenge_t;
-
-typedef struct {
-    uint8_t baker[17];
-    uint8_t gasAccount[17];
-} signTransactionDistributionFeeContext_t;
-
-typedef struct {
-    uint8_t gasBaker[17];
-    uint8_t gasFinalization[17];
-    uint8_t gasAccountCreation[17];
-    uint8_t gasChainUpdate[17];
-} signUpdateGasRewardsContext_t;
-
-typedef struct {
-    uint8_t foundationAccountAddress[52];
-} signUpdateFoundationAccountContext_t;
-
-typedef struct {
-    uint8_t mintRate[35];
-    uint8_t bakerReward[17];
-    uint8_t finalizationReward[17];
-} signUpdateMintDistribution_t;
-
-typedef struct {
-    uint8_t type[25];
-    uint16_t numberOfUpdateKeys;
-    char updateVerificationKey[65];
-    uint8_t threshold[6];
-    updateKeysState_t state;
-} signUpdateKeysWithRootKeysContext_t;
-
 /**
  * As the memory we have available is very limited, the context for each instruction is stored
  * in a shared global union, so that we do not use more memory than that of the most memory
  * consuming instruction context.
  */
 typedef union {
+    exportPrivateKeySeedContext_t exportPrivateKeySeedContext;
     exportPublicKeyContext_t exportPublicKeyContext;
+
+    signPublicInformationForIp_t signPublicInformationForIp;
+    signCredentialDeploymentContext_t signCredentialDeploymentContext;
+
     signTransferWithScheduleContext_t signTransferWithScheduleContext;
     signTransferContext_t signTransferContext;
-    signCredentialDeploymentContext_t signCredentialDeploymentContext;
+    signTransferToEncrypted_t signTransferToEncrypted;
+    signTransferToPublic_t signTransferToPublic;
+    signEncryptedAmountToTransfer_t signEncryptedAmountToTransfer;
+    signAddBakerContext_t signAddBaker;
+    signUpdateBakerStakeContext_t signUpdateBakerStake;
+    signUpdateBakerRestakeEarningsContext_t signUpdateBakerRestakeEarnings;
+
     signExchangeRateContext_t signExchangeRateContext;
     signUpdateAuthorizations_t signUpdateAuthorizations;
-    signTransferToEncrypted_t signTransferToEncrypted;
-    signEncryptedAmountToTransfer_t signEncryptedAmountToTransfer;
-    signPublicInformationForIp_t signPublicInformationForIp;
-    signTransferToPublic_t signTransferToPublic;
     signUpdateProtocolContext_t signUpdateProtocolContext;
-    exportPrivateKeySeedContext_t exportPrivateKeySeedContext;
-    signAccountChallenge_t signAccountChallengeContext;
     signTransactionDistributionFeeContext_t signTransactionDistributionFeeContext;
     signUpdateGasRewardsContext_t signUpdateGasRewardsContext;
     signUpdateFoundationAccountContext_t signUpdateFoundationAccountContext;
     signUpdateMintDistribution_t signUpdateMintDistribution;
     signElectionDifficultyContext_t signElectionDifficulty;
-    signAddBakerContext_t signAddBaker;
-    signUpdateBakerStakeContext_t signUpdateBakerStake;
-    sigUpdateBakerRestakeEarningsContext_t signUpdateBakerRestakeEarnings;
     signUpdateBakerStakeThresholdContext_t signUpdateBakerStakeThreshold;
     signUpdateKeysWithRootKeysContext_t signUpdateKeysWithRootKeysContext;
 } instructionContext;

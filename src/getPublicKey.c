@@ -2,9 +2,11 @@
 #include "ux.h"
 #include "util.h"
 #include "menu.h"
+#include "responseCodes.h"
 
 static keyDerivationPath_t *keyPath = &path;
 static exportPublicKeyContext_t *ctx = &global.exportPublicKeyContext;
+static tx_state_t *tx_state = &global_tx_state;
 
 void sendPublicKey(bool compare);
 
@@ -78,6 +80,8 @@ void sendPublicKey(bool compare) {
         // Show the public-key so that the user can verify the public-key.
         sendSuccessResultNoIdle(tx);
         toHex(publicKey, sizeof(publicKey), ctx->publicKey);
+        // Allow for receiving a new instruction even while comparing public keys.
+        tx_state->currentInstruction = -1;
         ux_flow_init(0, ux_sign_compare_public_key, NULL);    
     } else {
         sendSuccess(tx);
@@ -102,7 +106,7 @@ void handleGetPublicKey(uint8_t *cdata, uint8_t p1, uint8_t p2, volatile unsigne
         // Also it has to be in the governance subtree, which starts with 1.
         if (keyPath->pathLength == 5) {
             if (keyPath->rawKeyDerivationPath[2] != 1) {
-                THROW(SW_INVALID_PATH);
+                THROW(ERROR_INVALID_PATH);
             }
 
             uint32_t purpose = keyPath->rawKeyDerivationPath[3];
@@ -118,7 +122,7 @@ void handleGetPublicKey(uint8_t *cdata, uint8_t p1, uint8_t p2, volatile unsigne
                     memmove(ctx->display, "Gov. level 2", 13);
                     break;
                 default:
-                    THROW(SW_INVALID_PATH);
+                    THROW(ERROR_INVALID_PATH);
             }
         } else {
             getIdentityAccountDisplay(ctx->display);

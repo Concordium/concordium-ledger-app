@@ -1,6 +1,7 @@
 #include <os.h>
 #include "util.h"
 #include "sign.h"
+#include "responseCodes.h"
 
 static signUpdateKeysWithRootKeysContext_t *ctx = &global.signUpdateKeysWithRootKeysContext;
 static tx_state_t *tx_state = &global_tx_state;
@@ -47,11 +48,14 @@ UX_FLOW(ux_sign_root_keys_update_threshold,
 #define P1_UPDATE_KEYS  0x01
 #define P1_THRESHOLD    0x02
 
-void handleSignHigherLevelKeys(uint8_t *cdata, uint8_t p1, uint8_t updateType, volatile unsigned int *flags) {
-    if (p1 == P1_INITIAL && tx_state->initialized == false) {
+void handleSignHigherLevelKeys(uint8_t *cdata, uint8_t p1, uint8_t updateType, volatile unsigned int *flags, bool isInitialCall) {
+    if (isInitialCall) {
+        ctx->state = TX_UPDATE_KEYS_INITIAL;
+    }
+
+    if (p1 == P1_INITIAL && ctx->state == TX_UPDATE_KEYS_INITIAL) {
         cdata += parseKeyDerivationPath(cdata);
         cx_sha256_init(&tx_state->hash);
-        tx_state->initialized = true;
         cdata += hashUpdateHeaderAndType(cdata, updateType);
 
         // The specific type of key update is determined by this byte.
@@ -62,14 +66,14 @@ void handleSignHigherLevelKeys(uint8_t *cdata, uint8_t p1, uint8_t updateType, v
             } else if (keyUpdateType == ROOT_UPDATE_LEVEL_1) {
                 memmove(ctx->type, "Level 1 w. root keys\0", 21);
             } else {
-                THROW(SW_INVALID_TRANSACTION);
+                THROW(ERROR_INVALID_TRANSACTION);
             }
         } else if (updateType == UPDATE_TYPE_UPDATE_LEVEL1_KEYS) {
             if (keyUpdateType == ROOT_UPDATE_LEVEL_1) {
             } else if (keyUpdateType == LEVEL1_UPDATE_LEVEL_1) {
                 memmove(ctx->type, "Level 1 w. level 1 keys\0", 25);
             } else {
-                THROW(SW_INVALID_TRANSACTION);
+                THROW(ERROR_INVALID_TRANSACTION);
             }
         }
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 1, NULL, 0);
@@ -86,7 +90,7 @@ void handleSignHigherLevelKeys(uint8_t *cdata, uint8_t p1, uint8_t updateType, v
         if (ctx->numberOfUpdateKeys <= 0) {
             // We have already received all the expected keys, so the receieved
             // transaction is invalid.
-            THROW(SW_INVALID_TRANSACTION);
+            THROW(ERROR_INVALID_TRANSACTION);
         }
 
         // Hash the schemeId
@@ -113,6 +117,6 @@ void handleSignHigherLevelKeys(uint8_t *cdata, uint8_t p1, uint8_t updateType, v
         ux_flow_init(0, ux_sign_root_keys_update_threshold, NULL);
         *flags |= IO_ASYNCH_REPLY;
     } else {
-        THROW(SW_INVALID_STATE);
+        THROW(ERROR_INVALID_STATE);
     }
 }

@@ -61,7 +61,6 @@ fn main() {
             length: command_data.len() as u8,
             data: command_data
         };
-
         ledger.exchange(command).unwrap();
 
         // TODO: We should test one with > 127 values...
@@ -79,13 +78,12 @@ fn main() {
             ins: 0x2A,
             p1: 3,
             p2: 0,
-            length: 0,
+            length: access_structure_cdata.len() as u8,
             data: access_structure_cdata
         };
         ledger.exchange(command).unwrap();
 
         let mut threshold = hex::decode("0002").unwrap();
-
         let mut threshold_cdata = Vec::new();
         threshold_cdata.append(&mut threshold);
 
@@ -94,7 +92,7 @@ fn main() {
             ins: 0x2A,
             p1: 4,
             p2: 0,
-            length: 0,
+            length: threshold_cdata.len() as u8,
             data: threshold_cdata
         };
         let result = ledger.exchange(command).unwrap();

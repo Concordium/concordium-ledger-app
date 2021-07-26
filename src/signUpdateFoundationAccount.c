@@ -2,6 +2,7 @@
 #include "util.h"
 #include "sign.h"
 #include "base58check.h"
+#include "responseCodes.h"
 
 static signUpdateFoundationAccountContext_t *ctx = &global.signUpdateFoundationAccountContext;
 static tx_state_t *tx_state = &global_tx_state;
@@ -37,7 +38,7 @@ void handleSignUpdateFoundationAccount(uint8_t *cdata, volatile unsigned int *fl
     size_t outputSize = sizeof(ctx->foundationAccountAddress);
     if (base58check_encode(foundationAccount, sizeof(foundationAccount), ctx->foundationAccountAddress, &outputSize) != 0) {
       // The received address bytes were not valid a valid base58 encoding, so the transaction is invalid.
-        THROW(SW_INVALID_TRANSACTION);
+        THROW(ERROR_INVALID_TRANSACTION);
     }
     ctx->foundationAccountAddress[50] = '\0';
 

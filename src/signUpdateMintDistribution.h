@@ -8,4 +8,10 @@
  */
 void handleSignUpdateMintDistribution(uint8_t *cdata, volatile unsigned int *flags);
 
+typedef struct {
+    uint8_t mintRate[35];
+    uint8_t bakerReward[17];
+    uint8_t finalizationReward[17];
+} signUpdateMintDistribution_t;
+
 #endif

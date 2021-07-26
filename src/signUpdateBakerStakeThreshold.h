@@ -9,4 +9,8 @@
  */
 void handleSignUpdateBakerStakeThreshold(uint8_t *cdata, volatile unsigned int *flags);
 
+typedef struct {
+    uint8_t stakeThreshold[26];
+} signUpdateBakerStakeThresholdContext_t;
+
 #endif
