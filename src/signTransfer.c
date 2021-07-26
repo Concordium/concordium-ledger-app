@@ -9,7 +9,7 @@ static tx_state_t *tx_state = &global_tx_state;
 
 UX_STEP_NOCB(
     ux_sign_flow_1_step,
-    bn_paging,
+    bnnn_paging,
     {
       "Amount (GTU)",
       (char *) global.signTransferContext.displayAmount,

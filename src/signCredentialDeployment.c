@@ -66,7 +66,7 @@ UX_STEP_NOCB(
     });
 UX_STEP_NOCB(
     ux_credential_deployment_threshold_flow_1_step,
-    bn_paging,
+    bnnn_paging,
     {
       "RegIdCred",
       (char *) global.signCredentialDeploymentContext.regIdCred
@@ -115,7 +115,7 @@ UX_FLOW(ux_credential_deployment_dates,
 
 UX_STEP_NOCB(
     ux_sign_credential_deployment_0_step,
-    bn_paging,
+    bnnn_paging,
     {
       .title = "Address",
       .text = (char *) global.signCredentialDeploymentContext.accountAddress
@@ -147,7 +147,7 @@ UX_FLOW(ux_sign_credential_deployment,
 
 UX_STEP_CB(
     ux_sign_credential_update_id_0_step,
-    bn_paging,
+    bnnn_paging,
     sendSuccessNoIdle(),
     {
       .title = "Remove CredId",
@@ -164,7 +164,7 @@ UX_FLOW(ux_sign_credential_update_id,
  */
 UX_STEP_NOCB(
     ux_sign_credential_update_threshold_0_step,
-    bn_paging,
+    bnnn_paging,
     {
       .title = "Threshold",
       .text = (char *) global.signCredentialDeploymentContext.threshold

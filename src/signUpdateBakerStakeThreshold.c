@@ -7,7 +7,7 @@ static tx_state_t *tx_state = &global_tx_state;
 
 UX_STEP_NOCB(
     ux_sign_baker_stake_threshold_1_step,
-    bn_paging,
+    bnnn_paging,
     {
       .title = "Stake threshold",
       .text = (char *) global.signUpdateBakerStakeThreshold.stakeThreshold

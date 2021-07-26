@@ -2,6 +2,7 @@
 #include "cx.h"
 #include "globals.h"
 #include <stdbool.h>
+#include <string.h>
 
 /**
  * Converts bytes into uint64_t (big endian).

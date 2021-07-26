@@ -7,28 +7,28 @@ static tx_state_t *tx_state = &global_tx_state;
 
 UX_STEP_NOCB(
     ux_sign_gas_rewards_1_step,
-    bn_paging,
+    bnnn_paging,
     {
       .title = "Baker",
       .text = (char *) global.signUpdateGasRewardsContext.gasBaker
     });
 UX_STEP_NOCB(
     ux_sign_gas_rewards_2_step,
-    bn_paging,
+    bnnn_paging,
     {
       .title = "Finalization proof",
       .text = (char *) global.signUpdateGasRewardsContext.gasFinalization
     });
 UX_STEP_NOCB(
     ux_sign_gas_rewards_3_step,
-    bn_paging,
+    bnnn_paging,
     {
         .title = "Account creation",
         .text = (char *) global.signUpdateGasRewardsContext.gasAccountCreation
     });
 UX_STEP_NOCB(
     ux_sign_gas_rewards_4_step,
-    bn_paging,
+    bnnn_paging,
     {
       .title = "Chain update",
       .text = (char *) global.signUpdateGasRewardsContext.gasChainUpdate
