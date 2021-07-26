@@ -17,7 +17,7 @@ void exportPrivateKey();
 
 UX_STEP_CB(
     ux_export_private_key_0_step,
-    bn_paging,
+    bnnn_paging,
     exportPrivateKey(),
     {
       .title = (char *) global.exportPrivateKeySeedContext.type,

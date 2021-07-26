@@ -10,7 +10,7 @@ void handleText();
 
 UX_STEP_CB(
     ux_sign_protocol_update_1_step,
-    bn_paging,
+    bnnn_paging,
     handleText(),
     {
         "Message",
@@ -23,7 +23,7 @@ UX_FLOW(ux_sign_protocol_update,
 
 UX_STEP_CB(
     ux_sign_protocol_update_url_0_step,
-    bn_paging,
+    bnnn_paging,
     handleText(),
     {
         "Spec. URL",
@@ -35,7 +35,7 @@ UX_FLOW(ux_sign_protocol_update_url,
 
 UX_STEP_CB(
     ux_sign_protocol_update_specification_hash_0_step,
-    bn_paging,
+    bnnn_paging,
     sendSuccessNoIdle(),
     {
         "Spec. hash",

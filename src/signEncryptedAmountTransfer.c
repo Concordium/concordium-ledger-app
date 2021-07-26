@@ -19,7 +19,7 @@ UX_STEP_NOCB(
     });
 UX_STEP_CB(
     ux_sign_encrypted_amount_transfer_2_step,
-    bn_paging,
+    bnnn_paging,
     sendSuccessNoIdle(),
     {
       .title = "Recipient",

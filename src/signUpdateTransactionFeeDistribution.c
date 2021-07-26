@@ -8,14 +8,14 @@ static tx_state_t *tx_state = &global_tx_state;
 
 UX_STEP_NOCB(
     ux_sign_transaction_dist_1_step,
-    bn_paging,
+    bnnn_paging,
     {
       .title = "Baker fee",
       .text = (char *) global.signTransactionDistributionFeeContext.baker
     });
 UX_STEP_NOCB(
     ux_sign_transaction_dist_2_step,
-    bn_paging,
+    bnnn_paging,
     {
       .title = "GAS account fee",
       .text = (char *) global.signTransactionDistributionFeeContext.gasAccount

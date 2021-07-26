@@ -7,21 +7,21 @@ static tx_state_t *tx_state = &global_tx_state;
 
 UX_STEP_NOCB(
     ux_sign_mint_rate_1_step,
-    bn_paging,
+    bnnn_paging,
     {
       .title = "Mint rate",
       .text = (char *) global.signUpdateMintDistribution.mintRate
     });
 UX_STEP_NOCB(
     ux_sign_mint_rate_2_step,
-    bn_paging,
+    bnnn_paging,
     {
       .title = "Baker reward",
       .text = (char *) global.signUpdateMintDistribution.bakerReward
     });
 UX_STEP_NOCB(
     ux_sign_mint_rate_3_step,
-    bn_paging,
+    bnnn_paging,
     {
       .title = "Finalization reward",
       .text = (char *) global.signUpdateMintDistribution.finalizationReward

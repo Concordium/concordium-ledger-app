@@ -57,7 +57,7 @@ UX_FLOW(ux_update_authorizations_threshold,
 // UI for displaying the list of public-keys that are being authorized.
 UX_STEP_CB(
     ux_update_authorizations_public_key_0_step,
-    bn_paging,
+    bnnn_paging,
     sendSuccessNoIdle(),
     {
         "Public key",

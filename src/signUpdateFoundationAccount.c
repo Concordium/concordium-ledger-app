@@ -9,7 +9,7 @@ static tx_state_t *tx_state = &global_tx_state;
 
 UX_STEP_NOCB(
     ux_sign_foundation_account_address_1_step,
-    bn_paging,
+    bnnn_paging,
     {
       .title = "Foundation acc.",
       .text = (char *) global.signUpdateFoundationAccountContext.foundationAccountAddress

@@ -21,7 +21,7 @@ UX_FLOW(ux_sign_root_keys_review,
 
 UX_STEP_CB(
     ux_sign_root_keys_update_1_step,
-    bn_paging,
+    bnnn_paging,
     sendSuccessNoIdle(),
     {
       .title = "Update key",
@@ -33,7 +33,7 @@ UX_FLOW(ux_sign_root_keys_update_key,
 
 UX_STEP_NOCB(
     ux_sign_root_keys_update_threshold_0_step,
-    bn_paging,
+    bnnn_paging,
     {
       .title = "Threshold",
       .text = (char *) global.signUpdateKeysWithRootKeysContext.threshold
