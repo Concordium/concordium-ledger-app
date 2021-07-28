@@ -104,6 +104,7 @@ accountSender_t global_account_sender;
 #define INS_UPDATE_LEVEL1_KEYS 0x29
 #define INS_UPDATE_LEVEL2_KEYS_ROOT 0x2A
 #define INS_UPDATE_LEVEL2_KEYS_LEVEL1 0x2B
+#define INS_SIGN_ADD_IDENTITY_PROVIDER 0x2D
 
 #define INS_SIGN_UPDATE_CREDENTIAL      0x31
 
@@ -233,12 +234,15 @@ static void concordium_main(void) {
                     case INS_UPDATE_LEVEL2_KEYS_LEVEL1:
                         handleSignUpdateAuthorizations(cdata, p1, UPDATE_TYPE_UPDATE_LEVEL1_KEYS, lc, &flags, isInitialCall);
                         break;
+                    case INS_SIGN_ADD_IDENTITY_PROVIDER:
+                        handleSignAddIdentityProvider(cdata, p1, lc, &flags, isInitialCall);
+                        break;
                     default:
                         THROW(ERROR_INVALID_INSTRUCTION);
                         break;
                 }
             }
-            
+
             CATCH_OTHER(e) {
                 switch (e) {
                     case ERROR_NO_APDU_RECEIVED:
