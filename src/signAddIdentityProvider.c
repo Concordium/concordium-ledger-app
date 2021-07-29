@@ -51,7 +51,7 @@ void handleSignAddIdentityProvider(uint8_t *cdata, uint8_t p1, uint8_t dataLengt
         cx_sha256_init(&tx_state->hash);
         cdata += hashUpdateHeaderAndType(cdata, UPDATE_TYPE_ADD_IDENTITY_PROVIDER);
 
-        // Read the payload length.
+        // Read the IpInfo length.
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 4, NULL, 0);
         cdata += 4;
 
@@ -111,10 +111,10 @@ void handleSignAddIdentityProvider(uint8_t *cdata, uint8_t p1, uint8_t dataLengt
         sendSuccessNoIdle();
       }
     } else if (p1 == P1_CDI_VERIFY_KEY && ctx->state == TX_ADD_IDENTITY_PROVIDER_CDI_VERIFY_KEY) {
-        uint8_t publicKey[32];
-        memmove(publicKey, cdata, 32);
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, publicKey, 32, NULL, 0);
-        toHex(publicKey, 32, ctx->cdiVerifyKey);
+        uint8_t cdiVerifyKey[32];
+        memmove(cdiVerifyKey, cdata, 32);
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdiVerifyKey, 32, NULL, 0);
+        toHex(cdiVerifyKey, 32, ctx->cdiVerifyKey);
         cdata += 32;
 
 
