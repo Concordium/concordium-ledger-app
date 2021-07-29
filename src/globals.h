@@ -28,6 +28,7 @@
 #include "signUpdateBakerStakeThreshold.h"
 #include "signHigherLevelKeyUpdate.h"
 #include "signAddIdentityProvider.h"
+#include "signAddAnonymityRevoker.h"
 
 #ifndef _GLOBALS_H_
 #define _GLOBALS_H_
@@ -77,7 +78,7 @@ typedef enum {
     UPDATE_TYPE_BAKER_STAKE_THRESHOLD = 9,
     UPDATE_TYPE_UPDATE_ROOT_KEYS = 10,
     UPDATE_TYPE_UPDATE_LEVEL1_KEYS = 11,
-    UPDATE_TYPE_UPDATE_LEVEL2_KEYS = 12,
+    UPDATE_TYPE_ADD_ANONYMITY_REVOKER = 12,
     UPDATE_TYPE_ADD_IDENTITY_PROVIDER = 13
 } updateType_e;
 
@@ -141,6 +142,7 @@ typedef union {
     signUpdateBakerStakeThresholdContext_t signUpdateBakerStakeThreshold;
     signUpdateKeysWithRootKeysContext_t signUpdateKeysWithRootKeysContext;
   signAddIdentityProviderContext_t signAddIdentityProviderContext;
+    signAddAnonymityRevokerContext_t signAddAnonymityRevokerContext;
 } instructionContext;
 extern instructionContext global;
 
