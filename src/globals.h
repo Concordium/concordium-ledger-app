@@ -141,8 +141,8 @@ typedef union {
     signElectionDifficultyContext_t signElectionDifficulty;
     signUpdateBakerStakeThresholdContext_t signUpdateBakerStakeThreshold;
     signUpdateKeysWithRootKeysContext_t signUpdateKeysWithRootKeysContext;
-  signAddIdentityProviderContext_t signAddIdentityProviderContext;
     signAddAnonymityRevokerContext_t signAddAnonymityRevokerContext;
+    signAddIdentityProviderContext_t signAddIdentityProviderContext;
 } instructionContext;
 extern instructionContext global;
 
