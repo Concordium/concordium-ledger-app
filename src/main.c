@@ -19,6 +19,7 @@
 #include "os.h"
 #include "cx.h"
 #include "os_io_seproxyhal.h"
+#include <stdbool.h>
 #include "menu.h"
 #include "getPublicKey.h"
 #include "signTransfer.h"

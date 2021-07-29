@@ -42,7 +42,7 @@ typedef enum {
 typedef struct {
     uint8_t type[25];
     uint16_t numberOfUpdateKeys;
-    char updateVerificationKey[65];
+    char updateVerificationKey[68];
     uint8_t threshold[6];
     updateKeysState_t state;
 } signUpdateKeysWithRootKeysContext_t;

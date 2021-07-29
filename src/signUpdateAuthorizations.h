@@ -43,7 +43,7 @@ typedef enum {
 typedef struct {
     uint16_t publicKeyListLength;
     uint16_t publicKeyCount;
-    char publicKey[65];
+    char publicKey[68];
     uint16_t accessStructureSize;
     uint8_t title[29];
     uint8_t displayKeyIndex[6];

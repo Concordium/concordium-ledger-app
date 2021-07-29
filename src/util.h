@@ -89,12 +89,14 @@ void getPublicKey(uint8_t *publicKeyArray);
 /**
  * Helper method for converting a byte array into a character array, where the bytes
  * are translated into their hexadecimal representation. This is used for getting human-readable
- * representations of e.g. keys and credential ids.
- * @param byteArray [in] the bytes to convert to hex
- * @param len the length of 'byteArray', i.e. the number of bytes to convert to hex
+ * representations of e.g. keys and credential ids. The output array is 'paginated' by inserting
+ * a space after 16 characters, as this will make the Ledger pagination change page after 
+ * 16 characters.
+ * @param byteArray [in] the bytes to convert to paginated hex
+ * @param len the length of 'byteArray', i.e. the number of bytes to convert to paginated hex
  * @param asHex [out] where to write the output hexadecimal characters
  */
-void toHex(uint8_t *byteArray, const uint64_t len, char *asHex);
+void toPaginatedHex(uint8_t *byteArray, const uint64_t len, char *asHex);
 
 /**
  * Parses the key derivation path for the command to be executed. This method should
