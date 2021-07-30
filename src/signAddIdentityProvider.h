@@ -24,7 +24,10 @@ typedef enum {
 
 typedef struct {
     uint32_t payloadLength;
+    cx_sha256_t hash;
+    char verifyKeyHash[65];
     uint32_t textLength;
+    uint8_t text[255];
     uint32_t verifyKeyLength;
     uint8_t ipIdentity[5];
     descriptionState_t descriptionState;
