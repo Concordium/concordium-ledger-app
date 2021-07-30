@@ -155,10 +155,15 @@ void handleSignAddIdentityProvider(uint8_t *cdata, uint8_t p1, uint8_t dataLengt
         sendSuccessNoIdle();
     } else if (p1 == P1_DESCRIPTION && ctx->state == TX_ADD_IDENTITY_PROVIDER_DESCRIPTION) {
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, dataLength, NULL, 0);
+
         memmove(ctx->text, cdata, dataLength);
 
         ctx->payloadLength -= dataLength;
         ctx->textLength -= dataLength;
+
+        if (dataLength < 255) {
+            memmove(ctx->text + dataLength, "\0", 1);
+        }
 
         if (ctx->textLength < 0) {
             // We received more bytes than expected.
