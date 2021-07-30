@@ -35,9 +35,9 @@ UX_FLOW(ux_sign_add_identity_provider_finish,
 #define P1_INITIAL              0x00
 #define P1_DESCRIPTION_LENGTH          0x01        // Used for the name, url, description.
 #define P1_DESCRIPTION                 0x02        // Used for the name, url, description.
-#define P1_VERIFY_KEY_LENGTH   0x03
-#define P1_VERIFY_KEY       0x04
-#define P1_CDI_VERIFY_KEY       0x05
+#define P1_VERIFY_KEY       0x03
+#define P1_CDI_VERIFY_KEY       0x04
+#define CDI_VERIFY_KEY_LENGTH 32
 
 void handleSignAddIdentityProvider(uint8_t *cdata, uint8_t p1, uint8_t dataLength, volatile unsigned int *flags, bool isInitialCall) {
     if (isInitialCall) {
@@ -53,51 +53,70 @@ void handleSignAddIdentityProvider(uint8_t *cdata, uint8_t p1, uint8_t dataLengt
 
         // Read the IpInfo length.
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 4, NULL, 0);
+        ctx->payloadLength = U4BE(cdata, 0);
         cdata += 4;
 
         // Read the ipIdentity.
         uint32_t ipIdentity = U4BE(cdata, 0);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 4, NULL, 0);
         bin2dec(ctx->ipIdentity, ipIdentity);
+        ctx->payloadLength -= 4;
         cdata += 4;
 
         ctx->state = TX_ADD_IDENTITY_PROVIDER_DESCRIPTION_LENGTH;
+        ctx->descriptionState = NAME;
 
         ux_flow_init(0, ux_sign_add_identity_provider_start, NULL);
         *flags |= IO_ASYNCH_REPLY;
 
     } else if (p1 == P1_DESCRIPTION_LENGTH && ctx->state == TX_ADD_IDENTITY_PROVIDER_DESCRIPTION_LENGTH) {
         // Read description length
-        ctx->descriptionLength = U4BE(cdata, 0);
+        ctx->textLength = U4BE(cdata, 0);
+        ctx->payloadLength -= 4;
         cdata += 4;
 
         ctx->state = TX_ADD_IDENTITY_PROVIDER_DESCRIPTION;
         sendSuccessNoIdle();
     } else if (p1 == P1_DESCRIPTION && ctx->state == TX_ADD_IDENTITY_PROVIDER_DESCRIPTION) {
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, dataLength, NULL, 0);
-        ctx->descriptionLength -= dataLength;
+        ctx->payloadLength -= dataLength;
+        ctx->textLength -= dataLength;
 
-        if (ctx->descriptionLength == 0) {
-            // We have received all bytes of the description.
-            ctx->state = TX_ADD_IDENTITY_PROVIDER_VERIFY_KEY_LENGTH;
-            sendSuccessNoIdle();
-        } else if (ctx->descriptionLength < 0) {
+        if (ctx->textLength == 0) {
+            // We have received all bytes of the current part of the description.
+            switch (ctx->descriptionState) {
+            case NAME:
+                ctx->state = TX_ADD_IDENTITY_PROVIDER_DESCRIPTION_LENGTH;
+                ctx->descriptionState = URL;
+                sendSuccessNoIdle();
+                break;
+            case URL:
+                ctx->state = TX_ADD_IDENTITY_PROVIDER_DESCRIPTION_LENGTH;
+                ctx->descriptionState = DESCRIPTION;
+                sendSuccessNoIdle();
+                break;
+            case DESCRIPTION:
+                ctx->state = TX_ADD_IDENTITY_PROVIDER_VERIFY_KEY;
+                ctx->verifyKeyLength = ctx->payloadLength - CDI_VERIFY_KEY_LENGTH;
+                sendSuccessNoIdle();
+                break;
+            default:
+                THROW(ERROR_INVALID_STATE);
+                break;
+            }
+
+        } else if (ctx->textLength < 0) {
             // We received more bytes than expected.
             THROW(ERROR_INVALID_STATE);
         } else {
             // There are more bytes to be received. Ask the computer for more.
             sendSuccessNoIdle();
         }
-    } else if (p1 == P1_VERIFY_KEY_LENGTH && ctx->state == TX_ADD_IDENTITY_PROVIDER_VERIFY_KEY_LENGTH) {
-        // Read description length
-        ctx->verifyKeyLength = U4BE(cdata, 0);
-        cdata += 4;
 
-        ctx->state = TX_ADD_IDENTITY_PROVIDER_VERIFY_KEY;
-        sendSuccessNoIdle();
     } else if (p1 == P1_VERIFY_KEY && ctx->state == TX_ADD_IDENTITY_PROVIDER_VERIFY_KEY) {
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, dataLength, NULL, 0);
         ctx->verifyKeyLength -= dataLength;
+        ctx->payloadLength -= dataLength;
 
         if (ctx->verifyKeyLength == 0) {
             // We have received all bytes of the verifyKey.
@@ -111,12 +130,18 @@ void handleSignAddIdentityProvider(uint8_t *cdata, uint8_t p1, uint8_t dataLengt
             sendSuccessNoIdle();
         }
     } else if (p1 == P1_CDI_VERIFY_KEY && ctx->state == TX_ADD_IDENTITY_PROVIDER_CDI_VERIFY_KEY) {
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 32, NULL, 0);
-        toHex(cdata, 32, ctx->cdiVerifyKey);
-        cdata += 32;
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, CDI_VERIFY_KEY_LENGTH, NULL, 0);
+        toHex(cdata, CDI_VERIFY_KEY_LENGTH, ctx->cdiVerifyKey);
+        ctx->payloadLength -= CDI_VERIFY_KEY_LENGTH;
+        cdata += CDI_VERIFY_KEY_LENGTH;
 
-        ux_flow_init(0, ux_sign_add_identity_provider_finish, NULL);
-        *flags |= IO_ASYNCH_REPLY;
+        if (dataLength != CDI_VERIFY_KEY_LENGTH) {
+            // We received more bytes than expected.
+            THROW(ERROR_INVALID_STATE);
+        } else {
+            ux_flow_init(0, ux_sign_add_identity_provider_finish, NULL);
+            *flags |= IO_ASYNCH_REPLY;
+        }
     } else {
         THROW(ERROR_INVALID_STATE);
     }
