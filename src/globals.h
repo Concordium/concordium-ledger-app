@@ -103,7 +103,7 @@ extern tx_state_t global_tx_state;
 // Helper struct that is used to hold the account sender
 // address from an account transaction header.
 typedef struct {
-    uint8_t sender[52];
+    uint8_t sender[57];
 } accountSender_t;
 extern accountSender_t global_account_sender;
 

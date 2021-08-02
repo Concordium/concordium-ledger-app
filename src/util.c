@@ -213,9 +213,9 @@ int hashAccountTransactionHeaderAndKind(uint8_t *cdata, uint8_t validTransaction
     size_t outputSize = sizeof(accountSender->sender);
     if (base58check_encode(cdata, 32, accountSender->sender, &outputSize) != 0) {
         // The received address bytes are not a valid base58 encoding.
-        THROW(ERROR_INVALID_TRANSACTION);  
+        THROW(ERROR_INVALID_TRANSACTION);
     }
-    accountSender->sender[50] = '\0';
+    accountSender->sender[55] = '\0';
 
     return hashHeaderAndType(cdata, ACCOUNT_TRANSACTION_HEADER_LENGTH, validTransactionKind);
 }

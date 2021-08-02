@@ -533,7 +533,7 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, uint8_t p2,
             // The received address bytes are not a valid base58 encoding.
                 THROW(ERROR_INVALID_TRANSACTION);  
             }
-            ctx->accountAddress[50] = '\0';
+            ctx->accountAddress[55] = '\0';
 
             cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 32, NULL, 0);
             ux_flow_init(0, ux_sign_credential_deployment, NULL);

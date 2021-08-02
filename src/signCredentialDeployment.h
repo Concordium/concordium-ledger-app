@@ -63,7 +63,7 @@ typedef struct {
     char attributeHashDisplay[68];
 
     uint32_t proofLength;
-    uint8_t accountAddress[52];
+    uint8_t accountAddress[57];
 
     protocolState_t state;
 } signCredentialDeploymentContext_t;

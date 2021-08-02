@@ -4,6 +4,7 @@
 
 * Improved state validation to deny instruction changes in multi command transactions.
 * Support building for the Ledger Nano X.
+* Changed Hex and Base58Check functions to ensure splitting pages evenly and consistently.
 
 ## 1.0.2
 
