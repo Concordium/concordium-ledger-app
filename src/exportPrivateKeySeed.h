@@ -10,7 +10,6 @@
 void handleExportPrivateKeySeed(uint8_t *dataBuffer, uint8_t p1, volatile unsigned int *flags);
 
 typedef struct {
-    char type[20];
     uint8_t display[15];
     uint32_t path[6];
     uint8_t pathLength;

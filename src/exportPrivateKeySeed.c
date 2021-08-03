@@ -14,24 +14,75 @@ static const uint32_t HARDENED_OFFSET = 0x80000000;
 static exportPrivateKeySeedContext_t *ctx = &global.exportPrivateKeySeedContext;
 
 void exportPrivateKey();
+void exportPrfKey();
 
 UX_STEP_CB(
     ux_export_private_key_0_step,
     bnnn_paging,
     exportPrivateKey(),
     {
-      .title = (char *) global.exportPrivateKeySeedContext.type,
-      .text = (char *) global.exportPrivateKeySeedContext.display
+        .title = "Create Credential",
+        .text = (char *) global.exportPrivateKeySeedContext.display
     });
 UX_FLOW(ux_export_private_key,
     &ux_export_private_key_0_step
 );
 
+UX_STEP_CB(
+    ux_export_prf_key_0_step,
+    bnnn_paging,
+    exportPrfKey(),
+    {
+        .title = "Allow decryption",
+        .text = (char *) global.exportPrivateKeySeedContext.display
+            });
+UX_FLOW(ux_export_prf_key,
+        &ux_export_prf_key_0_step
+);
+
+
+#define ID_CRED_SEC 0
+#define PRF_KEY 1
+
 void exportPrivateKey() {
     cx_ecfp_private_key_t privateKey;
     BEGIN_TRY {
         TRY {
-            if (ctx->pathLength == 6) {
+            uint32_t keyType[] = {ID_CRED_SEC | HARDENED_OFFSET};
+            if (ctx->pathLength == 5) {
+                memmove(ctx->path + sizeof(keyType) * 5, keyType , sizeof(keyType));
+                getPrivateKey(ctx->path, ctx->pathLength, &privateKey);
+            } else {
+                THROW(ERROR_INVALID_PATH);
+            }
+            uint8_t tx = 0;
+            for (int i = 0; i < 32; i++) {
+                G_io_apdu_buffer[tx++] = privateKey.d[i];
+            }
+
+            keyType[0] = PRF_KEY | HARDENED_OFFSET;
+           memmove(ctx->path + sizeof(keyType) * 5, keyType , sizeof(keyType));
+           getPrivateKey(ctx->path, ctx->pathLength, &privateKey);
+            for (int i = 0; i < 32; i++) {
+                G_io_apdu_buffer[tx++] = privateKey.d[i];
+            }
+            sendSuccess(tx);
+        }
+        FINALLY {
+            explicit_bzero(&privateKey, sizeof(privateKey));
+        }
+    }
+    END_TRY;
+}
+
+
+void exportPrfKey() {
+    cx_ecfp_private_key_t privateKey;
+    BEGIN_TRY {
+        TRY {
+            uint32_t keyType[] = {PRF_KEY | HARDENED_OFFSET};
+            if (ctx->pathLength == 5) {
+                memmove(ctx->path + sizeof(keyType) * 5, keyType , sizeof(keyType));
                 getPrivateKey(ctx->path, ctx->pathLength, &privateKey);
             } else {
                 THROW(ERROR_INVALID_PATH);
@@ -49,44 +100,36 @@ void exportPrivateKey() {
     END_TRY;
 }
 
-const char* getPrivateKeyTypeName(uint8_t type) {
-    switch (type) {
-        case 0: return "IdCredSec";
-        case 1: return "PRF key";
-        default: THROW(ERROR_INVALID_PARAM);
-    }
-}
-
 #define ACCOUNT_SUBTREE 0
 #define NORMAL_ACCOUNTS 0
 
-#define P1_ID_CRED_SEC          0x00
-#define P1_PRF_KEY              0x01
+#define P1_PRF_KEY          0x00
+#define P1_BOTH               0x01
 
 void handleExportPrivateKeySeed(uint8_t *dataBuffer, uint8_t p1, volatile unsigned int *flags) {
-    memmove(ctx->type, "Export ", 7);
-    memmove(ctx->type + 7, getPrivateKeyTypeName(p1), 12);
-    
-    if (p1 == P1_ID_CRED_SEC || p1 == P1_PRF_KEY) {
-        uint32_t identity = U4BE(dataBuffer, 0);
-        uint8_t typeOfKey = p1 == P1_ID_CRED_SEC ? 0 : 1;
-        uint32_t keyDerivationPath[] = {
-            CONCORDIUM_PURPOSE | HARDENED_OFFSET,
-            CONCORDIUM_COIN_TYPE | HARDENED_OFFSET,
-            ACCOUNT_SUBTREE | HARDENED_OFFSET,
-            NORMAL_ACCOUNTS | HARDENED_OFFSET,
-            identity | HARDENED_OFFSET,
-            typeOfKey | HARDENED_OFFSET
-        };
-        memmove(ctx->path, keyDerivationPath, sizeof(keyDerivationPath) * 6);
-        ctx->pathLength = 6;
+    uint32_t identity = U4BE(dataBuffer, 0);
 
-        memmove(ctx->display, "ID #", 4);
-        bin2dec(ctx->display + 4, identity);
-    } else {
+    if (p1 != P1_BOTH && p1 != P1_PRF_KEY) {
         THROW(ERROR_INVALID_PARAM);
     }
 
-    ux_flow_init(0, ux_export_private_key, NULL);
+    uint32_t keyDerivationPath[] = {
+        CONCORDIUM_PURPOSE | HARDENED_OFFSET,
+        CONCORDIUM_COIN_TYPE | HARDENED_OFFSET,
+        ACCOUNT_SUBTREE | HARDENED_OFFSET,
+        NORMAL_ACCOUNTS | HARDENED_OFFSET,
+        identity | HARDENED_OFFSET,
+    };
+    memmove(ctx->path, keyDerivationPath, sizeof(keyDerivationPath) * 5);
+    ctx->pathLength = 5;
+
+    memmove(ctx->display, "ID #", 4);
+    bin2dec(ctx->display + 4, identity);
+
+    if (p1 == P1_BOTH) {
+        ux_flow_init(0, ux_export_private_key, NULL);
+    } else if (p1 == P1_PRF_KEY) {
+        ux_flow_init(0, ux_export_prf_key, NULL);
+    }
     *flags |= IO_ASYNCH_REPLY;
 }
