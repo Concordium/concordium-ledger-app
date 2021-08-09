@@ -45,7 +45,6 @@ typedef struct {
     uint8_t signatureThreshold[4];
     char regIdCred[97];
 
-    uint8_t identityProviderIdentity[4];
     uint8_t anonymityRevocationThreshold[4];
 
     uint16_t anonymityRevocationListLength;

@@ -8,25 +8,17 @@ static tx_state_t *tx_state = &global_tx_state;
 
 void loadSigningUx();
 
-UX_STEP_NOCB(
-    ux_sign_public_info_for_ip_1_step,
-    bnnn_paging,
-    {
-      .title = "IdCredPub",
-      .text = (char *) global.signPublicInformationForIp.idCredPub
-    });
 UX_STEP_CB(
-    ux_sign_public_info_for_ip_2_step,
+    ux_sign_public_info_for_ip_1_step,
     bnnn_paging,
     sendSuccessNoIdle(),
     {
-      .title = "RegId",
+      .title = "CredId",
       .text = (char *) global.signPublicInformationForIp.credId
     });
 UX_FLOW(ux_sign_public_info_for_ip,
     &ux_sign_flow_shared_review,
-    &ux_sign_public_info_for_ip_1_step,
-    &ux_sign_public_info_for_ip_2_step
+    &ux_sign_public_info_for_ip_1_step
 );
 
 UX_STEP_CB(
@@ -45,7 +37,7 @@ UX_STEP_NOCB(
     ux_sign_public_info_for_ip_threshold_0_step,
     bn,
     {
-      "Threshold",
+      "Sig Threshold",
       (char *) global.signPublicInformationForIp.threshold
     });
 UX_FLOW(ux_sign_public_info_for_ip_threshold,
@@ -67,12 +59,9 @@ void handleSignPublicInformationForIp(uint8_t *cdata, uint8_t p1, volatile unsig
         cdata += parseKeyDerivationPath(cdata);
         cx_sha256_init(&tx_state->hash);
 
-        // Parse id_cred_pub so it can be displayed.
-        uint8_t idCredPub[48];
-        memmove(idCredPub, cdata, 48);
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, idCredPub, 48, NULL, 0);
+        // Hash id_cred_pub.
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 48, NULL, 0);
         cdata += 48;
-        toHex(idCredPub, 48, ctx->idCredPub);
 
         // Parse cred_id so it can be displayed.
         uint8_t credId[48];

@@ -77,18 +77,11 @@ UX_STEP_NOCB(
     ux_credential_deployment_threshold_flow_1_step,
     bnnn_paging,
     {
-      "RegIdCred",
+      "CredId",
       (char *) global.signCredentialDeploymentContext.regIdCred
     });
-UX_STEP_NOCB(
-    ux_credential_deployment_threshold_flow_2_step,
-    bn,
-    {
-      "Identity provider",
-      (char *) global.signCredentialDeploymentContext.identityProviderIdentity
-    });
 UX_STEP_CB(
-    ux_credential_deployment_threshold_flow_3_step,
+    ux_credential_deployment_threshold_flow_2_step,
     bn,
     sendSuccessNoIdle(),
     {
@@ -98,15 +91,14 @@ UX_STEP_CB(
 UX_FLOW(ux_credential_deployment_threshold_flow,
     &ux_credential_deployment_threshold_flow_0_step,
     &ux_credential_deployment_threshold_flow_1_step,
-    &ux_credential_deployment_threshold_flow_2_step,
-    &ux_credential_deployment_threshold_flow_3_step
+    &ux_credential_deployment_threshold_flow_2_step
 );
 
 UX_STEP_NOCB(
     ux_credential_deployment_dates_0_step,
     bn,
     {
-      "Valid to",
+      "ID Valid to >=",
       (char *) global.signCredentialDeploymentContext.validTo
     });
 UX_STEP_CB(
@@ -368,12 +360,8 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, uint8_t p2,
         cx_hash((cx_hash_t *) &tx_state->hash, 0, regIdCred, 48, NULL, 0);
 
         // Parse identity provider identity.
-        uint8_t identityProviderIdentity[4];
-        memmove(identityProviderIdentity, dataBuffer, sizeof(identityProviderIdentity));
-        uint32_t identityProviderValue = U4BE(identityProviderIdentity, 0);
-        bin2dec(ctx->identityProviderIdentity, identityProviderValue);
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 4, NULL, 0);
         dataBuffer += 4;
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, identityProviderIdentity, 4, NULL, 0);
 
         // Parse anonymity revocation threshold.
         memmove(temp, dataBuffer, 1);
