@@ -48,9 +48,7 @@ void exportPrivateKey() {
     cx_ecfp_private_key_t privateKey;
     BEGIN_TRY {
         TRY {
-            uint32_t keyType[] = {ID_CRED_SEC | HARDENED_OFFSET};
-            if (ctx->pathLength == 5) {
-                memmove(ctx->path + sizeof(keyType) * 5, keyType , sizeof(keyType));
+            if (ctx->pathLength == 6) {
                 getPrivateKey(ctx->path, ctx->pathLength, &privateKey);
             } else {
                 THROW(ERROR_INVALID_PATH);
@@ -60,9 +58,9 @@ void exportPrivateKey() {
                 G_io_apdu_buffer[tx++] = privateKey.d[i];
             }
 
-            keyType[0] = PRF_KEY | HARDENED_OFFSET;
-           memmove(ctx->path + sizeof(keyType) * 5, keyType , sizeof(keyType));
-           getPrivateKey(ctx->path, ctx->pathLength, &privateKey);
+            uint32_t keyType = ID_CRED_SEC | HARDENED_OFFSET;
+            memmove(ctx->path + 5, &keyType, sizeof(keyType));
+            getPrivateKey(ctx->path, ctx->pathLength, &privateKey);
             for (int i = 0; i < 32; i++) {
                 G_io_apdu_buffer[tx++] = privateKey.d[i];
             }
@@ -80,9 +78,7 @@ void exportPrfKey() {
     cx_ecfp_private_key_t privateKey;
     BEGIN_TRY {
         TRY {
-            uint32_t keyType[] = {PRF_KEY | HARDENED_OFFSET};
-            if (ctx->pathLength == 5) {
-                memmove(ctx->path + sizeof(keyType) * 5, keyType , sizeof(keyType));
+            if (ctx->pathLength == 6) {
                 getPrivateKey(ctx->path, ctx->pathLength, &privateKey);
             } else {
                 THROW(ERROR_INVALID_PATH);
@@ -119,9 +115,10 @@ void handleExportPrivateKeySeed(uint8_t *dataBuffer, uint8_t p1, volatile unsign
         ACCOUNT_SUBTREE | HARDENED_OFFSET,
         NORMAL_ACCOUNTS | HARDENED_OFFSET,
         identity | HARDENED_OFFSET,
+        PRF_KEY | HARDENED_OFFSET
     };
-    memmove(ctx->path, keyDerivationPath, sizeof(keyDerivationPath) * 5);
-    ctx->pathLength = 5;
+    memmove(ctx->path, keyDerivationPath, sizeof(keyDerivationPath));
+    ctx->pathLength = 6;
 
     memmove(ctx->display, "ID #", 4);
     bin2dec(ctx->display + 4, identity);
