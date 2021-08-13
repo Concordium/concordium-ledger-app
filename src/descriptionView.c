@@ -45,13 +45,14 @@ UX_FLOW(ux_sign_description_description,
 void handleDescriptionPart(void) {
     if (ctx->textLength == 0) {
         switch (ctx->descriptionState) {
-        case NAME:
-            ctx->descriptionState = URL;
+        case DESC_NAME:
+            ctx->descriptionState = DESC_URL;
             break;
-        case URL:
-            ctx->descriptionState = DESCRIPTION;
+        case DESC_URL:
+            ctx->descriptionState = DESC_DESCRIPTION;
             break;
-        case DESCRIPTION:
+        case DESC_DESCRIPTION:
+            ctx->descriptionState = DESC_DESCRIPTION;
             break;
         default:
             THROW(ERROR_INVALID_STATE);

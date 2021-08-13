@@ -6,9 +6,9 @@ extern const ux_flow_step_t* const ux_sign_description_url[];
 extern const ux_flow_step_t* const ux_sign_description_description[];
 
 typedef enum {
-    NAME,
-    URL,
-    DESCRIPTION
+    DESC_NAME,
+    DESC_URL,
+    DESC_DESCRIPTION
 } descriptionState_t;
 
 typedef struct {

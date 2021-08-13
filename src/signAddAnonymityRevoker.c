@@ -9,39 +9,39 @@ static descriptionContext_t *desc_ctx = &global.withDescription.descriptionConte
 static tx_state_t *tx_state = &global_tx_state;
 
 UX_STEP_CB(
-           ux_sign_add_anonymity_revoker_arIdentity,
-           bnnn_paging,
-           sendSuccessNoIdle(),
-           {
-             "arIdentity",
-                 (char *) global.withDescription.signAddAnonymityRevokerContext.arIdentity
-               });
+    ux_sign_add_anonymity_revoker_arIdentity,
+    bnnn_paging,
+    sendSuccessNoIdle(),
+    {
+        "arIdentity",
+            (char *) global.withDescription.signAddAnonymityRevokerContext.arIdentity
+            });
 UX_FLOW(ux_sign_add_anonymity_revoker_start,
         &ux_sign_flow_shared_review,
         &ux_sign_add_anonymity_revoker_arIdentity
-        );
+    );
 
 UX_STEP_NOCB(
-             ux_sign_add_anonymity_revoker_public_key,
+    ux_sign_add_anonymity_revoker_public_key,
     bnnn_paging,
     {
         "Public key",
             (char *) global.withDescription.signAddAnonymityRevokerContext.publicKey
-    });
+            });
 UX_FLOW(ux_sign_add_anonymity_revoker_finish,
         &ux_sign_add_anonymity_revoker_public_key,
         &ux_sign_flow_shared_sign,
         &ux_sign_flow_shared_decline
-);
+    );
 
-#define P1_INITIAL              0x00
-#define P1_DESCRIPTION_LENGTH          0x01        // Used for both the message text and the specification URL.
-#define P1_DESCRIPTION                 0x02        // Used for both the message text and the specification URL.
-#define P1_PUBLIC_KEY       0x03
+#define P1_INITIAL                                    0x00
+#define P1_DESCRIPTION_LENGTH          0x01        // Used for both the name, url and description text.
+#define P1_DESCRIPTION                         0x02        // Used for both the name, url and description text..
+#define P1_PUBLIC_KEY                            0x03
 
 void handleSignAddAnonymityRevoker(uint8_t *cdata, uint8_t p1, uint8_t dataLength, volatile unsigned int *flags, bool isInitialCall) {
     if (isInitialCall) {
-      ctx->state = TX_ADD_ANONYMITY_REVOKER_INITIAL;
+        ctx->state = TX_ADD_ANONYMITY_REVOKER_INITIAL;
     }
 
     if (p1 == P1_INITIAL && ctx->state == TX_ADD_ANONYMITY_REVOKER_INITIAL) {
@@ -63,7 +63,7 @@ void handleSignAddAnonymityRevoker(uint8_t *cdata, uint8_t p1, uint8_t dataLengt
         cdata += 4;
 
         ctx->state = TX_ADD_ANONYMITY_REVOKER_DESCRIPTION_LENGTH;
-        desc_ctx->descriptionState = NAME;
+        desc_ctx->descriptionState = DESC_NAME;
 
         ux_flow_init(0, ux_sign_add_anonymity_revoker_start, NULL);
         *flags |= IO_ASYNCH_REPLY;
@@ -96,21 +96,21 @@ void handleSignAddAnonymityRevoker(uint8_t *cdata, uint8_t p1, uint8_t dataLengt
         }
 
         switch (desc_ctx->descriptionState) {
-        case NAME:
+        case DESC_NAME:
             if (desc_ctx->textLength==0) {
                 ctx->state = TX_ADD_ANONYMITY_REVOKER_DESCRIPTION_LENGTH;
             }
             ux_flow_init(0, ux_sign_description_name, NULL);
             *flags |= IO_ASYNCH_REPLY;
             break;
-        case URL:
+        case DESC_URL:
             if (desc_ctx->textLength==0) {
                 ctx->state = TX_ADD_ANONYMITY_REVOKER_DESCRIPTION_LENGTH;
             }
             ux_flow_init(0, ux_sign_description_url, NULL);
             *flags |= IO_ASYNCH_REPLY;
             break;
-        case DESCRIPTION:
+        case DESC_DESCRIPTION:
             if (desc_ctx->textLength==0) {
                 ctx->state = TX_ADD_ANONYMITY_REVOKER_PUBLIC_KEY;
             }

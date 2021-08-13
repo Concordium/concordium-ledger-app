@@ -79,7 +79,7 @@ fn main() {
     cdata.append(&mut description.as_bytes().to_vec());
     ledger.exchange(create_command(cdata, 2)).unwrap();
 
-    // Send cdi verify key
+    // Send public key
     let mut cdata = Vec::new();
     cdata.append(&mut public_key);
     let result = ledger.exchange(create_command(cdata, 3)).unwrap();

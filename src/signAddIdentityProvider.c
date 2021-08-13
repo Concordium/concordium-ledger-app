@@ -79,7 +79,7 @@ void handleSignAddIdentityProvider(uint8_t *cdata, uint8_t p1, uint8_t dataLengt
         cdata += 4;
 
         ctx->state = TX_ADD_IDENTITY_PROVIDER_DESCRIPTION_LENGTH;
-        desc_ctx->descriptionState = NAME;
+        desc_ctx->descriptionState = DESC_NAME;
 
         ux_flow_init(0, ux_sign_add_identity_provider_start, NULL);
         *flags |= IO_ASYNCH_REPLY;
@@ -112,25 +112,25 @@ void handleSignAddIdentityProvider(uint8_t *cdata, uint8_t p1, uint8_t dataLengt
         }
 
         switch (desc_ctx->descriptionState) {
-        case NAME:
+        case DESC_NAME:
             if (desc_ctx->textLength==0) {
                 ctx->state = TX_ADD_IDENTITY_PROVIDER_DESCRIPTION_LENGTH;
             }
             ux_flow_init(0, ux_sign_description_name, NULL);
             *flags |= IO_ASYNCH_REPLY;
             break;
-        case URL:
+        case DESC_URL:
             if (desc_ctx->textLength==0) {
                 ctx->state = TX_ADD_IDENTITY_PROVIDER_DESCRIPTION_LENGTH;
             }
             ux_flow_init(0, ux_sign_description_url, NULL);
             *flags |= IO_ASYNCH_REPLY;
             break;
-        case DESCRIPTION:
+        case DESC_DESCRIPTION:
             if (desc_ctx->textLength==0) {
                 ctx->state = TX_ADD_IDENTITY_PROVIDER_VERIFY_KEY;
+                ctx->verifyKeyLength = ctx->payloadLength - CDI_VERIFY_KEY_LENGTH;
             }
-            ctx->verifyKeyLength = ctx->payloadLength - CDI_VERIFY_KEY_LENGTH;
             ux_flow_init(0, ux_sign_description_description, NULL);
             *flags |= IO_ASYNCH_REPLY;
             break;
