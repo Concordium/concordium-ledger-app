@@ -4,6 +4,7 @@
 
 * Improved state validation to deny instruction changes in multi command transactions.
 * Support building for the Ledger Nano X.
+* Added support for "Add Identity Provider" update.
 
 ## 1.0.2
 
