@@ -3,10 +3,9 @@
 #include "sign.h"
 #include "responseCodes.h"
 
-static signAddIdentityProviderContext_t *ctx = &global.signAddIdentityProviderContext;
+static signAddIdentityProviderContext_t *ctx = &global.withDescription.signAddIdentityProviderContext;
+static descriptionContext_t *desc_ctx = &global.withDescription.descriptionContext;
 static tx_state_t *tx_state = &global_tx_state;
-
-void handleDescriptionPart();
 
 UX_STEP_CB(
     ux_sign_add_identity_provider_ipIdentity,
@@ -14,47 +13,11 @@ UX_STEP_CB(
     sendSuccessNoIdle(),
     {
         "Identity provider",
-            (char *) global.signAddIdentityProviderContext.ipIdentity
+            (char *) global.withDescription.signAddIdentityProviderContext.ipIdentity
             });
 UX_FLOW(ux_sign_add_identity_provider_start,
         &ux_sign_flow_shared_review,
         &ux_sign_add_identity_provider_ipIdentity
-    );
-
-UX_STEP_CB(
-    ux_sign_add_identity_provider_name_step,
-    bnnn_paging,
-    handleDescriptionPart(),
-    {
-        "Name",
-            (char *) global.signAddIdentityProviderContext.text
-            });
-UX_FLOW(ux_sign_add_identity_provider_name,
-        &ux_sign_add_identity_provider_name_step
-    );
-
-UX_STEP_CB(
-    ux_sign_add_identity_provider_url_step,
-    bnnn_paging,
-    handleDescriptionPart(),
-    {
-        "URL",
-            (char *) global.signAddIdentityProviderContext.text
-            });
-UX_FLOW(ux_sign_add_identity_provider_url,
-        &ux_sign_add_identity_provider_url_step
-    );
-
-UX_STEP_CB(
-    ux_sign_add_identity_provider_description_step,
-    bnnn_paging,
-    handleDescriptionPart(),
-    {
-        "Description",
-            (char *) global.signAddIdentityProviderContext.text
-            });
-UX_FLOW(ux_sign_add_identity_provider_description,
-        &ux_sign_add_identity_provider_description_step
     );
 
 UX_STEP_CB(
@@ -63,7 +26,7 @@ UX_STEP_CB(
     sendSuccessNoIdle(),
     {
         "Verify Key Hash",
-            (char *) global.signAddIdentityProviderContext.verifyKeyHash
+            (char *) global.withDescription.signAddIdentityProviderContext.verifyKeyHash
             });
 UX_FLOW(ux_sign_add_identity_provider_verify_key,
         &ux_sign_add_identity_provider_verify_key_hash
@@ -74,7 +37,7 @@ UX_STEP_NOCB(
     bnnn_paging,
     {
         "CDI Verify key",
-            (char *) global.signAddIdentityProviderContext.cdiVerifyKey
+            (char *) global.withDescription.signAddIdentityProviderContext.cdiVerifyKey
             });
 UX_FLOW(ux_sign_add_identity_provider_finish,
         &ux_sign_add_identity_provider_cdi_key,
@@ -89,29 +52,6 @@ UX_FLOW(ux_sign_add_identity_provider_finish,
 #define P1_CDI_VERIFY_KEY       0x04
 
 #define CDI_VERIFY_KEY_LENGTH 32
-
-void handleDescriptionPart(void) {
-    if (ctx->textLength == 0) {
-        switch (ctx->descriptionState) {
-        case NAME:
-            ctx->state = TX_ADD_IDENTITY_PROVIDER_DESCRIPTION_LENGTH;
-            ctx->descriptionState = URL;
-            break;
-        case URL:
-            ctx->state = TX_ADD_IDENTITY_PROVIDER_DESCRIPTION_LENGTH;
-            ctx->descriptionState = DESCRIPTION;
-            break;
-        case DESCRIPTION:
-            ctx->state = TX_ADD_IDENTITY_PROVIDER_VERIFY_KEY;
-            ctx->verifyKeyLength = ctx->payloadLength - CDI_VERIFY_KEY_LENGTH;
-            break;
-        default:
-            THROW(ERROR_INVALID_STATE);
-            break;
-        }
-    }
-    sendSuccessNoIdle();
-}
 
 void handleSignAddIdentityProvider(uint8_t *cdata, uint8_t p1, uint8_t dataLength, volatile unsigned int *flags, bool isInitialCall) {
     if (isInitialCall) {
@@ -139,14 +79,14 @@ void handleSignAddIdentityProvider(uint8_t *cdata, uint8_t p1, uint8_t dataLengt
         cdata += 4;
 
         ctx->state = TX_ADD_IDENTITY_PROVIDER_DESCRIPTION_LENGTH;
-        ctx->descriptionState = NAME;
+        desc_ctx->descriptionState = NAME;
 
         ux_flow_init(0, ux_sign_add_identity_provider_start, NULL);
         *flags |= IO_ASYNCH_REPLY;
 
     } else if (p1 == P1_DESCRIPTION_LENGTH && ctx->state == TX_ADD_IDENTITY_PROVIDER_DESCRIPTION_LENGTH) {
         // Read current part of description length
-        ctx->textLength = U4BE(cdata, 0);
+        desc_ctx->textLength = U4BE(cdata, 0);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 4, NULL, 0);
         ctx->payloadLength -= 4;
         cdata += 4;
@@ -156,32 +96,42 @@ void handleSignAddIdentityProvider(uint8_t *cdata, uint8_t p1, uint8_t dataLengt
     } else if (p1 == P1_DESCRIPTION && ctx->state == TX_ADD_IDENTITY_PROVIDER_DESCRIPTION) {
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, dataLength, NULL, 0);
 
-        memmove(ctx->text, cdata, dataLength);
+        memmove(desc_ctx->text, cdata, dataLength);
 
         ctx->payloadLength -= dataLength;
-        ctx->textLength -= dataLength;
+        desc_ctx->textLength -= dataLength;
 
         if (dataLength < 255) {
-            memmove(ctx->text + dataLength, "\0", 1);
+            memmove(desc_ctx->text + dataLength, "\0", 1);
         }
 
-        if (ctx->textLength < 0) {
+        if (desc_ctx->textLength < 0) {
             // We received more bytes than expected.
             THROW(ERROR_INVALID_STATE);
             return;
         }
 
-        switch (ctx->descriptionState) {
+        switch (desc_ctx->descriptionState) {
         case NAME:
-            ux_flow_init(0, ux_sign_add_identity_provider_name, NULL);
+            if (desc_ctx->textLength==0) {
+                ctx->state = TX_ADD_IDENTITY_PROVIDER_DESCRIPTION_LENGTH;
+            }
+            ux_flow_init(0, ux_sign_description_name, NULL);
             *flags |= IO_ASYNCH_REPLY;
             break;
         case URL:
-            ux_flow_init(0, ux_sign_add_identity_provider_url, NULL);
+            if (desc_ctx->textLength==0) {
+                ctx->state = TX_ADD_IDENTITY_PROVIDER_DESCRIPTION_LENGTH;
+            }
+            ux_flow_init(0, ux_sign_description_url, NULL);
             *flags |= IO_ASYNCH_REPLY;
             break;
         case DESCRIPTION:
-            ux_flow_init(0, ux_sign_add_identity_provider_description, NULL);
+            if (desc_ctx->textLength==0) {
+                ctx->state = TX_ADD_IDENTITY_PROVIDER_VERIFY_KEY;
+            }
+            ctx->verifyKeyLength = ctx->payloadLength - CDI_VERIFY_KEY_LENGTH;
+            ux_flow_init(0, ux_sign_description_description, NULL);
             *flags |= IO_ASYNCH_REPLY;
             break;
         default:

@@ -2,8 +2,10 @@
 #include "util.h"
 #include "sign.h"
 #include "responseCodes.h"
+#include "descriptionView.h"
 
-static signAddAnonymityRevokerContext_t *ctx = &global.signAddAnonymityRevokerContext;
+static signAddAnonymityRevokerContext_t *ctx = &global.withDescription.signAddAnonymityRevokerContext;
+static descriptionContext_t *desc_ctx = &global.withDescription.descriptionContext;
 static tx_state_t *tx_state = &global_tx_state;
 
 UX_STEP_CB(
@@ -12,7 +14,7 @@ UX_STEP_CB(
            sendSuccessNoIdle(),
            {
              "arIdentity",
-               (char *) global.signAddAnonymityRevokerContext.arIdentity
+                 (char *) global.withDescription.signAddAnonymityRevokerContext.arIdentity
                });
 UX_FLOW(ux_sign_add_anonymity_revoker_start,
         &ux_sign_flow_shared_review,
@@ -24,7 +26,7 @@ UX_STEP_NOCB(
     bnnn_paging,
     {
         "Public key",
-          (char *) global.signAddAnonymityRevokerContext.publicKey
+            (char *) global.withDescription.signAddAnonymityRevokerContext.publicKey
     });
 UX_FLOW(ux_sign_add_anonymity_revoker_finish,
         &ux_sign_add_anonymity_revoker_public_key,
@@ -51,6 +53,7 @@ void handleSignAddAnonymityRevoker(uint8_t *cdata, uint8_t p1, uint8_t dataLengt
 
         // Read the payload length.
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 4, NULL, 0);
+        ctx->payloadLength = U4BE(cdata, 0);
         cdata += 4;
 
         // Read the arIdentity.
@@ -60,32 +63,64 @@ void handleSignAddAnonymityRevoker(uint8_t *cdata, uint8_t p1, uint8_t dataLengt
         cdata += 4;
 
         ctx->state = TX_ADD_ANONYMITY_REVOKER_DESCRIPTION_LENGTH;
+        desc_ctx->descriptionState = NAME;
 
         ux_flow_init(0, ux_sign_add_anonymity_revoker_start, NULL);
         *flags |= IO_ASYNCH_REPLY;
 
     } else if (p1 == P1_DESCRIPTION_LENGTH && ctx->state == TX_ADD_ANONYMITY_REVOKER_DESCRIPTION_LENGTH) {
-        // Read description length
-        ctx->descriptionLength = U4BE(cdata, 0);
+        // Read current part of description length
+        desc_ctx->textLength = U4BE(cdata, 0);
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 4, NULL, 0);
+        ctx->payloadLength -= 4;
         cdata += 4;
 
         ctx->state = TX_ADD_ANONYMITY_REVOKER_DESCRIPTION;
         sendSuccessNoIdle();
     } else if (p1 == P1_DESCRIPTION && ctx->state == TX_ADD_ANONYMITY_REVOKER_DESCRIPTION) {
-      cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, dataLength, NULL, 0);
-      ctx->descriptionLength -= dataLength;
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, dataLength, NULL, 0);
 
-      if (ctx->descriptionLength == 0) {
-        // We have received all bytes, continue to signing flow.
-        ctx->state = TX_ADD_ANONYMITY_REVOKER_PUBLIC_KEY;
-        sendSuccessNoIdle();
-      } else if (ctx->descriptionLength < 0) {
-        // We received more bytes than expected.
-        THROW(ERROR_INVALID_STATE);
-      } else {
-        // There are more bytes to be received. Ask the computer for more.
-        sendSuccessNoIdle();
-      }
+        memmove(desc_ctx->text, cdata, dataLength);
+
+        ctx->payloadLength -= dataLength;
+        desc_ctx->textLength -= dataLength;
+
+        if (dataLength < 255) {
+            memmove(desc_ctx->text + dataLength, "\0", 1);
+        }
+
+        if (desc_ctx->textLength < 0) {
+            // We received more bytes than expected.
+            THROW(ERROR_INVALID_STATE);
+            return;
+        }
+
+        switch (desc_ctx->descriptionState) {
+        case NAME:
+            if (desc_ctx->textLength==0) {
+                ctx->state = TX_ADD_ANONYMITY_REVOKER_DESCRIPTION_LENGTH;
+            }
+            ux_flow_init(0, ux_sign_description_name, NULL);
+            *flags |= IO_ASYNCH_REPLY;
+            break;
+        case URL:
+            if (desc_ctx->textLength==0) {
+                ctx->state = TX_ADD_ANONYMITY_REVOKER_DESCRIPTION_LENGTH;
+            }
+            ux_flow_init(0, ux_sign_description_url, NULL);
+            *flags |= IO_ASYNCH_REPLY;
+            break;
+        case DESCRIPTION:
+            if (desc_ctx->textLength==0) {
+                ctx->state = TX_ADD_ANONYMITY_REVOKER_PUBLIC_KEY;
+            }
+            ux_flow_init(0, ux_sign_description_description, NULL);
+            *flags |= IO_ASYNCH_REPLY;
+            break;
+        default:
+            THROW(ERROR_INVALID_STATE);
+            break;
+        }
     } else if (p1 == P1_PUBLIC_KEY && ctx->state == TX_ADD_ANONYMITY_REVOKER_PUBLIC_KEY) {
         uint8_t publicKey[96];
         memmove(publicKey, cdata, 96);

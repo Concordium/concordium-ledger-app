@@ -30,6 +30,8 @@
 #include "signAddIdentityProvider.h"
 #include "signAddAnonymityRevoker.h"
 
+#include "descriptionView.h"
+
 #ifndef _GLOBALS_H_
 #define _GLOBALS_H_
 
@@ -110,6 +112,15 @@ typedef struct {
 } accountSender_t;
 extern accountSender_t global_account_sender;
 
+typedef struct {
+    union {
+        signAddAnonymityRevokerContext_t signAddAnonymityRevokerContext;
+        signAddIdentityProviderContext_t signAddIdentityProviderContext;
+    };
+    descriptionContext_t descriptionContext;
+
+} withDescription_t;
+
 /**
  * As the memory we have available is very limited, the context for each instruction is stored
  * in a shared global union, so that we do not use more memory than that of the most memory
@@ -141,8 +152,7 @@ typedef union {
     signElectionDifficultyContext_t signElectionDifficulty;
     signUpdateBakerStakeThresholdContext_t signUpdateBakerStakeThreshold;
     signUpdateKeysWithRootKeysContext_t signUpdateKeysWithRootKeysContext;
-    signAddAnonymityRevokerContext_t signAddAnonymityRevokerContext;
-    signAddIdentityProviderContext_t signAddIdentityProviderContext;
+    withDescription_t withDescription;
 } instructionContext;
 extern instructionContext global;
 

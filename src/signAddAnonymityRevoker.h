@@ -1,6 +1,8 @@
 #ifndef _CONCORDIUM_APP_ADD_ANONYMITY_REVOKER_H_
 #define _CONCORDIUM_APP_ADD_ANONYMITY_REVOKER_H_
 
+#include "descriptionView.h"
+
 /**
  * Handles the signing flow, including updating the display, for the 'add anonymity revoker'
  * update instruction.
@@ -16,10 +18,10 @@ typedef enum {
 } addAnonymityRevokerState_t;
 
 typedef struct {
-  uint32_t descriptionLength;
-  uint8_t arIdentity[4];
-  char publicKey[96];
-  addAnonymityRevokerState_t state;
+    uint32_t payloadLength;
+    char publicKey[97];
+    uint8_t arIdentity[5];
+    addAnonymityRevokerState_t state;
 } signAddAnonymityRevokerContext_t;
 
 #endif
