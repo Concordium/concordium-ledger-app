@@ -1,11 +1,12 @@
 #include <os.h>
 #include "util.h"
 #include "accountSenderView.h"
+#include "memo.h"
 #include "sign.h"
 #include "base58check.h"
 #include "responseCodes.h"
 
-static signEncryptedAmountToTransfer_t *ctx = &global.signEncryptedAmountToTransfer;
+static signEncryptedAmountToTransfer_t *ctx = &global.withMemo.signEncryptedAmountToTransfer;
 static tx_state_t *tx_state = &global_tx_state;
 
 // UI for displaying encrypted transfer transaction. It only shows the user the recipient address
@@ -14,40 +15,53 @@ UX_STEP_NOCB(
     ux_sign_encrypted_amount_transfer_1_step,
     nn,
     {
-      "Shielded",
-      "transfer"
-    });
+        "Shielded",
+            "transfer"
+            });
 UX_STEP_CB(
     ux_sign_encrypted_amount_transfer_2_step,
     bnnn_paging,
     sendSuccessNoIdle(),
     {
-      .title = "Recipient",
-      .text = (char *) global.signEncryptedAmountToTransfer.to
-    });
+        .title = "Recipient",
+            .text = (char *) global.withMemo.signEncryptedAmountToTransfer.to
+            });
 UX_FLOW(ux_sign_encrypted_amount_transfer,
-    &ux_sign_flow_shared_review,
-    &ux_sign_encrypted_amount_transfer_1_step,
-    &ux_sign_flow_account_sender_view,
-    &ux_sign_encrypted_amount_transfer_2_step,
-    &ux_sign_flow_shared_sign,
-    &ux_sign_flow_shared_decline
-);
+        &ux_sign_flow_shared_review,
+        &ux_sign_encrypted_amount_transfer_1_step,
+        &ux_sign_flow_account_sender_view,
+        &ux_sign_encrypted_amount_transfer_2_step,
+        &ux_sign_flow_shared_sign,
+        &ux_sign_flow_shared_decline
+    );
+
+UX_FLOW(ux_sign_encrypted_amount_transfer_memo,
+        &ux_sign_flow_shared_review,
+        &ux_sign_encrypted_amount_transfer_1_step,
+        &ux_sign_flow_account_sender_view,
+        &ux_sign_encrypted_amount_transfer_2_step
+    );
 
 #define P1_INITIAL                              0x00
 #define P1_REMAINING_AMOUNT                     0x01
 #define P1_TRANSFER_AMOUNT_AGG_INDEX_PROOF_SIZE 0x02
 #define P1_PROOF                                0x03
+#define P1_INITIAL_WITH_MEMO                                0x04
+#define P1_MEMO                                0x05
+
 
 void handleSignEncryptedAmountTransfer(uint8_t *cdata, uint8_t p1, uint8_t dataLength, volatile unsigned int *flags, bool isInitialCall) {
     if (isInitialCall) {
         ctx->state = TX_ENCRYPTED_AMOUNT_TRANSFER_INITIAL;
     }
 
-    if (p1 == P1_INITIAL && ctx->state == TX_ENCRYPTED_AMOUNT_TRANSFER_INITIAL) {
+    if ((p1 == P1_INITIAL || p1 == P1_INITIAL_WITH_MEMO) && ctx->state == TX_ENCRYPTED_AMOUNT_TRANSFER_INITIAL) {
         cdata += parseKeyDerivationPath(cdata);
+
+        ctx->transactionType = p1 == P1_INITIAL_WITH_MEMO ? ENCRYPTED_AMOUNT_TRANSFER_WITH_MEMO : ENCRYPTED_AMOUNT_TRANSFER;
+
         cx_sha256_init(&tx_state->hash);
-        cdata += hashAccountTransactionHeaderAndKind(cdata, ENCRYPTED_AMOUNT_TRANSFER);
+        cdata += hashAccountTransactionHeaderAndKind(cdata, ctx->transactionType);
 
         // To account address
         uint8_t toAddress[32];
@@ -73,27 +87,49 @@ void handleSignEncryptedAmountTransfer(uint8_t *cdata, uint8_t p1, uint8_t dataL
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 200, NULL, 0);
         cdata += 200;
 
-        // Save proof size so that we know when we are done processing the 
+        // Save proof size so that we know when we are done processing the
         // proof bytes that we are going to receive.
         ctx->proofSize = U2BE(cdata, 0);
 
         ctx->state = TX_ENCRYPTED_AMOUNT_TRANSFER_PROOFS;
         sendSuccessNoIdle();
-    } else if (p1 == P1_PROOF && ctx->state == TX_ENCRYPTED_AMOUNT_TRANSFER_PROOFS) { 
+    } else if (p1 == P1_PROOF && ctx->state == TX_ENCRYPTED_AMOUNT_TRANSFER_PROOFS) {
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, dataLength, NULL, 0);
         ctx->proofSize -= dataLength;
 
         if (ctx->proofSize == 0) {
             // We have received all proof bytes, continue to signing flow.
-            ux_flow_init(0, ux_sign_encrypted_amount_transfer, NULL);
+            if (ctx->transactionType == ENCRYPTED_AMOUNT_TRANSFER) {
+                ux_flow_init(0, ux_sign_encrypted_amount_transfer, NULL);
+            } else {
+                ctx->state = TX_ENCRYPTED_AMOUNT_TRANSFER_MEMO_START;
+                ux_flow_init(0, ux_sign_encrypted_amount_transfer_memo, NULL);
+            }
             *flags |= IO_ASYNCH_REPLY;
         } else if (ctx->proofSize < 0) {
             // We received more proof bytes than expected.
-            THROW(ERROR_INVALID_STATE);    
+            THROW(ERROR_INVALID_STATE);
         } else {
             // There are more bytes to be received. Ask the computer for more.
             sendSuccessNoIdle();
         }
+    } else if (p1 == P1_MEMO && ctx->state == TX_ENCRYPTED_AMOUNT_TRANSFER_MEMO_START) {
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, dataLength, NULL, 0);
+
+        readMemoInitial(cdata, dataLength);
+
+        ctx->state = TX_ENCRYPTED_AMOUNT_TRANSFER_MEMO;
+
+        ux_flow_init(0, ux_sign_transfer_memo, NULL);
+        *flags |= IO_ASYNCH_REPLY;
+
+    } else if (p1 == P1_MEMO && ctx->state == TX_ENCRYPTED_AMOUNT_TRANSFER_MEMO) {
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, dataLength, NULL, 0);
+
+        readMemoContent(cdata, dataLength);
+
+        ux_flow_init(0, ux_sign_transfer_memo, NULL);
+        *flags |= IO_ASYNCH_REPLY;
     } else {
         THROW(ERROR_INVALID_STATE);
     }

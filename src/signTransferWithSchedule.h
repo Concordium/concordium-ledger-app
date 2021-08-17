@@ -10,14 +10,17 @@
  * transaction kind, recipient address and the number of scheduled transfers to make, 0x01 when
  * sending pairs of scheduled amounts.
  */ 
-void handleSignTransferWithSchedule(uint8_t *cdata, uint8_t p1, volatile unsigned int *flags, bool isInitialCall);
+void handleSignTransferWithSchedule(uint8_t *cdata, uint8_t p1, uint8_t dataLength, volatile unsigned int *flags, bool isInitialCall);
 
 typedef enum {
     TX_TRANSFER_WITH_SCHEDULE_INITIAL = 28,
     TX_TRANSFER_WITH_SCHEDULE_TRANSFER_PAIRS = 29,
+    TX_TRANSFER_WITH_SCHEDULE_MEMO_START = 55,
+    TX_TRANSFER_WITH_SCHEDULE_MEMO = 56,
 } transferWithScheduleState_t;
 
 typedef struct {
+    uint8_t transactionType;
     transferWithScheduleState_t state;
 
     unsigned char displayStr[52];

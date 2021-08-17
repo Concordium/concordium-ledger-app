@@ -12,10 +12,13 @@ typedef enum {
     TX_ENCRYPTED_AMOUNT_TRANSFER_INITIAL = 15,
     TX_ENCRYPTED_AMOUNT_TRANSFER_REMAINING_AMOUNT = 16,
     TX_ENCRYPTED_AMOUNT_TRANSFER_TRANSFER_AMOUNT = 17,
-    TX_ENCRYPTED_AMOUNT_TRANSFER_PROOFS = 18
+    TX_ENCRYPTED_AMOUNT_TRANSFER_PROOFS = 18,
+    TX_ENCRYPTED_AMOUNT_TRANSFER_MEMO_START = 53,
+    TX_ENCRYPTED_AMOUNT_TRANSFER_MEMO = 54
 } encryptedAmountTransferState_t;
 
-typedef struct { 
+typedef struct {
+    uint8_t transactionType;
     uint8_t to[52];
     uint16_t proofSize;
     encryptedAmountTransferState_t state;

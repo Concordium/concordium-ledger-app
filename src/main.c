@@ -162,7 +162,7 @@ static void concordium_main(void) {
                         handleSignTransfer(cdata, p1, lc, &flags, isInitialCall);
                         break;
                     case INS_SIGN_TRANSFER_WITH_SCHEDULE:
-                        handleSignTransferWithSchedule(cdata, p1, &flags, isInitialCall);
+                        handleSignTransferWithSchedule(cdata, p1, lc, &flags, isInitialCall);
                         break;
                     case INS_CREDENTIAL_DEPLOYMENT:
                         handleSignCredentialDeployment(cdata, p1, p2, &flags, isInitialCall);

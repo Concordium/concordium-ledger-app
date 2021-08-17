@@ -6,7 +6,7 @@
 #include "time.h"
 #include "responseCodes.h"
 
-static signTransferWithScheduleContext_t *ctx = &global.signTransferWithScheduleContext;
+static signTransferWithScheduleContext_t *ctx = &global.withMemo.signTransferWithScheduleContext;
 static tx_state_t *tx_state = &global_tx_state;
 
 void processNextScheduledAmount(uint8_t *buffer);
@@ -22,23 +22,23 @@ UX_STEP_NOCB(
     ux_scheduled_transfer_initial_flow_1_step,
     bnnn_paging,
     {
-      .title = "Recipient",
-      .text = (char *) global.signTransferWithScheduleContext.displayStr
-    });
+        .title = "Recipient",
+            .text = (char *) global.withMemo.signTransferWithScheduleContext.displayStr
+            });
 UX_STEP_VALID(
     ux_scheduled_transfer_initial_flow_2_step,
     nn,
     updateStateAndSendSuccess(),
     {
-      "Continue",
-      "with transaction"
-    });
+        "Continue",
+            "with transaction"
+            });
 UX_FLOW(ux_scheduled_transfer_initial_flow,
-    &ux_sign_flow_shared_review,
-    &ux_sign_flow_account_sender_view,
-    &ux_scheduled_transfer_initial_flow_1_step,
-    &ux_scheduled_transfer_initial_flow_2_step
-);
+        &ux_sign_flow_shared_review,
+        &ux_sign_flow_account_sender_view,
+        &ux_scheduled_transfer_initial_flow_1_step,
+        &ux_scheduled_transfer_initial_flow_2_step
+    );
 
 // UI definitions for displaying a timestamp and an amount of a scheduled transfer.
 UX_STEP_NOCB(
@@ -46,33 +46,38 @@ UX_STEP_NOCB(
     bnnn_paging,
     {
         "Release time (UTC)",
-        (char *) global.signTransferWithScheduleContext.displayTimestamp
-    });
+            (char *) global.withMemo.signTransferWithScheduleContext.displayTimestamp
+            });
 UX_STEP_NOCB(
     ux_sign_scheduled_transfer_pair_flow_1_step,
     bnnn_paging,
     {
         "Amount",
-        (char *) global.signTransferWithScheduleContext.displayAmount
-    });
+            (char *) global.withMemo.signTransferWithScheduleContext.displayAmount
+            });
 UX_STEP_CB(
     ux_sign_scheduled_transfer_pair_flow_2_step,
     nn,
     processNextScheduledAmount(ctx->buffer),
     {
-      "Continue",
-      "with transaction"
-    });
+        "Continue",
+            "with transaction"
+            });
 UX_FLOW(ux_sign_scheduled_transfer_pair_flow,
-    &ux_sign_scheduled_transfer_pair_flow_0_step,
-    &ux_sign_scheduled_transfer_pair_flow_1_step,
-    &ux_sign_scheduled_transfer_pair_flow_2_step
-);
+        &ux_sign_scheduled_transfer_pair_flow_0_step,
+        &ux_sign_scheduled_transfer_pair_flow_1_step,
+        &ux_sign_scheduled_transfer_pair_flow_2_step
+    );
 
 void processNextScheduledAmount(uint8_t *buffer) {
     // The full transaction has been added to the hash, so we can continue to the signing process.
     if (ctx->remainingNumberOfScheduledAmounts == 0 && ctx->scheduledAmountsInCurrentPacket == 0) {
-        ux_flow_init(0, ux_sign_flow_shared, NULL);
+        if (ctx->transactionType == TRANSFER_WITH_SCHEDULE) {
+            ux_flow_init(0, ux_sign_flow_shared, NULL);
+        } else {
+            ctx->state = TX_TRANSFER_WITH_SCHEDULE_MEMO_START;
+            sendSuccessNoIdle();
+        }
     } else if (ctx->scheduledAmountsInCurrentPacket == 0) {
         // Current packet has been successfully read, but there are still more data to receive. Ask the caller
         // for more data.
@@ -110,19 +115,23 @@ void processNextScheduledAmount(uint8_t *buffer) {
 
 #define P1_INITIAL_PACKET           0x00
 #define P1_SCHEDULED_TRANSFER_PAIRS 0x01
+#define P1_INITIAL_WITH_MEMO           0x02
+#define P1_MEMO           0x03
 
-void handleSignTransferWithSchedule(uint8_t *cdata, uint8_t p1, volatile unsigned int *flags, bool isInitialCall) {
+void handleSignTransferWithSchedule(uint8_t *cdata, uint8_t p1, uint8_t dataLength, volatile unsigned int *flags, bool isInitialCall) {
     if (isInitialCall) {
         ctx->state = TX_TRANSFER_WITH_SCHEDULE_INITIAL;
     }
 
-    if (p1 == P1_INITIAL_PACKET && ctx->state == TX_TRANSFER_WITH_SCHEDULE_INITIAL) {
+    if ((p1 == P1_INITIAL_PACKET || p1 == P1_INITIAL_WITH_MEMO) && ctx->state == TX_TRANSFER_WITH_SCHEDULE_INITIAL) {
         int bytesRead = parseKeyDerivationPath(cdata);
         cdata += bytesRead;
 
+        ctx->transactionType = p1 == P1_INITIAL_WITH_MEMO ? TRANSFER_WITH_SCHEDULE_WITH_MEMO : TRANSFER_WITH_SCHEDULE;
+
         // Initialize the transaction hash object.
         cx_sha256_init(&tx_state->hash);
-        cdata += hashAccountTransactionHeaderAndKind(cdata, TRANSFER_WITH_SCHEDULE);
+        cdata += hashAccountTransactionHeaderAndKind(cdata, ctx->transactionType);
 
         // Extract the destination address and add to hash.
         uint8_t toAddress[32];
@@ -168,6 +177,23 @@ void handleSignTransferWithSchedule(uint8_t *cdata, uint8_t p1, volatile unsigne
         processNextScheduledAmount(ctx->buffer);
 
         // Tell the main process to wait for a button press.
+        *flags |= IO_ASYNCH_REPLY;
+    } else if (p1 == P1_MEMO && ctx->state == TX_TRANSFER_WITH_SCHEDULE_MEMO_START) {
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, dataLength, NULL, 0);
+
+        readMemoInitial(cdata, dataLength);
+
+        ctx->state = TX_TRANSFER_WITH_SCHEDULE_MEMO;
+
+        ux_flow_init(0, ux_sign_transfer_memo, NULL);
+        *flags |= IO_ASYNCH_REPLY;
+
+    } else if (p1 == P1_MEMO && ctx->state == TX_TRANSFER_WITH_SCHEDULE_MEMO) {
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, dataLength, NULL, 0);
+
+        readMemoContent(cdata, dataLength);
+
+        ux_flow_init(0, ux_sign_transfer_memo, NULL);
         *flags |= IO_ASYNCH_REPLY;
     } else {
         THROW(ERROR_INVALID_PARAM);
