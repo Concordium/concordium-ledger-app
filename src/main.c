@@ -159,7 +159,7 @@ static void concordium_main(void) {
                         handleGetPublicKey(cdata, p1, p2, &flags);
                         break;
                     case INS_SIGN_TRANSFER:
-                        handleSignTransfer(cdata, &flags);
+                        handleSignTransfer(cdata, p1, lc, &flags, isInitialCall);
                         break;
                     case INS_SIGN_TRANSFER_WITH_SCHEDULE:
                         handleSignTransferWithSchedule(cdata, p1, &flags, isInitialCall);
