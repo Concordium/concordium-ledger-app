@@ -31,9 +31,9 @@ void handleMemoStep() {
 }
 
 void readMemoInitial(uint8_t *cdata, uint8_t dataLength) {
-    cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, dataLength, NULL, 0);
     uint8_t header = cdata[0];
     cdata+=1;
+    // the first byte of an cbor encoding contains the type (3 high bits) and the shortCount (5 lower bits);
     ctx->majorType = header >> 5;
     uint8_t shortCount = header & 0x1f;
 
@@ -48,6 +48,7 @@ void readMemoInitial(uint8_t *cdata, uint8_t dataLength) {
         // Payload doesn't fit cbor encoding.
         THROW(ERROR_INVALID_STATE);
     } else if (shortCount < 24) {
+        // shortCount is the length, no extra bytes is used.
         sizeLength = 0;
         length = shortCount;
     } else if (shortCount == 24) {
@@ -63,14 +64,15 @@ void readMemoInitial(uint8_t *cdata, uint8_t dataLength) {
         length = U8BE(cdata,0);
         sizeLength = 8;
     } else if (shortCount == 31) {
-        // Todo: support infinite length strings?
-        THROW(ERROR_INVALID_STATE);
+        // TODO: support 'infinite' length strings?
+        THROW(ERROR_UNSUPPORTED_CBOR);
     }
     cdata += sizeLength;
 
+
     switch (ctx->majorType) {
     case 0:
-        // integer
+        // non-negative integer
         bin2dec(ctx->memo, length);
         ctx->memoLength = 0;
         break;
@@ -80,17 +82,21 @@ void readMemoInitial(uint8_t *cdata, uint8_t dataLength) {
         ctx->memoLength = 0;
         break;
     case 2:
+        // byte string
     case 3:
-        // string
+        // utf-8 string
         ctx->memoLength = length;
         readMemoContent(cdata, dataLength - 1 - sizeLength);
         break;
     case 4:
+        // array
     case 5:
+        // maps
     case 6:
+        // Tag
     case 7:
-        // Change to unsupported cbor encoding;
-        THROW(ERROR_INVALID_STATE);
+        // Change to 'unsupported cbor encoding;
+        THROW(ERROR_UNSUPPORTED_CBOR);
         break;
     default:
         THROW(ERROR_INVALID_STATE);
@@ -121,7 +127,7 @@ void readMemoContent(uint8_t *cdata, uint8_t dataLength) {
     case 6:
     case 7:
         // Change to unsupported cbor encoding;
-        THROW(ERROR_INVALID_STATE);
+        THROW(ERROR_UNSUPPORTED_CBOR);
         break;
     default:
         THROW(ERROR_INVALID_STATE);

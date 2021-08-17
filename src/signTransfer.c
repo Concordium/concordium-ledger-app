@@ -42,7 +42,7 @@ UX_STEP_CB(
             .text = (char *) global.withMemo.signTransferContext.displayStr
             });
 
-UX_FLOW(ux_sign_flow_memo,
+UX_FLOW(ux_transfer_initial_flow_memo,
         &ux_sign_flow_shared_review,
         &ux_sign_flow_account_sender_view,
         &ux_sign_flow_1_step,
@@ -94,10 +94,12 @@ void handleSignTransfer(uint8_t *cdata, uint8_t p1, uint8_t dataLength, volatile
 
         // Display the transaction information to the user (recipient address and amount to be sent).
         if (transactionType == TRANSFER) {
+            // initiate flow with signing
             ux_flow_init(0, ux_sign_flow, NULL);
-        } else if (transactionType == TRANSFER_WITH_MEMO){
+        } else if (transactionType == TRANSFER_WITH_MEMO) {
+            // initiate flow without signing, because memo should be sent afterwards
             ctx->state = TX_TRANSFER_MEMO_LENGTH;
-            ux_flow_init(0, ux_sign_flow_memo, NULL);
+            ux_flow_init(0, ux_transfer_initial_flow_memo, NULL);
         } else {
             THROW(ERROR_INVALID_STATE);
         }
@@ -106,6 +108,7 @@ void handleSignTransfer(uint8_t *cdata, uint8_t p1, uint8_t dataLength, volatile
     } else if (p1 == P1_MEMO && ctx->state == TX_TRANSFER_MEMO_LENGTH) {
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, dataLength, NULL, 0);
 
+        // Read initial part of memo and then display it:
         readMemoInitial(cdata, dataLength);
 
         ctx->state = TX_TRANSFER_MEMO;
@@ -116,6 +119,7 @@ void handleSignTransfer(uint8_t *cdata, uint8_t p1, uint8_t dataLength, volatile
     } else if (p1 == P1_MEMO && ctx->state == TX_TRANSFER_MEMO) {
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, dataLength, NULL, 0);
 
+        // Read current part of memo and then display it:
         readMemoContent(cdata, dataLength);
 
         ux_flow_init(0, ux_sign_transfer_memo, NULL);

@@ -181,6 +181,7 @@ void handleSignTransferWithSchedule(uint8_t *cdata, uint8_t p1, uint8_t dataLeng
     } else if (p1 == P1_MEMO && ctx->state == TX_TRANSFER_WITH_SCHEDULE_MEMO_START) {
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, dataLength, NULL, 0);
 
+        // Read initial part of memo and then display it:
         readMemoInitial(cdata, dataLength);
 
         ctx->state = TX_TRANSFER_WITH_SCHEDULE_MEMO;
@@ -191,6 +192,7 @@ void handleSignTransferWithSchedule(uint8_t *cdata, uint8_t p1, uint8_t dataLeng
     } else if (p1 == P1_MEMO && ctx->state == TX_TRANSFER_WITH_SCHEDULE_MEMO) {
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, dataLength, NULL, 0);
 
+        // Read current part of memo and then display it:
         readMemoContent(cdata, dataLength);
 
         ux_flow_init(0, ux_sign_transfer_memo, NULL);
