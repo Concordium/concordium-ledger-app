@@ -15,8 +15,8 @@ void handleSignTransferWithSchedule(uint8_t *cdata, uint8_t p1, uint8_t dataLeng
 typedef enum {
     TX_TRANSFER_WITH_SCHEDULE_INITIAL = 28,
     TX_TRANSFER_WITH_SCHEDULE_TRANSFER_PAIRS = 29,
-    TX_TRANSFER_WITH_SCHEDULE_MEMO_START = 55,
-    TX_TRANSFER_WITH_SCHEDULE_MEMO = 56,
+    TX_TRANSFER_WITH_SCHEDULE_MEMO_START = 54,
+    TX_TRANSFER_WITH_SCHEDULE_MEMO = 55,
 } transferWithScheduleState_t;
 
 typedef struct {
