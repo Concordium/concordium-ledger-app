@@ -12,7 +12,6 @@ void handleExportPrivateKeySeed(uint8_t *dataBuffer, uint8_t p1, volatile unsign
 typedef struct {
     uint8_t display[15];
     uint32_t path[6];
-    uint32_t identity;
     uint8_t pathLength;
 } exportPrivateKeySeedContext_t;
 
