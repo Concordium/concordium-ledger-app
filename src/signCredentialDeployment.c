@@ -85,7 +85,7 @@ UX_STEP_CB(
     bn,
     sendSuccessNoIdle(),
     {
-      "Revoke threshold",
+      "AR threshold",
       (char *) global.signCredentialDeploymentContext.anonymityRevocationThreshold
     });
 UX_FLOW(ux_credential_deployment_threshold_flow,
@@ -360,6 +360,7 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, uint8_t p2,
         cx_hash((cx_hash_t *) &tx_state->hash, 0, regIdCred, 48, NULL, 0);
 
         // Parse identity provider identity.
+        // We do not show the identity provider id, because it is infeasible for the user to validate it, and there are no known reasonable attacks made possible by replacing this.
         cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 4, NULL, 0);
         dataBuffer += 4;
 
@@ -384,12 +385,11 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, uint8_t p2,
     } else if (p1 == P1_AR_IDENTITY && ctx->state == TX_CREDENTIAL_DEPLOYMENT_AR_IDENTITY) {
         if (ctx->anonymityRevocationListLength == 0) {
              // Invalid state, sender says ar identity pair is incoming, but we already received all.
-            THROW(ERROR_INVALID_STATE); 
+            THROW(ERROR_INVALID_STATE);
         }
 
         // Parse ArIdentity
-        uint32_t arIdentity = U4BE(dataBuffer, 0);
-        bin2dec(ctx->arIdentity, arIdentity);
+        // We do not show the AR identity id, because it is infeasible for the user to validate it, and there are no known reasonable attacks made possible by replacing this.
         cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 4, NULL, 0);
         dataBuffer += 4;
 
@@ -532,7 +532,7 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, uint8_t p2,
             size_t outputSize = sizeof(ctx->accountAddress);
             if (base58check_encode(accountAddress, sizeof(accountAddress), ctx->accountAddress, &outputSize) != 0) {
             // The received address bytes are not a valid base58 encoding.
-                THROW(ERROR_INVALID_TRANSACTION);  
+                THROW(ERROR_INVALID_TRANSACTION);
             }
             ctx->accountAddress[50] = '\0';
 

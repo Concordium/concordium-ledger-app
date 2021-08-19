@@ -54,12 +54,13 @@ void handleSignPublicInformationForIp(uint8_t *cdata, uint8_t p1, volatile unsig
     if (isInitialCall) {
         ctx->state = TX_PUBLIC_INFO_FOR_IP_INITIAL;
     }
-    
+
     if (p1 == P1_INITIAL && ctx->state == TX_PUBLIC_INFO_FOR_IP_INITIAL) {
         cdata += parseKeyDerivationPath(cdata);
         cx_sha256_init(&tx_state->hash);
 
         // Hash id_cred_pub.
+        // We do not display the id_cred_pub, because it is infeasible for the user to verify the value, and replacing this value cannot give an attacker control of the account.
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 48, NULL, 0);
         cdata += 48;
 
@@ -87,6 +88,7 @@ void handleSignPublicInformationForIp(uint8_t *cdata, uint8_t p1, volatile unsig
         cdata += 1;
 
         // Hash key type
+        // We do not display the key type, as currently only ed_25519 is used.
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 1, NULL, 0);
         cdata += 1;
 
