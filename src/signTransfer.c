@@ -110,20 +110,15 @@ void handleSignTransfer(uint8_t *cdata, uint8_t p1, uint8_t dataLength, volatile
 
         // Read initial part of memo and then display it:
         readMemoInitial(cdata, dataLength);
-
         ctx->state = TX_TRANSFER_MEMO;
-
-        ux_flow_init(0, ux_sign_transfer_memo, NULL);
-        *flags |= IO_ASYNCH_REPLY;
+        displayMemo(flags);
 
     } else if (p1 == P1_MEMO && ctx->state == TX_TRANSFER_MEMO) {
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, dataLength, NULL, 0);
 
         // Read current part of memo and then display it:
         readMemoContent(cdata, dataLength);
-
-        ux_flow_init(0, ux_sign_transfer_memo, NULL);
-        *flags |= IO_ASYNCH_REPLY;
+        displayMemo(flags);
     } else {
         THROW(ERROR_INVALID_STATE);
     }
