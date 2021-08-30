@@ -14,8 +14,8 @@ UX_STEP_CB(
     sendSuccessNoIdle(),
     {
         "Identity provider",
-            (char *) global.signAddIdentityProviderContext.ipIdentity
-            });
+        (char *) global.signAddIdentityProviderContext.ipIdentity
+    });
 UX_FLOW(ux_sign_add_identity_provider_start,
         &ux_sign_flow_shared_review,
         &ux_sign_add_identity_provider_ipIdentity
@@ -27,8 +27,8 @@ UX_STEP_CB(
     handleDescriptionPart(),
     {
         "Name",
-            (char *) global.signAddIdentityProviderContext.text
-            });
+        (char *) global.signAddIdentityProviderContext.text
+    });
 UX_FLOW(ux_sign_add_identity_provider_name,
         &ux_sign_add_identity_provider_name_step
     );
@@ -39,8 +39,8 @@ UX_STEP_CB(
     handleDescriptionPart(),
     {
         "URL",
-            (char *) global.signAddIdentityProviderContext.text
-            });
+        (char *) global.signAddIdentityProviderContext.text
+    });
 UX_FLOW(ux_sign_add_identity_provider_url,
         &ux_sign_add_identity_provider_url_step
     );
@@ -51,8 +51,8 @@ UX_STEP_CB(
     handleDescriptionPart(),
     {
         "Description",
-            (char *) global.signAddIdentityProviderContext.text
-            });
+        (char *) global.signAddIdentityProviderContext.text
+    });
 UX_FLOW(ux_sign_add_identity_provider_description,
         &ux_sign_add_identity_provider_description_step
     );
@@ -63,8 +63,8 @@ UX_STEP_CB(
     sendSuccessNoIdle(),
     {
         "Verify Key Hash",
-            (char *) global.signAddIdentityProviderContext.verifyKeyHash
-            });
+        (char *) global.signAddIdentityProviderContext.verifyKeyHash
+    });
 UX_FLOW(ux_sign_add_identity_provider_verify_key,
         &ux_sign_add_identity_provider_verify_key_hash
     );
@@ -74,19 +74,19 @@ UX_STEP_NOCB(
     bnnn_paging,
     {
         "CDI Verify key",
-            (char *) global.signAddIdentityProviderContext.cdiVerifyKey
-            });
+        (char *) global.signAddIdentityProviderContext.cdiVerifyKey
+    });
 UX_FLOW(ux_sign_add_identity_provider_finish,
         &ux_sign_add_identity_provider_cdi_key,
         &ux_sign_flow_shared_sign,
         &ux_sign_flow_shared_decline
     );
 
-#define P1_INITIAL              0x00
+#define P1_INITIAL                     0x00
 #define P1_DESCRIPTION_LENGTH          0x01        // Used for the name, url, description.
 #define P1_DESCRIPTION                 0x02        // Used for the name, url, description.
-#define P1_VERIFY_KEY       0x03
-#define P1_CDI_VERIFY_KEY       0x04
+#define P1_VERIFY_KEY                  0x03
+#define P1_CDI_VERIFY_KEY              0x04
 
 #define CDI_VERIFY_KEY_LENGTH 32
 
@@ -217,7 +217,7 @@ void handleSignAddIdentityProvider(uint8_t *cdata, uint8_t p1, uint8_t dataLengt
         cdata += CDI_VERIFY_KEY_LENGTH;
 
         if (dataLength != CDI_VERIFY_KEY_LENGTH || ctx->payloadLength != 0) {
-            // We received more bytes than expected.
+            // the CDI_VERIFY_KEY or the entire payload did not have the expected length.
             THROW(ERROR_INVALID_STATE);
         } else {
             ux_flow_init(0, ux_sign_add_identity_provider_finish, NULL);
