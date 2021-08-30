@@ -155,8 +155,8 @@ UX_FLOW(ux_sign_credential_deployment_existing,
 );
 
 UX_FLOW(ux_sign_credential_deployment_new,
-        &ux_sign_credential_deployment_1_step,
-        &ux_sign_credential_deployment_2_step
+    &ux_sign_credential_deployment_1_step,
+    &ux_sign_credential_deployment_2_step
     );
 
 UX_STEP_CB(
@@ -396,7 +396,7 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, uint8_t p2,
     } else if (p1 == P1_AR_IDENTITY && ctx->state == TX_CREDENTIAL_DEPLOYMENT_AR_IDENTITY) {
         if (ctx->anonymityRevocationListLength == 0) {
              // Invalid state, sender says ar identity pair is incoming, but we already received all.
-            THROW(ERROR_INVALID_STATE); 
+            THROW(ERROR_INVALID_STATE);
         }
 
         // Parse ArIdentity
