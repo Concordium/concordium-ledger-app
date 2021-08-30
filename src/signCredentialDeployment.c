@@ -29,14 +29,6 @@ UX_STEP_CB(
       "details"
     });
 UX_STEP_CB(
-    ux_update_credentials_initial_flow_0_step,
-    nn,
-    sendSuccessNoIdle(),
-    {
-        "Review",
-            "transaction"
-            });
-UX_STEP_CB(
     ux_update_credentials_initial_flow_1_step,
     nn,
     sendSuccessNoIdle(),
@@ -49,7 +41,7 @@ UX_FLOW(ux_credential_deployment_initial_flow,
 );
 
 UX_FLOW(ux_update_credentials_initial_flow,
-    &ux_update_credentials_initial_flow_0_step,
+    &ux_sign_flow_shared_review,
     &ux_sign_flow_account_sender_view,
     &ux_update_credentials_initial_flow_1_step
 );
