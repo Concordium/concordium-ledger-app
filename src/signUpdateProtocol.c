@@ -18,8 +18,8 @@ UX_STEP_CB(
         (char *) global.signUpdateProtocolContext.buffer
     });
 UX_FLOW(ux_sign_protocol_update,
-        &ux_sign_flow_shared_review,
-        &ux_sign_protocol_update_1_step
+    &ux_sign_flow_shared_review,
+    &ux_sign_protocol_update_1_step
     );
 
 UX_STEP_CB(
@@ -31,7 +31,7 @@ UX_STEP_CB(
         (char *) global.signUpdateProtocolContext.buffer
     });
 UX_FLOW(ux_sign_protocol_update_url,
-        &ux_sign_protocol_update_url_0_step
+    &ux_sign_protocol_update_url_0_step
     );
 
 UX_STEP_CB(
@@ -43,7 +43,7 @@ UX_STEP_CB(
         (char *) global.signUpdateProtocolContext.specificationHash
     });
 UX_FLOW(ux_sign_protocol_update_specification_hash,
-        &ux_sign_protocol_update_specification_hash_0_step
+    &ux_sign_protocol_update_specification_hash_0_step
     );
 
 UX_STEP_NOCB(
@@ -54,7 +54,7 @@ UX_STEP_NOCB(
         .text = "please wait"
     });
 UX_FLOW(ux_sign_protocol_update_loading,
-        &ux_sign_protocol_update_loading_step
+    &ux_sign_protocol_update_loading_step
     );
 
 
@@ -98,7 +98,6 @@ void handleSignUpdateProtocol(uint8_t *cdata, uint8_t p1, uint8_t dataLength, vo
 
         sendSuccessNoIdle();
     } else if (p1 == P1_TEXT_LENGTH && ctx->state == TX_UPDATE_PROTOCOL_TEXT_LENGTH) {
-        
         // Read message text length
         ctx->textLength = U8BE(cdata, 0);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 8, NULL, 0);
@@ -124,17 +123,17 @@ void handleSignUpdateProtocol(uint8_t *cdata, uint8_t p1, uint8_t dataLength, vo
         }
 
         switch (ctx->textState) {
-        case MESSAGE:
-            ctx->state = TX_UPDATE_PROTOCOL_TEXT_LENGTH;
-            ux_flow_init(0, ux_sign_protocol_update, NULL);
-            break;
-        case SPECIFICATION_URL:
-            ctx->state = TX_UPDATE_PROTOCOL_SPECIFICATION_HASH;
-            ux_flow_init(0, ux_sign_protocol_update_url, NULL);
-            break;
-        default:
-            THROW(ERROR_INVALID_STATE);
-            break;
+            case MESSAGE:
+                ctx->state = TX_UPDATE_PROTOCOL_TEXT_LENGTH;
+                ux_flow_init(0, ux_sign_protocol_update, NULL);
+                break;
+            case SPECIFICATION_URL:
+                ctx->state = TX_UPDATE_PROTOCOL_SPECIFICATION_HASH;
+                ux_flow_init(0, ux_sign_protocol_update_url, NULL);
+                break;
+            default:
+                THROW(ERROR_INVALID_STATE);
+                break;
         }
 
         *flags |= IO_ASYNCH_REPLY;
