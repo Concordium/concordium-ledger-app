@@ -4,7 +4,7 @@
 *
 *  - Only the 'base58_encode()' method (renamed from btchip_encode_base58).
 *    Reformatting of the method has been done, and removal of all PRINTF()
-*    invocations, and changed the algoritm to insert a space for every 10 characters.
+*    invocations, and changed the algorithm to insert a space for every 10 characters.
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
