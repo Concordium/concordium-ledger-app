@@ -217,7 +217,7 @@ void parseVerificationKey(uint8_t *buffer) {
     cx_hash((cx_hash_t *) &tx_state->hash, 0, verificationKey, 32, NULL, 0);
 
     // Convert to a human-readable format.
-    toHex(verificationKey, sizeof(verificationKey), ctx->accountVerificationKey);
+    toPaginatedHex(verificationKey, sizeof(verificationKey), ctx->accountVerificationKey);
     ctx->numberOfVerificationKeys -= 1;
 
     // Show to the user.
@@ -289,7 +289,7 @@ void handleSignUpdateCredential(uint8_t *dataBuffer, uint8_t p1, uint8_t p2, vol
         sendSuccessNoIdle();
     } else if (p2 == P2_CREDENTIAL_ID && ctx->updateCredentialState == TX_UPDATE_CREDENTIAL_ID) {
         cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 48, NULL, 0);
-        toHex(dataBuffer, 48, ctx->credentialId);
+        toPaginatedHex(dataBuffer, 48, ctx->credentialId);
 
         ctx->credentialIdCount -= 1;
         if (ctx->credentialIdCount == 0) {
@@ -351,7 +351,7 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, uint8_t p2,
         uint8_t regIdCred[48];
         memmove(regIdCred, dataBuffer, 48);
         dataBuffer += 48;
-        toHex(regIdCred, sizeof(regIdCred), ctx->regIdCred);
+        toPaginatedHex(regIdCred, sizeof(regIdCred), ctx->regIdCred);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, regIdCred, 48, NULL, 0);
 
         // Parse identity provider identity.
@@ -395,7 +395,7 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, uint8_t p2,
         // Parse enc_id_cred_pub_share
         uint8_t encIdCredPubShare[96];
         memmove(encIdCredPubShare, dataBuffer, 96);
-        toHex(encIdCredPubShare, sizeof(encIdCredPubShare), ctx->encIdCredPubShare);
+        toPaginatedHex(encIdCredPubShare, sizeof(encIdCredPubShare), ctx->encIdCredPubShare);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, encIdCredPubShare, 96, NULL, 0);
         dataBuffer += 96;
 
@@ -476,7 +476,7 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, uint8_t p2,
         if (ctx->attributeListLength == 0) {
             uint8_t attributeHashBytes[32];
             cx_hash((cx_hash_t *) &attributeHash, CX_LAST, NULL, 0, attributeHashBytes, 32);
-            toHex(attributeHashBytes, sizeof(attributeHashBytes), ctx->attributeHashDisplay);
+            toPaginatedHex(attributeHashBytes, sizeof(attributeHashBytes), ctx->attributeHashDisplay);
             ctx->state = TX_CREDENTIAL_DEPLOYMENT_LENGTH_OF_PROOFS;
             sendSuccessNoIdle();
         } else {
@@ -533,7 +533,7 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, uint8_t p2,
             // The received address bytes are not a valid base58 encoding.
                 THROW(ERROR_INVALID_TRANSACTION);  
             }
-            ctx->accountAddress[50] = '\0';
+            ctx->accountAddress[55] = '\0';
 
             cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 32, NULL, 0);
             ux_flow_init(0, ux_sign_credential_deployment, NULL);

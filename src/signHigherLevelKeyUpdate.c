@@ -97,7 +97,7 @@ void handleSignHigherLevelKeys(uint8_t *cdata, uint8_t p1, uint8_t updateType, v
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 1, NULL, 0);
         cdata += 1;
 
-        toHex(cdata, 32, ctx->updateVerificationKey);
+        toPaginatedHex(cdata, 32, ctx->updateVerificationKey);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 32, NULL, 0);
         cdata += 32;
 

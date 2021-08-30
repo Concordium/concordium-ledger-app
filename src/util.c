@@ -213,9 +213,9 @@ int hashAccountTransactionHeaderAndKind(uint8_t *cdata, uint8_t validTransaction
     size_t outputSize = sizeof(accountSender->sender);
     if (base58check_encode(cdata, 32, accountSender->sender, &outputSize) != 0) {
         // The received address bytes are not a valid base58 encoding.
-        THROW(ERROR_INVALID_TRANSACTION);  
+        THROW(ERROR_INVALID_TRANSACTION);
     }
-    accountSender->sender[50] = '\0';
+    accountSender->sender[55] = '\0';
 
     return hashHeaderAndType(cdata, ACCOUNT_TRANSACTION_HEADER_LENGTH, validTransactionKind);
 }
@@ -253,13 +253,21 @@ void sendSuccessResultNoIdle(uint8_t tx) {
     io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, tx);
 }
 
-void toHex(uint8_t *byteArray, const uint64_t len, char *asHex) {
+void toPaginatedHex(uint8_t *byteArray, const uint64_t len, char *asHex) {
     static uint8_t const hex[] = "0123456789abcdef";
+    uint8_t offset = 0;
     for (uint64_t i = 0; i < len; i++) {
-        asHex[2 * i + 0] = hex[(byteArray[i]>>4) & 0x0F];
-        asHex[2 * i + 1] = hex[(byteArray[i]>>0) & 0x0F];
+        asHex[2 * i + offset] = hex[(byteArray[i]>>4) & 0x0F];
+        asHex[2 * i + (offset + 1)] = hex[(byteArray[i]>>0) & 0x0F];
+
+        // Insert a space to force the Ledger to paginate the string every
+        // 16 characters.
+        if ((2 * (i + 1)) % 16 == 0 && i != len - 1) {
+            asHex[2 * i + (offset + 2)] = ' ';
+            offset += 1;
+        }
     }
-    asHex[2 * len] = '\0';
+    asHex[2 * len + offset] = '\0';
 }
 
 void getPrivateKey(uint32_t *keyPath, uint8_t keyPathLength, cx_ecfp_private_key_t *privateKey) {

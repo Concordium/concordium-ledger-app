@@ -53,9 +53,9 @@ void handleSignTransfer(uint8_t *cdata, volatile unsigned int *flags) {
     size_t outputSize = sizeof(ctx->displayStr);
     if (base58check_encode(toAddress, sizeof(toAddress), ctx->displayStr, &outputSize) != 0) {
       // The received address bytes are not a valid base58 encoding.
-        THROW(ERROR_INVALID_TRANSACTION);  
+        THROW(ERROR_INVALID_TRANSACTION);
     }
-    ctx->displayStr[50] = '\0';
+    ctx->displayStr[55] = '\0';
 
     // Build display value of the amount to transfer, and also add the bytes to the hash.
     uint64_t amount = U8BE(cdata, 0);
