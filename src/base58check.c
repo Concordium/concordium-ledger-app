@@ -99,7 +99,7 @@ int base58_encode(const unsigned char *in, size_t length, unsigned char *out, si
     }
     else {
         for (i = *outlen + spaces - 1; (int)i >= 0; --i) {
-            if  ((*outlen - 1 - i) == nextSpace) {
+            if  ((*outlen + spaces - 1 - i) == nextSpace) {
                 out[i] = ' ';
                 nextSpace += (pageSize + 1);
                 offset++;
