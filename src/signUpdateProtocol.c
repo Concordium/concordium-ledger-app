@@ -48,7 +48,7 @@ UX_FLOW(ux_sign_protocol_update_specification_hash,
 
 UX_STEP_NOCB(
     ux_sign_protocol_update_loading_step,
-    nn_paging,
+    nn,
     {
         .title = "Loading data,",
         .text = "please wait"
