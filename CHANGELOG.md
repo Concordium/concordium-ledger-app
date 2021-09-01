@@ -5,6 +5,7 @@
 * Improved state validation to deny instruction changes in multi command transactions.
 * Support building for the Ledger Nano X.
 * Simplified the UI by updating terminology and stopped displaying details that cannot feasibly be verified by a user.
+* Export of private key seeds has been changed so that either the PRF key can be exported alone, or the PRF key and the IdCredSec are exported in a single command.
 * Changed Hex and Base58Check functions to ensure splitting pages evenly and consistently.
 
 ## 1.0.2
