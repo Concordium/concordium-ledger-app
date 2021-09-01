@@ -20,7 +20,7 @@ typedef enum {
 typedef struct {
     transferWithScheduleState_t state;
 
-    unsigned char displayStr[52];
+    unsigned char displayStr[57];
     uint8_t remainingNumberOfScheduledAmounts;
     uint8_t scheduledAmountsInCurrentPacket;
 

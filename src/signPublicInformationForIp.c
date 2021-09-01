@@ -113,7 +113,7 @@ void handleSignPublicInformationForIp(uint8_t *cdata, uint8_t p1, volatile unsig
         memmove(publicKey, cdata, 32);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, publicKey, 32, NULL, 0);
         cdata += 32;
-        toHex(publicKey, 32, ctx->publicKey);
+        toPaginatedHex(publicKey, 32, ctx->publicKey);
 
         ctx->publicKeysLength -= 1;
         if (ctx->publicKeysLength == 0) {

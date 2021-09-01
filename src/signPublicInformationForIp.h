@@ -17,7 +17,7 @@ typedef enum {
 
 typedef struct {
     uint8_t publicKeysLength;
-    char publicKey[65];
+    char publicKey[68];
     uint8_t threshold[4];
     publicInfoForIpState_t state;
 } signPublicInformationForIp_t;
