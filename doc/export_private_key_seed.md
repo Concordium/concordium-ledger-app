@@ -5,11 +5,10 @@ of some special private keys that are used as key seeds outside of the device. T
 and note that it is not possible to export keys that are used for signatures. Signature keys do not leave the device
 at any point, and the exported keys cannot be used to submit transactions.
 
-The three key types that can be exported are exactly these:
+The two key types that can be exported are exactly these:
 
-1. IdCredSec
 1. PRF-key
-1. Anonymity revoker decryption key
+1. IdCredSec
 
 The exported keys are derived using SLIP10 for ed25519, and they will serve as the key seed for the KeyGen algorithm
 for generating BLS12-381 private keys.
@@ -18,8 +17,7 @@ for generating BLS12-381 private keys.
 
 * Single command
 
-| P1 | CDATA | Comment |
-|--------|-------------|----|
-| `0x00` | `identity[uint32]` | Export of IdCredSec |
-| `0x01` | `identity[uint32]` | Export of PRF key |
-| `0x02` | `idp[uint32] ar_index[uint32]` | Export of anonymity revoker decryption key |
+| P1 | P2 | CDATA | Comment |
+|--------|--------|------------|----|
+| `0x00` | `0x01` | `identity[uint32]` | Export of PRF key |
+| `0x01` | `0x01` | `identity[uint32]` | Export of PRF key and IdCredSec |

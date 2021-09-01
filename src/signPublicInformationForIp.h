@@ -16,7 +16,6 @@ typedef enum {
 } publicInfoForIpState_t;
 
 typedef struct {
-    char credId[97];
     uint8_t publicKeysLength;
     char publicKey[65];
     uint8_t threshold[4];

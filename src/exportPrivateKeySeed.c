@@ -13,16 +13,15 @@
 static const uint32_t HARDENED_OFFSET = 0x80000000;
 static exportPrivateKeySeedContext_t *ctx = &global.exportPrivateKeySeedContext;
 
-void exportPrivateKey();
-void exportPrfKey();
+void exportPrivateKey(bool exportBoth);
 
 UX_STEP_CB(
     ux_export_private_key_0_step,
-    bnnn_paging,
-    exportPrivateKey(),
+    bn,
+    exportPrivateKey(true),
     {
-        .title = "Create Credential",
-        .text = (char *) global.exportPrivateKeySeedContext.display
+        "Create credential",
+        (char *) global.exportPrivateKeySeedContext.display
     });
 UX_FLOW(ux_export_private_key,
     &ux_export_private_key_0_step
@@ -30,63 +29,42 @@ UX_FLOW(ux_export_private_key,
 
 UX_STEP_CB(
     ux_export_prf_key_0_step,
-    bnnn_paging,
-    exportPrfKey(),
+    bn,
+    exportPrivateKey(false),
     {
-        .title = "Allow decryption",
-        .text = (char *) global.exportPrivateKeySeedContext.display
-            });
+        "Decrypt",
+        (char *) global.exportPrivateKeySeedContext.display
+    });
 UX_FLOW(ux_export_prf_key,
-        &ux_export_prf_key_0_step
+    &ux_export_prf_key_0_step
 );
-
 
 #define ID_CRED_SEC 0
 #define PRF_KEY 1
 
-void exportPrivateKey() {
+void exportPrivateKey(bool exportBoth) {
     cx_ecfp_private_key_t privateKey;
     BEGIN_TRY {
         TRY {
-            if (ctx->pathLength == 6) {
-                getPrivateKey(ctx->path, ctx->pathLength, &privateKey);
-            } else {
+            if (ctx->pathLength != 6) {
                 THROW(ERROR_INVALID_PATH);
             }
-            uint8_t tx = 0;
-            for (int i = 0; i < 32; i++) {
-                G_io_apdu_buffer[tx++] = privateKey.d[i];
-            }
 
-            uint32_t keyType = ID_CRED_SEC | HARDENED_OFFSET;
-            memmove(ctx->path + 5, &keyType, sizeof(keyType));
+            ctx->path[5] = PRF_KEY | HARDENED_OFFSET;
             getPrivateKey(ctx->path, ctx->pathLength, &privateKey);
-            for (int i = 0; i < 32; i++) {
-                G_io_apdu_buffer[tx++] = privateKey.d[i];
-            }
-            sendSuccess(tx);
-        }
-        FINALLY {
-            explicit_bzero(&privateKey, sizeof(privateKey));
-        }
-    }
-    END_TRY;
-}
-
-
-void exportPrfKey() {
-    cx_ecfp_private_key_t privateKey;
-    BEGIN_TRY {
-        TRY {
-            if (ctx->pathLength == 6) {
-                getPrivateKey(ctx->path, ctx->pathLength, &privateKey);
-            } else {
-                THROW(ERROR_INVALID_PATH);
-            }
             uint8_t tx = 0;
             for (int i = 0; i < 32; i++) {
                 G_io_apdu_buffer[tx++] = privateKey.d[i];
             }
+
+            if (exportBoth) {
+                ctx->path[5] = ID_CRED_SEC | HARDENED_OFFSET;
+                getPrivateKey(ctx->path, ctx->pathLength, &privateKey);
+                for (int i = 0; i < 32; i++) {
+                    G_io_apdu_buffer[tx++] = privateKey.d[i];
+                }
+            }
+
             sendSuccess(tx);
         }
         FINALLY {
@@ -99,25 +77,29 @@ void exportPrfKey() {
 #define ACCOUNT_SUBTREE 0
 #define NORMAL_ACCOUNTS 0
 
-#define P1_PRF_KEY          0x00
-#define P1_BOTH               0x01
+// Export the PRF key seed
+#define P1_PRF_KEY  0x00
+// Export the PRF key seed and the IdCredSec seed
+#define P1_BOTH     0x01
 
-void handleExportPrivateKeySeed(uint8_t *dataBuffer, uint8_t p1, volatile unsigned int *flags) {
-    uint32_t identity = U4BE(dataBuffer, 0);
-
-    if (p1 != P1_BOTH && p1 != P1_PRF_KEY) {
+void handleExportPrivateKeySeed(uint8_t *dataBuffer, uint8_t p1, uint8_t p2, volatile unsigned int *flags) {
+    if ((p1 != P1_BOTH && p1 != P1_PRF_KEY) || p2 != 0x01) {
         THROW(ERROR_INVALID_PARAM);
     }
 
-    uint32_t keyDerivationPath[] = {
+    uint32_t identity = U4BE(dataBuffer, 0);
+    uint32_t keyDerivationPath[5] = {
         CONCORDIUM_PURPOSE | HARDENED_OFFSET,
         CONCORDIUM_COIN_TYPE | HARDENED_OFFSET,
         ACCOUNT_SUBTREE | HARDENED_OFFSET,
         NORMAL_ACCOUNTS | HARDENED_OFFSET,
-        identity | HARDENED_OFFSET,
-        PRF_KEY | HARDENED_OFFSET
+        identity | HARDENED_OFFSET
     };
     memmove(ctx->path, keyDerivationPath, sizeof(keyDerivationPath));
+    
+    // The path total length is 6, even though the above path is of length 5.
+    // The final part determines if it is the PRF key or IdCredSec seed, and it
+    // is added before deriving the keys.
     ctx->pathLength = 6;
 
     memmove(ctx->display, "ID #", 4);

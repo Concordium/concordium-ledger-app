@@ -34,8 +34,8 @@ UX_STEP_CB(
     sendSuccessNoIdle(),
     {
         "Review",
-            "transaction"
-            });
+        "transaction"
+    });
 UX_STEP_CB(
     ux_update_credentials_initial_flow_1_step,
     nn,
@@ -70,18 +70,11 @@ UX_STEP_NOCB(
     ux_credential_deployment_threshold_flow_0_step,
     bn,
     {
-      "Sig threshold",
+      "Signature threshold",
       (char *) global.signCredentialDeploymentContext.signatureThreshold
     });
-UX_STEP_NOCB(
-    ux_credential_deployment_threshold_flow_1_step,
-    bnnn_paging,
-    {
-      "CredId",
-      (char *) global.signCredentialDeploymentContext.regIdCred
-    });
 UX_STEP_CB(
-    ux_credential_deployment_threshold_flow_2_step,
+    ux_credential_deployment_threshold_flow_1_step,
     bn,
     sendSuccessNoIdle(),
     {
@@ -90,15 +83,14 @@ UX_STEP_CB(
     });
 UX_FLOW(ux_credential_deployment_threshold_flow,
     &ux_credential_deployment_threshold_flow_0_step,
-    &ux_credential_deployment_threshold_flow_1_step,
-    &ux_credential_deployment_threshold_flow_2_step
+    &ux_credential_deployment_threshold_flow_1_step
 );
 
 UX_STEP_NOCB(
     ux_credential_deployment_dates_0_step,
     bn,
     {
-      "ID Valid to >=",
+      "Valid to",
       (char *) global.signCredentialDeploymentContext.validTo
     });
 UX_STEP_CB(
@@ -156,7 +148,7 @@ UX_STEP_CB(
     bnnn_paging,
     sendSuccessNoIdle(),
     {
-      .title = "Remove CredId",
+      .title = "Rem. credential",
       .text = (char *) global.signCredentialDeploymentContext.credentialId
     });
 UX_FLOW(ux_sign_credential_update_id,
@@ -171,7 +163,7 @@ UX_STEP_NOCB(
     ux_sign_credential_update_threshold_0_step,
     bnnn_paging,
     {
-      .title = "Threshold",
+      .title = "Cred. sig. threshold",
       .text = (char *) global.signCredentialDeploymentContext.threshold
     });
 UX_STEP_CB(
@@ -346,32 +338,29 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, uint8_t p2,
         }
 
         // Parse signature threshold.
-        uint8_t temp[1];
-        memmove(temp, dataBuffer, 1);
-        bin2dec(ctx->signatureThreshold, temp[0]);
+        bin2dec(ctx->signatureThreshold, dataBuffer[0]);
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 1, NULL, 0);
         dataBuffer += 1;
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, temp, 1, NULL, 0);
 
-        // Parse RegIdCred and make it displayable as hex.
-        uint8_t regIdCred[48];
-        memmove(regIdCred, dataBuffer, 48);
+        // Parse the RegIdCred, but do not display it, as the user cannot feasibly verify it.
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 48, NULL, 0);
         dataBuffer += 48;
-        toHex(regIdCred, sizeof(regIdCred), ctx->regIdCred);
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, regIdCred, 48, NULL, 0);
 
-        // Parse identity provider identity.
-        // We do not show the identity provider id, because it is infeasible for the user to validate it, and there are no known reasonable attacks made possible by replacing this.
+        // Parse identity provider index.
+        // We do not show the identity provider id, because it is infeasible for the user to validate it, 
+        // and there are no known reasonable attacks made possible by replacing this.
         cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 4, NULL, 0);
         dataBuffer += 4;
 
         // Parse anonymity revocation threshold.
-        memmove(temp, dataBuffer, 1);
-        bin2dec(ctx->anonymityRevocationThreshold, temp[0]);
+        int arThresholdLength = numberToText(ctx->anonymityRevocationThreshold, dataBuffer[0]);
+        memmove(ctx->anonymityRevocationThreshold + arThresholdLength, " out of ", 8);
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 1, NULL, 0);
         dataBuffer += 1;
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, temp, 1, NULL, 0);
 
         // Parse the length of the following list of anonymity revokers.
         ctx->anonymityRevocationListLength = U2BE(dataBuffer, 0);
+        bin2dec(ctx->anonymityRevocationThreshold + arThresholdLength + 8, ctx->anonymityRevocationListLength);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 2, NULL, 0);
         dataBuffer += 2;
 
@@ -384,16 +373,19 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, uint8_t p2,
         ux_flow_init(0, ux_credential_deployment_threshold_flow, NULL);
     } else if (p1 == P1_AR_IDENTITY && ctx->state == TX_CREDENTIAL_DEPLOYMENT_AR_IDENTITY) {
         if (ctx->anonymityRevocationListLength == 0) {
-             // Invalid state, sender says ar identity pair is incoming, but we already received all.
+            // Invalid state, sender says ar identity pair is incoming, but we already received all.
             THROW(ERROR_INVALID_STATE);
         }
 
         // Parse ArIdentity
-        // We do not show the AR identity id, because it is infeasible for the user to validate it, and there are no known reasonable attacks made possible by replacing this.
+        // We do not show the AR identity id, because it is infeasible for the user to validate it, 
+        // and there are no known reasonable attacks made possible by replacing this.
         cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 4, NULL, 0);
         dataBuffer += 4;
 
         // Parse enc_id_cred_pub_share
+        // We do not show encrypted shares, as they are not possible for a user
+        // to validate.
         uint8_t encIdCredPubShare[96];
         memmove(encIdCredPubShare, dataBuffer, 96);
         toHex(encIdCredPubShare, sizeof(encIdCredPubShare), ctx->encIdCredPubShare);
@@ -405,9 +397,6 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, uint8_t p2,
         }
         ctx->anonymityRevocationListLength -= 1;
         sendSuccessNoIdle();
-
-        // We do not show encrypted shares, as they are not possible for a user
-        // to validate.
     } else if (p1 == P1_CREDENTIAL_DATES && ctx->state == TX_CREDENTIAL_DEPLOYMENT_CREDENTIAL_DATES) {
         uint8_t temp[1];
 

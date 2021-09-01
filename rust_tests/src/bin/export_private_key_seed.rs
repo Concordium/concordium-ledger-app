@@ -3,13 +3,13 @@ use ledger::{ApduCommand, LedgerApp};
 fn main() {
     let ledger = LedgerApp::new().unwrap();
 
-    let identity = hex::decode("00000007").unwrap();
+    let identity = hex::decode("FFFFFFFF").unwrap();
 
     let prf_command = ApduCommand {
         cla: 224,
         ins: 5,
         p1: 0,
-        p2: 0,
+        p2: 1,
         length: 0,
         data: identity.clone()
     };
@@ -22,7 +22,7 @@ fn main() {
         cla: 224,
         ins: 5,
         p1: 1,
-        p2: 0,
+        p2: 1,
         length: 0,
         data: identity
     };

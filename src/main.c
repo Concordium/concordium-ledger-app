@@ -168,7 +168,7 @@ static void concordium_main(void) {
                         handleSignCredentialDeployment(cdata, p1, p2, &flags, isInitialCall);
                         break;
                     case INS_EXPORT_PRIVATE_KEY_SEED:
-                        handleExportPrivateKeySeed(cdata, p1, &flags);
+                        handleExportPrivateKeySeed(cdata, p1, p2, &flags);
                         break;
                     case INS_UPDATE_EXCHANGE_RATE:
                         handleSignUpdateExchangeRate(cdata, &flags);
