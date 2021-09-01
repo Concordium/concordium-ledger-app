@@ -13,8 +13,8 @@ UX_STEP_CB(
     nn,
     sendSuccessNoIdle(),
     {
-      "Review info for",
-      "identity provider"
+      "Review identity",
+      "provider info"
     });
 UX_FLOW(ux_review_public_info_for_ip,
     &ux_sign_public_info_review
@@ -38,8 +38,8 @@ UX_STEP_CB(
     buildAndSignTransactionHash(),
     {
       &C_icon_validate_14,
-      "Sign info for",
-      "identity provider"
+      "Sign identity",
+      "provider info"
     });
 
 UX_STEP_CB(
