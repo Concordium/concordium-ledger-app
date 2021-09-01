@@ -20,7 +20,7 @@ UX_STEP_CB(
 UX_FLOW(ux_sign_protocol_update,
     &ux_sign_flow_shared_review,
     &ux_sign_protocol_update_1_step
-    );
+);
 
 UX_STEP_CB(
     ux_sign_protocol_update_url_0_step,
@@ -32,7 +32,7 @@ UX_STEP_CB(
     });
 UX_FLOW(ux_sign_protocol_update_url,
     &ux_sign_protocol_update_url_0_step
-    );
+);
 
 UX_STEP_CB(
     ux_sign_protocol_update_specification_hash_0_step,
@@ -44,19 +44,18 @@ UX_STEP_CB(
     });
 UX_FLOW(ux_sign_protocol_update_specification_hash,
     &ux_sign_protocol_update_specification_hash_0_step
-    );
+);
 
 UX_STEP_NOCB(
     ux_sign_protocol_update_loading_step,
     nn,
     {
-        .title = "Loading data,",
-        .text = "please wait"
+        "Loading data,",
+        "please wait"
     });
 UX_FLOW(ux_sign_protocol_update_loading,
     &ux_sign_protocol_update_loading_step
-    );
-
+);
 
 void switchToLoading(void) {
     ux_flow_init(0, ux_sign_protocol_update_loading, NULL);
