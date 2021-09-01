@@ -4,6 +4,7 @@
 
 * Improved state validation to deny instruction changes in multi command transactions.
 * Support building for the Ledger Nano X.
+* Simplified the UI by updating terminology and stopped displaying details that cannot feasibly be verified by a user.
 
 ## 1.0.2
 
