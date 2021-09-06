@@ -11,7 +11,7 @@ on:
 
 jobs: 
     compile-nano-s:
-        runs-on: ubuntu:latest
+        runs-on: ubuntu-latest
 
         container: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
 
@@ -27,7 +27,7 @@ jobs:
                   make
 
     compile-nano-x:
-        runs-on: ubuntu:latest
+        runs-on: ubuntu-latest
 
         container: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
 
