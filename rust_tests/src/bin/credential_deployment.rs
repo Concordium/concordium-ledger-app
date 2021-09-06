@@ -1,12 +1,24 @@
 mod path;
 
+use std::env;
 use hex;
 use ledger::{ApduCommand, LedgerApp};
+
+use base58check::*;
 
 // TODO Test with multiple values for the ones that can be multiple (verification keys, anonymity
 // identities, ...,
 
 fn main() {
+
+    // use args to determine new_or_existing
+    let args: Vec<String> = env::args().collect();
+    let new_account = args.len() == 1 || &args[1] != "existing";
+    if new_account {
+        println!("Sending credential for new account. (Add existing as first parameter to send for existing account)");
+    } else {
+        println!("Sending credential for existing account.");
+    }
 
     let verification_key_list_length = hex::decode("01").unwrap();
     let mut verification_key = hex::decode("f78929ec8a9819f6ae2e10e79522b6b311949635fecc3d924d9d1e23f8e9e1c3").unwrap();
@@ -169,33 +181,28 @@ fn main() {
         ledger.exchange(proof_command).unwrap();
     }
 
-    // Send transaction expiry (new account)
-    let transaction_expiry = hex::decode("00000000006040F27E").unwrap();
-    let expiry_command = ApduCommand {
+    let data = {
+        if new_account {
+            // Send transaction expiry (new account)
+            hex::decode("00000000006040F27E").unwrap()
+        } else {
+            // Send account address (exisisting account)
+            let account_address_base58 = "3C8N65hBwc2cNtJkGmVyGeWYxhZ6R3X77mLWTwAKsnAnyworTq";
+            let mut account_address_bytes = hex::decode("01").unwrap();
+            let mut account_address = account_address_base58.from_base58check().unwrap().1;
+            account_address_bytes.append(&mut account_address);
+            account_address_bytes
+        }
+    };
+    let final_command = ApduCommand {
         cla: 224,
         ins: 4,
         p1: 9,
         p2: 0,
         length: 0,
-        data: transaction_expiry
+        data: data
     };
-    let signature_result = ledger.exchange(expiry_command).unwrap();
-
-    // Send account address (exisisting account)
-    // let account_address_base58 = "3C8N65hBwc2cNtJkGmVyGeWYxhZ6R3X77mLWTwAKsnAnyworTq";
-    // let mut account_address_bytes = hex::decode("01").unwrap();
-    // let mut account_address = account_address_base58.from_base58check().unwrap().1; 
-    // account_address_bytes.append(&mut account_address);
-
-    // let account_address_command = ApduCommand {
-    //     cla: 224,
-    //     ins: 4,
-    //     p1: 9,
-    //     p2: 0,
-    //     length: 0,
-    //     data: account_address_bytes
-    // };
-    // let signature_result = ledger.exchange(account_address_command).unwrap();
+    let signature_result = ledger.exchange(final_command).unwrap();
 
     println!("SIGNATURE: {}", hex::encode(signature_result.data));
 }

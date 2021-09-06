@@ -17,9 +17,7 @@ typedef enum {
 } simpleTransferState_t;
 
 typedef struct {
-    uint8_t memo[255];
-    uint32_t memoLength;
-    unsigned char displayStr[52];
+    unsigned char displayStr[57];
     uint8_t displayAmount[26];
     simpleTransferState_t state;
 } signTransferContext_t;

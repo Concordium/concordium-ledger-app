@@ -96,7 +96,7 @@ void handleSignTransfer(uint8_t *cdata, uint8_t p1, uint8_t dataLength, volatile
             // The received address bytes are not a valid base58 encoding.
             THROW(ERROR_INVALID_TRANSACTION);
         }
-        ctx->displayStr[50] = '\0';
+        ctx->displayStr[55] = '\0';
 
         // Display the transaction information to the user (recipient address and amount to be sent).
         if (transactionType == TRANSFER) {

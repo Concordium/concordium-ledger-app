@@ -176,7 +176,7 @@ void handleSignUpdateAuthorizations(uint8_t *cdata, uint8_t p1, uint8_t updateTy
 
         uint8_t publicKeyInput[32];
         memmove(publicKeyInput, cdata, 32);
-        toHex(publicKeyInput, 32, ctx->publicKey);
+        toPaginatedHex(publicKeyInput, 32, ctx->publicKey);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, publicKeyInput, 32, NULL, 0);
 
         ctx->publicKeyListLength -= 1;

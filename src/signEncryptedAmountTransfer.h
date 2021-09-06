@@ -19,7 +19,7 @@ typedef enum {
 
 typedef struct {
     uint8_t transactionType;
-    uint8_t to[52];
+    uint8_t to[57];
     uint16_t proofSize;
     encryptedAmountTransferState_t state;
 } signEncryptedAmountToTransfer_t;

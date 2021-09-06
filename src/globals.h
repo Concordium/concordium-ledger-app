@@ -27,6 +27,7 @@
 #include "signUpdateElectionDifficulty.h"
 #include "signUpdateBakerStakeThreshold.h"
 #include "signHigherLevelKeyUpdate.h"
+#include "signAddIdentityProvider.h"
 
 #include "memo.h"
 
@@ -63,7 +64,7 @@ typedef enum {
 } transactionKind_e;
 
 /**
- * Enumeration of all available update types. The exact numbering has 
+ * Enumeration of all available update types. The exact numbering has
  * to correspond with the on-chain values as it is used as part of the
  * transaction serialization, and it is used to validate that a received
  * transaction has a valid type.
@@ -81,7 +82,8 @@ typedef enum {
     UPDATE_TYPE_BAKER_STAKE_THRESHOLD = 9,
     UPDATE_TYPE_UPDATE_ROOT_KEYS = 10,
     UPDATE_TYPE_UPDATE_LEVEL1_KEYS = 11,
-    UPDATE_TYPE_UPDATE_LEVEL2_KEYS = 12
+    UPDATE_TYPE_UPDATE_LEVEL2_KEYS = 12,
+    UPDATE_TYPE_ADD_IDENTITY_PROVIDER = 13
 } updateType_e;
 
 typedef struct {
@@ -108,7 +110,7 @@ extern tx_state_t global_tx_state;
 // Helper struct that is used to hold the account sender
 // address from an account transaction header.
 typedef struct {
-    uint8_t sender[52];
+    uint8_t sender[57];
 } accountSender_t;
 extern accountSender_t global_account_sender;
 
@@ -150,6 +152,7 @@ typedef union {
     signUpdateBakerStakeThresholdContext_t signUpdateBakerStakeThreshold;
     signUpdateKeysWithRootKeysContext_t signUpdateKeysWithRootKeysContext;
     withMemo_t withMemo;
+    signAddIdentityProviderContext_t signAddIdentityProviderContext;
 } instructionContext;
 extern instructionContext global;
 

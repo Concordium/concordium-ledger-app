@@ -150,7 +150,7 @@ void handleSignTransferWithSchedule(uint8_t *cdata, uint8_t p1, uint8_t dataLeng
         if (base58check_encode(toAddress, sizeof(toAddress), ctx->displayStr, &outputSize) != 0) {
             THROW(ERROR_INVALID_TRANSACTION);
         }
-        ctx->displayStr[50] = '\0';
+        ctx->displayStr[55] = '\0';
 
         // Store the number of scheduled amounts we are going to receive next.
         ctx->remainingNumberOfScheduledAmounts = cdata[0];

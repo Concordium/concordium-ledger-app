@@ -5,6 +5,8 @@
 * Improved state validation to deny instruction changes in multi command transactions.
 * Support building for the Ledger Nano X.
 * Added support for transactions with memos.
+* Support for the "Add identity provider" update.
+* Improved pagination of account addresses and hexadecimal strings, so that pages are split evenly and consistently.
 
 ## 1.0.2
 

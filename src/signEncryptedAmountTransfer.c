@@ -78,7 +78,7 @@ void handleSignEncryptedAmountTransfer(uint8_t *cdata, uint8_t p1, uint8_t dataL
             // The received address bytes are not valid a valid base58 encoding.
             THROW(ERROR_INVALID_TRANSACTION);
         }
-        ctx->to[50] = '\0';
+        ctx->to[55] = '\0';
 
         if (p1 == P1_INITIAL_WITH_MEMO) {
             // Hash memo length
