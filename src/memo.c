@@ -17,19 +17,8 @@ UX_STEP_CB(
             (char *) global.withMemo.memoContext.memo
             });
 
-UX_STEP_CB(
-    ux_sign_transfer_memo_raw_step,
-    bnnn_paging,
-    handleMemoStep(),
-    {
-        "Memo (raw)",
-            (char *) global.withMemo.memoContext.memo
-            });
 UX_FLOW(ux_sign_transfer_memo,
         &ux_sign_transfer_memo_step
-    );
-UX_FLOW(ux_sign_transfer_memo_raw,
-        &ux_sign_transfer_memo_raw_step
     );
 
 void handleMemoStep() {
@@ -54,10 +43,7 @@ void readMemoInitial(uint8_t *cdata, uint8_t dataLength) {
     // length: payload byte size.
     uint64_t length = 0;
 
-    if (ctx->majorType > 7 || (shortCount > 27 && shortCount < 31)) {
-        // Payload doesn't fit cbor encoding.
-        THROW(ERROR_INVALID_STATE);
-    } else if (shortCount < 24) {
+    if (shortCount < 24) {
         // shortCount is the length, no extra bytes is used.
         sizeLength = 0;
         length = shortCount;
@@ -74,8 +60,9 @@ void readMemoInitial(uint8_t *cdata, uint8_t dataLength) {
         length = U8BE(cdata,0);
         sizeLength = 8;
     } else if (shortCount == 31) {
-        // TODO: support indefinite length strings / streaming?
         THROW(ERROR_UNSUPPORTED_CBOR);
+    } else {
+        THROW(ERROR_INVALID_STATE);
     }
     cdata += sizeLength;
     ctx->memoLength -= sizeLength;
@@ -95,25 +82,15 @@ void readMemoInitial(uint8_t *cdata, uint8_t dataLength) {
             THROW(ERROR_INVALID_STATE);
         }
         break;
-    case 2:
-        // byte string
     case 3:
         // utf-8 string
-    case 4:
-        // array
-    case 5:
-        // maps
-    case 6:
-        // Tag
-    case 7:
-        // special values or break marker
         if (ctx->memoLength != length) {
             THROW(ERROR_INVALID_STATE);
         }
         readMemoContent(cdata, dataLength - 1 - sizeLength);
         break;
     default:
-        THROW(ERROR_INVALID_STATE);
+        THROW(ERROR_UNSUPPORTED_CBOR);
     }
 }
 
@@ -127,43 +104,10 @@ void readMemoContent(uint8_t *cdata, uint8_t dataLength) {
             memmove(ctx->memo + dataLength, "\0", 1);
         }
         break;
-    case 4:
-    case 5:
-    case 6:
-    case 7:
-    case 2:
-        // Type 2 is a byte string, so we show that as hex. For type 4-7, we display as hex instead of decoding.
-        toHex(cdata, dataLength, ctx->memo);
-        if (dataLength * 2 < 255) {
-            memmove(ctx->memo + dataLength * 2, "\0", 1);
-        }
-        break;
     case 0:
     case 1:
         // Type 0 and 1 fails, because we don't support integers that can't fit in the initial payload.
-        // Change to unsupported cbor encoding;
         THROW(ERROR_UNSUPPORTED_CBOR);
-        break;
-    default:
-        THROW(ERROR_INVALID_STATE);
-    }
-}
-
-void displayMemo(volatile unsigned int *flags) {
-    switch (ctx->majorType) {
-    case 0:
-    case 1:
-    case 2:
-    case 3:
-        ux_flow_init(0, ux_sign_transfer_memo, NULL);
-        *flags |= IO_ASYNCH_REPLY;
-        break;
-    case 4:
-    case 5:
-    case 6:
-    case 7:
-        ux_flow_init(0, ux_sign_transfer_memo_raw, NULL);
-        *flags |= IO_ASYNCH_REPLY;
         break;
     default:
         THROW(ERROR_INVALID_STATE);
