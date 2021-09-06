@@ -4,7 +4,7 @@
 *
 *  - Only the 'base58_encode()' method (renamed from btchip_encode_base58).
 *    Reformatting of the method has been done, and removal of all PRINTF()
-*    invocations.
+*    invocations, and changed the algorithm to insert a space for every 10 characters.
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ int base58_encode(const unsigned char *in, size_t length, unsigned char *out, si
     size_t startAt, stopAt;
     size_t zeroCount = 0;
     size_t outputSize;
+    size_t pageSize = 10;
 
     if (length > MAX_ENC_INPUT_SIZE) {
         return -1;
@@ -48,6 +49,8 @@ int base58_encode(const unsigned char *in, size_t length, unsigned char *out, si
     }
 
     outputSize = (length - zeroCount) * 138 / 100 + 1;
+    int spaces = outputSize / pageSize;
+    outputSize += spaces;
     if (*outlen < outputSize) {
         *outlen = outputSize;
         return -1;
@@ -81,14 +84,28 @@ int base58_encode(const unsigned char *in, size_t length, unsigned char *out, si
 
     *outlen = zeroCount + outputSize - j;
     int distance = zeroCount - j;
+    size_t nextSpace = pageSize;
+    int offset = 0;
     if (distance < 0) {
-        for (i = zeroCount; i < *outlen; ++i) {
-            out[i] = BASE58ALPHABET[out[i - distance]];
+        for (i = zeroCount; i < *outlen + spaces; ++i) {
+            if (i == nextSpace) {
+                out[i] = ' ';
+                nextSpace += (pageSize + 1);
+                offset++;
+            } else {
+                out[i] = BASE58ALPHABET[out[i - distance - offset]];
+            }
         }
     }
     else {
-        for (i = *outlen - 1; (int)i >= 0; --i) {
-            out[i] = BASE58ALPHABET[out[i - distance]];
+        for (i = *outlen + spaces - 1; (int)i >= 0; --i) {
+            if  ((*outlen + spaces - 1 - i) == nextSpace) {
+                out[i] = ' ';
+                nextSpace += (pageSize + 1);
+                offset++;
+            } else {
+                out[i] = BASE58ALPHABET[out[i - distance + offset]];
+            }
         }
     }
 

@@ -15,8 +15,8 @@ typedef enum {
     TX_ENCRYPTED_AMOUNT_TRANSFER_PROOFS = 18
 } encryptedAmountTransferState_t;
 
-typedef struct { 
-    uint8_t to[52];
+typedef struct {
+    uint8_t to[57];
     uint16_t proofSize;
     encryptedAmountTransferState_t state;
 } signEncryptedAmountToTransfer_t;

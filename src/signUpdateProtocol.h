@@ -28,7 +28,7 @@ typedef struct {
     uint8_t buffer[255];
     textState_t textState;
     updateProtocolState_t state;
-    char specificationHash[65];
+    char specificationHash[68];
 } signUpdateProtocolContext_t;
 
 #endif

@@ -40,7 +40,7 @@ void handleSignUpdateFoundationAccount(uint8_t *cdata, volatile unsigned int *fl
       // The received address bytes were not valid a valid base58 encoding, so the transaction is invalid.
         THROW(ERROR_INVALID_TRANSACTION);
     }
-    ctx->foundationAccountAddress[50] = '\0';
+    ctx->foundationAccountAddress[55] = '\0';
 
     ux_flow_init(0, ux_sign_foundation_account_address, NULL);
     *flags |= IO_ASYNCH_REPLY;

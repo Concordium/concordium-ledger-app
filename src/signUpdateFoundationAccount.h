@@ -9,7 +9,7 @@
 void handleSignUpdateFoundationAccount(uint8_t *cdata, volatile unsigned int *flags);
 
 typedef struct {
-    uint8_t foundationAccountAddress[52];
+    uint8_t foundationAccountAddress[57];
 } signUpdateFoundationAccountContext_t;
 
 #endif
