@@ -16,7 +16,6 @@ jobs:
         container: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
 
         steps:
-            - name: Checkout
             - uses: actions/checkout@v2
               with:
                   submodules: 'recursive'
@@ -32,7 +31,6 @@ jobs:
         container: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
 
         steps:
-            - name: Checkout
             - uses: actions/checkout@v2
               with:
                   submodules: 'recursive'
