@@ -14,12 +14,12 @@ UX_STEP_CB(
     handleMemoStep(),
     {
         "Memo",
-            (char *) global.withMemo.memoContext.memo
-            });
+        (char *) global.withMemo.memoContext.memo
+    });
 
 UX_FLOW(ux_sign_transfer_memo,
-        &ux_sign_transfer_memo_step
-    );
+    &ux_sign_transfer_memo_step
+);
 
 void handleMemoStep() {
     if (ctx->memoLength < 0) {

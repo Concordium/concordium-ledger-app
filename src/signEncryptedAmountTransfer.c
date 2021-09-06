@@ -17,38 +17,38 @@ UX_STEP_NOCB(
     nn,
     {
         "Shielded",
-            "transfer"
-            });
+        "transfer"
+    });
 UX_STEP_CB(
     ux_sign_encrypted_amount_transfer_2_step,
     bnnn_paging,
     sendSuccessNoIdle(),
     {
         .title = "Recipient",
-            .text = (char *) global.withMemo.signEncryptedAmountToTransfer.to
-            });
+        .text = (char *) global.withMemo.signEncryptedAmountToTransfer.to
+    });
 UX_FLOW(ux_sign_encrypted_amount_transfer,
-        &ux_sign_flow_shared_review,
-        &ux_sign_encrypted_amount_transfer_1_step,
-        &ux_sign_flow_account_sender_view,
-        &ux_sign_encrypted_amount_transfer_2_step,
-        &ux_sign_flow_shared_sign,
-        &ux_sign_flow_shared_decline
-    );
+    &ux_sign_flow_shared_review,
+    &ux_sign_encrypted_amount_transfer_1_step,
+    &ux_sign_flow_account_sender_view,
+    &ux_sign_encrypted_amount_transfer_2_step,
+    &ux_sign_flow_shared_sign,
+    &ux_sign_flow_shared_decline
+);
 
 UX_FLOW(ux_sign_encrypted_amount_transfer_initial,
-        &ux_sign_flow_shared_review,
-        &ux_sign_encrypted_amount_transfer_1_step,
-        &ux_sign_flow_account_sender_view,
-        &ux_sign_encrypted_amount_transfer_2_step
-    );
+    &ux_sign_flow_shared_review,
+    &ux_sign_encrypted_amount_transfer_1_step,
+    &ux_sign_flow_account_sender_view,
+    &ux_sign_encrypted_amount_transfer_2_step
+);
 
 #define P1_INITIAL                              0x00
 #define P1_REMAINING_AMOUNT                     0x01
 #define P1_TRANSFER_AMOUNT_AGG_INDEX_PROOF_SIZE 0x02
 #define P1_PROOF                                0x03
-#define P1_INITIAL_WITH_MEMO                                0x04
-#define P1_MEMO                                0x05
+#define P1_INITIAL_WITH_MEMO                    0x04
+#define P1_MEMO                                 0x05
 
 
 void handleSignEncryptedAmountTransfer(uint8_t *cdata, uint8_t p1, uint8_t dataLength, volatile unsigned int *flags, bool isInitialCall) {

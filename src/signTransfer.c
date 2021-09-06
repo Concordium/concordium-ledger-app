@@ -15,24 +15,24 @@ UX_STEP_NOCB(
     bnnn_paging,
     {
         "Amount (GTU)",
-            (char *) global.withMemo.signTransferContext.displayAmount,
-            });
+        (char *) global.withMemo.signTransferContext.displayAmount
+    });
 
 UX_STEP_NOCB(
     ux_sign_flow_2_step,
     bnnn_paging,
     {
         .title = "Recipient",
-            .text = (char *) global.withMemo.signTransferContext.displayStr
-            });
+        .text = (char *) global.withMemo.signTransferContext.displayStr
+    });
 UX_FLOW(ux_sign_flow,
-        &ux_sign_flow_shared_review,
-        &ux_sign_flow_account_sender_view,
-        &ux_sign_flow_1_step,
-        &ux_sign_flow_2_step,
-        &ux_sign_flow_shared_sign,
-        &ux_sign_flow_shared_decline
-    );
+    &ux_sign_flow_shared_review,
+    &ux_sign_flow_account_sender_view,
+    &ux_sign_flow_1_step,
+    &ux_sign_flow_2_step,
+    &ux_sign_flow_shared_sign,
+    &ux_sign_flow_shared_decline
+);
 
 UX_STEP_CB(
     ux_sign_flow_2_step_cb,
@@ -40,25 +40,25 @@ UX_STEP_CB(
     sendSuccessNoIdle(),
     {
         .title = "Recipient",
-            .text = (char *) global.withMemo.signTransferContext.displayStr
-            });
+        .text = (char *) global.withMemo.signTransferContext.displayStr
+    });
 
 UX_FLOW(ux_transfer_initial_flow_memo,
-        &ux_sign_flow_shared_review,
-        &ux_sign_flow_account_sender_view,
-        &ux_sign_flow_2_step_cb
-    );
+    &ux_sign_flow_shared_review,
+    &ux_sign_flow_account_sender_view,
+    &ux_sign_flow_2_step_cb
+);
 
 UX_FLOW(ux_memo_sign_flow,
-        &ux_sign_flow_1_step,
-        &ux_sign_flow_shared_sign,
-        &ux_sign_flow_shared_decline
-    );
+    &ux_sign_flow_1_step,
+    &ux_sign_flow_shared_sign,
+    &ux_sign_flow_shared_decline
+);
 
-#define P1_INITIAL          0x00
+#define P1_INITIAL                      0x00
 #define P1_INITIAL_WITH_MEMO            0x01
-#define P1_MEMO            0x02
-#define P1_AMOUNT            0x03
+#define P1_MEMO                         0x02
+#define P1_AMOUNT                       0x03
 
 
 void handleSignTransfer(uint8_t *cdata, uint8_t p1, uint8_t dataLength, volatile unsigned int *flags, bool isInitialCall) {

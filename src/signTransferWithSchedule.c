@@ -28,22 +28,22 @@ UX_STEP_NOCB(
     bnnn_paging,
     {
         .title = "Recipient",
-            .text = (char *) global.withMemo.signTransferWithScheduleContext.displayStr
-            });
+        .text = (char *) global.withMemo.signTransferWithScheduleContext.displayStr
+    });
 UX_STEP_VALID(
     ux_scheduled_transfer_initial_flow_2_step,
     nn,
     updateStateAndSendSuccess(),
     {
         "Continue",
-            "with transaction"
-            });
+        "with transaction"
+    });
 UX_FLOW(ux_scheduled_transfer_initial_flow,
-        &ux_sign_flow_shared_review,
-        &ux_sign_flow_account_sender_view,
-        &ux_scheduled_transfer_initial_flow_1_step,
-        &ux_scheduled_transfer_initial_flow_2_step
-    );
+    &ux_sign_flow_shared_review,
+    &ux_sign_flow_account_sender_view,
+    &ux_scheduled_transfer_initial_flow_1_step,
+    &ux_scheduled_transfer_initial_flow_2_step
+);
 
 // UI definitions for displaying a timestamp and an amount of a scheduled transfer.
 UX_STEP_NOCB(
@@ -51,28 +51,28 @@ UX_STEP_NOCB(
     bnnn_paging,
     {
         "Release time (UTC)",
-            (char *) global.withMemo.signTransferWithScheduleContext.displayTimestamp
-            });
+        (char *) global.withMemo.signTransferWithScheduleContext.displayTimestamp
+    });
 UX_STEP_NOCB(
     ux_sign_scheduled_transfer_pair_flow_1_step,
     bnnn_paging,
     {
         "Amount",
-            (char *) global.withMemo.signTransferWithScheduleContext.displayAmount
-            });
+        (char *) global.withMemo.signTransferWithScheduleContext.displayAmount
+    });
 UX_STEP_CB(
     ux_sign_scheduled_transfer_pair_flow_2_step,
     nn,
     processNextScheduledAmount(ctx->buffer),
     {
         "Continue",
-            "with transaction"
-            });
+        "with transaction"
+    });
 UX_FLOW(ux_sign_scheduled_transfer_pair_flow,
-        &ux_sign_scheduled_transfer_pair_flow_0_step,
-        &ux_sign_scheduled_transfer_pair_flow_1_step,
-        &ux_sign_scheduled_transfer_pair_flow_2_step
-    );
+    &ux_sign_scheduled_transfer_pair_flow_0_step,
+    &ux_sign_scheduled_transfer_pair_flow_1_step,
+    &ux_sign_scheduled_transfer_pair_flow_2_step
+);
 
 void processNextScheduledAmount(uint8_t *buffer) {
     // The full transaction has been added to the hash, so we can continue to the signing process.
@@ -115,8 +115,8 @@ void processNextScheduledAmount(uint8_t *buffer) {
 
 #define P1_INITIAL_PACKET           0x00
 #define P1_SCHEDULED_TRANSFER_PAIRS 0x01
-#define P1_INITIAL_WITH_MEMO           0x02
-#define P1_MEMO           0x03
+#define P1_INITIAL_WITH_MEMO        0x02
+#define P1_MEMO                     0x03
 
 void handleSignTransferWithSchedule(uint8_t *cdata, uint8_t p1, uint8_t dataLength, volatile unsigned int *flags, bool isInitialCall) {
     if (isInitialCall) {
