@@ -25,3 +25,19 @@ jobs:
               run: |
                   make clean
                   make
+
+    compile-nano-x:
+        runs-on: ubuntu:latest
+
+        container: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
+
+        steps:
+            - name: Checkout
+            - uses: actions/checkout@v2
+              with:
+                  submodules: 'recursive'
+
+            - name: Build
+              run: |
+                  make clean
+                  make BOLOS_SDK=nanox-secure-sdk
