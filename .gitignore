@@ -4,6 +4,7 @@
 /dep
 /src/glyphs.c
 /src/glyphs.h
+/output-scan-build
 concordium-ledger-app-*
 .vscode
 .idea
