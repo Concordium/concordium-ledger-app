@@ -284,7 +284,7 @@ void io_seproxyhal_display(const bagl_element_t *element) {
     io_seproxyhal_display_default((bagl_element_t *)element);
 }
 
-unsigned char io_event(unsigned char channel) {
+unsigned char io_event(__attribute__((unused)) unsigned char channel) {
 	// can't have more than one tag in the reply, not supported yet.
 	switch (G_io_seproxyhal_spi_buffer[0]) {
         case SEPROXYHAL_TAG_FINGER_EVENT:
