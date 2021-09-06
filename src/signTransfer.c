@@ -7,6 +7,7 @@
 #include "responseCodes.h"
 
 static signTransferContext_t *ctx = &global.withMemo.signTransferContext;
+static memoContext_t *memo_ctx = &global.withMemo.memoContext;
 static tx_state_t *tx_state = &global_tx_state;
 
 UX_STEP_NOCB(
@@ -45,18 +46,28 @@ UX_STEP_CB(
 UX_FLOW(ux_transfer_initial_flow_memo,
         &ux_sign_flow_shared_review,
         &ux_sign_flow_account_sender_view,
-        &ux_sign_flow_1_step,
         &ux_sign_flow_2_step_cb
     );
 
+UX_FLOW(ux_memo_sign_flow,
+        &ux_sign_flow_1_step,
+        &ux_sign_flow_shared_sign,
+        &ux_sign_flow_shared_decline
+    );
 
 #define P1_INITIAL          0x00
 #define P1_INITIAL_WITH_MEMO            0x01
 #define P1_MEMO            0x02
+#define P1_AMOUNT            0x03
+
 
 void handleSignTransfer(uint8_t *cdata, uint8_t p1, uint8_t dataLength, volatile unsigned int *flags, bool isInitialCall) {
     if (isInitialCall) {
         ctx->state = TX_TRANSFER_INITIAL;
+    }
+
+    if (memo_ctx->memoLength == 0 && ctx->state == TX_TRANSFER_MEMO) {
+        ctx->state = TX_TRANSFER_AMOUNT;
     }
 
     if ((p1 == P1_INITIAL || p1 == P1_INITIAL_WITH_MEMO) && ctx->state == TX_TRANSFER_INITIAL) {
@@ -87,25 +98,29 @@ void handleSignTransfer(uint8_t *cdata, uint8_t p1, uint8_t dataLength, volatile
         }
         ctx->displayStr[50] = '\0';
 
-        // Build display value of the amount to transfer, and also add the bytes to the hash.
-        uint64_t amount = U8BE(cdata, 0);
-        amountToGtuDisplay(ctx->displayAmount, amount);
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 8, NULL, 0);
-
         // Display the transaction information to the user (recipient address and amount to be sent).
         if (transactionType == TRANSFER) {
+            // Build display value of the amount to transfer, and also add the bytes to the hash.
+            uint64_t amount = U8BE(cdata, 0);
+            amountToGtuDisplay(ctx->displayAmount, amount);
+            cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 8, NULL, 0);
+
             // initiate flow with signing
             ux_flow_init(0, ux_sign_flow, NULL);
         } else if (transactionType == TRANSFER_WITH_MEMO) {
+            // hash the memo length
+            memo_ctx->memoLength = U2BE(cdata, 0);
+            cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 2, NULL, 0);
+
             // initiate flow without signing, because memo should be sent afterwards
-            ctx->state = TX_TRANSFER_MEMO_LENGTH;
+            ctx->state = TX_TRANSFER_MEMO_INITIAL;
             ux_flow_init(0, ux_transfer_initial_flow_memo, NULL);
         } else {
             THROW(ERROR_INVALID_STATE);
         }
         // Tell the main process to wait for a button press.
         *flags |= IO_ASYNCH_REPLY;
-    } else if (p1 == P1_MEMO && ctx->state == TX_TRANSFER_MEMO_LENGTH) {
+    } else if (p1 == P1_MEMO && ctx->state == TX_TRANSFER_MEMO_INITIAL) {
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, dataLength, NULL, 0);
 
         // Read initial part of memo and then display it:
@@ -119,6 +134,14 @@ void handleSignTransfer(uint8_t *cdata, uint8_t p1, uint8_t dataLength, volatile
         // Read current part of memo and then display it:
         readMemoContent(cdata, dataLength);
         displayMemo(flags);
+    } else if (p1 == P1_AMOUNT && ctx->state == TX_TRANSFER_AMOUNT) {
+        // Build display value of the amount to transfer, and also add the bytes to the hash.
+        uint64_t amount = U8BE(cdata, 0);
+        amountToGtuDisplay(ctx->displayAmount, amount);
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 8, NULL, 0);
+
+        ux_flow_init(0, ux_memo_sign_flow, NULL);
+        *flags |= IO_ASYNCH_REPLY;
     } else {
         THROW(ERROR_INVALID_STATE);
     }

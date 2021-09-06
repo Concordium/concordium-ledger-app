@@ -33,18 +33,17 @@ UX_FLOW(ux_sign_transfer_memo_raw,
     );
 
 void handleMemoStep() {
-    if (ctx->memoLength == 0) {
-        ux_flow_init(0, ux_sign_flow_shared, NULL);
-    } else if (ctx->memoLength > 0) {
-        sendSuccessNoIdle();   // Request more data from the computer.
-    } else {
+    if (ctx->memoLength < 0) {
         THROW(ERROR_INVALID_STATE);
+    } else {
+        sendSuccessNoIdle();   // Request more data from the computer.
     }
 }
 
 void readMemoInitial(uint8_t *cdata, uint8_t dataLength) {
     uint8_t header = cdata[0];
     cdata+=1;
+    ctx->memoLength -= 1;
     // the first byte of an cbor encoding contains the type (3 high bits) and the shortCount (5 lower bits);
     ctx->majorType = header >> 5;
     uint8_t shortCount = header & 0x1f;
@@ -79,18 +78,22 @@ void readMemoInitial(uint8_t *cdata, uint8_t dataLength) {
         THROW(ERROR_UNSUPPORTED_CBOR);
     }
     cdata += sizeLength;
-
+    ctx->memoLength -= sizeLength;
 
     switch (ctx->majorType) {
     case 0:
         // non-negative integer
         bin2dec(ctx->memo, length);
-        ctx->memoLength = 0;
+        if (ctx->memoLength != 0) {
+            THROW(ERROR_INVALID_STATE);
+        }
         break;
     case 1:
         // negative integer
         bin2dec(ctx->memo, 1 - length);
-        ctx->memoLength = 0;
+        if (ctx->memoLength != 0) {
+            THROW(ERROR_INVALID_STATE);
+        }
         break;
     case 2:
         // byte string
@@ -104,7 +107,9 @@ void readMemoInitial(uint8_t *cdata, uint8_t dataLength) {
         // Tag
     case 7:
         // special values or break marker
-        ctx->memoLength = length;
+        if (ctx->memoLength != length) {
+            THROW(ERROR_INVALID_STATE);
+        }
         readMemoContent(cdata, dataLength - 1 - sizeLength);
         break;
     default:

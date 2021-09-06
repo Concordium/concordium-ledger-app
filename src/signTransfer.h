@@ -11,8 +11,9 @@ void handleSignTransfer(uint8_t *cdata, uint8_t p1, uint8_t dataLength, volatile
 
 typedef enum {
     TX_TRANSFER_INITIAL = 49,
-    TX_TRANSFER_MEMO_LENGTH = 50,
-    TX_TRANSFER_MEMO = 51
+    TX_TRANSFER_MEMO_INITIAL = 50,
+    TX_TRANSFER_MEMO = 51,
+    TX_TRANSFER_AMOUNT = 52
 } simpleTransferState_t;
 
 typedef struct {

@@ -7,12 +7,17 @@
 #include "responseCodes.h"
 
 static signTransferWithScheduleContext_t *ctx = &global.withMemo.signTransferWithScheduleContext;
+static memoContext_t *memo_ctx = &global.withMemo.memoContext;
 static tx_state_t *tx_state = &global_tx_state;
 
 void processNextScheduledAmount(uint8_t *buffer);
 
 void updateStateAndSendSuccess() {
-    ctx->state = TX_TRANSFER_WITH_SCHEDULE_TRANSFER_PAIRS;
+    if (ctx->transactionType == TRANSFER_WITH_SCHEDULE_WITH_MEMO) {
+        ctx->state = TX_TRANSFER_WITH_SCHEDULE_MEMO_START;
+    } else {
+        ctx->state = TX_TRANSFER_WITH_SCHEDULE_TRANSFER_PAIRS;
+    }
     sendSuccessNoIdle();
 }
 
@@ -72,12 +77,7 @@ UX_FLOW(ux_sign_scheduled_transfer_pair_flow,
 void processNextScheduledAmount(uint8_t *buffer) {
     // The full transaction has been added to the hash, so we can continue to the signing process.
     if (ctx->remainingNumberOfScheduledAmounts == 0 && ctx->scheduledAmountsInCurrentPacket == 0) {
-        if (ctx->transactionType == TRANSFER_WITH_SCHEDULE) {
-            ux_flow_init(0, ux_sign_flow_shared, NULL);
-        } else {
-            ctx->state = TX_TRANSFER_WITH_SCHEDULE_MEMO_START;
-            sendSuccessNoIdle();
-        }
+        ux_flow_init(0, ux_sign_flow_shared, NULL);
     } else if (ctx->scheduledAmountsInCurrentPacket == 0) {
         // Current packet has been successfully read, but there are still more data to receive. Ask the caller
         // for more data.
@@ -123,6 +123,12 @@ void handleSignTransferWithSchedule(uint8_t *cdata, uint8_t p1, uint8_t dataLeng
         ctx->state = TX_TRANSFER_WITH_SCHEDULE_INITIAL;
     }
 
+    if (memo_ctx->memoLength == 0 && ctx->state == TX_TRANSFER_WITH_SCHEDULE_MEMO) {
+        // Hash schedule length
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, &ctx->remainingNumberOfScheduledAmounts, 1, NULL, 0);
+        ctx->state = TX_TRANSFER_WITH_SCHEDULE_TRANSFER_PAIRS;
+    }
+
     if ((p1 == P1_INITIAL_PACKET || p1 == P1_INITIAL_WITH_MEMO) && ctx->state == TX_TRANSFER_WITH_SCHEDULE_INITIAL) {
         int bytesRead = parseKeyDerivationPath(cdata);
         cdata += bytesRead;
@@ -148,8 +154,17 @@ void handleSignTransferWithSchedule(uint8_t *cdata, uint8_t p1, uint8_t dataLeng
 
         // Store the number of scheduled amounts we are going to receive next.
         ctx->remainingNumberOfScheduledAmounts = cdata[0];
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 1, NULL, 0);
         cdata += 1;
+
+        if (p1 == P1_INITIAL_WITH_MEMO) {
+            // Hash memo length
+            memo_ctx->memoLength = U2BE(cdata, 0);
+            cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 2, NULL, 0);
+            cdata += 2;
+        } else {
+            // Hash schedule length
+            cx_hash((cx_hash_t *) &tx_state->hash, 0, &ctx->remainingNumberOfScheduledAmounts, 1, NULL, 0);
+        }
 
         // Display the transaction information to the user (recipient address and amount to be sent).
         ux_flow_init(0, ux_scheduled_transfer_initial_flow, NULL);

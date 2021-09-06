@@ -7,6 +7,7 @@
 #include "responseCodes.h"
 
 static signEncryptedAmountToTransfer_t *ctx = &global.withMemo.signEncryptedAmountToTransfer;
+static memoContext_t *memo_ctx = &global.withMemo.memoContext;
 static tx_state_t *tx_state = &global_tx_state;
 
 // UI for displaying encrypted transfer transaction. It only shows the user the recipient address
@@ -35,7 +36,7 @@ UX_FLOW(ux_sign_encrypted_amount_transfer,
         &ux_sign_flow_shared_decline
     );
 
-UX_FLOW(ux_sign_encrypted_amount_transfer_memo,
+UX_FLOW(ux_sign_encrypted_amount_transfer_initial,
         &ux_sign_flow_shared_review,
         &ux_sign_encrypted_amount_transfer_1_step,
         &ux_sign_flow_account_sender_view,
@@ -53,6 +54,10 @@ UX_FLOW(ux_sign_encrypted_amount_transfer_memo,
 void handleSignEncryptedAmountTransfer(uint8_t *cdata, uint8_t p1, uint8_t dataLength, volatile unsigned int *flags, bool isInitialCall) {
     if (isInitialCall) {
         ctx->state = TX_ENCRYPTED_AMOUNT_TRANSFER_INITIAL;
+    }
+
+    if (memo_ctx->memoLength == 0 && ctx->state == TX_ENCRYPTED_AMOUNT_TRANSFER_MEMO) {
+        ctx->state = TX_ENCRYPTED_AMOUNT_TRANSFER_REMAINING_AMOUNT;
     }
 
     if ((p1 == P1_INITIAL || p1 == P1_INITIAL_WITH_MEMO) && ctx->state == TX_ENCRYPTED_AMOUNT_TRANSFER_INITIAL) {
@@ -75,8 +80,18 @@ void handleSignEncryptedAmountTransfer(uint8_t *cdata, uint8_t p1, uint8_t dataL
         }
         ctx->to[50] = '\0';
 
-        ctx->state = TX_ENCRYPTED_AMOUNT_TRANSFER_REMAINING_AMOUNT;
-        sendSuccessNoIdle();
+        if (p1 == P1_INITIAL_WITH_MEMO) {
+            // Hash memo length
+            memo_ctx->memoLength = U2BE(cdata, 0);
+            cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 2, NULL, 0);
+            cdata += 2;
+            ctx->state = TX_ENCRYPTED_AMOUNT_TRANSFER_MEMO_START;
+            ux_flow_init(0, ux_sign_encrypted_amount_transfer_initial, NULL);
+            *flags |= IO_ASYNCH_REPLY;
+        } else {
+            ctx->state = TX_ENCRYPTED_AMOUNT_TRANSFER_REMAINING_AMOUNT;
+            sendSuccessNoIdle();
+        }
     } else if (p1 == P1_REMAINING_AMOUNT && ctx->state == TX_ENCRYPTED_AMOUNT_TRANSFER_REMAINING_AMOUNT) {
         // Hash remaining amount. Remaining amount is encrypted, and so we cannot display it.
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 192, NULL, 0);
@@ -103,7 +118,7 @@ void handleSignEncryptedAmountTransfer(uint8_t *cdata, uint8_t p1, uint8_t dataL
                 ux_flow_init(0, ux_sign_encrypted_amount_transfer, NULL);
             } else {
                 ctx->state = TX_ENCRYPTED_AMOUNT_TRANSFER_MEMO_START;
-                ux_flow_init(0, ux_sign_encrypted_amount_transfer_memo, NULL);
+                ux_flow_init(0, ux_sign_flow_shared, NULL);
             }
             *flags |= IO_ASYNCH_REPLY;
         } else if (ctx->proofSize < 0) {
