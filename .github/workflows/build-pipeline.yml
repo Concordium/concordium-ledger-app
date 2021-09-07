@@ -39,3 +39,18 @@ jobs:
               run: |
                   make clean
                   make BOLOS_SDK=nanox-secure-sdk
+    
+    scan-build:
+        runs-on: ubuntu-latest
+
+        container: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
+
+        steps:
+            - uses: actions/checkout@v2
+              with:
+                  submodules: 'recursive'
+
+            - name: Clang Static Analyzer
+              run: |
+                  make clean
+                  make scan-build
