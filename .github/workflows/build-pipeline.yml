@@ -11,6 +11,7 @@ on:
 
 jobs: 
     compile-nano-s:
+        name: Compile for Nano S
         runs-on: ubuntu-latest
 
         container: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
@@ -26,6 +27,7 @@ jobs:
                   make
 
     compile-nano-x:
+        name: Compile for Nano X
         runs-on: ubuntu-latest
 
         container: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
@@ -41,6 +43,7 @@ jobs:
                   make BOLOS_SDK=nanox-secure-sdk
     
     scan-build:
+        name: Run Clang Static Analyzer
         runs-on: ubuntu-latest
 
         container: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
