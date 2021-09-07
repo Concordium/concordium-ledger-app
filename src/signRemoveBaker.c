@@ -23,8 +23,8 @@ UX_FLOW(ux_sign_remove_baker,
 void handleSignRemoveBaker(uint8_t *cdata, volatile unsigned int *flags) {
     cdata += parseKeyDerivationPath(cdata);
     cx_sha256_init(&tx_state->hash);
-    cdata += hashAccountTransactionHeaderAndKind(cdata, REMOVE_BAKER);
-
+    hashAccountTransactionHeaderAndKind(cdata, REMOVE_BAKER);
+    
     // Note that there is no payload in this transaction, as the transaction
     // type itself indicates that the baker for the account should be removed.
     // So that is why it is a little empty here, as everything that has to be

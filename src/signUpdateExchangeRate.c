@@ -64,7 +64,6 @@ void handleSignUpdateExchangeRate(uint8_t *cdata, volatile unsigned int *flags) 
     uint64_t denominator = U8BE(cdata, 0);
     bin2dec(ctx->ratio + numeratorLength + sizeof(slash), denominator);
     cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 8, NULL, 0);
-    cdata += 8;
 
     ux_flow_init(0, ux_sign_exchange_rate, NULL);
     *flags |= IO_ASYNCH_REPLY;

@@ -177,7 +177,7 @@ void getIdentityAccountDisplay(uint8_t *dst) {
     int offset = bin2dec(dst, identityIndex) - 1;
     memmove(dst + offset, "/", 1);
     offset = offset + 1;
-    offset = offset + bin2dec(dst + offset, accountIndex);
+    bin2dec(dst + offset, accountIndex);
 }
 
 /**
@@ -194,8 +194,7 @@ int hashHeaderAndType(uint8_t *cdata, uint8_t headerLength, uint8_t validType) {
         THROW(ERROR_INVALID_TRANSACTION);
     }
     cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 1, NULL, 0);
-    cdata += 1;
-
+    
     return headerLength + 1;
 }
 
