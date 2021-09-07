@@ -105,12 +105,15 @@ void handleSignTransfer(uint8_t *cdata, volatile unsigned int *flags) {
     *flags |= IO_ASYNCH_REPLY;
 }
 
+void finishMemo(volatile unsigned int *flags) {
+    ctx->state = TX_TRANSFER_AMOUNT;
+    ux_flow_init(0, ux_sign_transfer_memo, NULL);
+    *flags |= IO_ASYNCH_REPLY;
+}
+
 void handleSignTransferWithMemo(uint8_t *cdata, uint8_t p1, uint8_t dataLength, volatile unsigned int *flags, bool isInitialCall) {
     if (isInitialCall) {
         ctx->state = TX_TRANSFER_INITIAL;
-    }
-    if (memo_ctx->memoLength == 0 && ctx->state == TX_TRANSFER_MEMO) {
-        ctx->state = TX_TRANSFER_AMOUNT;
     }
 
     if (p1 == P1_INITIAL_WITH_MEMO && ctx->state == TX_TRANSFER_INITIAL) {
@@ -129,17 +132,25 @@ void handleSignTransferWithMemo(uint8_t *cdata, uint8_t p1, uint8_t dataLength, 
 
         // Read initial part of memo and then display it:
         readMemoInitial(cdata, dataLength);
-        ctx->state = TX_TRANSFER_MEMO;
-        ux_flow_init(0, ux_sign_transfer_memo, NULL);
-        *flags |= IO_ASYNCH_REPLY;
+
+        if (memo_ctx->memoLength == 0) {
+            finishMemo(flags);
+        } else {
+            ctx->state = TX_TRANSFER_MEMO;
+            sendSuccessNoIdle();
+        }
     } else if (p1 == P1_MEMO && ctx->state == TX_TRANSFER_MEMO) {
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, dataLength, NULL, 0);
 
         // Read current part of memo and then display it:
         readMemoContent(cdata, dataLength);
-        ux_flow_init(0, ux_sign_transfer_memo, NULL);
-        *flags |= IO_ASYNCH_REPLY;
 
+        if (memo_ctx->memoLength != 0) {
+            // The memo size is <=256 bytes, so we should always have received the complete memo by this point;
+            THROW(ERROR_INVALID_STATE);
+        }
+
+        finishMemo(flags);
     } else if (p1 == P1_AMOUNT && ctx->state == TX_TRANSFER_AMOUNT) {
         // Build display value of the amount to transfer, and also add the bytes to the hash.
         uint64_t amount = U8BE(cdata, 0);

@@ -21,6 +21,6 @@ Uses the same INS number, but a different P1 for the initial call, and has a dif
 
 INS | P1 | P2 | CDATA | Comment |
 |----|--------|-----|-------------|----|
-| `0x02` | `0x01` | `0x00` | `path_length path[uint32]x[8] account_transaction_header[60 bytes] transaction_kind[uint8] recipient_address[32 bytes] memo_length[uint16]` | The amount is in µGTU. The recipient address has to be base58. |
+| `0x02` | `0x01` | `0x00` | `path_length path[uint32]x[8] account_transaction_header[60 bytes] transaction_kind[uint8] recipient_address[32 bytes] memo_length[uint16]` | The recipient address has to be base58. |
 | `0x02` | `0x02` | `0x00` | `memo[1...255 bytes]` | The memo is assumed to be CBOR encoded. |
-| `0x02` | `0x03` | `0x00` | `amount[uint64]` | The memo is assumed to be CBOR encoded. |
+| `0x02` | `0x03` | `0x00` | `amount[uint64]` | The amount is in µGTU. |

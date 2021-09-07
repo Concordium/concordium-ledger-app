@@ -165,15 +165,16 @@ void handleTransferPairs(uint8_t *cdata, volatile unsigned int *flags) {
 #define P1_INITIAL_WITH_MEMO        0x02
 #define P1_MEMO                     0x03
 
+void finishMemoScheduled(volatile unsigned int *flags) {
+    cx_hash((cx_hash_t *) &tx_state->hash, 0, &ctx->remainingNumberOfScheduledAmounts, 1, NULL, 0);
+    ctx->state = TX_TRANSFER_WITH_SCHEDULE_TRANSFER_PAIRS;
+    ux_flow_init(0, ux_sign_transfer_memo, NULL);
+    *flags |= IO_ASYNCH_REPLY;
+}
+
 void handleSignTransferWithScheduleAndMemo(uint8_t *cdata, uint8_t p1, uint8_t dataLength, volatile unsigned int *flags, bool isInitialCall) {
     if (isInitialCall) {
         ctx->state = TX_TRANSFER_WITH_SCHEDULE_INITIAL;
-    }
-
-    if (memo_ctx->memoLength == 0 && ctx->state == TX_TRANSFER_WITH_SCHEDULE_MEMO) {
-        // Hash schedule length
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, &ctx->remainingNumberOfScheduledAmounts, 1, NULL, 0);
-        ctx->state = TX_TRANSFER_WITH_SCHEDULE_TRANSFER_PAIRS;
     }
 
     if (p1 == P1_INITIAL_WITH_MEMO && ctx->state == TX_TRANSFER_WITH_SCHEDULE_INITIAL) {
@@ -199,17 +200,26 @@ void handleSignTransferWithScheduleAndMemo(uint8_t *cdata, uint8_t p1, uint8_t d
 
         // Read initial part of memo and then display it:
         readMemoInitial(cdata, dataLength);
-        ctx->state = TX_TRANSFER_WITH_SCHEDULE_MEMO;
-        ux_flow_init(0, ux_sign_transfer_memo, NULL);
-        *flags |= IO_ASYNCH_REPLY;
+
+        if (memo_ctx->memoLength == 0) {
+            finishMemoScheduled(flags);
+        } else {
+            ctx->state = TX_TRANSFER_WITH_SCHEDULE_MEMO;
+            sendSuccessNoIdle();
+        }
 
     } else if (p1 == P1_MEMO && ctx->state == TX_TRANSFER_WITH_SCHEDULE_MEMO) {
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, dataLength, NULL, 0);
 
         // Read current part of memo and then display it:
         readMemoContent(cdata, dataLength);
-        ux_flow_init(0, ux_sign_transfer_memo, NULL);
-        *flags |= IO_ASYNCH_REPLY;
+
+        if (memo_ctx->memoLength != 0) {
+            // The memo size is <=256 bytes, so we should always have received the complete memo by this point;
+            THROW(ERROR_INVALID_STATE);
+        }
+
+        finishMemoScheduled(flags);
     } else if (p1 == P1_SCHEDULED_TRANSFER_PAIRS && ctx->state == TX_TRANSFER_WITH_SCHEDULE_TRANSFER_PAIRS) {
         handleTransferPairs(cdata, flags);
     } else {

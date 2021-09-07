@@ -8,6 +8,7 @@ extern const ux_flow_step_t* const ux_sign_transfer_memo[];
 
 typedef struct {
     uint32_t memoLength;
+    uint32_t memoDisplayUsed;
     uint8_t memo[255];
     uint8_t majorType;
 } memoContext_t;

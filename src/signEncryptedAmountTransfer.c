@@ -118,13 +118,15 @@ void handleProofs(uint8_t *cdata, uint8_t dataLength, volatile unsigned int *fla
     }
 }
 
+void finishMemoEncrypted(volatile unsigned int *flags) {
+    ctx->state = TX_ENCRYPTED_AMOUNT_TRANSFER_REMAINING_AMOUNT;
+    ux_flow_init(0, ux_sign_transfer_memo, NULL);
+    *flags |= IO_ASYNCH_REPLY;
+}
+
 void handleSignEncryptedAmountTransferWithMemo(uint8_t *cdata, uint8_t p1, uint8_t dataLength, volatile unsigned int *flags, bool isInitialCall) {
     if (isInitialCall) {
         ctx->state = TX_ENCRYPTED_AMOUNT_TRANSFER_INITIAL;
-    }
-
-    if (memo_ctx->memoLength == 0 && ctx->state == TX_ENCRYPTED_AMOUNT_TRANSFER_MEMO) {
-        ctx->state = TX_ENCRYPTED_AMOUNT_TRANSFER_REMAINING_AMOUNT;
     }
 
     if (p1 == P1_INITIAL_WITH_MEMO && ctx->state == TX_ENCRYPTED_AMOUNT_TRANSFER_INITIAL) {
@@ -143,16 +145,25 @@ void handleSignEncryptedAmountTransferWithMemo(uint8_t *cdata, uint8_t p1, uint8
 
         // Read initial part of memo and then display it:
         readMemoInitial(cdata, dataLength);
-        ctx->state = TX_ENCRYPTED_AMOUNT_TRANSFER_MEMO;
-        ux_flow_init(0, ux_sign_transfer_memo, NULL);
-        *flags |= IO_ASYNCH_REPLY;
+
+        if (memo_ctx->memoLength == 0) {
+            finishMemoEncrypted(flags);
+        } else {
+            ctx->state = TX_ENCRYPTED_AMOUNT_TRANSFER_MEMO;
+            sendSuccessNoIdle();
+        }
     } else if (p1 == P1_MEMO && ctx->state == TX_ENCRYPTED_AMOUNT_TRANSFER_MEMO) {
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, dataLength, NULL, 0);
 
         // Read current part of memo and then display it:
         readMemoContent(cdata, dataLength);
-        ux_flow_init(0, ux_sign_transfer_memo, NULL);
-        *flags |= IO_ASYNCH_REPLY;
+
+        if (memo_ctx->memoLength != 0) {
+            // The memo size is <=256 bytes, so we should always have received the complete memo by this point;
+            THROW(ERROR_INVALID_STATE);
+        }
+
+        finishMemoEncrypted(flags);
     } else if (p1 == P1_REMAINING_AMOUNT && ctx->state == TX_ENCRYPTED_AMOUNT_TRANSFER_REMAINING_AMOUNT) {
         handleRemainingAmount(cdata);
     } else if (p1 == P1_TRANSFER_AMOUNT_AGG_INDEX_PROOF_SIZE && ctx->state == TX_ENCRYPTED_AMOUNT_TRANSFER_TRANSFER_AMOUNT) {

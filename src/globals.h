@@ -122,7 +122,7 @@ typedef struct {
     };
     memoContext_t memoContext;
 
-} withMemo_t;
+} transferWithMemo_t;
 /**
  * As the memory we have available is very limited, the context for each instruction is stored
  * in a shared global union, so that we do not use more memory than that of the most memory
@@ -151,7 +151,7 @@ typedef union {
     signElectionDifficultyContext_t signElectionDifficulty;
     signUpdateBakerStakeThresholdContext_t signUpdateBakerStakeThreshold;
     signUpdateKeysWithRootKeysContext_t signUpdateKeysWithRootKeysContext;
-    withMemo_t withMemo;
+    transferWithMemo_t withMemo;
     signAddIdentityProviderContext_t signAddIdentityProviderContext;
 } instructionContext;
 extern instructionContext global;
