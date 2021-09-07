@@ -140,3 +140,13 @@ int hashAccountTransactionHeaderAndKind(uint8_t *cdata, uint8_t validTransaction
  * @return the count of hashed bytes from cdata
  */
 int hashUpdateHeaderAndType(uint8_t *cdata, uint8_t validUpdateType);
+
+/**
+ * Adds the account transaction header and the recipient address to the transaction hash, and 
+ * writes the base58 encoded recipient address for later display.
+ * @param cdata the incoming command data pointing to the start of the input, i.e. with the key path at the start
+ * @param kind the transaction type
+ * @param recipientDst the destination where to write the base58 encoded recipient address
+ * @param recipientSize the size of the recipient destination
+ */
+int handleHeaderAndToAddress(uint8_t *cdata, uint8_t kind, uint8_t *recipientDst, size_t recipientSize);

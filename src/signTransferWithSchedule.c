@@ -104,37 +104,6 @@ void processNextScheduledAmount(uint8_t *buffer) {
     }
 }
 
-int handleHeaderAndToAddressScheduledTransfer(uint8_t *cdata, uint8_t kind) {
-    // Parse the key derivation path, which should always be the first thing received
-    // in a command to the Ledger application.
-    int keyPathLength = parseKeyDerivationPath(cdata);
-    cdata += keyPathLength;
-
-    // Initialize the hash that will be the hash of the whole transaction, which is what will be signed
-    // if the user approves.
-    cx_sha256_init(&tx_state->hash);
-    int headerLength = hashAccountTransactionHeaderAndKind(cdata, kind);
-    cdata += headerLength;
-
-    // Extract the recipient address and add to the hash.
-    uint8_t toAddress[32];
-    memmove(toAddress, cdata, 32);
-    cdata += 32;
-    cx_hash((cx_hash_t *) &tx_state->hash, 0, toAddress, 32, NULL, 0);
-
-    // The recipient address is in a base58 format, so we need to encode it to be
-    // able to display in a humand-readable way. This is written to ctx->displayStr as a string
-    // so that it can be displayed.
-    size_t outputSize = sizeof(ctx->displayStr);
-    if (base58check_encode(toAddress, sizeof(toAddress), ctx->displayStr, &outputSize) != 0) {
-        // The received address bytes are not a valid base58 encoding.
-        THROW(ERROR_INVALID_TRANSACTION);
-    }
-    ctx->displayStr[55] = '\0';
-
-    return keyPathLength + headerLength + 32;
-}
-
 void handleTransferPairs(uint8_t *cdata, volatile unsigned int *flags) {
     // Load the scheduled transfer information.
     // First 8 bytes is the timestamp, the following 8 bytes is the amount.
@@ -159,7 +128,6 @@ void handleTransferPairs(uint8_t *cdata, volatile unsigned int *flags) {
     *flags |= IO_ASYNCH_REPLY;
 }
 
-
 #define P1_INITIAL_PACKET           0x00
 #define P1_SCHEDULED_TRANSFER_PAIRS 0x01
 #define P1_INITIAL_WITH_MEMO        0x02
@@ -178,7 +146,7 @@ void handleSignTransferWithScheduleAndMemo(uint8_t *cdata, uint8_t p1, uint8_t d
     }
 
     if (p1 == P1_INITIAL_WITH_MEMO && ctx->state == TX_TRANSFER_WITH_SCHEDULE_INITIAL) {
-        cdata += handleHeaderAndToAddressScheduledTransfer(cdata, TRANSFER_WITH_SCHEDULE_WITH_MEMO);
+        cdata += handleHeaderAndToAddress(cdata, TRANSFER_WITH_SCHEDULE_WITH_MEMO, ctx->displayStr, sizeof(ctx->displayStr));
 
         // Store the number of scheduled amounts we are going to receive next.
         ctx->remainingNumberOfScheduledAmounts = cdata[0];
@@ -187,7 +155,6 @@ void handleSignTransferWithScheduleAndMemo(uint8_t *cdata, uint8_t p1, uint8_t d
         // Hash memo length
         memo_ctx->memoLength = U2BE(cdata, 0);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 2, NULL, 0);
-        cdata += 2;
 
         // Update the state to expect the next message to contain the first bytes of the memo.
         ctx->state = TX_TRANSFER_WITH_SCHEDULE_MEMO_START;
@@ -239,13 +206,12 @@ void handleSignTransferWithSchedule(uint8_t *cdata, uint8_t p1, volatile unsigne
     }
 
     if ((p1 == P1_INITIAL_PACKET || p1 == P1_INITIAL_WITH_MEMO) && ctx->state == TX_TRANSFER_WITH_SCHEDULE_INITIAL) {
-        cdata += handleHeaderAndToAddressScheduledTransfer(cdata, TRANSFER_WITH_SCHEDULE);
+        cdata += handleHeaderAndToAddress(cdata, TRANSFER_WITH_SCHEDULE, ctx->displayStr, sizeof(ctx->displayStr));
 
         // Store the number of scheduled amounts we are going to receive next.
         ctx->remainingNumberOfScheduledAmounts = cdata[0];
         // Hash schedule length
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 1, NULL, 0);
-        cdata += 1;
 
         // Update the state to expect the next message to contain transfer pairs.
         ctx->state = TX_TRANSFER_WITH_SCHEDULE_TRANSFER_PAIRS;

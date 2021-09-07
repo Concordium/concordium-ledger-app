@@ -60,38 +60,8 @@ UX_FLOW(ux_memo_sign_flow,
 #define P1_MEMO                         0x02
 #define P1_AMOUNT                       0x03
 
-int handleHeaderAndToAddressSimpleTransfer(uint8_t *cdata, uint8_t kind) {
-    // Parse the key derivation path, which should always be the first thing received
-    // in a command to the Ledger application.
-    int keyPathLength = parseKeyDerivationPath(cdata);
-    cdata += keyPathLength;
-
-    // Initialize the hash that will be the hash of the whole transaction, which is what will be signed
-    // if the user approves.
-    cx_sha256_init(&tx_state->hash);
-    int headerLength = hashAccountTransactionHeaderAndKind(cdata, kind);
-    cdata += headerLength;
-
-    // Extract the recipient address and add to the hash.
-    uint8_t toAddress[32];
-    memmove(toAddress, cdata, 32);
-    cdata += 32;
-    cx_hash((cx_hash_t *) &tx_state->hash, 0, toAddress, 32, NULL, 0);
-
-    // The recipient address is in a base58 format, so we need to encode it to be
-    // able to display in a humand-readable way. This is written to ctx->displayStr as a string
-    // so that it can be displayed.
-    size_t outputSize = sizeof(ctx->displayStr);
-    if (base58check_encode(toAddress, sizeof(toAddress), ctx->displayStr, &outputSize) != 0) {
-        // The received address bytes are not a valid base58 encoding.
-        THROW(ERROR_INVALID_TRANSACTION);
-    }
-    ctx->displayStr[55] = '\0';
-    return keyPathLength + headerLength + 32;
-}
-
 void handleSignTransfer(uint8_t *cdata, volatile unsigned int *flags) {
-    cdata += handleHeaderAndToAddressSimpleTransfer(cdata, TRANSFER);
+    cdata += handleHeaderAndToAddress(cdata, TRANSFER, ctx->displayStr, sizeof(ctx->displayStr));
 
     // Build display value of the amount to transfer, and also add the bytes to the hash.
     uint64_t amount = U8BE(cdata, 0);
@@ -117,7 +87,7 @@ void handleSignTransferWithMemo(uint8_t *cdata, uint8_t p1, uint8_t dataLength, 
     }
 
     if (p1 == P1_INITIAL_WITH_MEMO && ctx->state == TX_TRANSFER_INITIAL) {
-        cdata += handleHeaderAndToAddressSimpleTransfer(cdata, TRANSFER_WITH_MEMO);
+        cdata += handleHeaderAndToAddress(cdata, TRANSFER_WITH_MEMO, ctx->displayStr, sizeof(ctx->displayStr));
 
         // hash the memo length
         memo_ctx->memoLength = U2BE(cdata, 0);

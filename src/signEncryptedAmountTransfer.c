@@ -50,37 +50,6 @@ UX_FLOW(ux_sign_encrypted_amount_transfer_initial,
 #define P1_INITIAL_WITH_MEMO                    0x04
 #define P1_MEMO                                 0x05
 
-int handleHeaderAndToAddressEncryptedTransfer(uint8_t *cdata, uint8_t kind) {
-    // Parse the key derivation path, which should always be the first thing received
-    // in a command to the Ledger application.
-    int keyPathLength = parseKeyDerivationPath(cdata);
-    cdata += keyPathLength;
-
-    // Initialize the hash that will be the hash of the whole transaction, which is what will be signed
-    // if the user approves.
-    cx_sha256_init(&tx_state->hash);
-    int headerLength = hashAccountTransactionHeaderAndKind(cdata, kind);
-    cdata += headerLength;
-
-    // Extract the recipient address and add to the hash.
-    uint8_t toAddress[32];
-    memmove(toAddress, cdata, 32);
-    cdata += 32;
-    cx_hash((cx_hash_t *) &tx_state->hash, 0, toAddress, 32, NULL, 0);
-
-    // The recipient address is in a base58 format, so we need to encode it to be
-    // able to display in a humand-readable way. This is written to ctx->displayStr as a string
-    // so that it can be displayed.
-    size_t outputSize = sizeof(ctx->to);
-    if (base58check_encode(toAddress, sizeof(toAddress), ctx->to, &outputSize) != 0) {
-        // The received address bytes are not a valid base58 encoding.
-        THROW(ERROR_INVALID_TRANSACTION);
-    }
-    ctx->to[55] = '\0';
-
-    return keyPathLength + headerLength + 32;
-}
-
 void handleRemainingAmount(uint8_t *cdata) {
     // Hash remaining amount. Remaining amount is encrypted, and so we cannot display it.
     cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 192, NULL, 0);
@@ -130,7 +99,7 @@ void handleSignEncryptedAmountTransferWithMemo(uint8_t *cdata, uint8_t p1, uint8
     }
 
     if (p1 == P1_INITIAL_WITH_MEMO && ctx->state == TX_ENCRYPTED_AMOUNT_TRANSFER_INITIAL) {
-        cdata += handleHeaderAndToAddressEncryptedTransfer(cdata, ENCRYPTED_AMOUNT_TRANSFER_WITH_MEMO);
+        cdata += handleHeaderAndToAddress(cdata, ENCRYPTED_AMOUNT_TRANSFER_WITH_MEMO, ctx->to, sizeof(ctx->to));
 
         // Hash memo length
         memo_ctx->memoLength = U2BE(cdata, 0);
@@ -180,7 +149,7 @@ void handleSignEncryptedAmountTransfer(uint8_t *cdata, uint8_t p1, uint8_t dataL
         ctx->state = TX_ENCRYPTED_AMOUNT_TRANSFER_INITIAL;
     }
     if (p1 == P1_INITIAL && ctx->state == TX_ENCRYPTED_AMOUNT_TRANSFER_INITIAL) {
-        cdata += handleHeaderAndToAddressEncryptedTransfer(cdata, ENCRYPTED_AMOUNT_TRANSFER);
+        handleHeaderAndToAddress(cdata, ENCRYPTED_AMOUNT_TRANSFER, ctx->to, sizeof(ctx->to));
         ctx->state = TX_ENCRYPTED_AMOUNT_TRANSFER_REMAINING_AMOUNT;
         sendSuccessNoIdle();
     } else if (p1 == P1_REMAINING_AMOUNT && ctx->state == TX_ENCRYPTED_AMOUNT_TRANSFER_REMAINING_AMOUNT) {
