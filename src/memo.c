@@ -65,8 +65,8 @@ void readMemoInitial(uint8_t *cdata, uint8_t dataLength) {
         THROW(ERROR_INVALID_STATE);
     }
     cdata += sizeLength;
-    ctx->memoLength -= sizeLength;
 
+    ctx->memoLength -= sizeLength;
     switch (ctx->majorType) {
     case 0:
         // non-negative integer

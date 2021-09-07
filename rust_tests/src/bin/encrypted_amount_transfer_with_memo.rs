@@ -6,6 +6,7 @@ use ledger::{ApduCommand, LedgerApp};
 use base58check::*;
 
 fn main() {
+    let ins_encrypted_with_memo = 0x33;
     let transaction_kind = "17";
 
     // These values should be encrypted amounts, and not just random bytes like in this test.
@@ -30,7 +31,7 @@ fn main() {
 
     let command = ApduCommand {
         cla: 224,   // Has to be this value for all commands.
-        ins: 16,
+        ins: ins_encrypted_with_memo,
         p1: 0x04,
         p2: 0,
         length: 0, //command_data.len() as u8,
@@ -43,7 +44,7 @@ fn main() {
         for memo_part in memo.chunks(255) {
             let memo_command = ApduCommand {
                 cla: 224, // Has to be this value for all commands.
-                ins: 16,
+                ins: ins_encrypted_with_memo,
                 p1: 5,
                 p2: 0,
                 length: memo_part.len() as u8,
@@ -54,7 +55,7 @@ fn main() {
 
     let remaining_amount_command = ApduCommand {
         cla: 224,
-        ins: 16,
+        ins: ins_encrypted_with_memo,
         p1: 0x01,
         p2: 0,
         length: 0,
@@ -67,7 +68,7 @@ fn main() {
     transfer_amount_payload.append(&mut proofs_size);
     let transfer_amount_command = ApduCommand {
         cla: 224,
-        ins: 16,
+        ins: ins_encrypted_with_memo,
         p1: 0x02,
         p2: 0,
         length: 0,
@@ -79,8 +80,8 @@ fn main() {
         println!("{}", proof_partition.len());
         let command = ApduCommand {
             cla: 224,   // Has to be this value for all commands.
-            ins: 16,
-            p1: 0x03    ,
+            ins: ins_encrypted_with_memo,
+            p1: 0x03,
             p2: 0,
             length: proof_partition.len() as u8,
             data: proof_partition.to_vec()

@@ -6,6 +6,7 @@ use hex;
 use ledger::{ApduCommand, LedgerApp};
 
 fn main() {
+    let ins_scheduled_with_memo = 0x34;
     let transaction_kind = "18";
 
     let sender_address = "3C8N65hBwc2cNtJkGmVyGeWYxhZ6R3X77mLWTwAKsnAnyworTq";
@@ -32,7 +33,7 @@ fn main() {
 
     let initial_command = ApduCommand {
         cla: 224, // Has to be this value for all commands.
-        ins: 3,   // Scheduled transfer
+        ins: ins_scheduled_with_memo,
         p1: 2,
         p2: 0,
         length: 0,
@@ -44,7 +45,7 @@ fn main() {
     for memo_part in memo.chunks(255) {
         let memo_command = ApduCommand {
             cla: 224, // Has to be this value for all commands.
-            ins: 3,
+            ins: ins_scheduled_with_memo,
             p1: 3,
             p2: 0,
             length: memo_part.len() as u8,
@@ -69,7 +70,7 @@ fn main() {
             println!("{}", &command_data.len());
             let command = ApduCommand {
                 cla: 224,
-                ins: 3,
+                ins: ins_scheduled_with_memo,
                 p1: 1,
                 p2: 0,
                 length: 0,

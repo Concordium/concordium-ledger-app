@@ -6,6 +6,7 @@ use ledger::{ApduCommand, LedgerApp};
 use base58check::*;
 
 fn main() {
+    let ins_simple_with_memo = 50;
     let transaction_kind =  "16";
 
     let amount = hex::decode("FFFFFFFFFFFFFFFF").unwrap();
@@ -26,7 +27,7 @@ fn main() {
 
     let command = ApduCommand {
         cla: 224, // Has to be this value for all commands.
-        ins: 2,   // Transfer (Simple one time transfer)
+        ins: ins_simple_with_memo,
         p1: 1,
         p2: 0,
         length: 60,
@@ -39,7 +40,7 @@ fn main() {
         for memo_part in memo.chunks(255) {
             let memo_command = ApduCommand {
                 cla: 224, // Has to be this value for all commands.
-                ins: 2,   // Transfer (Simple one time transfer)
+                ins: ins_simple_with_memo,
                 p1: 2,
                 p2: 0,
                 length: memo_part.len() as u8,
@@ -50,7 +51,7 @@ fn main() {
 
     let amount_command = ApduCommand {
         cla: 224, // Has to be this value for all commands.
-        ins: 2,   // Transfer (Simple one time transfer)
+        ins: ins_simple_with_memo,
         p1: 3,
         p2: 0,
         length: 8,

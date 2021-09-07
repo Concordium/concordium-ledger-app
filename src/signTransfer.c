@@ -60,64 +60,68 @@ UX_FLOW(ux_memo_sign_flow,
 #define P1_MEMO                         0x02
 #define P1_AMOUNT                       0x03
 
+int handleHeaderAndToAddressSimpleTransfer(uint8_t *cdata, uint8_t kind) {
+    // Parse the key derivation path, which should always be the first thing received
+    // in a command to the Ledger application.
+    int keyPathLength = parseKeyDerivationPath(cdata);
+    cdata += keyPathLength;
 
-void handleSignTransfer(uint8_t *cdata, uint8_t p1, uint8_t dataLength, volatile unsigned int *flags, bool isInitialCall) {
+    // Initialize the hash that will be the hash of the whole transaction, which is what will be signed
+    // if the user approves.
+    cx_sha256_init(&tx_state->hash);
+    int headerLength = hashAccountTransactionHeaderAndKind(cdata, kind);
+    cdata += headerLength;
+
+    // Extract the recipient address and add to the hash.
+    uint8_t toAddress[32];
+    memmove(toAddress, cdata, 32);
+    cdata += 32;
+    cx_hash((cx_hash_t *) &tx_state->hash, 0, toAddress, 32, NULL, 0);
+
+    // The recipient address is in a base58 format, so we need to encode it to be
+    // able to display in a humand-readable way. This is written to ctx->displayStr as a string
+    // so that it can be displayed.
+    size_t outputSize = sizeof(ctx->displayStr);
+    if (base58check_encode(toAddress, sizeof(toAddress), ctx->displayStr, &outputSize) != 0) {
+        // The received address bytes are not a valid base58 encoding.
+        THROW(ERROR_INVALID_TRANSACTION);
+    }
+    ctx->displayStr[55] = '\0';
+    return keyPathLength + headerLength + 32;
+}
+
+void handleSignTransfer(uint8_t *cdata, volatile unsigned int *flags) {
+    cdata += handleHeaderAndToAddressSimpleTransfer(cdata, TRANSFER);
+
+    // Build display value of the amount to transfer, and also add the bytes to the hash.
+    uint64_t amount = U8BE(cdata, 0);
+    amountToGtuDisplay(ctx->displayAmount, amount);
+    cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 8, NULL, 0);
+
+    // Display the transaction information to the user (recipient address and amount to be sent).
+    ux_flow_init(0, ux_sign_flow, NULL);
+
+    // Tell the main process to wait for a button press.
+    *flags |= IO_ASYNCH_REPLY;
+}
+
+void handleSignTransferWithMemo(uint8_t *cdata, uint8_t p1, uint8_t dataLength, volatile unsigned int *flags, bool isInitialCall) {
     if (isInitialCall) {
         ctx->state = TX_TRANSFER_INITIAL;
     }
-
     if (memo_ctx->memoLength == 0 && ctx->state == TX_TRANSFER_MEMO) {
         ctx->state = TX_TRANSFER_AMOUNT;
     }
 
-    if ((p1 == P1_INITIAL || p1 == P1_INITIAL_WITH_MEMO) && ctx->state == TX_TRANSFER_INITIAL) {
-        // Parse the key derivation path, which should always be the first thing received
-        // in a command to the Ledger application.
-        cdata += parseKeyDerivationPath(cdata);
+    if (p1 == P1_INITIAL_WITH_MEMO && ctx->state == TX_TRANSFER_INITIAL) {
+        cdata += handleHeaderAndToAddressSimpleTransfer(cdata, TRANSFER_WITH_MEMO);
 
-        uint8_t transactionType = p1 == P1_INITIAL_WITH_MEMO ? TRANSFER_WITH_MEMO : TRANSFER;
+        // hash the memo length
+        memo_ctx->memoLength = U2BE(cdata, 0);
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 2, NULL, 0);
 
-        // Initialize the hash that will be the hash of the whole transaction, which is what will be signed
-        // if the user approves.
-        cx_sha256_init(&tx_state->hash);
-        cdata += hashAccountTransactionHeaderAndKind(cdata, transactionType);
-
-        // Extract the recipient address and add to the hash.
-        uint8_t toAddress[32];
-        memmove(toAddress, cdata, 32);
-        cdata += 32;
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, toAddress, 32, NULL, 0);
-
-        // The recipient address is in a base58 format, so we need to encode it to be
-        // able to display in a humand-readable way. This is written to ctx->displayStr as a string
-        // so that it can be displayed.
-        size_t outputSize = sizeof(ctx->displayStr);
-        if (base58check_encode(toAddress, sizeof(toAddress), ctx->displayStr, &outputSize) != 0) {
-            // The received address bytes are not a valid base58 encoding.
-            THROW(ERROR_INVALID_TRANSACTION);
-        }
-        ctx->displayStr[55] = '\0';
-
-        // Display the transaction information to the user (recipient address and amount to be sent).
-        if (transactionType == TRANSFER) {
-            // Build display value of the amount to transfer, and also add the bytes to the hash.
-            uint64_t amount = U8BE(cdata, 0);
-            amountToGtuDisplay(ctx->displayAmount, amount);
-            cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 8, NULL, 0);
-
-            // initiate flow with signing
-            ux_flow_init(0, ux_sign_flow, NULL);
-        } else if (transactionType == TRANSFER_WITH_MEMO) {
-            // hash the memo length
-            memo_ctx->memoLength = U2BE(cdata, 0);
-            cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 2, NULL, 0);
-
-            // initiate flow without signing, because memo should be sent afterwards
-            ctx->state = TX_TRANSFER_MEMO_INITIAL;
-            ux_flow_init(0, ux_transfer_initial_flow_memo, NULL);
-        } else {
-            THROW(ERROR_INVALID_STATE);
-        }
+        ctx->state = TX_TRANSFER_MEMO_INITIAL;
+        ux_flow_init(0, ux_transfer_initial_flow_memo, NULL);
         // Tell the main process to wait for a button press.
         *flags |= IO_ASYNCH_REPLY;
     } else if (p1 == P1_MEMO && ctx->state == TX_TRANSFER_MEMO_INITIAL) {
@@ -128,7 +132,6 @@ void handleSignTransfer(uint8_t *cdata, uint8_t p1, uint8_t dataLength, volatile
         ctx->state = TX_TRANSFER_MEMO;
         ux_flow_init(0, ux_sign_transfer_memo, NULL);
         *flags |= IO_ASYNCH_REPLY;
-
     } else if (p1 == P1_MEMO && ctx->state == TX_TRANSFER_MEMO) {
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, dataLength, NULL, 0);
 
@@ -149,3 +152,4 @@ void handleSignTransfer(uint8_t *cdata, uint8_t p1, uint8_t dataLength, volatile
         THROW(ERROR_INVALID_STATE);
     }
 }
+

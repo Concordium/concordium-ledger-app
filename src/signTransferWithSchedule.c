@@ -12,15 +12,6 @@ static tx_state_t *tx_state = &global_tx_state;
 
 void processNextScheduledAmount(uint8_t *buffer);
 
-void updateStateAndSendSuccess() {
-    if (ctx->transactionType == TRANSFER_WITH_SCHEDULE_WITH_MEMO) {
-        ctx->state = TX_TRANSFER_WITH_SCHEDULE_MEMO_START;
-    } else {
-        ctx->state = TX_TRANSFER_WITH_SCHEDULE_TRANSFER_PAIRS;
-    }
-    sendSuccessNoIdle();
-}
-
 // UI definitions for displaying the transaction contents of the first packet for verification before continuing
 // to process the scheduled amount pairs that will be received in separate packets.
 UX_STEP_NOCB(
@@ -33,7 +24,7 @@ UX_STEP_NOCB(
 UX_STEP_VALID(
     ux_scheduled_transfer_initial_flow_2_step,
     nn,
-    updateStateAndSendSuccess(),
+    sendSuccessNoIdle(),
     {
         "Continue",
         "with transaction"
@@ -92,14 +83,14 @@ void processNextScheduledAmount(uint8_t *buffer) {
         if (valid != 0) {
             THROW(ERROR_INVALID_PARAM);
         }
-        
+
         // If the year is too far into the future, then just fail. This is needed so
         // that we know how much space to reserve to display the date time.
         if (ctx->time.tm_year > 9999) {
             THROW(ERROR_INVALID_PARAM);
         }
         timeToDisplayText(ctx->time, ctx->displayTimestamp);
-        
+
         uint64_t amount = U8BE(ctx->buffer, ctx->pos);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, buffer + ctx->pos, 8, NULL, 0);
         ctx->pos += 8;
@@ -113,12 +104,68 @@ void processNextScheduledAmount(uint8_t *buffer) {
     }
 }
 
+int handleHeaderAndToAddressScheduledTransfer(uint8_t *cdata, uint8_t kind) {
+    // Parse the key derivation path, which should always be the first thing received
+    // in a command to the Ledger application.
+    int keyPathLength = parseKeyDerivationPath(cdata);
+    cdata += keyPathLength;
+
+    // Initialize the hash that will be the hash of the whole transaction, which is what will be signed
+    // if the user approves.
+    cx_sha256_init(&tx_state->hash);
+    int headerLength = hashAccountTransactionHeaderAndKind(cdata, kind);
+    cdata += headerLength;
+
+    // Extract the recipient address and add to the hash.
+    uint8_t toAddress[32];
+    memmove(toAddress, cdata, 32);
+    cdata += 32;
+    cx_hash((cx_hash_t *) &tx_state->hash, 0, toAddress, 32, NULL, 0);
+
+    // The recipient address is in a base58 format, so we need to encode it to be
+    // able to display in a humand-readable way. This is written to ctx->displayStr as a string
+    // so that it can be displayed.
+    size_t outputSize = sizeof(ctx->displayStr);
+    if (base58check_encode(toAddress, sizeof(toAddress), ctx->displayStr, &outputSize) != 0) {
+        // The received address bytes are not a valid base58 encoding.
+        THROW(ERROR_INVALID_TRANSACTION);
+    }
+    ctx->displayStr[55] = '\0';
+
+    return keyPathLength + headerLength + 32;
+}
+
+void handleTransferPairs(uint8_t *cdata, volatile unsigned int *flags) {
+    // Load the scheduled transfer information.
+    // First 8 bytes is the timestamp, the following 8 bytes is the amount.
+    // We have room for 255 bytes, so 240 = 15 * 16, i.e. 15 pairs in each packet. Determine how many pairs are
+    // in the current packet.
+    if (ctx->remainingNumberOfScheduledAmounts <= 15) {
+        ctx->scheduledAmountsInCurrentPacket = ctx->remainingNumberOfScheduledAmounts;
+        ctx->remainingNumberOfScheduledAmounts = 0;
+    } else {
+        // The maximum is available in the packet.
+        ctx->scheduledAmountsInCurrentPacket = 15;
+        ctx->remainingNumberOfScheduledAmounts -= 15;
+    }
+
+    // Reset pointer keeping track of where we are in the current packet being processed.
+    ctx->pos = 0;
+
+    memmove(ctx->buffer, cdata, ctx->scheduledAmountsInCurrentPacket * 16);
+    processNextScheduledAmount(ctx->buffer);
+
+    // Tell the main process to wait for a button press.
+    *flags |= IO_ASYNCH_REPLY;
+}
+
+
 #define P1_INITIAL_PACKET           0x00
 #define P1_SCHEDULED_TRANSFER_PAIRS 0x01
 #define P1_INITIAL_WITH_MEMO        0x02
 #define P1_MEMO                     0x03
 
-void handleSignTransferWithSchedule(uint8_t *cdata, uint8_t p1, uint8_t dataLength, volatile unsigned int *flags, bool isInitialCall) {
+void handleSignTransferWithScheduleAndMemo(uint8_t *cdata, uint8_t p1, uint8_t dataLength, volatile unsigned int *flags, bool isInitialCall) {
     if (isInitialCall) {
         ctx->state = TX_TRANSFER_WITH_SCHEDULE_INITIAL;
     }
@@ -129,69 +176,23 @@ void handleSignTransferWithSchedule(uint8_t *cdata, uint8_t p1, uint8_t dataLeng
         ctx->state = TX_TRANSFER_WITH_SCHEDULE_TRANSFER_PAIRS;
     }
 
-    if ((p1 == P1_INITIAL_PACKET || p1 == P1_INITIAL_WITH_MEMO) && ctx->state == TX_TRANSFER_WITH_SCHEDULE_INITIAL) {
-        int bytesRead = parseKeyDerivationPath(cdata);
-        cdata += bytesRead;
-
-        ctx->transactionType = p1 == P1_INITIAL_WITH_MEMO ? TRANSFER_WITH_SCHEDULE_WITH_MEMO : TRANSFER_WITH_SCHEDULE;
-
-        // Initialize the transaction hash object.
-        cx_sha256_init(&tx_state->hash);
-        cdata += hashAccountTransactionHeaderAndKind(cdata, ctx->transactionType);
-
-        // Extract the destination address and add to hash.
-        uint8_t toAddress[32];
-        memmove(toAddress, cdata, 32);
-        cdata += 32;
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, toAddress, 32, NULL, 0);
-
-        // Used in display of recipient address.
-        size_t outputSize = sizeof(ctx->displayStr);
-        if (base58check_encode(toAddress, sizeof(toAddress), ctx->displayStr, &outputSize) != 0) {
-            THROW(ERROR_INVALID_TRANSACTION);
-        }
-        ctx->displayStr[55] = '\0';
+    if (p1 == P1_INITIAL_WITH_MEMO && ctx->state == TX_TRANSFER_WITH_SCHEDULE_INITIAL) {
+        cdata += handleHeaderAndToAddressScheduledTransfer(cdata, TRANSFER_WITH_SCHEDULE_WITH_MEMO);
 
         // Store the number of scheduled amounts we are going to receive next.
         ctx->remainingNumberOfScheduledAmounts = cdata[0];
         cdata += 1;
 
-        if (p1 == P1_INITIAL_WITH_MEMO) {
-            // Hash memo length
-            memo_ctx->memoLength = U2BE(cdata, 0);
-            cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 2, NULL, 0);
-            cdata += 2;
-        } else {
-            // Hash schedule length
-            cx_hash((cx_hash_t *) &tx_state->hash, 0, &ctx->remainingNumberOfScheduledAmounts, 1, NULL, 0);
-        }
+        // Hash memo length
+        memo_ctx->memoLength = U2BE(cdata, 0);
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 2, NULL, 0);
+        cdata += 2;
 
+        // Update the state to expect the next message to contain the first bytes of the memo.
+        ctx->state = TX_TRANSFER_WITH_SCHEDULE_MEMO_START;
         // Display the transaction information to the user (recipient address and amount to be sent).
         ux_flow_init(0, ux_scheduled_transfer_initial_flow, NULL);
 
-        // Tell the main process to wait for a button press.
-        *flags |= IO_ASYNCH_REPLY;
-    } else if (p1 == P1_SCHEDULED_TRANSFER_PAIRS && ctx->state == TX_TRANSFER_WITH_SCHEDULE_TRANSFER_PAIRS) {
-        // Load the scheduled transfer information.
-        // First 8 bytes is the timestamp, the following 8 bytes is the amount.
-        // We have room for 255 bytes, so 240 = 15 * 16, i.e. 15 pairs in each packet. Determine how many pairs are
-        // in the current packet.
-        if (ctx->remainingNumberOfScheduledAmounts <= 15) {
-            ctx->scheduledAmountsInCurrentPacket = ctx->remainingNumberOfScheduledAmounts;
-            ctx->remainingNumberOfScheduledAmounts = 0;
-        } else {
-            // The maximum is available in the packet.
-            ctx->scheduledAmountsInCurrentPacket = 15;
-            ctx->remainingNumberOfScheduledAmounts -= 15;
-        }
-
-        // Reset pointer keeping track of where we are in the current packet being processed.
-        ctx->pos = 0;
-
-        memmove(ctx->buffer, cdata, ctx->scheduledAmountsInCurrentPacket * 16);
-        processNextScheduledAmount(ctx->buffer);
-
-        // Tell the main process to wait for a button press.
         *flags |= IO_ASYNCH_REPLY;
     } else if (p1 == P1_MEMO && ctx->state == TX_TRANSFER_WITH_SCHEDULE_MEMO_START) {
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, dataLength, NULL, 0);
@@ -209,6 +210,41 @@ void handleSignTransferWithSchedule(uint8_t *cdata, uint8_t p1, uint8_t dataLeng
         readMemoContent(cdata, dataLength);
         ux_flow_init(0, ux_sign_transfer_memo, NULL);
         *flags |= IO_ASYNCH_REPLY;
+    } else if (p1 == P1_SCHEDULED_TRANSFER_PAIRS && ctx->state == TX_TRANSFER_WITH_SCHEDULE_TRANSFER_PAIRS) {
+        handleTransferPairs(cdata, flags);
+    } else {
+        THROW(ERROR_INVALID_PARAM);
+    }
+}
+
+void handleSignTransferWithSchedule(uint8_t *cdata, uint8_t p1, volatile unsigned int *flags, bool isInitialCall) {
+    if (isInitialCall) {
+        ctx->state = TX_TRANSFER_WITH_SCHEDULE_INITIAL;
+    }
+
+    if (memo_ctx->memoLength == 0 && ctx->state == TX_TRANSFER_WITH_SCHEDULE_MEMO) {
+        // Hash schedule length
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, &ctx->remainingNumberOfScheduledAmounts, 1, NULL, 0);
+        ctx->state = TX_TRANSFER_WITH_SCHEDULE_TRANSFER_PAIRS;
+    }
+
+    if ((p1 == P1_INITIAL_PACKET || p1 == P1_INITIAL_WITH_MEMO) && ctx->state == TX_TRANSFER_WITH_SCHEDULE_INITIAL) {
+        cdata += handleHeaderAndToAddressScheduledTransfer(cdata, TRANSFER_WITH_SCHEDULE);
+
+        // Store the number of scheduled amounts we are going to receive next.
+        ctx->remainingNumberOfScheduledAmounts = cdata[0];
+        // Hash schedule length
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 1, NULL, 0);
+        cdata += 1;
+
+        // Update the state to expect the next message to contain transfer pairs.
+        ctx->state = TX_TRANSFER_WITH_SCHEDULE_TRANSFER_PAIRS;
+        // Display the transaction information to the user (recipient address and amount to be sent).
+        ux_flow_init(0, ux_scheduled_transfer_initial_flow, NULL);
+
+        *flags |= IO_ASYNCH_REPLY;
+    } else if (p1 == P1_SCHEDULED_TRANSFER_PAIRS && ctx->state == TX_TRANSFER_WITH_SCHEDULE_TRANSFER_PAIRS) {
+        handleTransferPairs(cdata, flags);
     } else {
         THROW(ERROR_INVALID_PARAM);
     }
