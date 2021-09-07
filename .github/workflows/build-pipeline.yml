@@ -2,7 +2,7 @@ name: Build
 
 on:
     push:
-        branches: [master, setup-build-pipeline]
+        branches: [master]
     pull_request:
         branches: [master]
 
