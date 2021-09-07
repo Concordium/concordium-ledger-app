@@ -53,4 +53,4 @@ jobs:
             - name: Clang Static Analyzer
               run: |
                   make clean
-                  make scan-build
+                  scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build --status-bugs make default
