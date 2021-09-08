@@ -5,6 +5,8 @@
 
 static memoContext_t *ctx = &global.withMemo.memoContext;
 
+#define MAX_MEMO_SIZE 256
+
 void handleMemoStep();
 
 UX_STEP_CB(
@@ -28,12 +30,12 @@ void handleMemoStep() {
     }
 }
 
-/**
- * Read a CBOR encoded memo's initial part, i.e. the header, which contains the major type and length
- * Only supports major type 0, 1 and 3 (non-negative integers, negative integers and utf-8 strings)
- * Does not streaming (shortCount = 31).
- */
 void readMemoInitial(uint8_t *cdata, uint8_t dataLength) {
+    if(ctx->memoLength > MAX_MEMO_SIZE) {
+        // Don't sign memos, which exceed the max size accepted by the blockchain.
+        THROW(ERROR_INVALID_PARAM);
+    }
+
     uint8_t header = cdata[0];
     cdata += 1;
     ctx->memoLength -= 1;
@@ -84,7 +86,12 @@ void readMemoInitial(uint8_t *cdata, uint8_t dataLength) {
         case 1:
             // negative integer
             memmove(ctx->memo, "-", 1);
-            bin2dec(ctx->memo + 1, 1 + length);
+            if (length == UINT64_MAX) {
+                bin2dec(ctx->memo + 1, length);
+                memmove(ctx->memo + 1 + 20, " - 1", 4);
+            } else {
+                bin2dec(ctx->memo + 1, 1 + length);
+            }
             if (ctx->memoLength != 0) {
                 THROW(ERROR_INVALID_STATE);
             }
