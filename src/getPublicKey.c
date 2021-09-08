@@ -79,7 +79,7 @@ void sendPublicKey(bool compare) {
     if (compare) {
         // Show the public-key so that the user can verify the public-key.
         sendSuccessResultNoIdle(tx);
-        toHex(publicKey, sizeof(publicKey), ctx->publicKey);
+        toPaginatedHex(publicKey, sizeof(publicKey), ctx->publicKey);
         // Allow for receiving a new instruction even while comparing public keys.
         tx_state->currentInstruction = -1;
         ux_flow_init(0, ux_sign_compare_public_key, NULL);    
@@ -89,8 +89,7 @@ void sendPublicKey(bool compare) {
 }
 
 void handleGetPublicKey(uint8_t *cdata, uint8_t p1, uint8_t p2, volatile unsigned int *flags) {
-    int bytesRead = parseKeyDerivationPath(cdata);
-    cdata += bytesRead;
+    parseKeyDerivationPath(cdata);
 
     // If P2 == 0x01, then the public-key is signed by its corresponding private key, and
     // appended to the returned public-key. This is used when it is needed to provide

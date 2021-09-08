@@ -1,0 +1,59 @@
+name: Build
+
+on:
+    push:
+        branches: [main]
+    pull_request:
+        branches: [main]
+
+    # Allows us to run the workflow manually from the Actions tab
+    workflow_dispatch:
+
+jobs: 
+    compile-nano-s:
+        name: Compile for Nano S
+        runs-on: ubuntu-latest
+
+        container: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
+
+        steps:
+            - uses: actions/checkout@v2
+              with:
+                  submodules: 'recursive'
+
+            - name: Build
+              run: |
+                  make clean
+                  make
+
+    compile-nano-x:
+        name: Compile for Nano X
+        runs-on: ubuntu-latest
+
+        container: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
+
+        steps:
+            - uses: actions/checkout@v2
+              with:
+                  submodules: 'recursive'
+
+            - name: Build
+              run: |
+                  make clean
+                  make BOLOS_SDK=nanox-secure-sdk
+    
+    scan-build:
+        name: Run Clang Static Analyzer
+        runs-on: ubuntu-latest
+
+        container: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
+
+        steps:
+            - uses: actions/checkout@v2
+              with:
+                  submodules: 'recursive'
+
+            - name: Clang Static Analyzer
+              run: |
+                  make clean
+                  scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build --status-bugs make default

@@ -26,10 +26,10 @@ UX_STEP_CB(
     sendSuccessNoIdle(),
     {
       "Review",
-      "transaction"
+      "details"
     });
 UX_STEP_CB(
-    ux_credential_deployment_initial_flow_1_step,
+    ux_update_credentials_initial_flow_1_step,
     nn,
     sendSuccessNoIdle(),
     {
@@ -40,10 +40,10 @@ UX_FLOW(ux_credential_deployment_initial_flow,
     &ux_credential_deployment_initial_flow_0_step
 );
 
-UX_FLOW(ux_update_credential_deployment_initial_flow,
-    &ux_credential_deployment_initial_flow_0_step,
+UX_FLOW(ux_update_credentials_initial_flow,
+    &ux_sign_flow_shared_review,
     &ux_sign_flow_account_sender_view,
-    &ux_credential_deployment_initial_flow_1_step
+    &ux_update_credentials_initial_flow_1_step
 );
 
 UX_STEP_CB(
@@ -128,7 +128,7 @@ UX_STEP_CB(
     {
       &C_icon_validate_14,
       "Sign",
-      "transaction"
+      "details"
     });
 UX_STEP_CB(
     ux_sign_credential_deployment_2_step,
@@ -137,14 +137,19 @@ UX_STEP_CB(
     {
       &C_icon_crossmark,
       "Decline to",
-      "sign transaction"
+      "sign details"
     });
-UX_FLOW(ux_sign_credential_deployment,
+
+UX_FLOW(ux_sign_credential_deployment_existing,
     &ux_sign_credential_deployment_0_step,
     &ux_sign_credential_deployment_1_step,
     &ux_sign_credential_deployment_2_step
 );
 
+UX_FLOW(ux_sign_credential_deployment_new,
+    &ux_sign_credential_deployment_1_step,
+    &ux_sign_credential_deployment_2_step
+    );
 
 UX_STEP_CB(
     ux_sign_credential_update_id_0_step,
@@ -213,11 +218,10 @@ void parseVerificationKey(uint8_t *buffer) {
 
     uint8_t verificationKey[32];
     memmove(verificationKey, buffer, 32);
-    buffer += 32;
     cx_hash((cx_hash_t *) &tx_state->hash, 0, verificationKey, 32, NULL, 0);
 
     // Convert to a human-readable format.
-    toHex(verificationKey, sizeof(verificationKey), ctx->accountVerificationKey);
+    toPaginatedHex(verificationKey, sizeof(verificationKey), ctx->accountVerificationKey);
     ctx->numberOfVerificationKeys -= 1;
 
     // Show to the user.
@@ -268,7 +272,7 @@ void handleSignUpdateCredential(uint8_t *dataBuffer, uint8_t p1, uint8_t p2, vol
             ctx->updateCredentialState = TX_UPDATE_CREDENTIAL_CREDENTIAL_INDEX;
         }
 
-        ux_flow_init(0, ux_update_credential_deployment_initial_flow, NULL);
+        ux_flow_init(0, ux_update_credentials_initial_flow, NULL);
         *flags |= IO_ASYNCH_REPLY;
     } else if (p2 == P2_CREDENTIAL_CREDENTIAL_INDEX && ctx->updateCredentialState == TX_UPDATE_CREDENTIAL_CREDENTIAL_INDEX && ctx->credentialDeploymentCount > 0) {
         // Add the credential index to the hash
@@ -289,13 +293,13 @@ void handleSignUpdateCredential(uint8_t *dataBuffer, uint8_t p1, uint8_t p2, vol
         sendSuccessNoIdle();
     } else if (p2 == P2_CREDENTIAL_ID && ctx->updateCredentialState == TX_UPDATE_CREDENTIAL_ID) {
         cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 48, NULL, 0);
-        toHex(dataBuffer, 48, ctx->credentialId);
+        toPaginatedHex(dataBuffer, 48, ctx->credentialId);
 
         ctx->credentialIdCount -= 1;
         if (ctx->credentialIdCount == 0) {
             ctx->updateCredentialState = TX_UPDATE_CREDENTIAL_THRESHOLD;
         }
-        
+
         ux_flow_init(0, ux_sign_credential_update_id, NULL);
         *flags |= IO_ASYNCH_REPLY;
     } else if (p2 == P2_THRESHOLD && ctx->updateCredentialState == TX_UPDATE_CREDENTIAL_THRESHOLD) {
@@ -316,8 +320,7 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, uint8_t p2,
     }
 
     if (p1 == P1_INITIAL_PACKET && ctx->state == TX_CREDENTIAL_DEPLOYMENT_INITIAL) {
-        int bytesRead = parseKeyDerivationPath(dataBuffer);
-        dataBuffer += bytesRead;
+        parseKeyDerivationPath(dataBuffer);
 
         // Initialize values.
         cx_sha256_init(&tx_state->hash);
@@ -351,7 +354,7 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, uint8_t p2,
         uint8_t regIdCred[48];
         memmove(regIdCred, dataBuffer, 48);
         dataBuffer += 48;
-        toHex(regIdCred, sizeof(regIdCred), ctx->regIdCred);
+        toPaginatedHex(regIdCred, sizeof(regIdCred), ctx->regIdCred);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, regIdCred, 48, NULL, 0);
 
         // Parse identity provider identity.
@@ -371,7 +374,6 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, uint8_t p2,
         // Parse the length of the following list of anonymity revokers.
         ctx->anonymityRevocationListLength = U2BE(dataBuffer, 0);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 2, NULL, 0);
-        dataBuffer += 2;
 
         // Initialize values for later.
         cx_sha256_init(&attributeHash);
@@ -383,7 +385,7 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, uint8_t p2,
     } else if (p1 == P1_AR_IDENTITY && ctx->state == TX_CREDENTIAL_DEPLOYMENT_AR_IDENTITY) {
         if (ctx->anonymityRevocationListLength == 0) {
              // Invalid state, sender says ar identity pair is incoming, but we already received all.
-            THROW(ERROR_INVALID_STATE); 
+            THROW(ERROR_INVALID_STATE);
         }
 
         // Parse ArIdentity
@@ -395,9 +397,8 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, uint8_t p2,
         // Parse enc_id_cred_pub_share
         uint8_t encIdCredPubShare[96];
         memmove(encIdCredPubShare, dataBuffer, 96);
-        toHex(encIdCredPubShare, sizeof(encIdCredPubShare), ctx->encIdCredPubShare);
+        toPaginatedHex(encIdCredPubShare, sizeof(encIdCredPubShare), ctx->encIdCredPubShare);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, encIdCredPubShare, 96, NULL, 0);
-        dataBuffer += 96;
 
         if (ctx->anonymityRevocationListLength == 1) {
             ctx->state = TX_CREDENTIAL_DEPLOYMENT_CREDENTIAL_DATES;
@@ -435,8 +436,7 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, uint8_t p2,
         // Read attribute list length
         ctx->attributeListLength = U2BE(dataBuffer, 0);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 2, NULL, 0);
-        dataBuffer += 2;
-
+        
         if (ctx->attributeListLength == 0) {
             ctx->state = TX_CREDENTIAL_DEPLOYMENT_LENGTH_OF_PROOFS;
         } else {
@@ -476,7 +476,7 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, uint8_t p2,
         if (ctx->attributeListLength == 0) {
             uint8_t attributeHashBytes[32];
             cx_hash((cx_hash_t *) &attributeHash, CX_LAST, NULL, 0, attributeHashBytes, 32);
-            toHex(attributeHashBytes, sizeof(attributeHashBytes), ctx->attributeHashDisplay);
+            toPaginatedHex(attributeHashBytes, sizeof(attributeHashBytes), ctx->attributeHashDisplay);
             ctx->state = TX_CREDENTIAL_DEPLOYMENT_LENGTH_OF_PROOFS;
             sendSuccessNoIdle();
         } else {
@@ -522,7 +522,7 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, uint8_t p2,
 
         if (newOrExisting == 0) {
             cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 8, NULL, 0);
-            ux_flow_init(0, ux_sign_flow_shared, NULL);
+            ux_flow_init(0, ux_sign_credential_deployment_new, NULL);
         } else if (newOrExisting == 1) {
             uint8_t accountAddress[32];
             memmove(accountAddress, dataBuffer, 32);
@@ -531,12 +531,12 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, uint8_t p2,
             size_t outputSize = sizeof(ctx->accountAddress);
             if (base58check_encode(accountAddress, sizeof(accountAddress), ctx->accountAddress, &outputSize) != 0) {
             // The received address bytes are not a valid base58 encoding.
-                THROW(ERROR_INVALID_TRANSACTION);  
+                THROW(ERROR_INVALID_TRANSACTION);
             }
-            ctx->accountAddress[50] = '\0';
+            ctx->accountAddress[55] = '\0';
 
             cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 32, NULL, 0);
-            ux_flow_init(0, ux_sign_credential_deployment, NULL);
+            ux_flow_init(0, ux_sign_credential_deployment_existing, NULL);
         } else {
             THROW(ERROR_INVALID_TRANSACTION);
         }

@@ -1,9 +1,7 @@
 #ifndef _DESCRIPTION_VIEW_H_
 #define _DESCRIPTION_VIEW_H_
 
-extern const ux_flow_step_t* const ux_sign_description_name[];
-extern const ux_flow_step_t* const ux_sign_description_url[];
-extern const ux_flow_step_t* const ux_sign_description_description[];
+void displayDescriptionPart(volatile unsigned int *flags);
 
 typedef enum {
     DESC_NAME,

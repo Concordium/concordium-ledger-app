@@ -37,13 +37,13 @@ typedef struct {
 
     uint8_t credentialDeploymentCount;
     uint8_t credentialIdCount;
-    char credentialId[97];
+    char credentialId[102];
     uint8_t threshold[4];
     updateCredentialState_t updateCredentialState;
 
-    char accountVerificationKey[65];
+    char accountVerificationKey[68];
     uint8_t signatureThreshold[4];
-    char regIdCred[97];
+    char regIdCred[102];
 
     uint8_t identityProviderIdentity[4];
     uint8_t anonymityRevocationThreshold[4];
@@ -51,7 +51,7 @@ typedef struct {
     uint16_t anonymityRevocationListLength;
 
     uint8_t arIdentity[11];
-    char encIdCredPubShare[192];
+    char encIdCredPubShare[204];
 
     uint8_t validTo[8];
     uint8_t createdAt[8];
@@ -60,10 +60,10 @@ typedef struct {
 
     cx_sha256_t attributeHash;
     uint8_t attributeValueLength;
-    char attributeHashDisplay[65];
+    char attributeHashDisplay[68];
 
     uint32_t proofLength;
-    uint8_t accountAddress[52];
+    uint8_t accountAddress[57];
 
     protocolState_t state;
 } signCredentialDeploymentContext_t;

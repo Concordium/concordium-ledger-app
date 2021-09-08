@@ -45,19 +45,37 @@ UX_FLOW(ux_sign_description_description,
 void handleDescriptionPart(void) {
     if (ctx->textLength == 0) {
         switch (ctx->descriptionState) {
+            case DESC_NAME:
+                ctx->descriptionState = DESC_URL;
+                break;
+            case DESC_URL:
+                ctx->descriptionState = DESC_DESCRIPTION;
+                break;
+            case DESC_DESCRIPTION:
+                ctx->descriptionState = DESC_DESCRIPTION;
+                break;
+            default:
+                THROW(ERROR_INVALID_STATE);
+                break;
+        }
+    }
+    sendSuccessNoIdle();
+}
+
+void displayDescriptionPart(volatile unsigned int *flags) {
+    switch (ctx->descriptionState) {
         case DESC_NAME:
-            ctx->descriptionState = DESC_URL;
+            ux_flow_init(0, ux_sign_description_name, NULL);
             break;
         case DESC_URL:
-            ctx->descriptionState = DESC_DESCRIPTION;
+            ux_flow_init(0, ux_sign_description_url, NULL);
             break;
         case DESC_DESCRIPTION:
-            ctx->descriptionState = DESC_DESCRIPTION;
+            ux_flow_init(0, ux_sign_description_description, NULL);
             break;
         default:
             THROW(ERROR_INVALID_STATE);
             break;
-        }
     }
-    sendSuccessNoIdle();
+    *flags |= IO_ASYNCH_REPLY;
 }

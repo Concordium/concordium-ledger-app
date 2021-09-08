@@ -14,30 +14,30 @@ UX_STEP_CB(
     sendSuccessNoIdle(),
     {
         "arIdentity",
-            (char *) global.withDescription.signAddAnonymityRevokerContext.arIdentity
-            });
+        (char *) global.withDescription.signAddAnonymityRevokerContext.arIdentity
+    });
 UX_FLOW(ux_sign_add_anonymity_revoker_start,
-        &ux_sign_flow_shared_review,
-        &ux_sign_add_anonymity_revoker_arIdentity
-    );
+    &ux_sign_flow_shared_review,
+    &ux_sign_add_anonymity_revoker_arIdentity
+);
 
 UX_STEP_NOCB(
     ux_sign_add_anonymity_revoker_public_key,
     bnnn_paging,
     {
         "Public key",
-            (char *) global.withDescription.signAddAnonymityRevokerContext.publicKey
-            });
+        (char *) global.withDescription.signAddAnonymityRevokerContext.publicKey
+    });
 UX_FLOW(ux_sign_add_anonymity_revoker_finish,
-        &ux_sign_add_anonymity_revoker_public_key,
-        &ux_sign_flow_shared_sign,
-        &ux_sign_flow_shared_decline
-    );
+    &ux_sign_add_anonymity_revoker_public_key,
+    &ux_sign_flow_shared_sign,
+    &ux_sign_flow_shared_decline
+);
 
-#define P1_INITIAL                                    0x00
-#define P1_DESCRIPTION_LENGTH          0x01        // Used for both the name, url and description text.
-#define P1_DESCRIPTION                         0x02        // Used for both the name, url and description text..
-#define P1_PUBLIC_KEY                            0x03
+#define P1_INITIAL                     0x00
+#define P1_DESCRIPTION_LENGTH          0x01        // Used for the name, url, description.
+#define P1_DESCRIPTION                 0x02        // Used for the name, url, description.
+#define P1_PUBLIC_KEY                  0x03
 
 void handleSignAddAnonymityRevoker(uint8_t *cdata, uint8_t p1, uint8_t dataLength, volatile unsigned int *flags, bool isInitialCall) {
     if (isInitialCall) {
@@ -92,40 +92,23 @@ void handleSignAddAnonymityRevoker(uint8_t *cdata, uint8_t p1, uint8_t dataLengt
         if (desc_ctx->textLength < 0) {
             // We received more bytes than expected.
             THROW(ERROR_INVALID_STATE);
-            return;
+        } else if (desc_ctx->textLength==0) {
+            // If we have received all of the current part of the description, update the state.
+            switch (desc_ctx->descriptionState) {
+                case DESC_DESCRIPTION:
+                    ctx->state = TX_ADD_ANONYMITY_REVOKER_PUBLIC_KEY;
+                    break;
+                default:
+                    ctx->state = TX_ADD_ANONYMITY_REVOKER_DESCRIPTION_LENGTH;
+                    break;
+            }
         }
-
-        switch (desc_ctx->descriptionState) {
-        case DESC_NAME:
-            if (desc_ctx->textLength==0) {
-                ctx->state = TX_ADD_ANONYMITY_REVOKER_DESCRIPTION_LENGTH;
-            }
-            ux_flow_init(0, ux_sign_description_name, NULL);
-            *flags |= IO_ASYNCH_REPLY;
-            break;
-        case DESC_URL:
-            if (desc_ctx->textLength==0) {
-                ctx->state = TX_ADD_ANONYMITY_REVOKER_DESCRIPTION_LENGTH;
-            }
-            ux_flow_init(0, ux_sign_description_url, NULL);
-            *flags |= IO_ASYNCH_REPLY;
-            break;
-        case DESC_DESCRIPTION:
-            if (desc_ctx->textLength==0) {
-                ctx->state = TX_ADD_ANONYMITY_REVOKER_PUBLIC_KEY;
-            }
-            ux_flow_init(0, ux_sign_description_description, NULL);
-            *flags |= IO_ASYNCH_REPLY;
-            break;
-        default:
-            THROW(ERROR_INVALID_STATE);
-            break;
-        }
+        displayDescriptionPart(flags);
     } else if (p1 == P1_PUBLIC_KEY && ctx->state == TX_ADD_ANONYMITY_REVOKER_PUBLIC_KEY) {
         uint8_t publicKey[96];
         memmove(publicKey, cdata, 96);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, publicKey, 96, NULL, 0);
-        toHex(publicKey, 96, ctx->publicKey);
+        toPaginatedHex(publicKey, 96, ctx->publicKey);
         cdata += 96;
 
         ux_flow_init(0, ux_sign_add_anonymity_revoker_finish, NULL);

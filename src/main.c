@@ -19,6 +19,7 @@
 #include "os.h"
 #include "cx.h"
 #include "os_io_seproxyhal.h"
+#include <stdbool.h>
 #include "menu.h"
 #include "getPublicKey.h"
 #include "signTransfer.h"
@@ -109,6 +110,10 @@ accountSender_t global_account_sender;
 
 #define INS_SIGN_UPDATE_CREDENTIAL      0x31
 
+#define INS_SIGN_TRANSFER_WITH_MEMO 0x32
+#define INS_ENCRYPTED_AMOUNT_TRANSFER_WITH_MEMO 0x33
+#define INS_SIGN_TRANSFER_WITH_SCHEDULE_AND_MEMO 0x34
+
 // Main entry of application that listens for APDU commands that will be received from the
 // computer. The APDU commands control what flow is activated, i.e. which control flow is initiated.
 static void concordium_main(void) {
@@ -163,8 +168,14 @@ static void concordium_main(void) {
                     case INS_SIGN_TRANSFER:
                         handleSignTransfer(cdata, &flags);
                         break;
+                    case INS_SIGN_TRANSFER_WITH_MEMO:
+                        handleSignTransferWithMemo(cdata, p1, lc, &flags, isInitialCall);
+                        break;
                     case INS_SIGN_TRANSFER_WITH_SCHEDULE:
                         handleSignTransferWithSchedule(cdata, p1, &flags, isInitialCall);
+                        break;
+                    case INS_SIGN_TRANSFER_WITH_SCHEDULE_AND_MEMO:
+                        handleSignTransferWithScheduleAndMemo(cdata, p1, lc, &flags, isInitialCall);
                         break;
                     case INS_CREDENTIAL_DEPLOYMENT:
                         handleSignCredentialDeployment(cdata, p1, p2, &flags, isInitialCall);
@@ -180,6 +191,9 @@ static void concordium_main(void) {
                         break;
                     case INS_ENCRYPTED_AMOUNT_TRANSFER:
                         handleSignEncryptedAmountTransfer(cdata, p1, lc, &flags, isInitialCall);
+                        break;
+                    case INS_ENCRYPTED_AMOUNT_TRANSFER_WITH_MEMO:
+                        handleSignEncryptedAmountTransferWithMemo(cdata, p1, lc, &flags, isInitialCall);
                         break;
                     case INS_TRANSFER_TO_PUBLIC:
                         handleSignTransferToPublic(cdata, p1, lc, &flags, isInitialCall);
@@ -287,7 +301,7 @@ void io_seproxyhal_display(const bagl_element_t *element) {
     io_seproxyhal_display_default((bagl_element_t *)element);
 }
 
-unsigned char io_event(unsigned char channel) {
+unsigned char io_event(__attribute__((unused)) unsigned char channel) {
 	// can't have more than one tag in the reply, not supported yet.
 	switch (G_io_seproxyhal_spi_buffer[0]) {
         case SEPROXYHAL_TAG_FINGER_EVENT:

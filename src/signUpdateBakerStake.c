@@ -30,7 +30,6 @@ void handleSignUpdateBakerStake(uint8_t *cdata, volatile unsigned int *flags) {
     uint64_t amount = U8BE(cdata, 0);
     amountToGtuDisplay(ctx->amount, amount);
     cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 8, NULL, 0);
-    cdata += 8;
 
     ux_flow_init(0, ux_sign_update_baker_stake, NULL);
     *flags |= IO_ASYNCH_REPLY;

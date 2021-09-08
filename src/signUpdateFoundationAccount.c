@@ -31,7 +31,6 @@ void handleSignUpdateFoundationAccount(uint8_t *cdata, volatile unsigned int *fl
     // The foundation account address is 32 bytes.
     uint8_t foundationAccount[32];
     memmove(foundationAccount, cdata, 32);
-    cdata += 32;
     cx_hash((cx_hash_t *) &tx_state->hash, 0, foundationAccount, 32, NULL, 0);
 
     // Used to display the foundation account address
@@ -40,7 +39,7 @@ void handleSignUpdateFoundationAccount(uint8_t *cdata, volatile unsigned int *fl
       // The received address bytes were not valid a valid base58 encoding, so the transaction is invalid.
         THROW(ERROR_INVALID_TRANSACTION);
     }
-    ctx->foundationAccountAddress[50] = '\0';
+    ctx->foundationAccountAddress[55] = '\0';
 
     ux_flow_init(0, ux_sign_foundation_account_address, NULL);
     *flags |= IO_ASYNCH_REPLY;

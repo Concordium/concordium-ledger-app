@@ -34,7 +34,7 @@ void handleSignTransferToPublic(uint8_t *cdata, uint8_t p1, uint8_t dataLength, 
     if (p1 == P1_INITIAL && ctx->state == TX_TRANSFER_TO_PUBLIC_INITIAL) {
         cdata += parseKeyDerivationPath(cdata);
         cx_sha256_init(&tx_state->hash);
-        cdata += hashAccountTransactionHeaderAndKind(cdata, TRANSFER_TO_PUBLIC);
+        hashAccountTransactionHeaderAndKind(cdata, TRANSFER_TO_PUBLIC);
 
         // Ask the caller for the next command.
         ctx->state = TX_TRANSFER_TO_PUBLIC_REMAINING_AMOUNT;
