@@ -68,7 +68,6 @@ void handleSignUpdateMintDistribution(uint8_t *cdata, volatile unsigned int *fla
     uint32_t finalizationReward = U4BE(cdata, 0);
     int finalizationRewardLength = numberToText(ctx->finalizationReward, finalizationReward);
     cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 4, NULL, 0);
-    cdata += 4;
     memmove(ctx->finalizationReward + finalizationRewardLength, fraction, 10);
 
     ux_flow_init(0, ux_sign_mint_rate, NULL);

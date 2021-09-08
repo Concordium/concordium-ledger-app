@@ -90,7 +90,6 @@ void handleSignUpdateProtocol(uint8_t *cdata, uint8_t p1, uint8_t dataLength, vo
         // Read payload length.
         ctx->payloadLength = U8BE(cdata, 0);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 8, NULL, 0);
-        cdata += 8;
 
         ctx->textState = MESSAGE;
         ctx->state = TX_UPDATE_PROTOCOL_TEXT_LENGTH;
@@ -100,7 +99,6 @@ void handleSignUpdateProtocol(uint8_t *cdata, uint8_t p1, uint8_t dataLength, vo
         // Read message text length
         ctx->textLength = U8BE(cdata, 0);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 8, NULL, 0);
-        cdata += 8;
 
         // Update payload length to ensure we end up with the length of the auxiliary data.
         ctx->payloadLength -= 8;

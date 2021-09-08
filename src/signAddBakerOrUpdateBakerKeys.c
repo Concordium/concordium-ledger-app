@@ -68,9 +68,9 @@ void handleSignAddBakerOrUpdateBakerKeys(uint8_t *cdata, uint8_t p1, uint8_t p2,
 
         cx_sha256_init(&tx_state->hash);
         if (p2 == P2_ADD_BAKER) {
-            cdata += hashAccountTransactionHeaderAndKind(cdata, ADD_BAKER);
+            hashAccountTransactionHeaderAndKind(cdata, ADD_BAKER);
         } else if (p2 == P2_UPDATE_BAKER_KEYS) {
-            cdata += hashAccountTransactionHeaderAndKind(cdata, UPDATE_BAKER_KEYS);
+            hashAccountTransactionHeaderAndKind(cdata, UPDATE_BAKER_KEYS);
         } else {
             THROW(ERROR_INVALID_TRANSACTION);
         }
@@ -92,7 +92,6 @@ void handleSignAddBakerOrUpdateBakerKeys(uint8_t *cdata, uint8_t p1, uint8_t p2,
 
         // Baker aggregation verify key
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 96, NULL, 0);
-        cdata += 96;
 
         ctx->state = ADD_BAKER_PROOFS_AMOUNT_RESTAKE;
         sendSuccessNoIdle();

@@ -58,7 +58,6 @@ void handleSignUpdateTransactionFeeDistribution(uint8_t *cdata, volatile unsigne
     uint32_t gasAccountFee = U4BE(cdata, 0);
     int gasAccountFeeLength = numberToText(ctx->gasAccount, gasAccountFee);
     cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 4, NULL, 0);
-    cdata += 4;
     memmove(ctx->gasAccount + gasAccountFeeLength, fraction, 9);
 
     ux_flow_init(0, ux_sign_transaction_dist, NULL);
