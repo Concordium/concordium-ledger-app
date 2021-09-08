@@ -177,7 +177,7 @@ void getIdentityAccountDisplay(uint8_t *dst) {
     int offset = bin2dec(dst, identityIndex) - 1;
     memmove(dst + offset, "/", 1);
     offset = offset + 1;
-    offset = offset + bin2dec(dst + offset, accountIndex);
+    bin2dec(dst + offset, accountIndex);
 }
 
 /**
@@ -194,8 +194,7 @@ int hashHeaderAndType(uint8_t *cdata, uint8_t headerLength, uint8_t validType) {
         THROW(ERROR_INVALID_TRANSACTION);
     }
     cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 1, NULL, 0);
-    cdata += 1;
-
+    
     return headerLength + 1;
 }
 
@@ -227,6 +226,33 @@ int hashAccountTransactionHeaderAndKind(uint8_t *cdata, uint8_t validTransaction
  */
 int hashUpdateHeaderAndType(uint8_t *cdata, uint8_t validUpdateType) {
     return hashHeaderAndType(cdata, UPDATE_HEADER_LENGTH, validUpdateType);
+}
+
+int handleHeaderAndToAddress(uint8_t *cdata, uint8_t kind, uint8_t *recipientDst, size_t recipientSize) {
+    // Parse the key derivation path, which should always be the first thing received
+    // in a command to the Ledger application.
+    int keyPathLength = parseKeyDerivationPath(cdata);
+    cdata += keyPathLength;
+
+    // Initialize the hash that will be the hash of the whole transaction, which is what will be signed
+    // if the user approves.
+    cx_sha256_init(&tx_state->hash);
+    int headerLength = hashAccountTransactionHeaderAndKind(cdata, kind);
+    cdata += headerLength;
+
+    // Extract the recipient address and add to the hash.
+    uint8_t toAddress[32];
+    memmove(toAddress, cdata, 32);
+    cx_hash((cx_hash_t *) &tx_state->hash, 0, toAddress, 32, NULL, 0);
+
+    // The recipient address is in a base58 format, so we need to encode it to be
+    // able to display in a humand-readable way.
+    if (base58check_encode(toAddress, sizeof(toAddress), recipientDst, &recipientSize) != 0) {
+        // The received address bytes are not a valid base58 encoding.
+        THROW(ERROR_INVALID_TRANSACTION);
+    }
+    recipientDst[55] = '\0';
+    return keyPathLength + headerLength + 32;
 }
 
 void sendUserRejection() {

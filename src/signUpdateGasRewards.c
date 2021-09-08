@@ -77,7 +77,6 @@ void handleSignUpdateGasRewards(uint8_t *cdata, volatile unsigned int *flags) {
     uint32_t gasChainUpdate = U4BE(cdata, 0);
     int gasChainUpdateLength = numberToText(ctx->gasChainUpdate, gasChainUpdate);
     cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 4, NULL, 0);
-    cdata += 4;
     memmove(ctx->gasChainUpdate + gasChainUpdateLength, fraction, 10);
 
     ux_flow_init(0, ux_sign_gas_rewards, NULL);

@@ -27,6 +27,9 @@
 #include "signUpdateElectionDifficulty.h"
 #include "signUpdateBakerStakeThreshold.h"
 #include "signHigherLevelKeyUpdate.h"
+#include "signAddIdentityProvider.h"
+
+#include "memo.h"
 
 #ifndef _GLOBALS_H_
 #define _GLOBALS_H_
@@ -54,11 +57,14 @@ typedef enum {
     TRANSFER_TO_ENCRYPTED = 17,
     TRANSFER_TO_PUBLIC = 18,
     TRANSFER_WITH_SCHEDULE = 19,
-    UPDATE_CREDENTIALS = 20
+    UPDATE_CREDENTIALS = 20,
+    TRANSFER_WITH_MEMO = 22,
+    ENCRYPTED_AMOUNT_TRANSFER_WITH_MEMO = 23,
+    TRANSFER_WITH_SCHEDULE_WITH_MEMO = 24
 } transactionKind_e;
 
 /**
- * Enumeration of all available update types. The exact numbering has 
+ * Enumeration of all available update types. The exact numbering has
  * to correspond with the on-chain values as it is used as part of the
  * transaction serialization, and it is used to validate that a received
  * transaction has a valid type.
@@ -76,7 +82,8 @@ typedef enum {
     UPDATE_TYPE_BAKER_STAKE_THRESHOLD = 9,
     UPDATE_TYPE_UPDATE_ROOT_KEYS = 10,
     UPDATE_TYPE_UPDATE_LEVEL1_KEYS = 11,
-    UPDATE_TYPE_UPDATE_LEVEL2_KEYS = 12
+    UPDATE_TYPE_UPDATE_LEVEL2_KEYS = 12,
+    UPDATE_TYPE_ADD_IDENTITY_PROVIDER = 13
 } updateType_e;
 
 typedef struct {
@@ -107,6 +114,15 @@ typedef struct {
 } accountSender_t;
 extern accountSender_t global_account_sender;
 
+typedef struct {
+    union {
+        signTransferContext_t signTransferContext;
+        signEncryptedAmountToTransfer_t signEncryptedAmountToTransfer;
+        signTransferWithScheduleContext_t signTransferWithScheduleContext;
+    };
+    memoContext_t memoContext;
+
+} transferWithMemo_t;
 /**
  * As the memory we have available is very limited, the context for each instruction is stored
  * in a shared global union, so that we do not use more memory than that of the most memory
@@ -119,11 +135,8 @@ typedef union {
     signPublicInformationForIp_t signPublicInformationForIp;
     signCredentialDeploymentContext_t signCredentialDeploymentContext;
 
-    signTransferWithScheduleContext_t signTransferWithScheduleContext;
-    signTransferContext_t signTransferContext;
     signTransferToEncrypted_t signTransferToEncrypted;
     signTransferToPublic_t signTransferToPublic;
-    signEncryptedAmountToTransfer_t signEncryptedAmountToTransfer;
     signAddBakerContext_t signAddBaker;
     signUpdateBakerStakeContext_t signUpdateBakerStake;
     signUpdateBakerRestakeEarningsContext_t signUpdateBakerRestakeEarnings;
@@ -138,6 +151,8 @@ typedef union {
     signElectionDifficultyContext_t signElectionDifficulty;
     signUpdateBakerStakeThresholdContext_t signUpdateBakerStakeThreshold;
     signUpdateKeysWithRootKeysContext_t signUpdateKeysWithRootKeysContext;
+    transferWithMemo_t withMemo;
+    signAddIdentityProviderContext_t signAddIdentityProviderContext;
 } instructionContext;
 extern instructionContext global;
 

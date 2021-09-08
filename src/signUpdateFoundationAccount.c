@@ -31,7 +31,6 @@ void handleSignUpdateFoundationAccount(uint8_t *cdata, volatile unsigned int *fl
     // The foundation account address is 32 bytes.
     uint8_t foundationAccount[32];
     memmove(foundationAccount, cdata, 32);
-    cdata += 32;
     cx_hash((cx_hash_t *) &tx_state->hash, 0, foundationAccount, 32, NULL, 0);
 
     // Used to display the foundation account address

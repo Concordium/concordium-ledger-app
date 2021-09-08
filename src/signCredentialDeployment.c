@@ -202,7 +202,6 @@ void parseVerificationKey(uint8_t *buffer) {
 
     uint8_t verificationKey[32];
     memmove(verificationKey, buffer, 32);
-    buffer += 32;
     cx_hash((cx_hash_t *) &tx_state->hash, 0, verificationKey, 32, NULL, 0);
 
     // Convert to a human-readable format.
@@ -305,8 +304,7 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, uint8_t p2,
     }
 
     if (p1 == P1_INITIAL_PACKET && ctx->state == TX_CREDENTIAL_DEPLOYMENT_INITIAL) {
-        int bytesRead = parseKeyDerivationPath(dataBuffer);
-        dataBuffer += bytesRead;
+        parseKeyDerivationPath(dataBuffer);
 
         // Initialize values.
         cx_sha256_init(&tx_state->hash);
@@ -354,7 +352,6 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, uint8_t p2,
         ctx->anonymityRevocationListLength = U2BE(dataBuffer, 0);
         bin2dec(ctx->anonymityRevocationThreshold + arThresholdLength + 8, ctx->anonymityRevocationListLength);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 2, NULL, 0);
-        dataBuffer += 2;
 
         // Initialize values for later.
         cx_sha256_init(&attributeHash);
@@ -382,7 +379,6 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, uint8_t p2,
         memmove(encIdCredPubShare, dataBuffer, 96);
         toPaginatedHex(encIdCredPubShare, sizeof(encIdCredPubShare), ctx->encIdCredPubShare);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, encIdCredPubShare, 96, NULL, 0);
-        dataBuffer += 96;
 
         if (ctx->anonymityRevocationListLength == 1) {
             ctx->state = TX_CREDENTIAL_DEPLOYMENT_CREDENTIAL_DATES;
@@ -417,8 +413,7 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, uint8_t p2,
         // Read attribute list length
         ctx->attributeListLength = U2BE(dataBuffer, 0);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 2, NULL, 0);
-        dataBuffer += 2;
-
+        
         if (ctx->attributeListLength == 0) {
             ctx->state = TX_CREDENTIAL_DEPLOYMENT_LENGTH_OF_PROOFS;
         } else {

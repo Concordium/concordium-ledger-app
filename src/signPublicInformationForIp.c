@@ -91,7 +91,6 @@ void handleSignPublicInformationForIp(uint8_t *cdata, uint8_t p1, volatile unsig
         // Parse number of public-keys that will be received next.
         ctx->publicKeysLength = cdata[0];
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 1, NULL, 0);
-        cdata += 1;
 
         ctx->state = TX_PUBLIC_INFO_FOR_IP_VERIFICATION_KEY;
         ux_flow_init(0, ux_review_public_info_for_ip, NULL);
@@ -112,7 +111,6 @@ void handleSignPublicInformationForIp(uint8_t *cdata, uint8_t p1, volatile unsig
         uint8_t publicKey[32];
         memmove(publicKey, cdata, 32);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, publicKey, 32, NULL, 0);
-        cdata += 32;
         toPaginatedHex(publicKey, 32, ctx->publicKey);
 
         ctx->publicKeysLength -= 1;
@@ -125,7 +123,6 @@ void handleSignPublicInformationForIp(uint8_t *cdata, uint8_t p1, volatile unsig
         // Read the threshold byte and parse it to display it.
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 1, NULL, 0);
         bin2dec(ctx->threshold, cdata[0]);
-        cdata += 1;
 
         ux_flow_init(0, ux_sign_public_info_for_ip_threshold, NULL);
         *flags |= IO_ASYNCH_REPLY;
