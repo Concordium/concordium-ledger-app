@@ -11,3 +11,4 @@ concordium-ledger-app-*
 .idea
 **/target/
 *.lock
+/tests/node_modules
