@@ -39,6 +39,18 @@ UX_FLOW(ux_export_prf_key,
     &ux_export_prf_key_0_step
 );
 
+UX_STEP_CB(
+    ux_export_prf_key_recovery_0_step,
+    bn,
+    exportPrivateKey(false),
+    {
+        "Recover credentials",
+        (char *) global.exportPrivateKeySeedContext.display
+    });
+UX_FLOW(ux_export_prf_key_recovery,
+    &ux_export_prf_key_recovery_0_step
+);
+
 #define ID_CRED_SEC 0
 #define PRF_KEY 1
 
@@ -78,12 +90,13 @@ void exportPrivateKey(bool exportBoth) {
 #define NORMAL_ACCOUNTS 0
 
 // Export the PRF key seed
-#define P1_PRF_KEY  0x00
+#define P1_PRF_KEY           0x00
+#define P1_PRF_KEY_RECOVERY  0x01
 // Export the PRF key seed and the IdCredSec seed
-#define P1_BOTH     0x01
+#define P1_BOTH              0x02
 
 void handleExportPrivateKeySeed(uint8_t *dataBuffer, uint8_t p1, uint8_t p2, volatile unsigned int *flags) {
-    if ((p1 != P1_BOTH && p1 != P1_PRF_KEY) || p2 != 0x01) {
+    if ((p1 != P1_BOTH && p1 != P1_PRF_KEY && p1 != P1_PRF_KEY_RECOVERY) || p2 != 0x01) {
         THROW(ERROR_INVALID_PARAM);
     }
 
@@ -107,6 +120,8 @@ void handleExportPrivateKeySeed(uint8_t *dataBuffer, uint8_t p1, uint8_t p2, vol
 
     if (p1 == P1_BOTH) {
         ux_flow_init(0, ux_export_private_key, NULL);
+    } else if (p1 == P1_PRF_KEY_RECOVERY) {
+        ux_flow_init(0, ux_export_prf_key_recovery, NULL);
     } else if (p1 == P1_PRF_KEY) {
         ux_flow_init(0, ux_export_prf_key, NULL);
     }
