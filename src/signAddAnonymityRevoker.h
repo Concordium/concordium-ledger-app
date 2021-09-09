@@ -19,7 +19,7 @@ typedef enum {
 
 typedef struct {
     uint32_t payloadLength;
-    char publicKey[97];
+    char publicKey[205];
     uint8_t arIdentity[5];
     addAnonymityRevokerState_t state;
 } signAddAnonymityRevokerContext_t;
