@@ -93,21 +93,21 @@ UX_FLOW(ux_sign_add_identity_provider_finish,
 void handleDescriptionPart(void) {
     if (ctx->textLength == 0) {
         switch (ctx->descriptionState) {
-        case NAME:
-            ctx->state = TX_ADD_IDENTITY_PROVIDER_DESCRIPTION_LENGTH;
-            ctx->descriptionState = URL;
-            break;
-        case URL:
-            ctx->state = TX_ADD_IDENTITY_PROVIDER_DESCRIPTION_LENGTH;
-            ctx->descriptionState = DESCRIPTION;
-            break;
-        case DESCRIPTION:
-            ctx->state = TX_ADD_IDENTITY_PROVIDER_VERIFY_KEY;
-            ctx->verifyKeyLength = ctx->payloadLength - CDI_VERIFY_KEY_LENGTH;
-            break;
-        default:
-            THROW(ERROR_INVALID_STATE);
-            break;
+            case NAME:
+                ctx->state = TX_ADD_IDENTITY_PROVIDER_DESCRIPTION_LENGTH;
+                ctx->descriptionState = URL;
+                break;
+            case URL:
+                ctx->state = TX_ADD_IDENTITY_PROVIDER_DESCRIPTION_LENGTH;
+                ctx->descriptionState = DESCRIPTION;
+                break;
+            case DESCRIPTION:
+                ctx->state = TX_ADD_IDENTITY_PROVIDER_VERIFY_KEY;
+                ctx->verifyKeyLength = ctx->payloadLength - CDI_VERIFY_KEY_LENGTH;
+                break;
+            default:
+                THROW(ERROR_INVALID_STATE);
+                break;
         }
     }
     sendSuccessNoIdle();
@@ -150,7 +150,7 @@ void handleSignAddIdentityProvider(uint8_t *cdata, uint8_t p1, uint8_t dataLengt
         ctx->payloadLength -= 4;
 
         ctx->state = TX_ADD_IDENTITY_PROVIDER_DESCRIPTION;
-        sendSuccessNoIdle();
+        handleDescriptionPart();
     } else if (p1 == P1_DESCRIPTION && ctx->state == TX_ADD_IDENTITY_PROVIDER_DESCRIPTION) {
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, dataLength, NULL, 0);
 
