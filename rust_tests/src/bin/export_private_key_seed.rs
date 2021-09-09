@@ -18,10 +18,23 @@ fn main() {
     let prf_key_seed = hex::encode(result.data);
     println!("prf_key seed (hex): {}", prf_key_seed);
 
-    let both_command = ApduCommand {
+    let prf_recovery_command = ApduCommand {
         cla: 224,
         ins: 5,
         p1: 1,
+        p2: 1,
+        length: 0,
+        data: identity.clone()
+    };
+
+    let result = ledger.exchange(prf_recovery_command).unwrap();
+    let prf_key_seed = hex::encode(result.data);
+    println!("prf_key seed (hex): {}", prf_key_seed);
+
+    let both_command = ApduCommand {
+        cla: 224,
+        ins: 5,
+        p1: 2,
         p2: 1,
         length: 0,
         data: identity
