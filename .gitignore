@@ -12,3 +12,4 @@ concordium-ledger-app-*
 **/target/
 *.lock
 /tests/node_modules
+/tests/*.eslintcache

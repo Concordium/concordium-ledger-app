@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "End-to-end test suite for Concordium Ledger application",
   "dependencies": {
+    "@zondax/zemu": "^0.16.5",
     "jest": "^27.1.1",
     "prettier": "^2.3.2",
     "ts-jest": "^27.0.5"
