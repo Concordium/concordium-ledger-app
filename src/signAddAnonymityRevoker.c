@@ -10,10 +10,10 @@ static tx_state_t *tx_state = &global_tx_state;
 
 UX_STEP_CB(
     ux_sign_add_anonymity_revoker_arIdentity,
-    bnnn_paging,
+    bn,
     sendSuccessNoIdle(),
     {
-        "arIdentity",
+        "AR Identity",
         (char *) global.withDescription.signAddAnonymityRevokerContext.arIdentity
     });
 UX_FLOW(ux_sign_add_anonymity_revoker_start,
@@ -76,6 +76,11 @@ void handleSignAddAnonymityRevoker(uint8_t *cdata, uint8_t p1, uint8_t dataLengt
         ctx->state = TX_ADD_ANONYMITY_REVOKER_DESCRIPTION;
         handleDescriptionPart();
     } else if (p1 == P1_DESCRIPTION && ctx->state == TX_ADD_ANONYMITY_REVOKER_DESCRIPTION) {
+        if (desc_ctx->textLength < dataLength) {
+            // We received more bytes than expected.
+            THROW(ERROR_INVALID_STATE);
+        }
+
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, dataLength, NULL, 0);
 
         memmove(desc_ctx->text, cdata, dataLength);
@@ -87,10 +92,7 @@ void handleSignAddAnonymityRevoker(uint8_t *cdata, uint8_t p1, uint8_t dataLengt
             memmove(desc_ctx->text + dataLength, "\0", 1);
         }
 
-        if (desc_ctx->textLength < 0) {
-            // We received more bytes than expected.
-            THROW(ERROR_INVALID_STATE);
-        } else if (desc_ctx->textLength==0) {
+        if (desc_ctx->textLength==0) {
             // If we have received all of the current part of the description, update the state.
             switch (desc_ctx->descriptionState) {
                 case DESC_DESCRIPTION:

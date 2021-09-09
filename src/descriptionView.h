@@ -12,6 +12,7 @@ typedef enum {
 
 typedef struct {
     uint32_t textLength;
+    uint8_t header[12];
     uint8_t text[255];
     descriptionState_t descriptionState;
 } descriptionContext_t;
