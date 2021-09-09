@@ -12,11 +12,11 @@ UX_STEP_CB(
     handleDescriptionPart(),
     {
         "Name",
-            (char *) global.withDescription.descriptionContext.text
-            });
+        (char *) global.withDescription.descriptionContext.text
+    });
 UX_FLOW(ux_sign_description_name,
-        &ux_sign_add_identity_provider_name_step
-    );
+    &ux_sign_add_identity_provider_name_step
+);
 
 UX_STEP_CB(
     ux_sign_add_identity_provider_url_step,
@@ -24,11 +24,11 @@ UX_STEP_CB(
     handleDescriptionPart(),
     {
         "URL",
-            (char *) global.withDescription.descriptionContext.text
-            });
+        (char *) global.withDescription.descriptionContext.text
+    });
 UX_FLOW(ux_sign_description_url,
-        &ux_sign_add_identity_provider_url_step
-    );
+    &ux_sign_add_identity_provider_url_step
+);
 
 UX_STEP_CB(
     ux_sign_add_identity_provider_description_step,
@@ -36,11 +36,11 @@ UX_STEP_CB(
     handleDescriptionPart(),
     {
         "Description",
-            (char *) global.withDescription.descriptionContext.text
-            });
+        (char *) global.withDescription.descriptionContext.text
+    });
 UX_FLOW(ux_sign_description_description,
-        &ux_sign_add_identity_provider_description_step
-    );
+    &ux_sign_add_identity_provider_description_step
+);
 
 void handleDescriptionPart(void) {
     if (ctx->textLength == 0) {
