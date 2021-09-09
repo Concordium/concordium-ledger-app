@@ -20,4 +20,5 @@ for generating BLS12-381 private keys.
 | P1 | P2 | CDATA | Comment |
 |--------|--------|------------|----|
 | `0x00` | `0x01` | `identity[uint32]` | Export of PRF key |
-| `0x01` | `0x01` | `identity[uint32]` | Export of PRF key and IdCredSec |
+| `0x01` | `0x01` | `identity[uint32]` | Export of PRF key with alternative display (for recovery) |
+| `0x02` | `0x01` | `identity[uint32]` | Export of PRF key and IdCredSec |
