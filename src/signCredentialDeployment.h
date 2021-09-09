@@ -43,14 +43,10 @@ typedef struct {
 
     char accountVerificationKey[68];
     uint8_t signatureThreshold[4];
-    char regIdCred[102];
 
-    uint8_t identityProviderIdentity[4];
-    uint8_t anonymityRevocationThreshold[4];
-
+    uint8_t anonymityRevocationThreshold[13];
     uint16_t anonymityRevocationListLength;
 
-    uint8_t arIdentity[11];
     char encIdCredPubShare[204];
 
     uint8_t validTo[8];
