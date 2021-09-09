@@ -2,6 +2,7 @@
 #define _DESCRIPTION_VIEW_H_
 
 void displayDescriptionPart(volatile unsigned int *flags);
+void handleDescriptionPart(void);
 
 typedef enum {
     DESC_NAME,

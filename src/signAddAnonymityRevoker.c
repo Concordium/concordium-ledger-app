@@ -74,7 +74,7 @@ void handleSignAddAnonymityRevoker(uint8_t *cdata, uint8_t p1, uint8_t dataLengt
         ctx->payloadLength -= 4;
 
         ctx->state = TX_ADD_ANONYMITY_REVOKER_DESCRIPTION;
-        sendSuccessNoIdle();
+        handleDescriptionPart();
     } else if (p1 == P1_DESCRIPTION && ctx->state == TX_ADD_ANONYMITY_REVOKER_DESCRIPTION) {
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, dataLength, NULL, 0);
 
