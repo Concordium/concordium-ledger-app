@@ -39,6 +39,20 @@ UX_FLOW(ux_sign_add_anonymity_revoker_finish,
 #define P1_DESCRIPTION                 0x02        // Used for the name, url, description.
 #define P1_PUBLIC_KEY                  0x03
 
+void checkIfDescriptionPartIsDoneAnonymityRevoker() {
+    if (desc_ctx->textLength==0) {
+        // If we have received all of the current part of the description, update the state.
+        switch (desc_ctx->descriptionState) {
+            case DESC_DESCRIPTION:
+                ctx->state = TX_ADD_ANONYMITY_REVOKER_PUBLIC_KEY;
+                break;
+            default:
+                ctx->state = TX_ADD_ANONYMITY_REVOKER_DESCRIPTION_LENGTH;
+                break;
+        }
+    }
+}
+
 void handleSignAddAnonymityRevoker(uint8_t *cdata, uint8_t p1, uint8_t dataLength, volatile unsigned int *flags, bool isInitialCall) {
     if (isInitialCall) {
         ctx->state = TX_ADD_ANONYMITY_REVOKER_INITIAL;
@@ -74,6 +88,8 @@ void handleSignAddAnonymityRevoker(uint8_t *cdata, uint8_t p1, uint8_t dataLengt
         ctx->payloadLength -= 4;
 
         ctx->state = TX_ADD_ANONYMITY_REVOKER_DESCRIPTION;
+
+        checkIfDescriptionPartIsDoneAnonymityRevoker();
         handleDescriptionPart();
     } else if (p1 == P1_DESCRIPTION && ctx->state == TX_ADD_ANONYMITY_REVOKER_DESCRIPTION) {
         if (desc_ctx->textLength < dataLength) {
@@ -92,17 +108,7 @@ void handleSignAddAnonymityRevoker(uint8_t *cdata, uint8_t p1, uint8_t dataLengt
             memmove(desc_ctx->text + dataLength, "\0", 1);
         }
 
-        if (desc_ctx->textLength==0) {
-            // If we have received all of the current part of the description, update the state.
-            switch (desc_ctx->descriptionState) {
-                case DESC_DESCRIPTION:
-                    ctx->state = TX_ADD_ANONYMITY_REVOKER_PUBLIC_KEY;
-                    break;
-                default:
-                    ctx->state = TX_ADD_ANONYMITY_REVOKER_DESCRIPTION_LENGTH;
-                    break;
-            }
-        }
+        checkIfDescriptionPartIsDoneAnonymityRevoker();
         displayDescriptionPart(flags);
     } else if (p1 == P1_PUBLIC_KEY && ctx->state == TX_ADD_ANONYMITY_REVOKER_PUBLIC_KEY) {
         uint8_t publicKey[96];

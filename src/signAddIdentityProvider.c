@@ -53,6 +53,21 @@ UX_FLOW(ux_sign_add_identity_provider_finish,
 
 #define CDI_VERIFY_KEY_LENGTH 32
 
+void checkIfDescriptionPartIsDoneIdentityProvider() {
+    if (desc_ctx->textLength == 0) {
+        // If we have received all of the current part of the description, update the state.
+        switch (desc_ctx->descriptionState) {
+            case DESC_DESCRIPTION:
+                ctx->state = TX_ADD_IDENTITY_PROVIDER_VERIFY_KEY;
+                ctx->verifyKeyLength = ctx->payloadLength - CDI_VERIFY_KEY_LENGTH;
+                break;
+            default:
+                ctx->state = TX_ADD_IDENTITY_PROVIDER_DESCRIPTION_LENGTH;
+                break;
+        }
+    }
+}
+
 void handleSignAddIdentityProvider(uint8_t *cdata, uint8_t p1, uint8_t dataLength, volatile unsigned int *flags, bool isInitialCall) {
     if (isInitialCall) {
         ctx->state = TX_ADD_IDENTITY_PROVIDER_INITIAL;
@@ -90,6 +105,8 @@ void handleSignAddIdentityProvider(uint8_t *cdata, uint8_t p1, uint8_t dataLengt
         ctx->payloadLength -= 4;
 
         ctx->state = TX_ADD_IDENTITY_PROVIDER_DESCRIPTION;
+
+        checkIfDescriptionPartIsDoneIdentityProvider();
         handleDescriptionPart();
     } else if (p1 == P1_DESCRIPTION && ctx->state == TX_ADD_IDENTITY_PROVIDER_DESCRIPTION) {
         if (desc_ctx->textLength < dataLength) {
@@ -109,18 +126,7 @@ void handleSignAddIdentityProvider(uint8_t *cdata, uint8_t p1, uint8_t dataLengt
             memmove(desc_ctx->text + dataLength, "\0", 1);
         }
 
-        if (desc_ctx->textLength == 0) {
-            // If we have received all of the current part of the description, update the state.
-            switch (desc_ctx->descriptionState) {
-                case DESC_DESCRIPTION:
-                    ctx->state = TX_ADD_IDENTITY_PROVIDER_VERIFY_KEY;
-                    ctx->verifyKeyLength = ctx->payloadLength - CDI_VERIFY_KEY_LENGTH;
-                    break;
-                default:
-                    ctx->state = TX_ADD_IDENTITY_PROVIDER_DESCRIPTION_LENGTH;
-                    break;
-            }
-        }
+        checkIfDescriptionPartIsDoneIdentityProvider();
         displayDescriptionPart(flags);
     } else if (p1 == P1_VERIFY_KEY && ctx->state == TX_ADD_IDENTITY_PROVIDER_VERIFY_KEY) {
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, dataLength, NULL, 0);
