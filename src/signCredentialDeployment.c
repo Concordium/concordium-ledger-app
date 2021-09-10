@@ -79,26 +79,6 @@ UX_FLOW(ux_credential_deployment_threshold_flow,
 );
 
 UX_STEP_NOCB(
-    ux_credential_deployment_dates_0_step,
-    bn,
-    {
-      "Valid to",
-      (char *) global.signCredentialDeploymentContext.validTo
-    });
-UX_STEP_CB(
-    ux_credential_deployment_dates_1_step,
-    bn,
-    sendSuccessNoIdle(),
-    {
-      "Created at",
-      (char *) global.signCredentialDeploymentContext.createdAt
-    });
-UX_FLOW(ux_credential_deployment_dates,
-    &ux_credential_deployment_dates_0_step,
-    &ux_credential_deployment_dates_1_step
-);
-
-UX_STEP_NOCB(
     ux_sign_credential_deployment_0_step,
     bnnn_paging,
     {
@@ -386,41 +366,22 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, uint8_t p2,
         ctx->anonymityRevocationListLength -= 1;
         sendSuccessNoIdle();
     } else if (p1 == P1_CREDENTIAL_DATES && ctx->state == TX_CREDENTIAL_DEPLOYMENT_CREDENTIAL_DATES) {
-        uint8_t temp[1];
-
-        // Build display of valid to
-        uint16_t validToYear = U2BE(dataBuffer, 0);
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 2, NULL, 0);
-        dataBuffer += 2;
-        memmove(temp, dataBuffer, 1);
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 1, NULL, 0);
-        dataBuffer += 1;
-        numberToText(ctx->validTo, validToYear);
-        ctx->validTo[4] = ' ';
-        bin2dec(ctx->validTo + 5, temp[0]);
-
-        // Build display of created at
-        uint16_t createdAtYear = U2BE(dataBuffer, 0);
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 2, NULL, 0);
-        dataBuffer += 2;
-        memmove(temp, dataBuffer, 1);
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 1, NULL, 0);
-        dataBuffer += 1;
-        numberToText(ctx->createdAt, createdAtYear);
-        ctx->createdAt[4] = ' ';
-        bin2dec(ctx->createdAt + 5, temp[0]);
+        // hash valid to and created at
+        // We don't show these values, because only the dates on the identity object can be accepted by the chain.
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 6, NULL, 0);
+        dataBuffer += 6;
 
         // Read attribute list length
         ctx->attributeListLength = U2BE(dataBuffer, 0);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 2, NULL, 0);
-        
+
         if (ctx->attributeListLength == 0) {
             ctx->state = TX_CREDENTIAL_DEPLOYMENT_LENGTH_OF_PROOFS;
         } else {
             ctx->state = TX_CREDENTIAL_DEPLOYMENT_ATTRIBUTE_TAG;
         }
 
-        ux_flow_init(0, ux_credential_deployment_dates, NULL);
+        sendSuccessNoIdle();
     } else if (p1 == P1_ATTRIBUTE_TAG && ctx->state == TX_CREDENTIAL_DEPLOYMENT_ATTRIBUTE_TAG) {
         if (ctx->attributeListLength <= 0) {
             THROW(ERROR_INVALID_STATE);
