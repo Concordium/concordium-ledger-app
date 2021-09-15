@@ -8,6 +8,7 @@
 * Export of private key seeds has been changed so that either the PRF key can be exported alone, or the PRF key and the IdCredSec are exported in a single command.
 * Added support for transactions with memos.
 * Support for the "Add identity provider" update.
+* Support for the "Add anonymity revoker" update.
 * Improved pagination of account addresses and hexadecimal strings, so that pages are split evenly and consistently.
 
 ## 1.0.2

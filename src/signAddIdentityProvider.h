@@ -1,6 +1,8 @@
 #ifndef _CONCORDIUM_APP_ADD_IDENTITY_PROVIDER_H_
 #define _CONCORDIUM_APP_ADD_IDENTITY_PROVIDER_H_
 
+#include "descriptionView.h"
+
 /**
  * Handles the signing flow, including updating the display, for the 'add identity provider'
  * update instruction.
@@ -16,21 +18,12 @@ typedef enum {
     TX_ADD_IDENTITY_PROVIDER_CDI_VERIFY_KEY = 44
 } addIdentityProviderState_t;
 
-typedef enum {
-    NAME,
-    URL,
-    DESCRIPTION
-} descriptionState_t;
-
 typedef struct {
     uint32_t payloadLength;
     cx_sha256_t hash;
     char verifyKeyHash[68];
-    uint32_t textLength;
-    uint8_t text[255];
     uint32_t verifyKeyLength;
     uint8_t ipIdentity[5];
-    descriptionState_t descriptionState;
     char cdiVerifyKey[68];
     addIdentityProviderState_t state;
 } signAddIdentityProviderContext_t;
