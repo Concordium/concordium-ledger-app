@@ -271,6 +271,7 @@ static void concordium_main(void) {
                     case ERROR_INVALID_TRANSACTION:
                     case ERROR_INVALID_INSTRUCTION:
                     case ERROR_INVALID_CLA:
+                    case ERROR_DEVICE_LOCKED:
                         global_tx_state.currentInstruction = -1;
                         sw = e;
                         G_io_apdu_buffer[tx] = sw >> 8;
