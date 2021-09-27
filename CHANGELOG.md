@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.1.0 (Work in progress)
+## 2.0.0
 
 * Improved state validation to deny instruction changes in multi command transactions.
 * Support building for the Ledger Nano X.
