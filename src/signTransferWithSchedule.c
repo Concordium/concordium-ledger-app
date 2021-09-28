@@ -150,6 +150,7 @@ void handleSignTransferWithScheduleAndMemo(uint8_t *cdata, uint8_t p1, uint8_t d
 
         // Store the number of scheduled amounts we are going to receive next.
         ctx->remainingNumberOfScheduledAmounts = cdata[0];
+        cdata += 1;
 
         // Hash memo length
         memo_ctx->memoLength = U2BE(cdata, 0);

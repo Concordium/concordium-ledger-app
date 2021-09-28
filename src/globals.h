@@ -28,6 +28,9 @@
 #include "signUpdateBakerStakeThreshold.h"
 #include "signHigherLevelKeyUpdate.h"
 #include "signAddIdentityProvider.h"
+#include "signAddAnonymityRevoker.h"
+
+#include "descriptionView.h"
 
 #include "memo.h"
 
@@ -82,7 +85,7 @@ typedef enum {
     UPDATE_TYPE_BAKER_STAKE_THRESHOLD = 9,
     UPDATE_TYPE_UPDATE_ROOT_KEYS = 10,
     UPDATE_TYPE_UPDATE_LEVEL1_KEYS = 11,
-    UPDATE_TYPE_UPDATE_LEVEL2_KEYS = 12,
+    UPDATE_TYPE_ADD_ANONYMITY_REVOKER = 12,
     UPDATE_TYPE_ADD_IDENTITY_PROVIDER = 13
 } updateType_e;
 
@@ -116,6 +119,15 @@ extern accountSender_t global_account_sender;
 
 typedef struct {
     union {
+        signAddAnonymityRevokerContext_t signAddAnonymityRevokerContext;
+        signAddIdentityProviderContext_t signAddIdentityProviderContext;
+    };
+    descriptionContext_t descriptionContext;
+
+} updateWithDescription_t;
+
+typedef struct {
+    union {
         signTransferContext_t signTransferContext;
         signEncryptedAmountToTransfer_t signEncryptedAmountToTransfer;
         signTransferWithScheduleContext_t signTransferWithScheduleContext;
@@ -123,6 +135,7 @@ typedef struct {
     memoContext_t memoContext;
 
 } transferWithMemo_t;
+
 /**
  * As the memory we have available is very limited, the context for each instruction is stored
  * in a shared global union, so that we do not use more memory than that of the most memory
@@ -151,8 +164,8 @@ typedef union {
     signElectionDifficultyContext_t signElectionDifficulty;
     signUpdateBakerStakeThresholdContext_t signUpdateBakerStakeThreshold;
     signUpdateKeysWithRootKeysContext_t signUpdateKeysWithRootKeysContext;
+    updateWithDescription_t withDescription;
     transferWithMemo_t withMemo;
-    signAddIdentityProviderContext_t signAddIdentityProviderContext;
 } instructionContext;
 extern instructionContext global;
 

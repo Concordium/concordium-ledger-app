@@ -105,6 +105,7 @@ accountSender_t global_account_sender;
 #define INS_UPDATE_LEVEL1_KEYS 0x29
 #define INS_UPDATE_LEVEL2_KEYS_ROOT 0x2A
 #define INS_UPDATE_LEVEL2_KEYS_LEVEL1 0x2B
+#define INS_ADD_ANONYMITY_REVOKER 0x2C
 #define INS_ADD_IDENTITY_PROVIDER 0x2D
 
 #define INS_SIGN_UPDATE_CREDENTIAL      0x31
@@ -180,7 +181,7 @@ static void concordium_main(void) {
                         handleSignCredentialDeployment(cdata, p1, p2, &flags, isInitialCall);
                         break;
                     case INS_EXPORT_PRIVATE_KEY_SEED:
-                        handleExportPrivateKeySeed(cdata, p1, &flags);
+                        handleExportPrivateKeySeed(cdata, p1, p2, &flags);
                         break;
                     case INS_UPDATE_EXCHANGE_RATE:
                         handleSignUpdateExchangeRate(cdata, &flags);
@@ -251,6 +252,9 @@ static void concordium_main(void) {
                     case INS_ADD_IDENTITY_PROVIDER:
                         handleSignAddIdentityProvider(cdata, p1, lc, &flags, isInitialCall);
                         break;
+                    case INS_ADD_ANONYMITY_REVOKER:
+                        handleSignAddAnonymityRevoker(cdata, p1, lc, &flags, isInitialCall);
+                        break;
                     default:
                         THROW(ERROR_INVALID_INSTRUCTION);
                         break;
@@ -267,6 +271,7 @@ static void concordium_main(void) {
                     case ERROR_INVALID_TRANSACTION:
                     case ERROR_INVALID_INSTRUCTION:
                     case ERROR_INVALID_CLA:
+                    case ERROR_DEVICE_LOCKED:
                         global_tx_state.currentInstruction = -1;
                         sw = e;
                         G_io_apdu_buffer[tx] = sw >> 8;
