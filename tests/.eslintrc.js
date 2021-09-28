@@ -25,7 +25,8 @@ module.exports = {
         "ts": "never",
         "tsx": "never"
       }
-    ]
+    ],
+    indent: ["error", 4],
   },
   settings: {
     "import/resolver": {

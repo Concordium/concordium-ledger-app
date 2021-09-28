@@ -14,3 +14,4 @@ concordium-ledger-app-*
 /tests/node_modules
 /tests/*.eslintcache
 .eslintcache
+/tests/bin
