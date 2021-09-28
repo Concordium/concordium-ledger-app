@@ -1,22 +1,16 @@
 import Zemu from '@zondax/zemu';
-import { optionsNanoS } from './options';
-
-const Resolve = require('path').resolve;
+import { NANOS_ELF_PATH, optionsNanoS } from './options';
 
 test('Sign a valid simple transfer', async () => {
-  const sim = new Zemu(Resolve('../bin/app.elf'));
+  const sim = new Zemu(NANOS_ELF_PATH);
 
   try {
     await sim.start(optionsNanoS);
-
     const transport = sim.getTransport();
 
     const data = Buffer.from('08000004510000000000000000000000000000000000000002000000000000000020a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7000000000000000a0000000000000064000000290000000063de5da70320a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7ffffffffffffffff', 'hex');
-
     const tx = transport.send(0xe0, 0x02, 0x00, 0x00, data);
-
     await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
-
     await sim.clickRight();
     await sim.clickRight();
     await sim.clickRight();

@@ -2,7 +2,7 @@ name: Build
 
 on:
     push:
-        branches: [main]
+        branches: [main, e2e-testing]
     pull_request:
         branches: [main]
 
@@ -25,6 +25,13 @@ jobs:
               run: |
                   make clean
                   make
+                  mv bin/app.elf concordium_nanos.elf
+
+            - name: Upload binary
+              uses: actions/upload-artifact@v2
+              with:
+                name: nanos
+                path: ./concordium_nanos.elf
 
     compile-nano-x:
         name: Compile for Nano X
@@ -41,6 +48,13 @@ jobs:
               run: |
                   make clean
                   make BOLOS_SDK=nanox-secure-sdk
+                  mv bin/app.elf concordium_nanox.elf
+
+            - name: Upload binary
+              uses: actions/upload-artifact@v2
+              with:
+                name: nanox
+                path: ./concordium_nanox.elf
     
     scan-build:
         name: Run Clang Static Analyzer
@@ -57,3 +71,35 @@ jobs:
               run: |
                   make clean
                   scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build --status-bugs make default
+
+    e2e-tests:
+        name: End to end tests
+        needs: [compile-nano-s, compile-nano-x]
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v2
+              with:
+                submodules: 'recursive'
+            - run: sudo apt-get update -y && sudo apt-get install -y libusb-1.0.0 libudev-dev
+
+            - uses: actions/setup-node@v2
+              with:
+                node-version: "14.16.0"
+
+            - name: Setup dependencies
+              run: |
+                cd tests && yarn
+
+            - name: Create directory for binaries
+              run: |
+                mkdir tests/bin
+
+            - name: Download binaries
+              uses: actions/download-artifact@v2
+              with:
+                path: tests/bin
+
+            - name: Run tests
+              run: |
+                cd tests && yarn test
