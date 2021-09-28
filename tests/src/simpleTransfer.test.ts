@@ -30,16 +30,15 @@ test('Sign a valid simple transfer with memo', async () => {
         await sim.clickBoth();
 
         data = Buffer.from('ffffffffffffffff', 'hex');
-        let tx = transport.send(0xe0, 0x32, 0x03, 0x00, data);
+        const tx = transport.send(0xe0, 0x32, 0x03, 0x00, data);
         await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
         await sim.clickRight();
         await sim.clickRight();
         await sim.clickBoth();
 
         await expect(tx).resolves.toEqual(
-            Buffer.from('542b8448df7579b94337cea6e169d981c755b2bde8cbd01ea1698b2098b8295a3a401e784664068ec5da74ffe8554aabe2c01ba0f70923f43440f60eba669c0d9000', 'hex')
+            Buffer.from('542b8448df7579b94337cea6e169d981c755b2bde8cbd01ea1698b2098b8295a3a401e784664068ec5da74ffe8554aabe2c01ba0f70923f43440f60eba669c0d9000', 'hex'),
         );
-
     } finally {
         await sim.close();
     }
