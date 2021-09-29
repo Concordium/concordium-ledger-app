@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.1
+
+* Fixed an issue in the add baker UI, where a response could be sent before signing or declining.
+
 ## 2.0.0
 
 * Improved state validation to deny instruction changes in multi command transactions.
