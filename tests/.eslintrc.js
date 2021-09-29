@@ -27,6 +27,7 @@ module.exports = {
       }
     ],
     "no-unused-vars": ["error", { "args": "none" }],
+    "no-await-in-loop": "off",
     indent: ["error", 4],
   },
   settings: {
