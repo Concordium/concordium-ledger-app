@@ -26,6 +26,7 @@ module.exports = {
         "tsx": "never"
       }
     ],
+    "no-unused-vars": ["error", { "args": "none" }],
     indent: ["error", 4],
   },
   settings: {
