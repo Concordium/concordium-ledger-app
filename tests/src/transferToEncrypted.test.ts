@@ -3,8 +3,8 @@ import Zemu from '@zondax/zemu';
 import { setupZemu } from './options';
 
 async function transferToEncrypted(sim: Zemu, transport: Transport, handleUi: () => Promise<void>) {
-    let data = Buffer.from('08000004510000000000000000000000000000000000000002000000000000000020a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7000000000000000a0000000000000064000000290000000063de5da711f0000000000f4240', 'hex');
-    let tx = transport.send(0xe0, 0x11, 0x00, 0x00, data);
+    const data = Buffer.from('08000004510000000000000000000000000000000000000002000000000000000020a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7000000000000000a0000000000000064000000290000000063de5da711f0000000000f4240', 'hex');
+    const tx = transport.send(0xe0, 0x11, 0x00, 0x00, data);
     await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
     await handleUi();
 
