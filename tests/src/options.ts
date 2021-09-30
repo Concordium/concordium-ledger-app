@@ -7,8 +7,8 @@ const SEED_PHRASE = 'vendor sphere crew wise puppy wise stand wait tissue boy fo
 
 export const optionsNanoS: StartOptions = {
     model: 'nanos',
-    X11: true,
-    logging: true,
+    X11: false,
+    logging: false,
     startDelay: 2000,
     custom: `-s "${SEED_PHRASE}" `,
     pressDelay: 100,
@@ -17,8 +17,8 @@ export const optionsNanoS: StartOptions = {
 
 export const optionsNanoX: StartOptions = {
     model: 'nanox',
-    X11: true,
-    logging: true,
+    X11: false,
+    logging: false,
     startDelay: 2000,
     custom: `-s "${SEED_PHRASE}" `,
     pressDelay: 100,
