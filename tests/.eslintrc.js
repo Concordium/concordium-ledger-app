@@ -28,6 +28,12 @@ module.exports = {
     ],
     "no-unused-vars": ["error", { "args": "none" }],
     "no-await-in-loop": "off",
+    "no-restricted-syntax": [
+      "error",
+      "ForInStatement",
+      "LabeledStatement",
+      "WithStatement"
+    ],
     indent: ["error", 4],
   },
   settings: {
