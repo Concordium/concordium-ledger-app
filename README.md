@@ -65,6 +65,21 @@ make emulator
 ```
 The file will be available at `bin/app.elf`.
 
+## Testing
+
+### Running end to end tests
+An end to end test is available for each instruction implemented in the application. The end
+to end tests depends on having built the application for Nano S and Nano X, and having placed
+their `.elf` files correctly. This can achieved by running:
+```bash
+cd tests
+./build_binaries.sh
+```
+While still in the `tests` directory, execute the following to run the end to end tests:
+```bash
+yarn test
+```
+
 ## Building a release
 
 Note that it is only possible to build a release for the Nano S.
