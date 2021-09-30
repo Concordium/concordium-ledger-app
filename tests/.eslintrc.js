@@ -26,7 +26,10 @@ module.exports = {
         "tsx": "never"
       }
     ],
-    "no-unused-vars": ["error", { "args": "none" }],
+    "no-unused-vars": "off",
+    "@typescript-eslint/no-unused-vars": ["error"],
+    "no-shadow": "off",
+    "@typescript-eslint/no-shadow": ["error"],
     "no-await-in-loop": "off",
     "no-restricted-syntax": [
       "error",
