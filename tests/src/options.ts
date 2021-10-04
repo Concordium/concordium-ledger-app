@@ -9,20 +9,20 @@ export const optionsNanoS: StartOptions = {
     model: 'nanos',
     X11: true,
     logging: true,
-    startDelay: 2000,
+    startDelay: 3000,
     custom: `-s "${SEED_PHRASE}" `,
     pressDelay: 250,
-    pressDelayAfter: 700,
+    pressDelayAfter: 1000,
 };
 
 export const optionsNanoX: StartOptions = {
     model: 'nanox',
     X11: true,
     logging: true,
-    startDelay: 2000,
+    startDelay: 3000,
     custom: `-s "${SEED_PHRASE}" `,
     pressDelay: 250,
-    pressDelayAfter: 700,
+    pressDelayAfter: 1000,
 };
 
 export const NANOS_ELF_PATH = resolve('bin/nanos/concordium_nanos.elf');
