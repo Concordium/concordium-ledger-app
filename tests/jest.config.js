@@ -8,6 +8,7 @@ module.exports = {
             tsconfig: 'tsconfig.jest.json',
         },
     },
-    testTimeout: 60000,
-    globalSetup: '<rootDir>/globalSetup.js'
+    testTimeout: 120000,
+    globalSetup: '<rootDir>/globalSetup.js',
+    bail: true,
 };
