@@ -8,7 +8,7 @@ async function addIdentityProviderShared(sim: Zemu, transport: Transport) {
     transport.send(0xe0, 0x2d, 0x00, 0x00, data);
     await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
     await sim.clickRight();
-    await sim.clickBoth();
+    const snapshot1 = await sim.clickBoth();
 
     // Length of the name
     data = Buffer.from('00000009', 'hex');
@@ -17,8 +17,8 @@ async function addIdentityProviderShared(sim: Zemu, transport: Transport) {
     // The name
     data = Buffer.from('54657374206e616d65', 'hex');
     transport.send(0xe0, 0x2d, 0x02, 0x00, data);
-    await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
-    await sim.clickBoth();
+    await sim.waitUntilScreenIsNot(snapshot1);
+    const snapshot2 = await sim.clickBoth();
 
     // Length of the URL
     data = Buffer.from('00000015', 'hex');
@@ -28,9 +28,9 @@ async function addIdentityProviderShared(sim: Zemu, transport: Transport) {
     data = Buffer.from('687474703a2f2f636f6e636f726469756d2e636f6d', 'hex');
     transport.send(0xe0, 0x2d, 0x02, 0x00, data);
     Zemu.sleep(1000);
-    await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
+    await sim.waitUntilScreenIsNot(snapshot2);
     await sim.clickRight();
-    await sim.clickBoth();
+    const snapshot3 = await sim.clickBoth();
 
     // Length of the description
     data = Buffer.from('00000010', 'hex');
@@ -39,27 +39,27 @@ async function addIdentityProviderShared(sim: Zemu, transport: Transport) {
     // The description
     data = Buffer.from('54657374206465736372697074696f6e', 'hex');
     transport.send(0xe0, 0x2d, 0x02, 0x00, data);
-    await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
-    await sim.clickBoth();
+    await sim.waitUntilScreenIsNot(snapshot3);
+    return sim.clickBoth();
 }
 
 test('[NANO S] Add identity provider', setupZemu('nanos', async (sim, transport) => {
-    await addIdentityProviderShared(sim, transport);
+    const snapshot4 = await addIdentityProviderShared(sim, transport);
 
     // Verify key
     let data = Buffer.from('00000010', 'hex');
     transport.send(0xe0, 0x2d, 0x03, 0x00, data);
-    await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
+    await sim.waitUntilScreenIsNot(snapshot4);
     await sim.clickRight();
     await sim.clickRight();
     await sim.clickRight();
     await sim.clickRight();
-    await sim.clickBoth();
+    const snapshot5 = await sim.clickBoth();
 
     // CDI key
     data = Buffer.from('37efcc5b9180fc9c43a5a51a2f27d6581e63e4b2b3dad75b8510061b8c2db39f', 'hex');
     const tx = transport.send(0xe0, 0x2d, 0x04, 0x00, data);
-    await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
+    await sim.waitUntilScreenIsNot(snapshot5);
     await sim.clickRight();
     await sim.clickRight();
     await sim.clickRight();
@@ -72,19 +72,19 @@ test('[NANO S] Add identity provider', setupZemu('nanos', async (sim, transport)
 }));
 
 test('[NANO X] Add identity provider', setupZemu('nanox', async (sim, transport) => {
-    await addIdentityProviderShared(sim, transport);
+    const snapshot4 = await addIdentityProviderShared(sim, transport);
 
     // Verify key
     let data = Buffer.from('00000010', 'hex');
     transport.send(0xe0, 0x2d, 0x03, 0x00, data);
-    await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
+    await sim.waitUntilScreenIsNot(snapshot4);
     await sim.clickRight();
-    await sim.clickBoth();
+    const snapshot5 = await sim.clickBoth();
 
     // CDI key
     data = Buffer.from('37efcc5b9180fc9c43a5a51a2f27d6581e63e4b2b3dad75b8510061b8c2db39f', 'hex');
     const tx = transport.send(0xe0, 0x2d, 0x04, 0x00, data);
-    await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
+    await sim.waitUntilScreenIsNot(snapshot5);
     await sim.clickRight();
     await sim.clickBoth();
 

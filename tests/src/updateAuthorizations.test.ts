@@ -8,7 +8,7 @@ async function updateAuthorizations(
     type: string,
     prefix: string,
     expectedSignature: string,
-    handleKeyUi: () => Promise<void>,
+    handleKeyUi: () => Promise<any>,
 ) {
     const data = Buffer.concat([
         Buffer.from('080000045100000000000000000000000000000000000000020000000000000000000000000000000a00000000000000640000000063de5da700000029', 'hex'),
@@ -20,7 +20,7 @@ async function updateAuthorizations(
     transport.send(0xe0, ins, 0x00, 0x00, data);
     await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
     await sim.clickRight();
-    await sim.clickBoth();
+    let snapshot = await sim.clickBoth();
 
     const key1 = Buffer.from('00b6bc751f1abfb6440ff5cce27d7cdd1e7b0b8ec174f54de426890635b27e7daf', 'hex');
     const key2 = Buffer.from('0046a3e38ddf8b493be6e979034510b91db5448da9cba48c106139c288d658a004', 'hex');
@@ -28,8 +28,8 @@ async function updateAuthorizations(
 
     for (const key of keys) {
         transport.send(0xe0, ins, 0x01, 0x00, key);
-        await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
-        await handleKeyUi();
+        await sim.waitUntilScreenIsNot(snapshot);
+        snapshot = await handleKeyUi();
     }
 
     // Go through each access structure
@@ -43,16 +43,16 @@ async function updateAuthorizations(
 
         const accessStructureData = Buffer.concat([keyIndex1, keyIndex2, keyIndex3]);
         transport.send(0xe0, ins, 0x03, 0x00, accessStructureData);
-        await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
+        await sim.waitUntilScreenIsNot(snapshot);
         await sim.clickBoth();
         await sim.clickBoth();
         await sim.clickBoth();
-        await sim.clickBoth();
+        snapshot = await sim.clickBoth();
 
         const threshold = Buffer.from('0002', 'hex');
         const tx = transport.send(0xe0, ins, 0x04, 0x00, threshold);
-        await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
-        await sim.clickBoth();
+        await sim.waitUntilScreenIsNot(snapshot);
+        snapshot = await sim.clickBoth();
 
         if (i === 11) {
             await sim.clickBoth();
@@ -76,7 +76,7 @@ test('[NANO S] Update level 2 keys with root keys', setupZemu('nanos', async (si
             await sim.clickRight();
             await sim.clickRight();
             await sim.clickRight();
-            await sim.clickBoth();
+            return sim.clickBoth();
         },
     );
 }));
@@ -91,7 +91,7 @@ test('[NANO X] Update level 2 keys with root keys', setupZemu('nanox', async (si
         'e9740c83110c2bc4fe876da81050cff27c1ab282178a3049327c6e97ebea34f2cd5f038e2b8dff466b1455e4d667d95d050fed1af04ea80c40360854dede12049000',
         async () => {
             await sim.clickRight();
-            await sim.clickBoth();
+            return sim.clickBoth();
         },
     );
 }));
@@ -109,7 +109,7 @@ test('[NANO S] Update level 2 keys with level 1 keys', setupZemu('nanos', async 
             await sim.clickRight();
             await sim.clickRight();
             await sim.clickRight();
-            await sim.clickBoth();
+            return sim.clickBoth();
         },
     );
 }));
@@ -124,7 +124,7 @@ test('[NANO X] Update level 2 keys with level 1 keys', setupZemu('nanox', async 
         'b3843361c16bc8f9f7792df766f7192e8b77aae420c958d290d8408b9ac224350998d4c264e4e60c577385963a574391b122948afae0dcb1e0ae7fda8076150e9000',
         async () => {
             await sim.clickRight();
-            await sim.clickBoth();
+            return sim.clickBoth();
         },
     );
 }));

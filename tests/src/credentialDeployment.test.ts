@@ -12,10 +12,11 @@ enum CredentialDeploymentType {
  * Handles the shared part of credential deployment / update credentials.
  */
 async function sharedCredentialDeployment(
+    snapshot: any,
     sim: Zemu, transport: Transport,
     ins: number,
     p2: number,
-    handleKeyUi: () => Promise<void>,
+    handleKeyUi: () => Promise<any>,
 ) {
     let data = Buffer.from('01', 'hex');
     await transport.send(0xe0, ins, 0x0A, p2, data);
@@ -23,13 +24,13 @@ async function sharedCredentialDeployment(
     data = Buffer.from('00f78929ec8a9819f6ae2e10e79522b6b311949635fecc3d924d9d1e23f8e9e1c3', 'hex');
     transport.send(0xe0, ins, 0x01, p2, data);
     await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
-    await handleKeyUi();
+    const snapshot1 = await handleKeyUi();
 
     data = Buffer.from('ff85d8a7aa296c162e4e2f0d6bfbdc562db240e28942f7f3ddef6979a1133b5c719ec3581869aaf88388824b0f6755e63c0000f013010001', 'hex');
     transport.send(0xe0, ins, 0x02, p2, data);
-    await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
+    await sim.waitUntilScreenIsNot(snapshot1);
     await sim.clickRight();
-    await sim.clickBoth();
+    const snapshot2 = await sim.clickBoth();
 
     data = Buffer.from('000f0301aca024ce6083d4956edad825c3721da9b61e5b3712606ba1465f7818a43849121bdb3e4d99624e9a74b9436cc8948d178b9b144122aa070372e3fadee4998e1cc21161186a3d19698ad245e10912810df1aaddda16a27f654716108e27758099', 'hex');
     await transport.send(0xe0, ins, 0x03, p2, data);
@@ -52,30 +53,34 @@ async function sharedCredentialDeployment(
     for (const chunk of chunkedProofs) {
         await transport.send(0xe0, ins, 0x08, p2, chunk);
     }
+
+    return snapshot2;
 }
 
 async function credentialDeployment(
     sim: Zemu, transport: Transport, type: CredentialDeploymentType, expectedSignature: string,
-    handleKeyUi: () => Promise<void>,
+    handleKeyUi: () => Promise<any>,
     handleAddressUi: () => Promise<void>,
 ) {
     let data = Buffer.from('080000045100000000000000000000000000000000000000020000000000000000', 'hex');
     transport.send(0xe0, 0x04, 0x00, 0x00, data);
     await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
-    await sim.clickBoth();
+    const snapshot1 = await sim.clickBoth();
 
-    await sharedCredentialDeployment(sim, transport, 0x04, 0x00, handleKeyUi);
+    const snapshot2 = await sharedCredentialDeployment(
+        snapshot1, sim, transport, 0x04, 0x00, handleKeyUi,
+    );
 
     let tx;
     if (type === CredentialDeploymentType.NEW) {
         data = Buffer.from('00000000006040F27E', 'hex');
         tx = transport.send(0xe0, 0x04, 0x09, 0x00, data);
-        await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
+        await sim.waitUntilScreenIsNot(snapshot2);
         await sim.clickBoth();
     } else if (type === CredentialDeploymentType.EXISTING) {
         data = Buffer.from('0120a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7', 'hex');
         tx = transport.send(0xe0, 0x04, 0x09, 0x00, data);
-        await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
+        await sim.waitUntilScreenIsNot(snapshot2);
         await handleAddressUi();
     }
 
@@ -86,19 +91,22 @@ async function credentialDeployment(
 
 async function updateCredentials(
     sim: Zemu, transport: Transport,
-    handleInitialUi: () => Promise<void>,
-    handleKeyUi: () => Promise<void>,
-    handleCredentialUi: () => Promise<void>,
+    handleInitialUi: () => Promise<any>,
+    handleKeyUi: () => Promise<any>,
+    handleCredentialUi: () => Promise<any>,
 ) {
     const data = Buffer.from('08000004510000000000000000000000000000000000000002000000000000000020a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7000000000000000a0000000000000064000000290000000063de5da71402', 'hex');
     transport.send(0xe0, 0x31, 0x00, 0x00, data);
     await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
-    await handleInitialUi();
+    const snapshot = await handleInitialUi();
 
+    let credentialSnapshot;
     for (let i = 0; i < 2; i += 1) {
         const credentialIndex = Buffer.from(`0${i}`, 'hex');
         await transport.send(0xe0, 0x31, 0x00, 0x01, credentialIndex);
-        await sharedCredentialDeployment(sim, transport, 0x31, 0x02, handleKeyUi);
+        credentialSnapshot = await sharedCredentialDeployment(
+            snapshot, sim, transport, 0x31, 0x02, handleKeyUi,
+        );
     }
 
     const credentialId1 = Buffer.from('85d8a7aa296c162e4e2f0d6bfbdc562db240e28942f7f3ddef6979a1133b5c719ec3581869aaf88388824b0f6755e63c', 'hex');
@@ -109,13 +117,13 @@ async function updateCredentials(
 
     for (const credentialId of credentialIdList) {
         transport.send(0xe0, 0x31, 0x00, 0x04, credentialId);
-        await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
-        await handleCredentialUi();
+        await sim.waitUntilScreenIsNot(credentialSnapshot);
+        credentialSnapshot = await handleCredentialUi();
     }
 
     const threshold = Buffer.from('02', 'hex');
     const tx = transport.send(0xe0, 0x31, 0x00, 0x05, threshold);
-    await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
+    await sim.waitUntilScreenIsNot(credentialSnapshot);
     await sim.clickRight();
     await sim.clickBoth();
 
@@ -135,14 +143,14 @@ test('[NANO S] Update credentials', setupZemu('nanos', async (sim, transport) =>
             await sim.clickRight();
             await sim.clickRight();
             await sim.clickRight();
-            await sim.clickBoth();
+            return sim.clickBoth();
         },
         async () => {
             await sim.clickRight();
             await sim.clickRight();
             await sim.clickRight();
             await sim.clickRight();
-            await sim.clickBoth();
+            return sim.clickBoth();
         },
         async () => {
             await sim.clickRight();
@@ -151,7 +159,7 @@ test('[NANO S] Update credentials', setupZemu('nanos', async (sim, transport) =>
             await sim.clickRight();
             await sim.clickRight();
             await sim.clickRight();
-            await sim.clickBoth();
+            return sim.clickBoth();
         },
     );
 }));
@@ -164,16 +172,16 @@ test('[NANO X] Update credentials', setupZemu('nanox', async (sim, transport) =>
             await sim.clickRight();
             await sim.clickRight();
             await sim.clickRight();
-            await sim.clickBoth();
+            return sim.clickBoth();
         },
         async () => {
             await sim.clickRight();
-            await sim.clickBoth();
+            return sim.clickBoth();
         },
         async () => {
             await sim.clickRight();
             await sim.clickRight();
-            await sim.clickBoth();
+            return sim.clickBoth();
         },
     );
 }));
@@ -189,7 +197,7 @@ test('[NANO S] Credential deployment for new account', setupZemu('nanos', async 
             await sim.clickRight();
             await sim.clickRight();
             await sim.clickRight();
-            await sim.clickBoth();
+            return sim.clickBoth();
         },
         async () => {
             // Not used for new account
@@ -208,7 +216,7 @@ test('[NANO S] Credential deployment for an existing account', setupZemu('nanos'
             await sim.clickRight();
             await sim.clickRight();
             await sim.clickRight();
-            await sim.clickBoth();
+            return sim.clickBoth();
         },
         async () => {
             await sim.clickRight();
@@ -229,7 +237,7 @@ test('[NANO X] Credential deployment for new account', setupZemu('nanox', async 
         '00b0173e6d05ce14745bbe5ced4160c15072aeba56da028a452cc0b4dab9ca2c01f88210174020ca05251910f4a4341f5925dfa9fc1122c3c4843ae81720490b9000',
         async () => {
             await sim.clickRight();
-            await sim.clickBoth();
+            return sim.clickBoth();
         },
         async () => {
             // Not used for new account
@@ -245,7 +253,7 @@ test('[NANO X] Credential deployment for an existing account', setupZemu('nanox'
         'd573d7facf4c2c53a4fb21f76dcb06090ef287f81628b9fa65d60796072c595a3016db12053a350c966aeff3bcc52787482e2781b4787f6a2cf9dd14df6d15069000',
         async () => {
             await sim.clickRight();
-            await sim.clickBoth();
+            return sim.clickBoth();
         },
         async () => {
             await sim.clickRight();
