@@ -43,7 +43,11 @@ export function setupZemu(device: 'nanos' | 'nanox', func: (sim: Zemu, transport
         try {
             await sim.start(simOptions);
             await func(sim, sim.getTransport());
+        } catch (e) {
+            console.error('An error occurred!');
+            console.error(e);
         } finally {
+            console.log('Finally closing after the fact');
             await sim.close();
         }
     };
