@@ -11,18 +11,14 @@ export const optionsNanoS: StartOptions = {
     logging: true,
     startDelay: 3000,
     custom: `-s "${SEED_PHRASE}" `,
-    pressDelay: 250,
-    pressDelayAfter: 1000,
 };
 
 export const optionsNanoX: StartOptions = {
     model: 'nanox',
-    X11: true,
+    X11: false,
     logging: true,
     startDelay: 3000,
     custom: `-s "${SEED_PHRASE}" `,
-    pressDelay: 250,
-    pressDelayAfter: 1000,
 };
 
 export const NANOS_ELF_PATH = resolve('bin/nanos/concordium_nanos.elf');
@@ -43,11 +39,7 @@ export function setupZemu(device: 'nanos' | 'nanox', func: (sim: Zemu, transport
         try {
             await sim.start(simOptions);
             await func(sim, sim.getTransport());
-        } catch (e) {
-            console.error('An error occurred!');
-            console.error(e);
         } finally {
-            console.log('Finally closing after the fact');
             await sim.close();
         }
     };
