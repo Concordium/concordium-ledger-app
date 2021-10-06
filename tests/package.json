@@ -21,7 +21,7 @@
     "typescript": "^4.4.2"
   },
   "scripts": {
-    "test": "jest --runInBand",
+    "test": "jest --runInBand simpleTransfer",
     "lint": "eslint . --cache --ext .ts,.tsx --max-warnings 0",
     "lint-fix": "yarn --silent lint --fix; exit 0"
   }
