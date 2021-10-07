@@ -20,10 +20,14 @@
 ********************************************************************************/
 
 #include <stdlib.h>
+#if TEST
 #include <stdint.h>  // uint*_t
 #include <stddef.h>  // size_t
-#include <string.h>
+#else
+#include "os.h"
+#endif
 #include "cx.h"
+#include <string.h>
 
 #define MAX_ENC_INPUT_SIZE 120
 
