@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
+#include <limits.h>
 
 #include <stdint.h>  // uint*_t
 
@@ -52,6 +53,16 @@ static void test_seconds_to_display_2030() {
     assert_string_equal(display, "2030-05-19 13:04:39");
 }
 
+static void test_secondsToTm_overflow() {
+    tm t;
+    long long time = 1 + INT_MAX * 31622400LL;
+    int result = secondsToTm(time, &t);
+    assert_int_equal(result, -1);
+    time = -1 - INT_MIN * 31622400LL;
+    result = secondsToTm(time, &t);
+    assert_int_equal(result, -1);
+}
+
 int main() {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_prefixWithZero_does_prefix_1),
@@ -59,6 +70,7 @@ int main() {
         cmocka_unit_test(test_seconds_to_display_0),
         cmocka_unit_test(test_seconds_to_display_2021),
         cmocka_unit_test(test_seconds_to_display_2030),
+        cmocka_unit_test(test_secondsToTm_overflow),
     };
 
     return cmocka_run_group_tests(tests, NULL, NULL);

@@ -12,3 +12,7 @@ Modified files used to build this release:
     - The epoch seconds to date time string code used is from the musl library 
       found at https://git.musl-libc.org/cgit/musl/, with only small type and 
       naming differences. It is used under the license included as musl-MIT.txt.
+
+    - In the testing code, we have an implementation of sha256, in sha256.c and sha256.h,
+      which has been lifted from https://github.com/B-Con/crypto-algorithms, provided by
+      Brad Conte (brad@bradconte.com). The code is available as part of the public domain. 

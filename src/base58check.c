@@ -20,12 +20,7 @@
 ********************************************************************************/
 
 #include <stdlib.h>
-#if TEST
-#include <stdint.h>  // uint*_t
-#include <stddef.h>  // size_t
-#else
 #include "os.h"
-#endif
 #include "cx.h"
 #include <string.h>
 

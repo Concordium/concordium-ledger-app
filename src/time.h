@@ -1,7 +1,7 @@
 #ifndef _CONCORDIUM_APP_TIME_H_
 #define _CONCORDIUM_APP_TIME_H_
 
-#include <stdint.h>  // uint*_t
+#include <os.h>
 
 typedef struct {
    int tm_sec;         /* seconds,  range 0 to 59          */

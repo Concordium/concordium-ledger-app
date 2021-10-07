@@ -26,6 +26,8 @@ static void test_lengthOfNumbers() {
     assert_int_equal(lengthOfNumber(999), 3);
     assert_int_equal(lengthOfNumber(1000), 4);
     assert_int_equal(lengthOfNumber(1001), 4);
+    assert_int_equal(lengthOfNumber(32768L), 5);
+    assert_int_equal(lengthOfNumber(18446744073709551615ULL), 20);
 }
 
 static void test_numberToText() {
@@ -36,8 +38,21 @@ static void test_numberToText() {
     assert_string_equal(text, "4041");
 }
 
+static void test_numberToText_max() {
+    uint8_t text[20];
+    bin2dec(text, 18446744073709551615ULL);
+    assert_string_equal(text, "18446744073709551615");
+}
+
+static void test_numberToText_zero() {
+    uint8_t text[1];
+    bin2dec(text, 0);
+    assert_string_equal(text, "0");
+}
+
 static void test_numberToText_shorter_number() {
     uint8_t text[4];
+
     numberToText(text, 46);
     assert_string_equal(text, "46");
 
@@ -50,6 +65,7 @@ static void test_numberToText_shorter_number() {
     numberToText(text, 1);
     assert_string_equal(text, "130");
 }
+
 /*
 static void test_numberToText_longer_number() {
     uint8_t text[4];
@@ -58,12 +74,21 @@ static void test_numberToText_longer_number() {
     assert_int_equal(result, -1);
 }
 */
+
 static void test_bin2dec() {
-    uint8_t text[4];
+    uint8_t text[5];
+    bin2dec(text, 0);
+    assert_string_equal(text, "0");
     bin2dec(text, 2001);
     assert_string_equal(text, "2001");
     bin2dec(text, 4041);
     assert_string_equal(text, "4041");
+}
+
+static void test_bin2dec_max() {
+    uint8_t text[21];
+    bin2dec(text, 18446744073709551615ULL);
+    assert_string_equal(text, "18446744073709551615");
 }
 
 static void test_bin2dec_shorter_number() {
@@ -86,8 +111,8 @@ static void test_bin2dec_shorter_number() {
 /*
 static void test_bin2dec_longer_number() {
     uint8_t text[4];
-    // This should fail, because the text is not long enough
-    int result = bin2dec(text, 12041);
+    // This should fail, because the text is not long enough to contain 1204 and a termination character
+    int result = bin2dec(text, 1204);
     assert_int_equal(result, -1);
 }
 */
@@ -149,6 +174,13 @@ static void test_amountToGtuDisplay_with_thousand_separator() {
     assert_string_equal(text, "1,111,111,111.111111");
 }
 
+
+static void test_amountToGtuDisplay_max() {
+    uint8_t text[25];
+    amountToGtuDisplay(text, 18446744073709551615ULL);
+    assert_string_equal(text, "18,446,744,073,709.551615");
+}
+
 static void test_toPaginatedHex() {
     char text[70];
     uint8_t bytes[] = { 171, 34, 31, 72, 83, 171, 34, 29, 72, 83, 34, 29, 31, 72, 34, 29, 31, 72, 34, 29, 31, 72 };
@@ -166,13 +198,32 @@ static void test_toPaginatedHex_stops_after_given_length() {
     assert_int_equal(text[11], 100);
 }
 
+static void test_toPaginatedHex_does_not_have_trailing_space() {
+    char text[18];
+    uint8_t bytes[] = { 171, 34, 31, 72, 83, 171, 34, 29 };
+    toPaginatedHex(bytes, 8, text);
+    assert_string_equal(text, "ab221f4853ab221d");
+    assert_int_equal(text[16], '\0');
+}
+
+static void test_toPaginatedHex_inserts_white_space() {
+    char text[20];
+    uint8_t bytes[] = { 171, 34, 31, 72, 83, 171, 34, 29, 171 };
+    toPaginatedHex(bytes, 9, text);
+    assert_string_equal(text, "ab221f4853ab221d ab");
+    assert_int_equal(text[19], '\0');
+}
+
 int main() {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_lengthOfNumbers),
         cmocka_unit_test(test_numberToText),
+        cmocka_unit_test(test_numberToText_zero),
+        cmocka_unit_test(test_numberToText_max),
         cmocka_unit_test(test_numberToText_shorter_number),
         // cmocka_unit_test(test_numberToText_longer_number),
         cmocka_unit_test(test_bin2dec),
+        cmocka_unit_test(test_bin2dec_max),
         cmocka_unit_test(test_bin2dec_shorter_number),
         // cmocka_unit_test(test_bin2dec_longer_number),
         cmocka_unit_test(test_decimalAmountToGtuDisplay),
@@ -181,8 +232,11 @@ int main() {
         cmocka_unit_test(test_amountToGtuDisplay_with_thousand_separator),
         cmocka_unit_test(test_amountToGtuDisplay_mixed),
         cmocka_unit_test(test_amountToGtuDisplay_zero),
+        cmocka_unit_test(test_amountToGtuDisplay_max),
         cmocka_unit_test(test_toPaginatedHex),
         cmocka_unit_test(test_toPaginatedHex_stops_after_given_length),
+        cmocka_unit_test(test_toPaginatedHex_does_not_have_trailing_space),
+        cmocka_unit_test(test_toPaginatedHex_inserts_white_space),
     };
 
     return cmocka_run_group_tests(tests, NULL, NULL);
