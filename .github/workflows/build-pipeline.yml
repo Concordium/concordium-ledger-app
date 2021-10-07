@@ -1,8 +1,8 @@
-name: Build
+name: Build and test
 
 on:
     push:
-        branches: [main, e2e-testing]
+        branches: [main]
     pull_request:
         branches: [main]
 
