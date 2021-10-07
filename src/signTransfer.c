@@ -3,7 +3,6 @@
 #include "sign.h"
 #include "memo.h"
 #include "accountSenderView.h"
-#include "base58check.h"
 #include "responseCodes.h"
 
 static signTransferContext_t *ctx = &global.withMemo.signTransferContext;

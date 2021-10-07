@@ -11,3 +11,6 @@ concordium-ledger-app-*
 .idea
 **/target/
 *.lock
+/unit_tests/build
+/unit_tests/coverage
+/unit_tests/coverage*
