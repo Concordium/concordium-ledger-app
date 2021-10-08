@@ -68,8 +68,8 @@ The file will be available at `bin/app.elf`.
 ## Testing
 
 ### Running unit tests
-There are tests on some of the functions, which doesn't rely on Ledger specfic behaviour. 
-First, you must have following installed:
+There are unit tests on some of the functions that do not rely on Ledger specific libraries.
+First, you must have the following installed:
 
 - CMake >= 3.10
 - CMocka >= 1.1.5
