@@ -67,6 +67,23 @@ The file will be available at `bin/app.elf`.
 
 ## Testing
 
+### Running unit tests
+There are unit tests on some of the functions that do not rely on Ledger specific libraries.
+First, you must have the following installed:
+
+- CMake >= 3.10
+- CMocka >= 1.1.5
+
+To build the tests:
+```bash
+cd unit_tests
+cmake -Bbuild -H. && make -C build
+```
+While still in the `unit_tests` directory, execute the following to run the unit tests:
+```bash
+CTEST_OUTPUT_ON_FAILURE=1 make -C build test
+```
+
 ### Running end to end tests
 An end to end test is available for each instruction implemented in the application. The end
 to end tests depends on having built the application for Nano S and Nano X, and having placed
@@ -82,7 +99,6 @@ yarn
 While still in the `tests` directory, execute the following to run the end to end tests:
 ```bash
 yarn test
-```
 
 ## Building a release
 

@@ -16,3 +16,6 @@ concordium-ledger-app-*
 .eslintcache
 /tests/bin
 /tests/snapshots-tmp
+/unit_tests/build
+/unit_tests/coverage
+/unit_tests/coverage*
