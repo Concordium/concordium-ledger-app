@@ -75,6 +75,10 @@ their `.elf` files correctly. This can achieved by running:
 cd tests
 ./build_binaries.sh
 ```
+To fetch the required dependencies run:
+```bash
+yarn
+```
 While still in the `tests` directory, execute the following to run the end to end tests:
 ```bash
 yarn test

@@ -13,15 +13,11 @@ async function getPublicKey(sim: Zemu, transport: Transport) {
     );
 }
 
-test('[NANO S] Extract an account public key', setupZemu('nanos', async (sim, transport) => {
-    await getPublicKey(sim, transport);
-}));
+test('[NANO S] Extract an account public key', setupZemu('nanos', getPublicKey));
 
-test('[NANO X] Extract an account public key', setupZemu('nanox', async (sim, transport) => {
-    await getPublicKey(sim, transport);
-}));
+test('[NANO X] Extract an account public key', setupZemu('nanox', getPublicKey));
 
-async function keyWithNoPrompt(transport: Transport) {
+async function keyWithNoPrompt(_sim: Zemu, transport: Transport) {
     const data = Buffer.from('080000045100000000000000000000000000000000000000020000000000000000', 'hex');
     const tx = transport.send(0xe0, 0x01, 0x01, 0x00, data);
     await expect(tx).resolves.toEqual(
@@ -29,13 +25,9 @@ async function keyWithNoPrompt(transport: Transport) {
     );
 }
 
-test('[NANO S] Extract a public key with no prompt', setupZemu('nanos', async (_sim, transport) => {
-    await keyWithNoPrompt(transport);
-}));
+test('[NANO S] Extract a public key with no prompt', setupZemu('nanos', keyWithNoPrompt));
 
-test('[NANO X] Extract a public key with no prompt', setupZemu('nanox', async (_sim, transport) => {
-    await keyWithNoPrompt(transport);
-}));
+test('[NANO X] Extract a public key with no prompt', setupZemu('nanox', keyWithNoPrompt));
 
 async function signedKey(sim: Zemu, transport: Transport) {
     const data = Buffer.from('050000045100000000000000010000000200000000', 'hex');
@@ -48,13 +40,9 @@ async function signedKey(sim: Zemu, transport: Transport) {
     );
 }
 
-test('[NANO S] Extract a a signed key', setupZemu('nanos', async (sim, transport) => {
-    await signedKey(sim, transport);
-}));
+test('[NANO S] Extract a signed key', setupZemu('nanos', signedKey));
 
-test('[NANO X] Extract a a signed key', setupZemu('nanox', async (sim, transport) => {
-    await signedKey(sim, transport);
-}));
+test('[NANO X] Extract a signed key', setupZemu('nanox', signedKey));
 
 async function rootGovernance(sim: Zemu, transport: Transport) {
     const data = Buffer.from('050000045100000000000000010000000000000000', 'hex');
@@ -67,13 +55,9 @@ async function rootGovernance(sim: Zemu, transport: Transport) {
     );
 }
 
-test('[NANO S] Extract a root governance public key', setupZemu('nanos', async (sim, transport) => {
-    await rootGovernance(sim, transport);
-}));
+test('[NANO S] Extract a root governance public key', setupZemu('nanos', rootGovernance));
 
-test('[NANO X] Extract a root governance public key', setupZemu('nanox', async (sim, transport) => {
-    await rootGovernance(sim, transport);
-}));
+test('[NANO X] Extract a root governance public key', setupZemu('nanox', rootGovernance));
 
 async function level1Governance(sim: Zemu, transport: Transport) {
     const data = Buffer.from('050000045100000000000000010000000100000000', 'hex');
@@ -86,13 +70,9 @@ async function level1Governance(sim: Zemu, transport: Transport) {
     );
 }
 
-test('[NANO S] Extract a level 1 governance public key', setupZemu('nanos', async (sim, transport) => {
-    await level1Governance(sim, transport);
-}));
+test('[NANO S] Extract a level 1 governance public key', setupZemu('nanos', level1Governance));
 
-test('[NANO X] Extract a level 1 governance public key', setupZemu('nanox', async (sim, transport) => {
-    await level1Governance(sim, transport);
-}));
+test('[NANO X] Extract a level 1 governance public key', setupZemu('nanox', level1Governance));
 
 async function level2Governance(sim: Zemu, transport: Transport) {
     const data = Buffer.from('050000045100000000000000010000000200000000', 'hex');
@@ -105,10 +85,6 @@ async function level2Governance(sim: Zemu, transport: Transport) {
     );
 }
 
-test('[NANO S] Extract a level 2 governance public key', setupZemu('nanos', async (sim, transport) => {
-    await level2Governance(sim, transport);
-}));
+test('[NANO S] Extract a level 2 governance public key', setupZemu('nanos', level2Governance));
 
-test('[NANO X] Extract a level 2 governance public key', setupZemu('nanox', async (sim, transport) => {
-    await level2Governance(sim, transport);
-}));
+test('[NANO X] Extract a level 2 governance public key', setupZemu('nanox', level2Governance));

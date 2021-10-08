@@ -101,3 +101,40 @@ test('[NANO X] Sign a valid simple transfer', setupZemu('nanox', async (sim, tra
         Buffer.from('12afcc203c73075ae3e4d89e01844b3fb1b2ecef26565d8c1220e04bddfb7ced0fe38b06a6df22669a20eea4b180ea3d1e1e4ad28a1d2bea29e518ad53f1550d9000', 'hex'),
     );
 }));
+
+test('[NANO S] Decline to sign a valid simple transfer', setupZemu('nanos', async (sim, transport) => {
+    expect.assertions(1);
+    const data = Buffer.from('08000004510000000000000000000000000000000000000002000000000000000020a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7000000000000000a0000000000000064000000290000000063de5da70320a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7ffffffffffffffff', 'hex');
+    transport.send(0xe0, 0x02, 0x00, 0x00, data).catch((e) => expect(e.statusCode).toEqual(27013));
+    await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
+    await sim.clickRight();
+    await sim.clickRight();
+    await sim.clickRight();
+    await sim.clickRight();
+    await sim.clickRight();
+    await sim.clickRight();
+    await sim.clickRight();
+    await sim.clickRight();
+    await sim.clickRight();
+    await sim.clickRight();
+    await sim.clickRight();
+    await sim.clickRight();
+    await sim.clickRight();
+    await sim.clickRight();
+    await sim.clickBoth();
+}));
+
+test('[NANO X] Decline to sign a valid simple transfer', setupZemu('nanox', async (sim, transport) => {
+    expect.assertions(1);
+    const data = Buffer.from('08000004510000000000000000000000000000000000000002000000000000000020a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7000000000000000a0000000000000064000000290000000063de5da70320a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7ffffffffffffffff', 'hex');
+    transport.send(0xe0, 0x02, 0x00, 0x00, data).catch((e) => expect(e.statusCode).toEqual(27013));
+    await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
+    await sim.clickRight();
+    await sim.clickRight();
+    await sim.clickRight();
+    await sim.clickRight();
+    await sim.clickRight();
+    await sim.clickRight();
+    await sim.clickRight();
+    await sim.clickBoth();
+}));

@@ -8,7 +8,6 @@ async function identityProvider(device: 'nanos' | 'nanox', sim: Zemu, transport:
     await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
     const snapshot1 = await sim.clickBoth();
 
-    // This should be handled per device. 3 times.
     data = Buffer.from('0000b6bc751f1abfb6440ff5cce27d7cdd1e7b0b8ec174f54de426890635b27e7daf', 'hex');
     transport.send(0xe0, 0x20, 0x01, 0x00, data);
     await sim.waitUntilScreenIsNot(snapshot1);
