@@ -65,6 +65,25 @@ make emulator
 ```
 The file will be available at `bin/app.elf`.
 
+## Testing
+
+### Running unit tests
+There are unit tests on some of the functions that do not rely on Ledger specific libraries.
+First, you must have the following installed:
+
+- CMake >= 3.10
+- CMocka >= 1.1.5
+
+To build the tests:
+```bash
+cd unit_tests
+cmake -Bbuild -H. && make -C build
+```
+While still in the `unit_tests` directory, execute the following to run the unit tests:
+```bash
+CTEST_OUTPUT_ON_FAILURE=1 make -C build test
+```
+
 ## Building a release
 
 Note that it is only possible to build a release for the Nano S.

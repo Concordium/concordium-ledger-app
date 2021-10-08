@@ -57,3 +57,21 @@ jobs:
               run: |
                   make clean
                   scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build --status-bugs make default
+
+
+
+    run_unit_test:
+      name: Unit test
+      runs-on: ubuntu-latest
+
+      container:
+        image: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
+
+      steps:
+          - name: Clone
+            uses: actions/checkout@v2
+
+          - name: Build unit tests
+            run: |
+              cd unit_tests/
+              cmake -Bbuild -H. && make -C build && make -C build test

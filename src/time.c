@@ -8,8 +8,9 @@
  *  The musl LICENSE is provided in licenses/musl-MIT.txt
  */
 #include "time.h"
-#include "util.h"
+#include "numberHelpers.h"
 #include <limits.h>
+#include <string.h>
 
 /* 2000-03-01 (mod 400 year, immediately after feb29 */
 #define LEAPOCH (946684800LL + 86400*(31+29))
@@ -90,7 +91,7 @@ int secondsToTm(long long t, tm *tm) {
 }
 
 /**
- * Helper function for prepending numbers that are 
+ * Helper function for prepending numbers that are
  * less than 10 with a '0', so that 5 results in 05.
  */
 int prefixWithZero(uint8_t *dst, int value) {
