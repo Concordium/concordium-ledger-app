@@ -50,10 +50,10 @@ typedef struct {
     uint8_t type[24];
 
     uint8_t processedCount;
-    
+
     uint8_t buffer[255];
     int bufferPointer;
-    
+
     updateAuthorizationsState_t state;
     authorizationType_e authorizationType;
 } signUpdateAuthorizations_t;

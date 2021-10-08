@@ -199,13 +199,7 @@ void handleSignTransferWithSchedule(uint8_t *cdata, uint8_t p1, volatile unsigne
         ctx->state = TX_TRANSFER_WITH_SCHEDULE_INITIAL;
     }
 
-    if (memo_ctx->memoLength == 0 && ctx->state == TX_TRANSFER_WITH_SCHEDULE_MEMO) {
-        // Hash schedule length
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, &ctx->remainingNumberOfScheduledAmounts, 1, NULL, 0);
-        ctx->state = TX_TRANSFER_WITH_SCHEDULE_TRANSFER_PAIRS;
-    }
-
-    if ((p1 == P1_INITIAL_PACKET || p1 == P1_INITIAL_WITH_MEMO) && ctx->state == TX_TRANSFER_WITH_SCHEDULE_INITIAL) {
+    if (p1 == P1_INITIAL_PACKET && ctx->state == TX_TRANSFER_WITH_SCHEDULE_INITIAL) {
         cdata += handleHeaderAndToAddress(cdata, TRANSFER_WITH_SCHEDULE, ctx->displayStr, sizeof(ctx->displayStr));
 
         // Store the number of scheduled amounts we are going to receive next.

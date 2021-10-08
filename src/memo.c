@@ -7,7 +7,7 @@ static memoContext_t *ctx = &global.withMemo.memoContext;
 
 #define MAX_MEMO_SIZE 256
 
-void handleMemoStep();
+void handleMemoStep(void);
 
 UX_STEP_CB(
     ux_sign_transfer_memo_step,
@@ -22,7 +22,7 @@ UX_FLOW(ux_sign_transfer_memo,
     &ux_sign_transfer_memo_step
 );
 
-void handleMemoStep() {
+void handleMemoStep(void) {
     if (ctx->memoLength < 0) {
         THROW(ERROR_INVALID_STATE);
     } else {

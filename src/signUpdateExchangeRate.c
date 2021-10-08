@@ -32,7 +32,7 @@ void handleSignUpdateExchangeRate(uint8_t *cdata, volatile unsigned int *flags) 
     cdata += bytesRead;
 
     cx_sha256_init(&tx_state->hash);
-    // Note that this method cannot easily use hashUpdateHeaderAndType from util.h, as 
+    // Note that this method cannot easily use hashUpdateHeaderAndType from util.h, as
     // the UI is built based on the specific update type.
     cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, UPDATE_HEADER_LENGTH, NULL, 0);
     cdata += UPDATE_HEADER_LENGTH;

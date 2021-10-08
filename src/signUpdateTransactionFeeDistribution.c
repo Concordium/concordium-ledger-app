@@ -33,32 +33,21 @@ void handleSignUpdateTransactionFeeDistribution(uint8_t *cdata, volatile unsigne
     cdata += bytesRead;
 
     cx_sha256_init(&tx_state->hash);
-
-    // Add UpdateHeader to hash.
-    cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, UPDATE_HEADER_LENGTH, NULL, 0);
-    cdata += UPDATE_HEADER_LENGTH;
-
-    // All update transactions are pre-pended by their type.
-    uint8_t updateType = cdata[0];
-    cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 1, NULL, 0);
-    cdata += 1;
-    if (updateType != UPDATE_TYPE_TRANSACTION_FEE_DISTRIBUTION) {
-        THROW(ERROR_INVALID_TRANSACTION);
-    }
+    cdata += hashUpdateHeaderAndType(cdata, UPDATE_TYPE_TRANSACTION_FEE_DISTRIBUTION);
 
     // Baker fee is first 4 bytes
     uint32_t bakerFee = U4BE(cdata, 0);
     int bakerFeeLength = numberToText(ctx->baker, bakerFee);
     cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 4, NULL, 0);
     cdata += 4;
-    uint8_t fraction[10] = "/100000";
-    memmove(ctx->baker + bakerFeeLength, fraction, 10);
+    uint8_t fraction[8] = "/100000";
+    memmove(ctx->baker + bakerFeeLength, fraction, 8);
 
     // Gas account fee is the next 4 bytes
     uint32_t gasAccountFee = U4BE(cdata, 0);
     int gasAccountFeeLength = numberToText(ctx->gasAccount, gasAccountFee);
     cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 4, NULL, 0);
-    memmove(ctx->gasAccount + gasAccountFeeLength, fraction, 9);
+    memmove(ctx->gasAccount + gasAccountFeeLength, fraction, 8);
 
     ux_flow_init(0, ux_sign_transaction_dist, NULL);
     *flags |= IO_ASYNCH_REPLY;

@@ -73,8 +73,8 @@ int amountToGtuDisplay(uint8_t *dst, uint64_t microGtuAmount) {
 
     int length = lengthOfNumber(microGtuAmount);
 
-    // If the amount is less than than the resolution (micro), then the 
-    // GTU amount has to be prefixed by '0.' as it will purely consist 
+    // If the amount is less than than the resolution (micro), then the
+    // GTU amount has to be prefixed by '0.' as it will purely consist
     // of the decimals.
     if (microGtuAmount < 1000000) {
         dst[0] = '0';
@@ -121,8 +121,8 @@ int amountToGtuDisplay(uint8_t *dst, uint64_t microGtuAmount) {
     for (int i = wholeNumberLength - 1 + separatorCount; i >= 0; i--) {
 		dst[i] = (microGtuAmount % 10) + '0';
 		microGtuAmount /= 10;
-        
-        current += 1;
+
+    current += 1;
         if (current == 3 && i != 0) {
             dst[i - 1] = ',';
             i--;

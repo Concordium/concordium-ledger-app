@@ -62,16 +62,16 @@ void handleSignHigherLevelKeys(uint8_t *cdata, uint8_t p1, uint8_t updateType, v
         uint8_t keyUpdateType = cdata[0];
         if (updateType == UPDATE_TYPE_UPDATE_ROOT_KEYS) {
             if (keyUpdateType == ROOT_UPDATE_ROOT) {
-                memmove(ctx->type, "Root w. root keys\0", 18);   
+                memmove(ctx->type, "Root w. root keys", 18);
             } else if (keyUpdateType == ROOT_UPDATE_LEVEL_1) {
-                memmove(ctx->type, "Level 1 w. root keys\0", 21);
+                memmove(ctx->type, "Level 1 w. root keys", 21);
             } else {
                 THROW(ERROR_INVALID_TRANSACTION);
             }
         } else if (updateType == UPDATE_TYPE_UPDATE_LEVEL1_KEYS) {
             if (keyUpdateType == ROOT_UPDATE_LEVEL_1) {
             } else if (keyUpdateType == LEVEL1_UPDATE_LEVEL_1) {
-                memmove(ctx->type, "Level 1 w. level 1 keys\0", 25);
+                memmove(ctx->type, "Level 1 w. level 1 keys", 25);
             } else {
                 THROW(ERROR_INVALID_TRANSACTION);
             }
@@ -87,7 +87,7 @@ void handleSignHigherLevelKeys(uint8_t *cdata, uint8_t p1, uint8_t updateType, v
         *flags |= IO_ASYNCH_REPLY;
     } else if (p1 == P1_UPDATE_KEYS && ctx->state == TX_UPDATE_KEYS_KEY) {
         if (ctx->numberOfUpdateKeys <= 0) {
-            // We have already received all the expected keys, so the receieved
+            // We have already received all the expected keys, so the received
             // transaction is invalid.
             THROW(ERROR_INVALID_TRANSACTION);
         }

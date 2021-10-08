@@ -6,6 +6,8 @@
 #include <string.h>
 #include "responseCodes.h"
 
+// Allow the user to decline exporting the private keys seeds.
+
 // This class allows for the export of a number of very specific private keys. These private keys are made
 // exportable as they are used in computations that are not feasible to carry out on the Ledger device.
 // The key derivation paths that are allowed are restricted so that it is not possible to export
@@ -13,7 +15,7 @@
 static const uint32_t HARDENED_OFFSET = 0x80000000;
 static exportPrivateKeySeedContext_t *ctx = &global.exportPrivateKeySeedContext;
 
-void exportPrivateKey();
+void exportPrivateKey(void);
 
 UX_STEP_CB(
     ux_export_private_key_0_step,
@@ -32,7 +34,7 @@ UX_FLOW(ux_export_private_key,
 
 #define pathLength 6
 
-void exportPrivateKey() {
+void exportPrivateKey(void) {
     cx_ecfp_private_key_t privateKey;
     BEGIN_TRY {
         TRY {

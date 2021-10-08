@@ -6,8 +6,8 @@
 static signUpdateProtocolContext_t *ctx = &global.signUpdateProtocolContext;
 static tx_state_t *tx_state = &global_tx_state;
 
-void handleText();
-void switchToLoading();
+void handleText(void);
+void switchToLoading(void);
 
 UX_STEP_CB(
     ux_sign_protocol_update_1_step,
