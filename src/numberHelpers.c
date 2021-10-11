@@ -47,13 +47,13 @@ int decimalAmountToGtuDisplay(uint8_t *dst, uint64_t microGtuAmount) {
     // This avoids displaying numbers like 5300, as it will
     // instead become 53.
     for (int i = length - 1; i >= 0; i--) {
-		uint64_t currentNumber = (microGtuAmount % 10);
+        uint64_t currentNumber = (microGtuAmount % 10);
         if (currentNumber != 0) {
             break;
         } else {
             microGtuAmount /= 10;
         }
-	}
+    }
 
     return numberToText(dst + zeroFillLength, microGtuAmount) + zeroFillLength;
 }
@@ -119,10 +119,10 @@ int amountToGtuDisplay(uint8_t *dst, uint64_t microGtuAmount) {
     // Write the whole number part of the amount to the output destination. This
     // part has to have thousand separators added.
     for (int i = wholeNumberLength - 1 + separatorCount; i >= 0; i--) {
-		dst[i] = (microGtuAmount % 10) + '0';
-		microGtuAmount /= 10;
+        dst[i] = (microGtuAmount % 10) + '0';
+        microGtuAmount /= 10;
 
-    current += 1;
+        current += 1;
         if (current == 3 && i != 0) {
             dst[i - 1] = ',';
             i--;

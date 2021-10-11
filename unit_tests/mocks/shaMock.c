@@ -13,5 +13,3 @@ __wrap_cx_hash_sha256 (uint8_t* buffer, size_t length, uint8_t* hash, size_t *ha
     sha256_final(&ctx, hash);
     return 0;
 }
-
-
