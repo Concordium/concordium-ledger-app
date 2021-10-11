@@ -11,6 +11,11 @@ concordium-ledger-app-*
 .idea
 **/target/
 *.lock
+/tests/node_modules
+/tests/*.eslintcache
+.eslintcache
+/tests/bin
+/tests/snapshots-tmp
 /unit_tests/build
 /unit_tests/coverage
 /unit_tests/coverage*
