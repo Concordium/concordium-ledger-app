@@ -64,7 +64,7 @@ void handleSignTransfer(uint8_t *cdata, volatile unsigned int *flags) {
 
     // Build display value of the amount to transfer, and also add the bytes to the hash.
     uint64_t amount = U8BE(cdata, 0);
-    amountToGtuDisplay(ctx->displayAmount, amount);
+    amountToGtuDisplay(ctx->displayAmount, sizeof(ctx->displayAmount), amount);
     cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 8, NULL, 0);
 
     // Display the transaction information to the user (recipient address and amount to be sent).
@@ -123,7 +123,7 @@ void handleSignTransferWithMemo(uint8_t *cdata, uint8_t p1, uint8_t dataLength, 
     } else if (p1 == P1_AMOUNT && ctx->state == TX_TRANSFER_AMOUNT) {
         // Build display value of the amount to transfer, and also add the bytes to the hash.
         uint64_t amount = U8BE(cdata, 0);
-        amountToGtuDisplay(ctx->displayAmount, amount);
+        amountToGtuDisplay(ctx->displayAmount, sizeof(ctx->displayAmount), amount);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 8, NULL, 0);
 
         ux_flow_init(0, ux_memo_sign_flow, NULL);

@@ -3,6 +3,7 @@
 #include "util.h"
 #include "menu.h"
 #include "responseCodes.h"
+#include "globals.h"
 
 static keyDerivationPath_t *keyPath = &path;
 static exportPublicKeyContext_t *ctx = &global.exportPublicKeyContext;
@@ -79,7 +80,7 @@ void sendPublicKey(bool compare) {
     if (compare) {
         // Show the public-key so that the user can verify the public-key.
         sendSuccessResultNoIdle(tx);
-        toPaginatedHex(publicKey, sizeof(publicKey), ctx->publicKey);
+        toPaginatedHex(publicKey, sizeof(publicKey), ctx->publicKey, sizeof(ctx->publicKey));
         // Allow for receiving a new instruction even while comparing public keys.
         tx_state->currentInstruction = -1;
         ux_flow_init(0, ux_sign_compare_public_key, NULL);
@@ -124,7 +125,7 @@ void handleGetPublicKey(uint8_t *cdata, uint8_t p1, uint8_t p2, volatile unsigne
                     THROW(ERROR_INVALID_PATH);
             }
         } else {
-            getIdentityAccountDisplay(ctx->display);
+            getIdentityAccountDisplay(ctx->display, sizeof(ctx->display));
         }
 
         // Display the UI for the public-key flow, where the user can validate that the

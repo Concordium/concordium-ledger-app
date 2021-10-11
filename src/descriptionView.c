@@ -1,5 +1,7 @@
-#include <os.h>
+#include "ux.h"
+#include "globals.h"
 #include "util.h"
+#include "descriptionView.h"
 #include "responseCodes.h"
 
 static descriptionContext_t *ctx = &global.withDescription.descriptionContext;
@@ -12,11 +14,11 @@ UX_STEP_CB(
     handleDescriptionPart(),
     {
         (char *) global.withDescription.descriptionContext.header,
-        (char *) global.withDescription.descriptionContext.text
-    });
+            (char *) global.withDescription.descriptionContext.text
+            });
 UX_FLOW(ux_sign_description,
-    &ux_sign_description_step
-);
+        &ux_sign_description_step
+    );
 
 void handleDescriptionPart(void) {
     if (ctx->textLength == 0) {

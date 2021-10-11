@@ -23,6 +23,6 @@ int secondsToTm(long long, tm *);
  * Writes a time struct to dst as human readable text in
  * the format yyyy-mm-dd hh:mm:ss.
  */
-int timeToDisplayText(tm time, uint8_t *dst);
+int timeToDisplayText(tm time, uint8_t *dst, size_t dstLength);
 
 #endif

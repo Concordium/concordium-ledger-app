@@ -1,4 +1,5 @@
 #include <os.h>
+#include "ux.h"
 #include "cx.h"
 #include <stdint.h>
 #include "util.h"
@@ -87,7 +88,7 @@ void handleExportPrivateKeySeed(uint8_t *dataBuffer, uint8_t p1, uint8_t p2, vol
     memmove(ctx->path, keyDerivationPath, sizeof(keyDerivationPath));
 
     memmove(ctx->display, "ID #", 4);
-    bin2dec(ctx->display + 4, identity);
+    bin2dec(ctx->display + 4, sizeof(ctx->display) - 4, identity);
 
     if (p1 == P1_BOTH) {
         memmove(ctx->displayHeader, "Create credential", 17);

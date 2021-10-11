@@ -78,7 +78,7 @@ void readMemoInitial(uint8_t *cdata, uint8_t dataLength) {
     switch (ctx->majorType) {
         case 0:
             // non-negative integer
-            bin2dec(ctx->memo, length);
+            bin2dec(ctx->memo, sizeof(ctx->memo), length);
             if (ctx->memoLength != 0) {
                 THROW(ERROR_INVALID_STATE);
             }
@@ -87,10 +87,10 @@ void readMemoInitial(uint8_t *cdata, uint8_t dataLength) {
             // negative integer
             memmove(ctx->memo, "-", 1);
             if (length == UINT64_MAX) {
-                bin2dec(ctx->memo + 1, length);
+                bin2dec(ctx->memo + 1, sizeof(ctx->memo) - 1 , length);
                 memmove(ctx->memo + 1 + 20, " - 1", 4);
             } else {
-                bin2dec(ctx->memo + 1, 1 + length);
+                bin2dec(ctx->memo + 1, sizeof(ctx->memo) - 1, 1 + length);
             }
             if (ctx->memoLength != 0) {
                 THROW(ERROR_INVALID_STATE);

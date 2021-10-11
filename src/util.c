@@ -38,14 +38,14 @@ int parseKeyDerivationPath(uint8_t *cdata) {
 // Builds a display version of the identity/account path. A pre-condition
 // for running this method is that 'parseKeyDerivation' has been
 // run prior to it.
-void getIdentityAccountDisplay(uint8_t *dst) {
+void getIdentityAccountDisplay(uint8_t *dst, size_t dstLength) {
     uint32_t identityIndex = keyPath->rawKeyDerivationPath[4];
     uint32_t accountIndex = keyPath->rawKeyDerivationPath[6];
 
-    int offset = bin2dec(dst, identityIndex) - 1;
+    int offset = bin2dec(dst, dstLength, identityIndex) - 1;
     memmove(dst + offset, "/", 1);
-    offset = offset + 1;
-    bin2dec(dst + offset, accountIndex);
+    offset += 1;
+    bin2dec(dst + offset, dstLength - offset, accountIndex);
 }
 
 /**
@@ -62,15 +62,15 @@ int hashHeaderAndType(uint8_t *cdata, uint8_t headerLength, uint8_t validType) {
         THROW(ERROR_INVALID_TRANSACTION);
     }
     cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 1, NULL, 0);
-    
+
     return headerLength + 1;
 }
 
 /**
- * Adds the account transaction header and the transaction kind to the hash. The 
+ * Adds the account transaction header and the transaction kind to the hash. The
  * transaction kind is verified to have the supplied value to prevent processing
  * invalid transactions.
- * 
+ *
  * A side effect of this method is that the sender address from the transaction header
  * is parsed and saved in a global variable, so that it is available to be displayed
  * for all account transactions.

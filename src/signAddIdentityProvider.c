@@ -89,7 +89,7 @@ void handleSignAddIdentityProvider(uint8_t *cdata, uint8_t p1, uint8_t dataLengt
         // Read the ipIdentity.
         uint32_t ipIdentity = U4BE(cdata, 0);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 4, NULL, 0);
-        bin2dec(ctx->ipIdentity, ipIdentity);
+        bin2dec(ctx->ipIdentity, sizeof(ctx->ipIdentity), ipIdentity);
         ctx->payloadLength -= 4;
 
         ctx->state = TX_ADD_IDENTITY_PROVIDER_DESCRIPTION_LENGTH;
@@ -139,7 +139,7 @@ void handleSignAddIdentityProvider(uint8_t *cdata, uint8_t p1, uint8_t dataLengt
             // We have received all bytes of the verifyKey.
             uint8_t hashBytes[32];
             cx_hash((cx_hash_t *) &ctx->hash, CX_LAST, NULL, 0, hashBytes, 32);
-            toPaginatedHex(hashBytes, 32, ctx->verifyKeyHash);
+            toPaginatedHex(hashBytes, 32, ctx->verifyKeyHash, sizeof(ctx->verifyKeyHash));
 
             ctx->state = TX_ADD_IDENTITY_PROVIDER_CDI_VERIFY_KEY;
             ux_flow_init(0, ux_sign_add_identity_provider_verify_key, NULL);
@@ -153,7 +153,7 @@ void handleSignAddIdentityProvider(uint8_t *cdata, uint8_t p1, uint8_t dataLengt
         }
     } else if (p1 == P1_CDI_VERIFY_KEY && ctx->state == TX_ADD_IDENTITY_PROVIDER_CDI_VERIFY_KEY) {
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, CDI_VERIFY_KEY_LENGTH, NULL, 0);
-        toPaginatedHex(cdata, CDI_VERIFY_KEY_LENGTH, ctx->cdiVerifyKey);
+        toPaginatedHex(cdata, CDI_VERIFY_KEY_LENGTH, ctx->cdiVerifyKey, sizeof(ctx->cdiVerifyKey));
         ctx->payloadLength -= CDI_VERIFY_KEY_LENGTH;
 
         if (dataLength != CDI_VERIFY_KEY_LENGTH || ctx->payloadLength != 0) {

@@ -183,7 +183,7 @@ void parseVerificationKey(uint8_t *buffer) {
     cx_hash((cx_hash_t *) &tx_state->hash, 0, verificationKey, 32, NULL, 0);
 
     // Convert to a human-readable format.
-    toPaginatedHex(verificationKey, sizeof(verificationKey), ctx->accountVerificationKey);
+    toPaginatedHex(verificationKey, sizeof(verificationKey), ctx->accountVerificationKey, sizeof(ctx->accountVerificationKey));
     ctx->numberOfVerificationKeys -= 1;
 
     // Show to the user.
@@ -255,7 +255,7 @@ void handleSignUpdateCredential(uint8_t *dataBuffer, uint8_t p1, uint8_t p2, vol
         sendSuccessNoIdle();
     } else if (p2 == P2_CREDENTIAL_ID && ctx->updateCredentialState == TX_UPDATE_CREDENTIAL_ID) {
         cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 48, NULL, 0);
-        toPaginatedHex(dataBuffer, 48, ctx->credentialId);
+        toPaginatedHex(dataBuffer, 48, ctx->credentialId, sizeof(ctx->credentialId));
 
         ctx->credentialIdCount -= 1;
         if (ctx->credentialIdCount == 0) {
@@ -266,7 +266,7 @@ void handleSignUpdateCredential(uint8_t *dataBuffer, uint8_t p1, uint8_t p2, vol
         *flags |= IO_ASYNCH_REPLY;
     } else if (p2 == P2_THRESHOLD && ctx->updateCredentialState == TX_UPDATE_CREDENTIAL_THRESHOLD) {
         uint8_t threshold = dataBuffer[0];
-        bin2dec(ctx->threshold, threshold);
+        bin2dec(ctx->threshold, sizeof(ctx->threshold), threshold);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 1, NULL, 0);
 
         ux_flow_init(0, ux_sign_credential_update_threshold, NULL);
@@ -306,7 +306,7 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, uint8_t p2,
         }
 
         // Parse signature threshold.
-        bin2dec(ctx->signatureThreshold, dataBuffer[0]);
+        bin2dec(ctx->signatureThreshold, sizeof(ctx->signatureThreshold), dataBuffer[0]);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 1, NULL, 0);
         dataBuffer += 1;
 
@@ -321,15 +321,17 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, uint8_t p2,
         dataBuffer += 4;
 
         // Parse anonymity revocation threshold.
-        int arThresholdLength = numberToText(ctx->anonymityRevocationThreshold, dataBuffer[0]);
-        memmove(ctx->anonymityRevocationThreshold + arThresholdLength, " out of ", 8);
+        int offset = numberToText(ctx->anonymityRevocationThreshold, sizeof(ctx->anonymityRevocationThreshold), dataBuffer[0]);
+        memmove(ctx->anonymityRevocationThreshold + offset, " out of ", 8);
+        offset += 8;
         cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 1, NULL, 0);
         dataBuffer += 1;
 
         // Parse the length of the following list of anonymity revokers.
         ctx->anonymityRevocationListLength = U2BE(dataBuffer, 0);
-        bin2dec(ctx->anonymityRevocationThreshold + arThresholdLength + 8, ctx->anonymityRevocationListLength);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 2, NULL, 0);
+        // Add the total amount of revokers to the display of threshold to get "x out of y"
+        bin2dec(ctx->anonymityRevocationThreshold + offset,  sizeof(ctx->anonymityRevocationThreshold) - offset, ctx->anonymityRevocationListLength);
 
         // Initialize values for later.
         cx_sha256_init(&attributeHash);
@@ -355,7 +357,7 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, uint8_t p2,
         // to validate.
         uint8_t encIdCredPubShare[96];
         memmove(encIdCredPubShare, dataBuffer, 96);
-        toPaginatedHex(encIdCredPubShare, sizeof(encIdCredPubShare), ctx->encIdCredPubShare);
+        toPaginatedHex(encIdCredPubShare, sizeof(encIdCredPubShare), ctx->encIdCredPubShare, sizeof(ctx->encIdCredPubShare));
         cx_hash((cx_hash_t *) &tx_state->hash, 0, encIdCredPubShare, 96, NULL, 0);
 
         if (ctx->anonymityRevocationListLength == 1) {
@@ -412,7 +414,7 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, uint8_t p2,
         if (ctx->attributeListLength == 0) {
             uint8_t attributeHashBytes[32];
             cx_hash((cx_hash_t *) &attributeHash, CX_LAST, NULL, 0, attributeHashBytes, 32);
-            toPaginatedHex(attributeHashBytes, sizeof(attributeHashBytes), ctx->attributeHashDisplay);
+            toPaginatedHex(attributeHashBytes, sizeof(attributeHashBytes), ctx->attributeHashDisplay, sizeof(ctx->attributeHashDisplay));
             ctx->state = TX_CREDENTIAL_DEPLOYMENT_LENGTH_OF_PROOFS;
             sendSuccessNoIdle();
         } else {

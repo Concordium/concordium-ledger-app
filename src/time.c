@@ -102,40 +102,40 @@ int prefixWithZero(uint8_t *dst, int value) {
 	return 0;
 }
 
-int timeToDisplayText(tm time, uint8_t *dst) {
+int timeToDisplayText(tm time, uint8_t *dst, size_t dstLength) {
 	int offset = 0;
 
-	offset += numberToText(dst, time.tm_year + 1900);
-	
+	offset += numberToText(dst, dstLength, time.tm_year + 1900);
+
 	memmove(dst + offset, "-", 1);
 	offset += 1;
 
 	offset += prefixWithZero(dst + offset, time.tm_mon + 1);
-	offset += numberToText(dst + offset, time.tm_mon + 1);
+	offset += numberToText(dst + offset, dstLength - offset, time.tm_mon + 1);
 
 	memmove(dst + offset, "-", 1);
 	offset += 1;
 
 	offset += prefixWithZero(dst + offset, time.tm_mday);
-	offset += numberToText(dst + offset, time.tm_mday);
+	offset += numberToText(dst + offset, dstLength - offset, time.tm_mday);
 
 	memmove(dst + offset, " ", 1);
 	offset += 1;
 
 	offset += prefixWithZero(dst + offset, time.tm_hour);
-	offset += numberToText(dst + offset, time.tm_hour);
+	offset += numberToText(dst + offset, dstLength - offset, time.tm_hour);
 
 	memmove(dst + offset, ":", 1);
 	offset += 1;
 
 	offset += prefixWithZero(dst + offset, time.tm_min);
-	offset += numberToText(dst + offset, time.tm_min);
+	offset += numberToText(dst + offset, dstLength - offset, time.tm_min);
 
 	memmove(dst + offset, ":", 1);
 	offset += 1;
 
 	offset += prefixWithZero(dst + offset, time.tm_sec);
-	offset += bin2dec(dst + offset, time.tm_sec);
+	offset += bin2dec(dst + offset, dstLength - offset, time.tm_sec);
 
 	return offset;
 }

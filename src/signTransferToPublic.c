@@ -46,7 +46,7 @@ void handleSignTransferToPublic(uint8_t *cdata, uint8_t p1, uint8_t dataLength, 
 
         // Parse transaction amount so it can be displayed.
         uint64_t amountToPublic = U8BE(cdata, 0);
-        amountToGtuDisplay(ctx->amount, amountToPublic);
+        amountToGtuDisplay(ctx->amount, sizeof(ctx->amount), amountToPublic);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 8, NULL, 0);
         cdata += 8;
 

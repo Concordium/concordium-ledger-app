@@ -1,7 +1,13 @@
-#include "globals.h"
+#ifndef  _CONCORDIUM_APP_UTIL_H_
+#define _CONCORDIUM_APP_UTIL_H_
+
+#include "os.h"
 #include <stdbool.h>
 #include <string.h>
 #include "numberHelpers.h"
+#include "ux.h"
+#include "cx.h"
+#include "globals.h"
 
 /**
  * Converts bytes into uint64_t (big endian).
@@ -81,8 +87,9 @@ void sign(uint8_t *input, uint8_t *signatureOnInput);
  * pre-condotion for running this method is that 'parseKeyDerivation' has been
  * run prior to it.
  * @param dst [out] where to write the identity/account string
+ * @param dstLength length of dst
  */
-void getIdentityAccountDisplay(uint8_t *dst);
+void getIdentityAccountDisplay(uint8_t *dst, size_t dstLength);
 
 /**
  * Adds the account transaction header and transaction kind to the current
@@ -110,3 +117,5 @@ int hashUpdateHeaderAndType(uint8_t *cdata, uint8_t validUpdateType);
  * @param recipientSize the size of the recipient destination
  */
 int handleHeaderAndToAddress(uint8_t *cdata, uint8_t kind, uint8_t *recipientDst, size_t recipientSize);
+
+#endif

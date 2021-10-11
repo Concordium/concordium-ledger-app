@@ -37,7 +37,7 @@ void handleSignUpdateTransactionFeeDistribution(uint8_t *cdata, volatile unsigne
 
     // Baker fee is first 4 bytes
     uint32_t bakerFee = U4BE(cdata, 0);
-    int bakerFeeLength = numberToText(ctx->baker, bakerFee);
+    int bakerFeeLength = numberToText(ctx->baker, sizeof(ctx->baker), bakerFee);
     cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 4, NULL, 0);
     cdata += 4;
     uint8_t fraction[8] = "/100000";
@@ -45,7 +45,7 @@ void handleSignUpdateTransactionFeeDistribution(uint8_t *cdata, volatile unsigne
 
     // Gas account fee is the next 4 bytes
     uint32_t gasAccountFee = U4BE(cdata, 0);
-    int gasAccountFeeLength = numberToText(ctx->gasAccount, gasAccountFee);
+    int gasAccountFeeLength = numberToText(ctx->gasAccount, sizeof(ctx->gasAccount), gasAccountFee);
     cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 4, NULL, 0);
     memmove(ctx->gasAccount + gasAccountFeeLength, fraction, 8);
 
