@@ -7,6 +7,7 @@
 #include "menu.h"
 #include "base58check.h"
 #include "responseCodes.h"
+#include "numberHelpers.h"
 
 static tx_state_t *tx_state = &global_tx_state;
 static keyDerivationPath_t *keyPath = &path;

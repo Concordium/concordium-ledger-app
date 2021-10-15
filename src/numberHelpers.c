@@ -1,5 +1,4 @@
 #include "os.h"
-#include <stdint.h>
 #include "numberHelpers.h"
 #include "responseCodes.h"
 
@@ -48,7 +47,7 @@ size_t decimalAmountToGtuDisplay(uint8_t *dst, size_t dstLength, uint64_t microG
     size_t length = lengthOfNumber(microGtuAmount);
     int zeroFillLength = 6 - length;
 
-    if (zeroFillLength > 0 && dstLength < zeroFillLength) {
+    if (dstLength - zeroFillLength < 0) {
         THROW(ERROR_BUFFER_OVERFLOW);
     }
 

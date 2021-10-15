@@ -5,8 +5,6 @@
 #include <stdbool.h>
 #include <string.h>
 #include "numberHelpers.h"
-#include "ux.h"
-#include "cx.h"
 #include "globals.h"
 
 /**

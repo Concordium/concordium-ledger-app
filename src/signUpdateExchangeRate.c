@@ -53,11 +53,10 @@ void handleSignUpdateExchangeRate(uint8_t *cdata, volatile unsigned int *flags) 
 
     // Numerator is the first 8 bytes.
     uint64_t numerator = U8BE(cdata, 0);
-    int numeratorLength = numberToText(ctx->ratio, sizeof(ctx->ratio), numerator);
+    int offset = numberToText(ctx->ratio, sizeof(ctx->ratio), numerator);
     cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 8, NULL, 0);
     cdata += 8;
 
-    int offset = numeratorLength;
     memmove(ctx->ratio + offset, " / ", 3);
     offset += 3;
 
