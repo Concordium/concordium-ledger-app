@@ -63,13 +63,6 @@ static void test_secondsToTm_overflow() {
     assert_int_equal(result, -1);
 }
 
-static void test_memmove() {
-    uint8_t text[3];
-    text[2] = '1';
-    memmove(text, "No", 3);
-    assert_int_equal(text[2], 0);
-}
-
 int main() {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_prefixWithZero_does_prefix_1),
@@ -78,7 +71,6 @@ int main() {
         cmocka_unit_test(test_seconds_to_display_2021),
         cmocka_unit_test(test_seconds_to_display_2030),
         cmocka_unit_test(test_secondsToTm_overflow),
-        cmocka_unit_test(test_memmove),
     };
 
     return cmocka_run_group_tests(tests, NULL, NULL);
