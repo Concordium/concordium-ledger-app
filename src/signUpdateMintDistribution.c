@@ -53,8 +53,8 @@ void handleSignUpdateMintDistribution(uint8_t *cdata, volatile unsigned int *fla
     uint8_t multiplication[6] = "*10^(-";
     memmove(ctx->mintRate + mintRateMantissaLength, multiplication, 6);
     int mintRateExponentLength = numberToText(ctx->mintRate + mintRateMantissaLength + 6, mintRateExponent);
-    uint8_t end_paranthesis[2] = ")";
-    memmove(ctx->mintRate + mintRateMantissaLength + 6 + mintRateExponentLength, end_paranthesis, 2);
+    uint8_t endParenthesis[2] = ")";
+    memmove(ctx->mintRate + mintRateMantissaLength + 6 + mintRateExponentLength, endParenthesis, 2);
 
     // Baker reward
     uint8_t fraction[8] = "/100000";

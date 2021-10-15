@@ -34,20 +34,6 @@ int parseKeyDerivationPath(uint8_t *cdata) {
     return 1 + (4 * keyPath->pathLength);
 }
 
-// TODO: This is only used in getPublicKey, so perhaps it should be moved there?
-// Builds a display version of the identity/account path. A pre-condition
-// for running this method is that 'parseKeyDerivation' has been
-// run prior to it.
-void getIdentityAccountDisplay(uint8_t *dst) {
-    uint32_t identityIndex = keyPath->rawKeyDerivationPath[4];
-    uint32_t accountIndex = keyPath->rawKeyDerivationPath[6];
-
-    int offset = bin2dec(dst, identityIndex) - 1;
-    memmove(dst + offset, "/", 1);
-    offset = offset + 1;
-    bin2dec(dst + offset, accountIndex);
-}
-
 /**
  * Generic method for hashing and validating header and type for a transaction.
  * Use hashAccountTransactionHeaderAndKind or hashUpdateHeaderAndType
@@ -62,12 +48,12 @@ int hashHeaderAndType(uint8_t *cdata, uint8_t headerLength, uint8_t validType) {
         THROW(ERROR_INVALID_TRANSACTION);
     }
     cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 1, NULL, 0);
-    
+
     return headerLength + 1;
 }
 
 /**
- * Adds the account transaction header and the transaction kind to the hash. The 
+ * Adds the account transaction header and the transaction kind to the hash. The
  * transaction kind is verified to have the supplied value to prevent processing
  * invalid transactions.
  * 

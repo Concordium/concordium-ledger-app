@@ -49,6 +49,18 @@ UX_FLOW(ux_sign_compare_public_key,
     &ux_sign_compare_public_key_0_step
 );
 
+// Builds a display version of the identity/account path. A pre-condition
+// for running this method is that 'parseKeyDerivation' has been
+// run prior to it.
+void getIdentityAccountDisplay(uint8_t *dst) {
+    uint32_t identityIndex = keyPath->rawKeyDerivationPath[4];
+    uint32_t accountIndex = keyPath->rawKeyDerivationPath[6];
+
+    int offset = bin2dec(dst, identityIndex) - 1;
+    memmove(dst + offset, "/", 1);
+    offset = offset + 1;
+    bin2dec(dst + offset, accountIndex);
+}
 
 /**
  * Derive the public-key for the given path, and then write it to
