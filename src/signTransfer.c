@@ -115,7 +115,7 @@ void handleSignTransferWithMemo(uint8_t *cdata, uint8_t p1, uint8_t dataLength, 
         readMemoContent(cdata, dataLength);
 
         if (memo_ctx->memoLength != 0) {
-            // The memo size is <=256 bytes, so we should always have received the complete memo by this point;
+            // The memo size is <=256 bytes, so we should always have received the complete memo by this point
             THROW(ERROR_INVALID_STATE);
         }
 

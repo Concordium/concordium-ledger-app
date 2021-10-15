@@ -126,6 +126,7 @@ void handleSignAddIdentityProvider(uint8_t *cdata, uint8_t p1, uint8_t dataLengt
             memmove(desc_ctx->text + dataLength, "\0", 1);
         }
 
+        // We do this to handle if this part of the description is empty
         checkIfDescriptionPartIsDoneIdentityProvider();
         displayDescriptionPart(flags);
     } else if (p1 == P1_VERIFY_KEY && ctx->state == TX_ADD_IDENTITY_PROVIDER_VERIFY_KEY) {

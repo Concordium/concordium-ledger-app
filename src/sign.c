@@ -52,10 +52,5 @@ void buildAndSignTransactionHash() {
     sign(tx_state->transactionHash, signedHash);
 
     memmove(G_io_apdu_buffer, signedHash, sizeof(signedHash));
-    sendSuccess(sizeof(signedHash));    
-}
-
-// Send user rejection and make sure to reset context (otherwise a new request would be rejected).
-void declineToSignTransaction() {
-    sendUserRejection();
+    sendSuccess(sizeof(signedHash));
 }

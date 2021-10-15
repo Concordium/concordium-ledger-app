@@ -36,8 +36,8 @@ void handleSignTransferToPublic(uint8_t *cdata, uint8_t p1, uint8_t dataLength, 
         cx_sha256_init(&tx_state->hash);
         hashAccountTransactionHeaderAndKind(cdata, TRANSFER_TO_PUBLIC);
 
-        // Ask the caller for the next command.
         ctx->state = TX_TRANSFER_TO_PUBLIC_REMAINING_AMOUNT;
+        // Ask the caller for the next command.
         sendSuccessNoIdle();
     } else if (p1 == P1_REMAINING_AMOUNT && ctx->state == TX_TRANSFER_TO_PUBLIC_REMAINING_AMOUNT) {
         // Hash remaining amount. Remaining amount is encrypted, and so we cannot display it.

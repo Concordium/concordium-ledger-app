@@ -39,7 +39,7 @@ UX_FLOW(ux_sign_add_anonymity_revoker_finish,
 #define P1_DESCRIPTION                 0x02        // Used for the name, url, description.
 #define P1_PUBLIC_KEY                  0x03
 
-void checkIfDescriptionPartIsDoneAnonymityRevoker() {
+void checkIfDescriptionPartIsDoneAnonymityRevoker(void) {
     if (desc_ctx->textLength==0) {
         // If we have received all of the current part of the description, update the state.
         switch (desc_ctx->descriptionState) {
@@ -88,7 +88,8 @@ void handleSignAddAnonymityRevoker(uint8_t *cdata, uint8_t p1, uint8_t dataLengt
         ctx->payloadLength -= 4;
 
         ctx->state = TX_ADD_ANONYMITY_REVOKER_DESCRIPTION;
-
+        
+        // We do this to handle if this part of the description is empty
         checkIfDescriptionPartIsDoneAnonymityRevoker();
         handleDescriptionPart();
     } else if (p1 == P1_DESCRIPTION && ctx->state == TX_ADD_ANONYMITY_REVOKER_DESCRIPTION) {

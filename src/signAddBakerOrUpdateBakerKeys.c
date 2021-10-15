@@ -83,7 +83,7 @@ void handleSignAddBakerOrUpdateBakerKeys(uint8_t *cdata, uint8_t p1, uint8_t p2,
         // Election verify key
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 32, NULL, 0);
         cdata += 32;
-        
+
         // Baker sign verify key
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 32, NULL, 0);
         cdata += 32;
@@ -94,7 +94,7 @@ void handleSignAddBakerOrUpdateBakerKeys(uint8_t *cdata, uint8_t p1, uint8_t p2,
         ctx->state = ADD_BAKER_PROOFS_AMOUNT_RESTAKE;
         sendSuccessNoIdle();
     } else if (p1 == P1_PROOFS_AMOUNT_RESTAKE && ctx->state == ADD_BAKER_PROOFS_AMOUNT_RESTAKE) {
-        // Next comes 3x64 bytes of proofs corresponding to each of the 
+        // Next comes 3x64 bytes of proofs corresponding to each of the
         // verification keys above. Proofs are not sensible to display,
         // so we add it directly to the hash.
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 192, NULL, 0);
@@ -114,9 +114,9 @@ void handleSignAddBakerOrUpdateBakerKeys(uint8_t *cdata, uint8_t p1, uint8_t p2,
             uint8_t restakeEarnings = cdata[0];
             cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 1, NULL, 0);
             if (restakeEarnings == 0) {
-                memmove(ctx->restake, "No\0", 3);
+                memmove(ctx->restake, "No", 3);
             } else if (restakeEarnings == 1) {
-                memmove(ctx->restake, "Yes\0", 4);
+                memmove(ctx->restake, "Yes", 4);
             } else {
                 THROW(ERROR_INVALID_TRANSACTION);
             }

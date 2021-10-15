@@ -1,3 +1,6 @@
+#ifndef _GLOBALS_H_
+#define _GLOBALS_H_
+
 #include "os.h"
 #include "ux.h"
 #include "cx.h"
@@ -34,8 +37,6 @@
 
 #include "memo.h"
 
-#ifndef _GLOBALS_H_
-#define _GLOBALS_H_
 
 #define CONCORDIUM_PURPOSE 1105
 #define CONCORDIUM_COIN_TYPE 0

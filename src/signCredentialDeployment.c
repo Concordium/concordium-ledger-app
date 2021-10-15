@@ -15,9 +15,7 @@ static signCredentialDeploymentContext_t *ctx = &global.signCredentialDeployment
 static cx_sha256_t attributeHash;
 static tx_state_t *tx_state = &global_tx_state;
 
-void processNextVerificationKey();
-void signCredentialDeployment();
-void declineToSignCredentialDeployment();
+void processNextVerificationKey(void);
 void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, uint8_t p2, volatile unsigned int *flags, bool isInitialCall);
 
 UX_STEP_CB(
@@ -162,7 +160,7 @@ UX_FLOW(ux_sign_credential_update_threshold,
     &ux_sign_credential_update_threshold_2_step
 );
 
-void processNextVerificationKey() {
+void processNextVerificationKey(void) {
     if (ctx->numberOfVerificationKeys == 0) {
         ctx->state = TX_CREDENTIAL_DEPLOYMENT_SIGNATURE_THRESHOLD;
         sendSuccessNoIdle();

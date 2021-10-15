@@ -30,14 +30,19 @@ void handleSignUpdateElectionDifficulty(uint8_t *cdata, volatile unsigned int *f
     cx_sha256_init(&tx_state->hash);
     cdata += hashUpdateHeaderAndType(cdata, UPDATE_TYPE_ELECTION_DIFFICULTY);
 
-    uint8_t fraction[10] = "/100000";
+
     uint32_t numerator = U4BE(cdata, 0);
     if (numerator > 100000) {
         THROW(ERROR_INVALID_TRANSACTION);
     }
-    int numeratorLength = numberToText(ctx->electionDifficulty, numerator);
+
+    // Hash numerator
     cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 4, NULL, 0);
-    memmove(ctx->electionDifficulty + numeratorLength, fraction, 10);
+
+    // Display numerator as "numerator/100000"
+    int numeratorLength = numberToText(ctx->electionDifficulty, numerator);
+    uint8_t fraction[8] = "/100000";
+    memmove(ctx->electionDifficulty + numeratorLength, fraction, 8);
 
     ux_flow_init(0, ux_sign_election_difficulty, NULL);
     *flags |= IO_ASYNCH_REPLY;

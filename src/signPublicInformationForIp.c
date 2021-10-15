@@ -6,8 +6,6 @@
 static signPublicInformationForIp_t *ctx = &global.signPublicInformationForIp;
 static tx_state_t *tx_state = &global_tx_state;
 
-void loadSigningUx();
-
 UX_STEP_CB(
     ux_sign_public_info_review,
     nn,

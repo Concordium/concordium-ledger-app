@@ -34,25 +34,11 @@ int parseKeyDerivationPath(uint8_t *cdata) {
     return 1 + (4 * keyPath->pathLength);
 }
 
-
-// Builds a display version of the identity/account path. A pre-condition
-// for running this method is that 'parseKeyDerivation' has been
-// run prior to it.
-void getIdentityAccountDisplay(uint8_t *dst) {
-    uint32_t identityIndex = keyPath->rawKeyDerivationPath[4];
-    uint32_t accountIndex = keyPath->rawKeyDerivationPath[6];
-
-    int offset = bin2dec(dst, identityIndex) - 1;
-    memmove(dst + offset, "/", 1);
-    offset = offset + 1;
-    bin2dec(dst + offset, accountIndex);
-}
-
 /**
  * Generic method for hashing and validating header and type for a transaction.
- * Use hashAccountTransactionHeaderAndKind or hashUpdateHeaderAndType 
+ * Use hashAccountTransactionHeaderAndKind or hashUpdateHeaderAndType
  * instead of using this method directly.
- */ 
+ */
 int hashHeaderAndType(uint8_t *cdata, uint8_t headerLength, uint8_t validType) {
     cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, headerLength, NULL, 0);
     cdata += headerLength;
@@ -62,12 +48,12 @@ int hashHeaderAndType(uint8_t *cdata, uint8_t headerLength, uint8_t validType) {
         THROW(ERROR_INVALID_TRANSACTION);
     }
     cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 1, NULL, 0);
-    
+
     return headerLength + 1;
 }
 
 /**
- * Adds the account transaction header and the transaction kind to the hash. The 
+ * Adds the account transaction header and the transaction kind to the hash. The
  * transaction kind is verified to have the supplied value to prevent processing
  * invalid transactions.
  * 
@@ -114,7 +100,7 @@ int handleHeaderAndToAddress(uint8_t *cdata, uint8_t kind, uint8_t *recipientDst
     cx_hash((cx_hash_t *) &tx_state->hash, 0, toAddress, 32, NULL, 0);
 
     // The recipient address is in a base58 format, so we need to encode it to be
-    // able to display in a humand-readable way.
+    // able to display in a human-readable way.
     if (base58check_encode(toAddress, sizeof(toAddress), recipientDst, &recipientSize) != 0) {
         // The received address bytes are not a valid base58 encoding.
         THROW(ERROR_INVALID_TRANSACTION);
@@ -169,12 +155,11 @@ void getPublicKey(uint8_t *publicKeyArray) {
     cx_ecfp_private_key_t privateKey;
     cx_ecfp_public_key_t publicKey;
 
-    getPrivateKey(keyPath->keyDerivationPath, keyPath->pathLength, &privateKey);
-
-    // Invoke the device method for generating a public-key pair.
     // Wrap in try/finally to ensure private key information is cleaned up, even if the system call fails.
     BEGIN_TRY {
         TRY {
+            getPrivateKey(keyPath->keyDerivationPath, keyPath->pathLength, &privateKey);
+            // Invoke the device method for generating a public-key pair.
             cx_ecfp_generate_pair(CX_CURVE_Ed25519, &publicKey, &privateKey, 1);
         }
         FINALLY {

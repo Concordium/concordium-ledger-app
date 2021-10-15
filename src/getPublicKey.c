@@ -49,6 +49,18 @@ UX_FLOW(ux_sign_compare_public_key,
     &ux_sign_compare_public_key_0_step
 );
 
+// Builds a display version of the identity/account path. A pre-condition
+// for running this method is that 'parseKeyDerivation' has been
+// run prior to it.
+void getIdentityAccountDisplay(uint8_t *dst) {
+    uint32_t identityIndex = keyPath->rawKeyDerivationPath[4];
+    uint32_t accountIndex = keyPath->rawKeyDerivationPath[6];
+
+    int offset = bin2dec(dst, identityIndex) - 1;
+    memmove(dst + offset, "/", 1);
+    offset = offset + 1;
+    bin2dec(dst + offset, accountIndex);
+}
 
 /**
  * Derive the public-key for the given path, and then write it to
@@ -82,7 +94,7 @@ void sendPublicKey(bool compare) {
         toPaginatedHex(publicKey, sizeof(publicKey), ctx->publicKey);
         // Allow for receiving a new instruction even while comparing public keys.
         tx_state->currentInstruction = -1;
-        ux_flow_init(0, ux_sign_compare_public_key, NULL);    
+        ux_flow_init(0, ux_sign_compare_public_key, NULL);
     } else {
         sendSuccess(tx);
     }
@@ -96,7 +108,7 @@ void handleGetPublicKey(uint8_t *cdata, uint8_t p1, uint8_t p2, volatile unsigne
     // proof of the knowledge of the corresponding private key.
     ctx->signPublicKey = p2 == 0x01;
 
-    // If P1 == 0x01, then we skip displaying the key being exported. This is used when it 
+    // If P1 == 0x01, then we skip displaying the key being exported. This is used when it
     // it is not important for the user to validate the key.
     if (p1 == 0x01) {
         sendPublicKey(false);

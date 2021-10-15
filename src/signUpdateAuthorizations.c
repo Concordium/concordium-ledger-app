@@ -11,8 +11,8 @@
 static signUpdateAuthorizations_t *ctx = &global.signUpdateAuthorizations;
 static tx_state_t *tx_state = &global_tx_state;
 
-void processKeyIndices();
-void processThreshold();
+void processKeyIndices(void);
+void processThreshold(void);
 
 UX_STEP_CB(
     ux_sign_update_authorizations_review_1_step,
@@ -95,28 +95,32 @@ const char* getAuthorizationName(authorizationType_e type) {
 }
 
 /**
- * Method to be called when the user validates the threshold in the UI. If there are 
- * additional authorization types to process, then ask for additional data, otherwise 
+ * Method to be called when the user validates the threshold in the UI. If there are
+ * additional authorization types to process, then ask for additional data, otherwise
  * continue to the signing flow as this marks the end of the transaction.
  */
-void processThreshold() {
+void processThreshold(void) {
     ctx->authorizationType += 1;
 
     if (ctx->authorizationType == AUTHORIZATION_END) {
         ux_flow_init(0, ux_sign_flow_shared, NULL);
     } else {
-        // Ask for the next access structure, as we have not processed all of 
+        // Ask for the next access structure, as we have not processed all of
         // them yet.
         ctx->state = TX_UPDATE_AUTHORIZATIONS_ACCESS_STRUCTURE_SIZE;
-        sendSuccessNoIdle(); 
+        sendSuccessNoIdle();
     }
 }
 
 // Cycle through the received key indices for the current access structure, and display
 // it to the user. If we have completed processing the current access structure, then
 // move on to receiving the threshold.
-void processKeyIndices() {
+void processKeyIndices(void) {
     if (ctx->accessStructureSize == 0) {
+        if (ctx->processedCount != 0) {
+            // We have been given more indices than promised
+            THROW(ERROR_INVALID_TRANSACTION);
+        }
         // The current access structure has been fully processed, continue to the threshold
         // for the current access structure.
         ctx->state = TX_UPDATE_AUTHORIZATIONS_ACCESS_STRUCTURE_THRESHOLD;
@@ -154,9 +158,9 @@ void handleSignUpdateAuthorizations(uint8_t *cdata, uint8_t p1, uint8_t updateTy
 
         uint8_t keyUpdateType = cdata[0];
         if (keyUpdateType == ROOT_UPDATE_LEVEL_2) {
-            memmove(ctx->type, "Level 2 w. root keys\0", 21);
+            memmove(ctx->type, "Level 2 w. root keys", 21);
         } else if (keyUpdateType == LEVEL1_UPDATE_LEVEL_2) {
-            memmove(ctx->type, "Level 2 w. level 1 keys\0", 24);
+            memmove(ctx->type, "Level 2 w. level 1 keys", 24);
         } else {
             THROW(ERROR_INVALID_TRANSACTION);
         }
@@ -192,12 +196,12 @@ void handleSignUpdateAuthorizations(uint8_t *cdata, uint8_t p1, uint8_t updateTy
         sendSuccessNoIdle();
     } else if (p1 == P1_ACCESS_STRUCTURE && ctx->state == TX_UPDATE_AUTHORIZATIONS_ACCESS_STRUCTURE_INDEX) {
         ctx->bufferPointer = 0;
-        ctx->processedCount = 0;
-        while (2 * ctx->processedCount < dataLength) {
-            cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata + (2 * ctx->processedCount), 2, NULL, 0);
-            memmove(ctx->buffer + (2 * ctx->processedCount), cdata + (2 * ctx->processedCount), 2);
-            ctx->processedCount += 1;
+        if (dataLength % 2 == 1) {
+            THROW(ERROR_INVALID_TRANSACTION);
         }
+        ctx->processedCount = dataLength / 2;
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, dataLength, NULL, 0);
+        memmove(ctx->buffer, cdata, dataLength);
         processKeyIndices();
         *flags |= IO_ASYNCH_REPLY;
 

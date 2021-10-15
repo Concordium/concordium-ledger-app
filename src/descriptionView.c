@@ -4,7 +4,7 @@
 
 static descriptionContext_t *ctx = &global.withDescription.descriptionContext;
 
-void handleDescriptionPart();
+void handleDescriptionPart(void);
 
 UX_STEP_CB(
     ux_sign_description_step,
