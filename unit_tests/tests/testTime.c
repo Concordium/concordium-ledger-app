@@ -31,7 +31,7 @@ static void test_seconds_to_display_0() {
     tm t;
     long long time = 0;
     secondsToTm(time, &t);
-    timeToDisplayText(t, display);
+    timeToDisplayText(t, display, sizeof(display));
     assert_string_equal(display, "1970-01-01 00:00:00");
 }
 
@@ -40,7 +40,7 @@ static void test_seconds_to_display_2021() {
     tm t;
     long long time = 1633526457;
     secondsToTm(time, &t);
-    timeToDisplayText(t, display);
+    timeToDisplayText(t, display, sizeof(display));
     assert_string_equal(display, "2021-10-06 13:20:57");
 }
 
@@ -49,7 +49,7 @@ static void test_seconds_to_display_2030() {
     tm t;
     long long time = 1905426279;
     secondsToTm(time, &t);
-    timeToDisplayText(t, display);
+    timeToDisplayText(t, display, sizeof(display));
     assert_string_equal(display, "2030-05-19 13:04:39");
 }
 

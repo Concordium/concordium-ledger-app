@@ -1,5 +1,7 @@
+#include "os.h"
 #include <stdint.h>
 #include "numberHelpers.h"
+#include "responseCodes.h"
 
 size_t lengthOfNumber(uint64_t number) {
     if (number == 0) {
@@ -16,7 +18,7 @@ size_t numberToText(uint8_t *dst, size_t dstLength, uint64_t number) {
     size_t len = lengthOfNumber(number);
 
     if (dstLength < len) {
-        return -1;
+        THROW(ERROR_BUFFER_OVERFLOW);
     }
 
     // Build the number in big-endian order.
@@ -29,6 +31,9 @@ size_t numberToText(uint8_t *dst, size_t dstLength, uint64_t number) {
 
 size_t bin2dec(uint8_t *dst, size_t dstLength, uint64_t number) {
     size_t characterLength = numberToText(dst, dstLength, number);
+    if (dstLength < characterLength + 1) {
+        THROW(ERROR_BUFFER_OVERFLOW);
+    }
     dst[characterLength] = '\0';
     return characterLength + 1;
 }
@@ -42,6 +47,10 @@ size_t decimalAmountToGtuDisplay(uint8_t *dst, size_t dstLength, uint64_t microG
     // so that input like 5304 become 005304 in their display version.
     size_t length = lengthOfNumber(microGtuAmount);
     int zeroFillLength = 6 - length;
+
+    if (zeroFillLength > 0 && dstLength < zeroFillLength) {
+        THROW(ERROR_BUFFER_OVERFLOW);
+    }
 
     for (int i = 0; i < zeroFillLength; i++) {
         dst[i] = '0';
@@ -68,8 +77,9 @@ size_t decimalAmountToGtuDisplay(uint8_t *dst, size_t dstLength, uint64_t microG
  * to relate to in the GUI.
  */
 size_t amountToGtuDisplay(uint8_t *dst, size_t dstLength, uint64_t microGtuAmount) {
+    // In every case we need to write atleast 2 characters
     if (dstLength < 2) {
-        return -1;
+        THROW(ERROR_BUFFER_OVERFLOW);
     }
 
     // A zero amount should be displayed as a plain '0'.
@@ -89,7 +99,7 @@ size_t amountToGtuDisplay(uint8_t *dst, size_t dstLength, uint64_t microGtuAmoun
         dst[1] = '.';
         size_t length = decimalAmountToGtuDisplay(dst + 2, dstLength - 2, microGtuAmount) + 2;
         if (dstLength < length + 1) {
-            return -1;
+            THROW(ERROR_BUFFER_OVERFLOW);
         }
         dst[length] = '\0';
         return length + 1;
@@ -110,14 +120,14 @@ size_t amountToGtuDisplay(uint8_t *dst, size_t dstLength, uint64_t microGtuAmoun
     // We check that the fit entire number and termination,
     // under the assumption that there is no decimalPart
     if (dstLength < wholeNumberLength + separatorCount + 1) {
-        return -1;
+        THROW(ERROR_BUFFER_OVERFLOW);
     }
 
     // Write the whole number part of the amount to the output destination. This
     // part has to have thousand separators added.
     for (int i = wholeNumberLength - 1 + separatorCount; i >= 0; i--) {
         dst[i] = (wholePart % 10) + '0';
-        microGtuAmount /= 10;
+        wholePart /= 10;
 
         current += 1;
         if (current == 3 && i != 0) {
@@ -139,9 +149,9 @@ size_t amountToGtuDisplay(uint8_t *dst, size_t dstLength, uint64_t microGtuAmoun
         offset += decimalAmountToGtuDisplay(dst + offset, dstLength - offset, decimalPart);
     }
 
-    // We check we can fit the termination character
+    // We check that we can fit the termination character
     if (dstLength < offset + 1) {
-        return -1;
+        THROW(ERROR_BUFFER_OVERFLOW);
     }
 
     dst[offset] = '\0';
