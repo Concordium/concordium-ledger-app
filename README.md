@@ -96,16 +96,18 @@ To fetch the required dependencies run:
 ```bash
 yarn
 ```
+
 While still in the `tests` directory, execute the following to run the end to end tests:
 ```bash
 yarn test
+```
 
 ## Building a release
 
 Note that it is only possible to build a release for the Nano S.
 
 To make a new release of the Concordium Ledger application you must have set up the build
-environment like described in the [official guide](https://ledger.readthedocs.io/en/latest/userspace/getting_started.html).
+environment like described in the [official guide](https://developers.ledger.com/docs/nano-app/build/).
 Additionally you must set the following environment variables
 ```
 LEDGER_SIGNING_KEY=private_key_used_for_signing_releases
