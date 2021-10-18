@@ -11,7 +11,7 @@ const exportPrivateKeyTest = (p1: number, picture: string, seed: string) => (asy
     const data = Buffer.from(path, 'hex');
     const tx = transport.send(0xe0, 0x05, p1, 0x01, data);
     await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
-    await sim.navigateAndCompareSnapshots('.', picture, [0]);
+    await sim.navigateAndCompareSnapshots('.', picture, [1, 0]);
     await expect(tx).resolves.toEqual(
         Buffer.from(seed + end, 'hex'),
     );
@@ -31,7 +31,7 @@ const negativePrivateKeyExportTest = (p1: number, picture: string, seed: string)
     const data = Buffer.from(path, 'hex');
     const tx = transport.send(0xe0, 0x05, p1, 0x01, data).catch((e) => expect(e.statusCode).toEqual(27013));
     await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
-    await sim.navigateAndCompareSnapshots('.', picture, [1, 0]);
+    await sim.navigateAndCompareSnapshots('.', picture, [2, 0]);
 });
 
 test('[NANO S] Decline to export private key seed for decryption', setupZemu('nanos', negativePrivateKeyExportTest(0x00, 'nanos_decline_decrypt', prfKeySeed)));

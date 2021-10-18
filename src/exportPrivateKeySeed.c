@@ -15,27 +15,33 @@ static exportPrivateKeySeedContext_t *ctx = &global.exportPrivateKeySeedContext;
 
 void exportPrivateKey();
 
-UX_STEP_CB(
+UX_STEP_NOCB(
     ux_export_private_key_0_step,
-    pnn,
-    exportPrivateKey(),
+    nn,
     {
-        &C_icon_validate_14,
         (char *) global.exportPrivateKeySeedContext.displayHeader,
         (char *) global.exportPrivateKeySeedContext.display
     });
 UX_STEP_CB(
-    ux_export_private_key_1_step,
+    ux_export_private_key_accept_step,
+    pb,
+    exportPrivateKey(),
+    {
+        &C_icon_validate_14,
+        "Accept"
+    });
+UX_STEP_CB(
+    ux_export_private_key_decline_step,
     pb,
     sendUserRejection(),
     {
         &C_icon_crossmark,
         "Decline"
-});
+    });
 UX_FLOW(ux_export_private_key,
     &ux_export_private_key_0_step,
-    &ux_export_private_key_1_step,
-    FLOW_LOOP
+    &ux_export_private_key_accept_step,
+    &ux_export_private_key_decline_step
 );
 
 
@@ -98,18 +104,15 @@ void handleExportPrivateKeySeed(uint8_t *dataBuffer, uint8_t p1, uint8_t p2, vol
 
     ctx->exportBoth = p1 == P1_BOTH;
 
+    memmove(ctx->display, "ID #", 4);
+    bin2dec(ctx->display + 4, identity);
+
     if (p1 == P1_BOTH) {
-        memmove(ctx->displayHeader, "Create ID #", 11);
-        bin2dec(ctx->displayHeader + 11, identity);
-        memmove(ctx->display, "credential", 11);
+        memmove(ctx->displayHeader, "Create credential", 18);
     } else if (p1 == P1_PRF_KEY_RECOVERY) {
-        memmove(ctx->displayHeader, "Recover ID #", 12);
-        bin2dec(ctx->displayHeader + 12, identity);
-        memmove(ctx->display, "credentials", 12);
+        memmove(ctx->displayHeader, "Recover credentials", 20);
     } else if (p1 == P1_PRF_KEY) {
         memmove(ctx->displayHeader, "Decrypt", 8);
-        memmove(ctx->display, "ID #", 4);
-        bin2dec(ctx->display + 4, identity);
     }
 
     ux_flow_init(0, ux_export_private_key, NULL);
