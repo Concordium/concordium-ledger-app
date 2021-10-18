@@ -96,10 +96,8 @@ size_t amountToGtuDisplay(uint8_t *dst, size_t dstLength, uint64_t microGtuAmoun
     if (microGtuAmount < 1000000) {
         dst[0] = '0';
         dst[1] = '.';
-        size_t length = decimalAmountToGtuDisplay(dst + 2, dstLength - 2, microGtuAmount) + 2;
-        if (dstLength < length + 1) {
-            THROW(ERROR_BUFFER_OVERFLOW);
-        }
+        // We decrement the length an extra time, to make sure there is space for the termination.
+        size_t length = decimalAmountToGtuDisplay(dst + 2, dstLength - 3, microGtuAmount) + 2;
         dst[length] = '\0';
         return length + 1;
     }
@@ -116,7 +114,7 @@ size_t amountToGtuDisplay(uint8_t *dst, size_t dstLength, uint64_t microGtuAmoun
     }
     uint64_t wholePart = microGtuAmount / 1000000;
 
-    // We check that the fit entire number and termination,
+    // We check that the entire number and termination fits,
     // under the assumption that there is no decimalPart
     if (dstLength < wholeNumberLength + separatorCount + 1) {
         THROW(ERROR_BUFFER_OVERFLOW);
@@ -140,7 +138,7 @@ size_t amountToGtuDisplay(uint8_t *dst, size_t dstLength, uint64_t microGtuAmoun
 
     // The first 6 digits should be without thousand separators,
     // as they are part of the decimal part of the number. Write those
-    // characters first to the destination output and separate with ','
+    // characters first to the destination output and separate with '.'
     uint64_t decimalPart = microGtuAmount % 1000000;
     if (decimalPart != 0) {
         dst[offset] = '.';

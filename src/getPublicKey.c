@@ -57,7 +57,7 @@ void getIdentityAccountDisplay(uint8_t *dst, size_t dstLength) {
     uint32_t identityIndex = keyPath->rawKeyDerivationPath[4];
     uint32_t accountIndex = keyPath->rawKeyDerivationPath[6];
 
-    int offset = bin2dec(dst, dstLength, identityIndex) - 1;
+    int offset = numberToText(dst, dstLength, identityIndex);
     memmove(dst + offset, "/", 1);
     offset += 1;
     bin2dec(dst + offset, dstLength - offset, accountIndex);
