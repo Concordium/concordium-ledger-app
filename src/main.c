@@ -113,6 +113,7 @@ accountSender_t global_account_sender;
 #define INS_SIGN_TRANSFER_WITH_MEMO 0x32
 #define INS_ENCRYPTED_AMOUNT_TRANSFER_WITH_MEMO 0x33
 #define INS_SIGN_TRANSFER_WITH_SCHEDULE_AND_MEMO 0x34
+#define INS_REGISTER_DATA 0x35
 
 // Main entry of application that listens for APDU commands that will be received from the
 // computer. The APDU commands control what flow is activated, i.e. which control flow is initiated.
@@ -197,6 +198,9 @@ static void concordium_main(void) {
                         break;
                     case INS_TRANSFER_TO_PUBLIC:
                         handleSignTransferToPublic(cdata, p1, lc, &flags, isInitialCall);
+                        break;
+                    case INS_REGISTER_DATA:
+                        handleSignRegisterData(cdata, p1, lc, &flags, isInitialCall);
                         break;
                     case INS_PUBLIC_INFO_FOR_IP:
                         handleSignPublicInformationForIp(cdata, p1, &flags, isInitialCall);

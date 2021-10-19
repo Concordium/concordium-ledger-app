@@ -19,6 +19,7 @@
 #include "signEncryptedAmountTransfer.h"
 #include "signAddBakerOrUpdateBakerKeys.h"
 #include "signUpdateBakerRestakeEarnings.h"
+#include "signRegisterData.h"
 
 #include "signUpdateExchangeRate.h"
 #include "signUpdateAuthorizations.h"
@@ -62,6 +63,7 @@ typedef enum {
     TRANSFER_TO_PUBLIC = 18,
     TRANSFER_WITH_SCHEDULE = 19,
     UPDATE_CREDENTIALS = 20,
+    REGISTER_DATA = 21,
     TRANSFER_WITH_MEMO = 22,
     ENCRYPTED_AMOUNT_TRANSFER_WITH_MEMO = 23,
     TRANSFER_WITH_SCHEDULE_WITH_MEMO = 24
@@ -154,6 +156,7 @@ typedef union {
     signAddBakerContext_t signAddBaker;
     signUpdateBakerStakeContext_t signUpdateBakerStake;
     signUpdateBakerRestakeEarningsContext_t signUpdateBakerRestakeEarnings;
+    signRegisterData_t signRegisterData;
 
     signExchangeRateContext_t signExchangeRateContext;
     signUpdateAuthorizations_t signUpdateAuthorizations;
