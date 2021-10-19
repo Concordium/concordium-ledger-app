@@ -1,20 +1,24 @@
-#include <stdint.h>
+#include "os.h"
 #include "numberHelpers.h"
-// TODO: add guards for the size of the output buffer.
+#include "responseCodes.h"
 
-int lengthOfNumber(uint64_t number) {
+size_t lengthOfNumber(uint64_t number) {
     if (number == 0) {
         return 1;
     }
-    int len = 0;
+    size_t len = 0;
     for (uint64_t nn = number; nn != 0; nn /= 10) {
         len++;
     }
     return len;
 }
 
-int numberToText(uint8_t *dst, uint64_t number) {
-    int len = lengthOfNumber(number);
+size_t numberToText(uint8_t *dst, size_t dstLength, uint64_t number) {
+    size_t len = lengthOfNumber(number);
+
+    if (dstLength < len) {
+        THROW(ERROR_BUFFER_OVERFLOW);
+    }
 
     // Build the number in big-endian order.
     for (int i = len - 1; i >= 0; i--) {
@@ -24,8 +28,11 @@ int numberToText(uint8_t *dst, uint64_t number) {
     return len;
 }
 
-int bin2dec(uint8_t *dst, uint64_t number) {
-    int characterLength = numberToText(dst, number);
+size_t bin2dec(uint8_t *dst, size_t dstLength, uint64_t number) {
+    size_t characterLength = numberToText(dst, dstLength, number);
+    if (dstLength < characterLength + 1) {
+        THROW(ERROR_BUFFER_OVERFLOW);
+    }
     dst[characterLength] = '\0';
     return characterLength + 1;
 }
@@ -34,11 +41,16 @@ int bin2dec(uint8_t *dst, uint64_t number) {
  * Write the display version of the decimal part of a GTU amount,
  * i.e. the numbers on the right-side of the decimal point.
  */
-int decimalAmountToGtuDisplay(uint8_t *dst, uint64_t microGtuAmount) {
+size_t decimalAmountToGtuDisplay(uint8_t *dst, size_t dstLength, uint64_t microGtuAmount) {
     // Fill with zeroes if the number is less than 6 digits,
     // so that input like 5304 become 005304 in their display version.
-    int length = lengthOfNumber(microGtuAmount);
+    size_t length = lengthOfNumber(microGtuAmount);
     int zeroFillLength = 6 - length;
+
+    if (dstLength - zeroFillLength < 0) {
+        THROW(ERROR_BUFFER_OVERFLOW);
+    }
+
     for (int i = 0; i < zeroFillLength; i++) {
         dst[i] = '0';
     }
@@ -55,7 +67,7 @@ int decimalAmountToGtuDisplay(uint8_t *dst, uint64_t microGtuAmount) {
         }
     }
 
-    return numberToText(dst + zeroFillLength, microGtuAmount) + zeroFillLength;
+    return numberToText(dst + zeroFillLength, dstLength - zeroFillLength, microGtuAmount) + zeroFillLength;
 }
 
 /**
@@ -63,7 +75,12 @@ int decimalAmountToGtuDisplay(uint8_t *dst, uint64_t microGtuAmount) {
  * can displayed as GTU, i.e. not as the micro version, as it is easier
  * to relate to in the GUI.
  */
-int amountToGtuDisplay(uint8_t *dst, uint64_t microGtuAmount) {
+size_t amountToGtuDisplay(uint8_t *dst, size_t dstLength, uint64_t microGtuAmount) {
+    // In every case we need to write atleast 2 characters
+    if (dstLength < 2) {
+        THROW(ERROR_BUFFER_OVERFLOW);
+    }
+
     // A zero amount should be displayed as a plain '0'.
     if (microGtuAmount == 0) {
         dst[0] = '0';
@@ -79,48 +96,35 @@ int amountToGtuDisplay(uint8_t *dst, uint64_t microGtuAmount) {
     if (microGtuAmount < 1000000) {
         dst[0] = '0';
         dst[1] = '.';
-        int length = decimalAmountToGtuDisplay(dst + 2, microGtuAmount) + 2;
+        // We decrement the length an extra time, to make sure there is space for the termination.
+        size_t length = decimalAmountToGtuDisplay(dst + 2, dstLength - 3, microGtuAmount) + 2;
         dst[length] = '\0';
         return length + 1;
     }
 
+    size_t offset = 0;
+
     // If we reach this case, then the number is greater than 1.000.000 and we will
     // need to consider thousand separators for the whole number part.
-    int wholeNumberLength = length - 6;
+    size_t wholeNumberLength = length - 6;
     int current = 0;
-    int separatorCount = wholeNumberLength / 3;
+    size_t separatorCount = wholeNumberLength / 3;
     if (wholeNumberLength % 3 == 0) {
         separatorCount -= 1;
     }
+    uint64_t wholePart = microGtuAmount / 1000000;
 
-    // 100,000
-    
-    // The first 6 digits should be without thousand separators,
-    // as they are part of the decimal part of the number. Write those
-    // characters first to the destination output and separate with ','
-    uint8_t decimalSeparatorCount = 0;
-    int decimalPartLength = 0;
-    uint64_t decimalPart = microGtuAmount % 1000000;
-    if (decimalPart != 0) {
-        decimalPartLength = decimalAmountToGtuDisplay(dst + wholeNumberLength + separatorCount + 1, decimalPart);
-        dst[wholeNumberLength + separatorCount] = '.';
-        decimalSeparatorCount = 1;
-
-        // Adjust length, as we might not have exactly 6 decimals anymore, as we have removed
-        // non-significant zeroes at the end of the number.
-        length -= 6 - decimalPartLength;
-    } else {
-        // The number does not have any decimals (they are all 0), so we reduce the total
-        // length of the number to remove the decimals, as we don't need them to display the number.
-        length -= 6;
+    // We check that the entire number and termination fits,
+    // under the assumption that there is no decimalPart
+    if (dstLength < wholeNumberLength + separatorCount + 1) {
+        THROW(ERROR_BUFFER_OVERFLOW);
     }
-    microGtuAmount /= 1000000;
 
     // Write the whole number part of the amount to the output destination. This
     // part has to have thousand separators added.
     for (int i = wholeNumberLength - 1 + separatorCount; i >= 0; i--) {
-        dst[i] = (microGtuAmount % 10) + '0';
-        microGtuAmount /= 10;
+        dst[i] = (wholePart % 10) + '0';
+        wholePart /= 10;
 
         current += 1;
         if (current == 3 && i != 0) {
@@ -130,12 +134,34 @@ int amountToGtuDisplay(uint8_t *dst, uint64_t microGtuAmount) {
         }
     }
 
-    dst[length + separatorCount + decimalSeparatorCount] = '\0';
-    return length + separatorCount + decimalSeparatorCount + 1;
+    offset = wholeNumberLength + separatorCount;
+
+    // The first 6 digits should be without thousand separators,
+    // as they are part of the decimal part of the number. Write those
+    // characters first to the destination output and separate with '.'
+    uint64_t decimalPart = microGtuAmount % 1000000;
+    if (decimalPart != 0) {
+        dst[offset] = '.';
+        offset += 1;
+        offset += decimalAmountToGtuDisplay(dst + offset, dstLength - offset, decimalPart);
+    }
+
+    // We check that we can fit the termination character
+    if (dstLength < offset + 1) {
+        THROW(ERROR_BUFFER_OVERFLOW);
+    }
+
+    dst[offset] = '\0';
+    return offset + 1;
 }
 
-void toPaginatedHex(uint8_t *byteArray, const uint64_t len, char *asHex) {
+void toPaginatedHex(uint8_t *byteArray, const uint64_t len, char *asHex, const size_t asHexSize) {
     static uint8_t const hex[] = "0123456789abcdef";
+
+    if (asHexSize < len * 2 + len / 16 + 1) {
+        return;
+    }
+
     uint8_t offset = 0;
     for (uint64_t i = 0; i < len; i++) {
         asHex[2 * i + offset] = hex[(byteArray[i]>>4) & 0x0F];

@@ -7,6 +7,7 @@
 #include "menu.h"
 #include "base58check.h"
 #include "responseCodes.h"
+#include "numberHelpers.h"
 
 static tx_state_t *tx_state = &global_tx_state;
 static keyDerivationPath_t *keyPath = &path;
@@ -56,7 +57,7 @@ int hashHeaderAndType(uint8_t *cdata, uint8_t headerLength, uint8_t validType) {
  * Adds the account transaction header and the transaction kind to the hash. The
  * transaction kind is verified to have the supplied value to prevent processing
  * invalid transactions.
- * 
+ *
  * A side effect of this method is that the sender address from the transaction header
  * is parsed and saved in a global variable, so that it is available to be displayed
  * for all account transactions.

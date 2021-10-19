@@ -96,7 +96,7 @@ void handleSignHigherLevelKeys(uint8_t *cdata, uint8_t p1, uint8_t updateType, v
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 1, NULL, 0);
         cdata += 1;
 
-        toPaginatedHex(cdata, 32, ctx->updateVerificationKey);
+        toPaginatedHex(cdata, 32, ctx->updateVerificationKey, sizeof(ctx->updateVerificationKey));
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 32, NULL, 0);
 
         ctx->numberOfUpdateKeys -= 1;
@@ -108,7 +108,7 @@ void handleSignHigherLevelKeys(uint8_t *cdata, uint8_t p1, uint8_t updateType, v
         *flags |= IO_ASYNCH_REPLY;
     } else if (p1 == P1_THRESHOLD && ctx->state == TX_UPDATE_KEYS_THRESHOLD) {
         uint16_t threshold = U2BE(cdata, 0);
-        bin2dec(ctx->threshold, threshold);
+        bin2dec(ctx->threshold, sizeof(ctx->threshold), threshold);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 2, NULL, 0);
 
         ux_flow_init(0, ux_sign_root_keys_update_threshold, NULL);

@@ -130,7 +130,7 @@ void processKeyIndices(void) {
         sendSuccessNoIdle();
     } else {
         uint16_t keyIndex = U2BE(ctx->buffer, ctx->bufferPointer);
-        bin2dec(ctx->displayKeyIndex, keyIndex);
+        bin2dec(ctx->displayKeyIndex, sizeof(ctx->displayKeyIndex), keyIndex);
         memmove(ctx->title, getAuthorizationName(ctx->authorizationType), 29);
         ctx->bufferPointer += 2;
         ctx->accessStructureSize -= 1;
@@ -180,7 +180,7 @@ void handleSignUpdateAuthorizations(uint8_t *cdata, uint8_t p1, uint8_t updateTy
 
         uint8_t publicKeyInput[32];
         memmove(publicKeyInput, cdata, 32);
-        toPaginatedHex(publicKeyInput, 32, ctx->publicKey);
+        toPaginatedHex(publicKeyInput, 32, ctx->publicKey, sizeof(ctx->publicKey));
         cx_hash((cx_hash_t *) &tx_state->hash, 0, publicKeyInput, 32, NULL, 0);
 
         ctx->publicKeyListLength -= 1;
@@ -208,7 +208,7 @@ void handleSignUpdateAuthorizations(uint8_t *cdata, uint8_t p1, uint8_t updateTy
     } else if (p1 == P1_ACCESS_STRUCTURE_THRESHOLD && ctx->state == TX_UPDATE_AUTHORIZATIONS_ACCESS_STRUCTURE_THRESHOLD) {
         uint16_t threshold = U2BE(cdata, 0);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 2, NULL, 0);
-        bin2dec(ctx->displayKeyIndex, threshold);
+        bin2dec(ctx->displayKeyIndex, sizeof(ctx->displayKeyIndex), threshold);
         memmove(ctx->title, "Threshold", 10);
 
         ux_flow_init(0, ux_update_authorizations_threshold, NULL);

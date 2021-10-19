@@ -73,7 +73,7 @@ void handleSignAddAnonymityRevoker(uint8_t *cdata, uint8_t p1, uint8_t dataLengt
         // Read the arIdentity.
         uint32_t arIdentity = U4BE(cdata, 0);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 4, NULL, 0);
-        numberToText(ctx->arIdentity, arIdentity);
+        numberToText(ctx->arIdentity, sizeof(ctx->arIdentity), arIdentity);
 
         ctx->state = TX_ADD_ANONYMITY_REVOKER_DESCRIPTION_LENGTH;
         desc_ctx->descriptionState = DESC_NAME;
@@ -88,7 +88,7 @@ void handleSignAddAnonymityRevoker(uint8_t *cdata, uint8_t p1, uint8_t dataLengt
         ctx->payloadLength -= 4;
 
         ctx->state = TX_ADD_ANONYMITY_REVOKER_DESCRIPTION;
-        
+
         // We do this to handle if this part of the description is empty
         checkIfDescriptionPartIsDoneAnonymityRevoker();
         handleDescriptionPart();
@@ -115,7 +115,7 @@ void handleSignAddAnonymityRevoker(uint8_t *cdata, uint8_t p1, uint8_t dataLengt
         uint8_t publicKey[96];
         memmove(publicKey, cdata, 96);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, publicKey, 96, NULL, 0);
-        toPaginatedHex(publicKey, 96, ctx->publicKey);
+        toPaginatedHex(publicKey, 96, ctx->publicKey, sizeof(ctx->publicKey));
 
         ux_flow_init(0, ux_sign_add_anonymity_revoker_finish, NULL);
         *flags |= IO_ASYNCH_REPLY;

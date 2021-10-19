@@ -89,12 +89,12 @@ void processNextScheduledAmount(uint8_t *buffer) {
         if (ctx->time.tm_year > 9999) {
             THROW(ERROR_INVALID_PARAM);
         }
-        timeToDisplayText(ctx->time, ctx->displayTimestamp);
+        timeToDisplayText(ctx->time, ctx->displayTimestamp, sizeof(ctx->displayTimestamp));
 
         uint64_t amount = U8BE(ctx->buffer, ctx->pos);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, buffer + ctx->pos, 8, NULL, 0);
         ctx->pos += 8;
-        amountToGtuDisplay(ctx->displayAmount, amount);
+        amountToGtuDisplay(ctx->displayAmount, sizeof(ctx->displayAmount), amount);
 
         // We read one more scheduled amount, so count down to keep track of remaining to process.
         ctx->scheduledAmountsInCurrentPacket -= 1;

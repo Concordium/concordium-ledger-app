@@ -136,7 +136,7 @@ void handleSignUpdateProtocol(uint8_t *cdata, uint8_t p1, uint8_t dataLength, vo
         *flags |= IO_ASYNCH_REPLY;
     } else if (p1 == P1_SPECIFICATION_HASH && ctx->state == TX_UPDATE_PROTOCOL_SPECIFICATION_HASH) {
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 32, NULL, 0);
-        toPaginatedHex(cdata, 32, ctx->specificationHash);
+        toPaginatedHex(cdata, 32, ctx->specificationHash, sizeof(ctx->specificationHash));
         ctx->payloadLength -= 32;
 
         ctx->state = TX_UPDATE_PROTOCOL_AUXILIARY_DATA;

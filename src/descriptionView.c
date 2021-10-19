@@ -1,5 +1,7 @@
-#include <os.h>
+#include "ux.h"
+#include "globals.h"
 #include "util.h"
+#include "descriptionView.h"
 #include "responseCodes.h"
 
 static descriptionContext_t *ctx = &global.withDescription.descriptionContext;

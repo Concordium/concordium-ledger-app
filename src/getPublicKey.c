@@ -3,6 +3,7 @@
 #include "util.h"
 #include "menu.h"
 #include "responseCodes.h"
+#include "globals.h"
 
 static keyDerivationPath_t *keyPath = &path;
 static exportPublicKeyContext_t *ctx = &global.exportPublicKeyContext;
@@ -52,14 +53,14 @@ UX_FLOW(ux_sign_compare_public_key,
 // Builds a display version of the identity/account path. A pre-condition
 // for running this method is that 'parseKeyDerivation' has been
 // run prior to it.
-void getIdentityAccountDisplay(uint8_t *dst) {
+void getIdentityAccountDisplay(uint8_t *dst, size_t dstLength) {
     uint32_t identityIndex = keyPath->rawKeyDerivationPath[4];
     uint32_t accountIndex = keyPath->rawKeyDerivationPath[6];
 
-    int offset = bin2dec(dst, identityIndex) - 1;
+    int offset = numberToText(dst, dstLength, identityIndex);
     memmove(dst + offset, "/", 1);
-    offset = offset + 1;
-    bin2dec(dst + offset, accountIndex);
+    offset += 1;
+    bin2dec(dst + offset, dstLength - offset, accountIndex);
 }
 
 /**
@@ -91,7 +92,7 @@ void sendPublicKey(bool compare) {
     if (compare) {
         // Show the public-key so that the user can verify the public-key.
         sendSuccessResultNoIdle(tx);
-        toPaginatedHex(publicKey, sizeof(publicKey), ctx->publicKey);
+        toPaginatedHex(publicKey, sizeof(publicKey), ctx->publicKey, sizeof(ctx->publicKey));
         // Allow for receiving a new instruction even while comparing public keys.
         tx_state->currentInstruction = -1;
         ux_flow_init(0, ux_sign_compare_public_key, NULL);
@@ -136,7 +137,7 @@ void handleGetPublicKey(uint8_t *cdata, uint8_t p1, uint8_t p2, volatile unsigne
                     THROW(ERROR_INVALID_PATH);
             }
         } else {
-            getIdentityAccountDisplay(ctx->display);
+            getIdentityAccountDisplay(ctx->display, sizeof(ctx->display));
         }
 
         // Display the UI for the public-key flow, where the user can validate that the

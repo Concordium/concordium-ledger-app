@@ -11,11 +11,11 @@ uint8_t version[10];
  * supported is xx.yy.zzz.
  */ 
 void loadVersion(uint8_t* version) {
-    int majorLength = numberToText(version, APPVERSION_MAJOR);
+    int majorLength = numberToText(version, 2, APPVERSION_MAJOR);
     version[majorLength] = '.';
-    int minorLength = numberToText(version + majorLength + 1, APPVERSION_MINOR);
+    int minorLength = numberToText(version + majorLength + 1, 2, APPVERSION_MINOR);
     version[majorLength + minorLength + 1] = '.';
-    numberToText(version + majorLength + minorLength + 2, APPVERSION_PATCH);
+    numberToText(version + majorLength + minorLength + 2, 3, APPVERSION_PATCH);
     version[9] = '\0';
 }
 

@@ -106,7 +106,7 @@ void handleSignAddBakerOrUpdateBakerKeys(uint8_t *cdata, uint8_t p1, uint8_t p2,
         } else if (p2 == P2_ADD_BAKER) {
             // Parse the amount to stake, so it can be displayed for verification.
             uint64_t amount = U8BE(cdata, 0);
-            amountToGtuDisplay(ctx->amount, amount);
+            amountToGtuDisplay(ctx->amount, sizeof(ctx->amount), amount);
             cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 8, NULL, 0);
             cdata += 8;
 

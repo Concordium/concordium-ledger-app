@@ -2,6 +2,7 @@
 #define _CONCORDIUM_TEST_OS_H_
 
 #include <stdint.h>  // uint*_t
+#include <stddef.h>  // size_t
 
 typedef struct cx_ecfp_private_key_t {
     uint8_t W[33];
