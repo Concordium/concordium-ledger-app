@@ -12,11 +12,9 @@ git submodule update --init
 ```
 
 ## Building and deploying application to Ledger Nano S
-
-Start by following the [official guide](https://developers.ledger.com/docs/nano-app/quickstart/) to 
-set your environment up correctly with the required dependencies. Note that it is important to use the correct 
-version of `clang` for the build to work (currently 9.0.0, as linked by Ledger [here](https://developers.ledger.com/docs/nano-app/deepdive/)). 
-If your version is incompatible, then it is quite likely that you will see an error stating that 
+Ledger has documentation on [how to build an application](https://developers.ledger.com/docs/nano-app/build/) and [load it onto a Nano S](https://developers.ledger.com/docs/nano-app/load/), using a docker image. 
+If you try to setup your local environment to build, note that it is important to use the correct version of `clang` for the build to work (currently 9.0.0).
+If your version is incompatible, then it is quite likely that you will see an error stating that
 `ld.lld doesn't exist`.
 
 The Makefile is responsible for loading the application onto the device. This is done with the load
@@ -49,7 +47,7 @@ when switching the SDK used to build the application.
 
 Refer to the official documentation provided by Ledger. For quick development when deploying to the 
 device, make sure to deploy a custom certificate to the device. See the "PIN Bypass" section 
-[here](https://ledger.readthedocs.io/en/latest/userspace/debugging.html).
+[here](https://developers.ledger.com/docs/nano-app/debug/).
 
 For documentation of the exposed functionality and how to integrate with the Concordium specific 
 applications, please take a look [here](doc/api.md).
