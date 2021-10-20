@@ -1,4 +1,3 @@
-#include <cmocka.h>
 #include <setjmp.h>
 #include <stdarg.h>
 #include <stdbool.h>
@@ -6,6 +5,7 @@
 #include <stdint.h>
 #include <stdint.h>  // uint*_t
 #include <string.h>
+#include <cmocka.h>
 
 #include "base58check.h"
 

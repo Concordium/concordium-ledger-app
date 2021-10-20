@@ -1,12 +1,10 @@
-#include <cmocka.h>
 #include <setjmp.h>
 #include <stdarg.h>
 #include <stdbool.h>
-#include <stddef.h>
 #include <stddef.h>  // size_t
-#include <stdint.h>
 #include <stdint.h>  // uint*_t
 #include <string.h>
+#include <cmocka.h>
 
 #include "numberHelpers.c"
 #include "responseCodes.h"

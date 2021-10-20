@@ -1,11 +1,10 @@
-#include <cmocka.h>
 #include <setjmp.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stddef.h>
-#include <stdint.h>
 #include <stdint.h>  // uint*_t
 #include <string.h>
+#include <cmocka.h>
 
 #include "globals.h"
 #include "util.h"
