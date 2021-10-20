@@ -1,6 +1,8 @@
 #ifndef _MEMO_H_
 #define _MEMO_H_
 
+#include "ux.h"
+
 /**
  * Read a CBOR encoded memo's initial part, i.e. the header, which contains the major type and length
  * Only supports major type 0, 1 and 3 (non-negative integers, negative integers and utf-8 strings)

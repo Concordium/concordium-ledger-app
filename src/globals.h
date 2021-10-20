@@ -3,12 +3,12 @@
 
 #include <stdbool.h>
 
+#include "os.h"
 #include "cx.h"
 #include "descriptionView.h"
 #include "exportPrivateKeySeed.h"
 #include "getPublicKey.h"
 #include "memo.h"
-#include "os.h"
 #include "signAddAnonymityRevoker.h"
 #include "signAddBakerOrUpdateBakerKeys.h"
 #include "signAddIdentityProvider.h"

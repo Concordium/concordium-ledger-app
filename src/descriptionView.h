@@ -1,6 +1,8 @@
 #ifndef _DESCRIPTION_VIEW_H_
 #define _DESCRIPTION_VIEW_H_
 
+#include "stdint.h"
+
 void displayDescriptionPart(volatile unsigned int *flags);
 void handleDescriptionPart(void);
 

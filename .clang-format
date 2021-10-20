@@ -15,3 +15,4 @@ AllowShortBlocksOnASingleLine: false
 AllowShortFunctionsOnASingleLine: None
 BinPackArguments: false
 BinPackParameters: false
+SortIncludes: false

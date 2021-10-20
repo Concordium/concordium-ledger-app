@@ -2,6 +2,7 @@
 #define _NUMBER_HELPERS_H_
 
 #include <stddef.h>
+#include "stdint.h"
 
 /**
  * Writes the input amount of µGTU to the supplied destination as its value in

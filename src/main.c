@@ -18,13 +18,13 @@
 #include <stdbool.h>
 #include <string.h>
 
+#include "os.h"
 #include "cx.h"
 #include "exportPrivateKeySeed.h"
 #include "getPublicKey.h"
 #include "globals.h"
 #include "glyphs.h"
 #include "menu.h"
-#include "os.h"
 #include "os_io_seproxyhal.h"
 #include "responseCodes.h"
 #include "seproxyhal_protocol.h"
