@@ -8,4 +8,3 @@ typedef struct ux_flow_step_t {
 } ux_flow_step_t;
 
 #endif
-

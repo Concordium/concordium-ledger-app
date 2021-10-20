@@ -1,37 +1,36 @@
 /*******************************************************************************
-*   Ledger App - Bitcoin Wallet
-*   (c) 2016-2019 Ledger
-*
-*  - Only the 'base58_encode()' method (renamed from btchip_encode_base58).
-*    Reformatting of the method has been done, and removal of all PRINTF()
-*    invocations, and changed the algorithm to insert a space for every 10 characters.
-*
-*  Licensed under the Apache License, Version 2.0 (the "License");
-*  you may not use this file except in compliance with the License.
-*  You may obtain a copy of the License at
-*
-*      http://www.apache.org/licenses/LICENSE-2.0
-*
-*  Unless required by applicable law or agreed to in writing, software
-*  distributed under the License is distributed on an "AS IS" BASIS,
-*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-*  See the License for the specific language governing permissions and
-*  limitations under the License.
-********************************************************************************/
+ *   Ledger App - Bitcoin Wallet
+ *   (c) 2016-2019 Ledger
+ *
+ *  - Only the 'base58_encode()' method (renamed from btchip_encode_base58).
+ *    Reformatting of the method has been done, and removal of all PRINTF()
+ *    invocations, and changed the algorithm to insert a space for every 10 characters.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ ********************************************************************************/
 
 #include <stdlib.h>
-#include "os.h"
-#include "cx.h"
 #include <string.h>
+
+#include "cx.h"
+#include "os.h"
 
 #define MAX_ENC_INPUT_SIZE 120
 
-unsigned char const BASE58ALPHABET[] = {
-    '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F',
-    'G', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W',
-    'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'm',
-    'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'
-};
+unsigned char const BASE58ALPHABET[] = {'1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F',
+                                        'G', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W',
+                                        'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'm',
+                                        'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'};
 
 int base58_encode(const unsigned char *in, size_t length, unsigned char *out, size_t *outlen) {
     size_t i = 0, j;
@@ -60,7 +59,7 @@ int base58_encode(const unsigned char *in, size_t length, unsigned char *out, si
     stopAt = outputSize - 1;
     for (startAt = zeroCount; startAt < length; startAt++) {
         int carry = in[startAt];
-        for (j = outputSize - 1; (int)j >= 0; j--) {
+        for (j = outputSize - 1; (int) j >= 0; j--) {
             carry += 256 * out[j];
             out[j] = carry % 58;
             carry /= 58;
@@ -96,10 +95,9 @@ int base58_encode(const unsigned char *in, size_t length, unsigned char *out, si
                 out[i] = BASE58ALPHABET[out[i - distance - offset]];
             }
         }
-    }
-    else {
-        for (i = *outlen + spaces - 1; (int)i >= 0; --i) {
-            if  ((*outlen + spaces - 1 - i) == nextSpace) {
+    } else {
+        for (i = *outlen + spaces - 1; (int) i >= 0; --i) {
+            if ((*outlen + spaces - 1 - i) == nextSpace) {
                 out[i] = ' ';
                 nextSpace += (pageSize + 1);
                 offset++;

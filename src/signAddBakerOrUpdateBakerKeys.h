@@ -4,17 +4,18 @@
 /**
  * Method for signing either an 'AddBaker' transaction or an 'UpdateBakerKeys' transaction. The method
  * is shared as the latter transaction is almost a subset of the prior (except a difference in transaction kind byte).
- * 
+ *
  * @param cdata please see /doc/ins_add_baker_or_update_baker_keys.md for details
  * @param p2 use 0x00 to run add baker flow, use 0x01 to update baker keys.
  */
-void handleSignAddBakerOrUpdateBakerKeys(uint8_t *cdata, uint8_t p1, uint8_t p2, volatile unsigned int *flags, bool isInitialCall);
+void handleSignAddBakerOrUpdateBakerKeys(
+    uint8_t *cdata,
+    uint8_t p1,
+    uint8_t p2,
+    volatile unsigned int *flags,
+    bool isInitialCall);
 
-typedef enum {
-    ADD_BAKER_INITIAL = 1,
-    ADD_BAKER_VERIFY_KEYS = 2,
-    ADD_BAKER_PROOFS_AMOUNT_RESTAKE = 3
-} addBakerState_t;
+typedef enum { ADD_BAKER_INITIAL = 1, ADD_BAKER_VERIFY_KEYS = 2, ADD_BAKER_PROOFS_AMOUNT_RESTAKE = 3 } addBakerState_t;
 
 typedef struct {
     uint8_t amount[26];

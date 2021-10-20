@@ -199,6 +199,9 @@ load: all
 delete:
 	python3 -m ledgerblue.deleteApp $(COMMON_DELETE_PARAMS)
 
+lint:
+	find . -regex './src/.*\.\(c\|h\)\|./unit_tests/.*\.\(c\|h\)' -exec clang-format -style=file -i {} \;
+	
 # Import rules to compile the glyphs supplied in the glyphs/ directory
 include $(BOLOS_SDK)/Makefile.glyphs
 

@@ -1,26 +1,24 @@
-#include <stdarg.h>
-#include <stddef.h>
-#include <setjmp.h>
-#include <stdint.h>
-#include <stdbool.h>
-#include <string.h>
-#include <limits.h>
-
-#include <stdint.h>  // uint*_t
-
 #include <cmocka.h>
+#include <limits.h>
+#include <setjmp.h>
+#include <stdarg.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdint.h>  // uint*_t
+#include <string.h>
 
 #include "time.h"
 
 static void test_prefixWithZero_does_prefix_1() {
-    uint8_t text[4]  = { '1' };
+    uint8_t text[4] = {'1'};
     int didPrefix = prefixWithZero(text, 1);
     assert_int_equal(didPrefix, 1);
     assert_string_equal(text, "0");
 }
 
 static void test_prefixWithZero_does_not_prefix_2001() {
-    uint8_t text[1]  = { '1' };
+    uint8_t text[1] = {'1'};
     int didPrefix = prefixWithZero(text, 2001);
     assert_int_equal(didPrefix, 0);
     assert_string_equal(text, "1");

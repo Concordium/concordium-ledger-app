@@ -1,50 +1,44 @@
 #ifndef _GLOBALS_H_
 #define _GLOBALS_H_
 
-#include "os.h"
-#include "ux.h"
-#include "cx.h"
 #include <stdbool.h>
 
-#include "getPublicKey.h"
+#include "cx.h"
+#include "descriptionView.h"
 #include "exportPrivateKeySeed.h"
-
+#include "getPublicKey.h"
+#include "memo.h"
+#include "os.h"
+#include "signAddAnonymityRevoker.h"
+#include "signAddBakerOrUpdateBakerKeys.h"
+#include "signAddIdentityProvider.h"
 #include "signCredentialDeployment.h"
+#include "signEncryptedAmountTransfer.h"
+#include "signHigherLevelKeyUpdate.h"
 #include "signPublicInformationForIp.h"
-
 #include "signTransfer.h"
 #include "signTransferToEncrypted.h"
 #include "signTransferToPublic.h"
 #include "signTransferWithSchedule.h"
-#include "signEncryptedAmountTransfer.h"
-#include "signAddBakerOrUpdateBakerKeys.h"
-#include "signUpdateBakerRestakeEarnings.h"
-
-#include "signUpdateExchangeRate.h"
 #include "signUpdateAuthorizations.h"
+#include "signUpdateBakerRestakeEarnings.h"
+#include "signUpdateBakerStakeThreshold.h"
+#include "signUpdateElectionDifficulty.h"
+#include "signUpdateExchangeRate.h"
+#include "signUpdateFoundationAccount.h"
+#include "signUpdateGasRewards.h"
+#include "signUpdateMintDistribution.h"
 #include "signUpdateProtocol.h"
 #include "signUpdateTransactionFeeDistribution.h"
-#include "signUpdateGasRewards.h"
-#include "signUpdateFoundationAccount.h"
-#include "signUpdateMintDistribution.h"
-#include "signUpdateElectionDifficulty.h"
-#include "signUpdateBakerStakeThreshold.h"
-#include "signHigherLevelKeyUpdate.h"
-#include "signAddIdentityProvider.h"
-#include "signAddAnonymityRevoker.h"
+#include "ux.h"
 
-#include "descriptionView.h"
-
-#include "memo.h"
-
-
-#define CONCORDIUM_PURPOSE 1105
+#define CONCORDIUM_PURPOSE   1105
 #define CONCORDIUM_COIN_TYPE 0
 
 #define MAX_CDATA_LENGTH 255
 
 #define ACCOUNT_TRANSACTION_HEADER_LENGTH 60
-#define UPDATE_HEADER_LENGTH 28
+#define UPDATE_HEADER_LENGTH              28
 
 typedef enum {
     DEPLOY_MODULE = 0,

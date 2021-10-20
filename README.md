@@ -65,6 +65,12 @@ make emulator
 ```
 The file will be available at `bin/app.elf`.
 
+## Linting
+A make target is available for linting:
+```bash
+make lint
+```
+
 ## Testing
 
 ### Running unit tests

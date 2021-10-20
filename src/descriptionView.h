@@ -4,11 +4,7 @@
 void displayDescriptionPart(volatile unsigned int *flags);
 void handleDescriptionPart(void);
 
-typedef enum {
-    DESC_NAME,
-    DESC_URL,
-    DESC_DESCRIPTION
-} descriptionState_t;
+typedef enum { DESC_NAME, DESC_URL, DESC_DESCRIPTION } descriptionState_t;
 
 typedef struct {
     uint32_t textLength;
