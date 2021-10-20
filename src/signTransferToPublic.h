@@ -6,7 +6,12 @@
  * account transaction.
  * @param cdata please see /doc/ins_transfer_to_public.md
  */
-void handleSignTransferToPublic(uint8_t *cdata, uint8_t p1, uint8_t dataLength, volatile unsigned int *flags, bool isInitialCall);
+void handleSignTransferToPublic(
+    uint8_t *cdata,
+    uint8_t p1,
+    uint8_t dataLength,
+    volatile unsigned int *flags,
+    bool isInitialCall);
 
 typedef enum {
     TX_TRANSFER_TO_PUBLIC_INITIAL = 25,

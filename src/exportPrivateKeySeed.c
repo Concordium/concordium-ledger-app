@@ -1,11 +1,12 @@
 #include <os.h>
-#include "ux.h"
-#include "cx.h"
 #include <stdint.h>
-#include "util.h"
-#include "globals.h"
 #include <string.h>
+
+#include "cx.h"
+#include "globals.h"
 #include "responseCodes.h"
+#include "util.h"
+#include "ux.h"
 
 // Allow the user to decline exporting the private keys seeds.
 
@@ -21,35 +22,17 @@ void exportPrivateKey(void);
 UX_STEP_NOCB(
     ux_export_private_key_0_step,
     nn,
-    {
-        (char *) global.exportPrivateKeySeedContext.displayHeader,
-        (char *) global.exportPrivateKeySeedContext.display
-    });
-UX_STEP_CB(
-    ux_export_private_key_accept_step,
-    pb,
-    exportPrivateKey(),
-    {
-        &C_icon_validate_14,
-        "Accept"
-    });
-UX_STEP_CB(
-    ux_export_private_key_decline_step,
-    pb,
-    sendUserRejection(),
-    {
-        &C_icon_crossmark,
-        "Decline"
-    });
-UX_FLOW(ux_export_private_key,
+    {(char *) global.exportPrivateKeySeedContext.displayHeader, (char *) global.exportPrivateKeySeedContext.display});
+UX_STEP_CB(ux_export_private_key_accept_step, pb, exportPrivateKey(), {&C_icon_validate_14, "Accept"});
+UX_STEP_CB(ux_export_private_key_decline_step, pb, sendUserRejection(), {&C_icon_crossmark, "Decline"});
+UX_FLOW(
+    ux_export_private_key,
     &ux_export_private_key_0_step,
     &ux_export_private_key_accept_step,
-    &ux_export_private_key_decline_step
-);
-
+    &ux_export_private_key_decline_step);
 
 #define ID_CRED_SEC 0
-#define PRF_KEY 1
+#define PRF_KEY     1
 
 #define pathLength 6
 
@@ -85,10 +68,10 @@ void exportPrivateKey(void) {
 #define NORMAL_ACCOUNTS 0
 
 // Export the PRF key seed
-#define P1_PRF_KEY           0x00
-#define P1_PRF_KEY_RECOVERY  0x01
+#define P1_PRF_KEY          0x00
+#define P1_PRF_KEY_RECOVERY 0x01
 // Export the PRF key seed and the IdCredSec seed
-#define P1_BOTH              0x02
+#define P1_BOTH 0x02
 
 void handleExportPrivateKeySeed(uint8_t *dataBuffer, uint8_t p1, uint8_t p2, volatile unsigned int *flags) {
     if ((p1 != P1_BOTH && p1 != P1_PRF_KEY && p1 != P1_PRF_KEY_RECOVERY) || p2 != 0x01) {
@@ -96,13 +79,11 @@ void handleExportPrivateKeySeed(uint8_t *dataBuffer, uint8_t p1, uint8_t p2, vol
     }
 
     uint32_t identity = U4BE(dataBuffer, 0);
-    uint32_t keyDerivationPath[5] = {
-        CONCORDIUM_PURPOSE | HARDENED_OFFSET,
-        CONCORDIUM_COIN_TYPE | HARDENED_OFFSET,
-        ACCOUNT_SUBTREE | HARDENED_OFFSET,
-        NORMAL_ACCOUNTS | HARDENED_OFFSET,
-        identity | HARDENED_OFFSET
-    };
+    uint32_t keyDerivationPath[5] = {CONCORDIUM_PURPOSE | HARDENED_OFFSET,
+                                     CONCORDIUM_COIN_TYPE | HARDENED_OFFSET,
+                                     ACCOUNT_SUBTREE | HARDENED_OFFSET,
+                                     NORMAL_ACCOUNTS | HARDENED_OFFSET,
+                                     identity | HARDENED_OFFSET};
     memmove(ctx->path, keyDerivationPath, sizeof(keyDerivationPath));
 
     ctx->exportBoth = p1 == P1_BOTH;

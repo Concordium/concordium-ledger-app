@@ -1,12 +1,13 @@
 #include <os.h>
 #include <os_io_seproxyhal.h>
-#include "cx.h"
 #include <stdint.h>
-#include "menu.h"
-#include "util.h"
 #include <string.h>
-#include "sign.h"
+
+#include "cx.h"
+#include "menu.h"
 #include "responseCodes.h"
+#include "sign.h"
+#include "util.h"
 
 static signElectionDifficultyContext_t *ctx = &global.signElectionDifficulty;
 static tx_state_t *tx_state = &global_tx_state;
@@ -14,22 +15,19 @@ static tx_state_t *tx_state = &global_tx_state;
 UX_STEP_NOCB(
     ux_sign_election_difficulty_1_step,
     bnnn_paging,
-    {
-      .title = "Election difficulty",
-      .text = (char *) global.signElectionDifficulty.electionDifficulty
-    });
-UX_FLOW(ux_sign_election_difficulty,
+    {.title = "Election difficulty", .text = (char *) global.signElectionDifficulty.electionDifficulty});
+UX_FLOW(
+    ux_sign_election_difficulty,
     &ux_sign_flow_shared_review,
     &ux_sign_election_difficulty_1_step,
     &ux_sign_flow_shared_sign,
-    &ux_sign_flow_shared_decline
-);
+    &ux_sign_flow_shared_decline);
 
 void handleSignUpdateElectionDifficulty(uint8_t *cdata, volatile unsigned int *flags) {
-    cdata += parseKeyDerivationPath(cdata);;
+    cdata += parseKeyDerivationPath(cdata);
+    ;
     cx_sha256_init(&tx_state->hash);
     cdata += hashUpdateHeaderAndType(cdata, UPDATE_TYPE_ELECTION_DIFFICULTY);
-
 
     uint32_t numerator = U4BE(cdata, 0);
     if (numerator > 100000) {

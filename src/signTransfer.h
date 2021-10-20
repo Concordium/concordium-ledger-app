@@ -13,7 +13,12 @@ void handleSignTransfer(uint8_t *cdata, volatile unsigned int *flags);
  * account transaction.
  * @param cdata please see /doc/ins_transfer.md for details
  */
-void handleSignTransferWithMemo(uint8_t *cdata, uint8_t p1, uint8_t dataLength, volatile unsigned int *flags, bool isInitialCall);
+void handleSignTransferWithMemo(
+    uint8_t *cdata,
+    uint8_t p1,
+    uint8_t dataLength,
+    volatile unsigned int *flags,
+    bool isInitialCall);
 
 typedef enum {
     TX_TRANSFER_INITIAL = 49,

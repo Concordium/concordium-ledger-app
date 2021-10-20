@@ -1,14 +1,12 @@
 #ifndef _DESCRIPTION_VIEW_H_
 #define _DESCRIPTION_VIEW_H_
 
+#include "stdint.h"
+
 void displayDescriptionPart(volatile unsigned int *flags);
 void handleDescriptionPart(void);
 
-typedef enum {
-    DESC_NAME,
-    DESC_URL,
-    DESC_DESCRIPTION
-} descriptionState_t;
+typedef enum { DESC_NAME, DESC_URL, DESC_DESCRIPTION } descriptionState_t;
 
 typedef struct {
     uint32_t textLength;

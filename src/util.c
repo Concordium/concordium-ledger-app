@@ -1,13 +1,15 @@
-#include "os.h"
-#include "cx.h"
+#include "util.h"
+
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
-#include "util.h"
-#include "menu.h"
+
 #include "base58check.h"
-#include "responseCodes.h"
+#include "cx.h"
+#include "menu.h"
 #include "numberHelpers.h"
+#include "os.h"
+#include "responseCodes.h"
 
 static tx_state_t *tx_state = &global_tx_state;
 static keyDerivationPath_t *keyPath = &path;
@@ -141,7 +143,15 @@ void getPrivateKey(uint32_t *keyPath, uint8_t keyPathLength, cx_ecfp_private_key
     // Wrap in try/finally to ensure that private key information is cleaned up, even if a system call fails.
     BEGIN_TRY {
         TRY {
-            os_perso_derive_node_bip32_seed_key(HDW_ED25519_SLIP10, CX_CURVE_Ed25519, keyPath, keyPathLength, privateKeyData, NULL, (unsigned char*) "ed25519 seed", 12);
+            os_perso_derive_node_bip32_seed_key(
+                HDW_ED25519_SLIP10,
+                CX_CURVE_Ed25519,
+                keyPath,
+                keyPathLength,
+                privateKeyData,
+                NULL,
+                (unsigned char *) "ed25519 seed",
+                12);
             cx_ecfp_init_private_key(CX_CURVE_Ed25519, privateKeyData, 32, privateKey);
         }
         FINALLY {
@@ -187,7 +197,17 @@ void sign(uint8_t *input, uint8_t *signatureOnInput) {
     BEGIN_TRY {
         TRY {
             getPrivateKey(keyPath->keyDerivationPath, keyPath->pathLength, &privateKey);
-            cx_eddsa_sign(&privateKey, CX_RND_RFC6979 | CX_LAST, CX_SHA512, input, 32, NULL, 0, signatureOnInput, 64, NULL);
+            cx_eddsa_sign(
+                &privateKey,
+                CX_RND_RFC6979 | CX_LAST,
+                CX_SHA512,
+                input,
+                32,
+                NULL,
+                0,
+                signatureOnInput,
+                64,
+                NULL);
         }
         FINALLY {
             // Clean up the private key, so that we cannot leak it.

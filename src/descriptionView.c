@@ -1,8 +1,9 @@
-#include "ux.h"
-#include "globals.h"
-#include "util.h"
 #include "descriptionView.h"
+
+#include "globals.h"
 #include "responseCodes.h"
+#include "util.h"
+#include "ux.h"
 
 static descriptionContext_t *ctx = &global.withDescription.descriptionContext;
 
@@ -12,13 +13,9 @@ UX_STEP_CB(
     ux_sign_description_step,
     bnnn_paging,
     handleDescriptionPart(),
-    {
-        (char *) global.withDescription.descriptionContext.header,
-        (char *) global.withDescription.descriptionContext.text
-    });
-UX_FLOW(ux_sign_description,
-    &ux_sign_description_step
-);
+    {(char *) global.withDescription.descriptionContext.header,
+     (char *) global.withDescription.descriptionContext.text});
+UX_FLOW(ux_sign_description, &ux_sign_description_step);
 
 void handleDescriptionPart(void) {
     if (ctx->textLength == 0) {

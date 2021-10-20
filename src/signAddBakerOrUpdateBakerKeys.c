@@ -1,8 +1,9 @@
 #include <os.h>
-#include "util.h"
+
 #include "accountSenderView.h"
-#include "sign.h"
 #include "responseCodes.h"
+#include "sign.h"
+#include "util.h"
 
 static signAddBakerContext_t *ctx = &global.signAddBaker;
 static tx_state_t *tx_state = &global_tx_state;
@@ -10,49 +11,42 @@ static tx_state_t *tx_state = &global_tx_state;
 UX_STEP_NOCB(
     ux_sign_add_baker_1_step,
     bnnn_paging,
-    {
-      .title = "Amount to stake",
-      .text = (char *) global.signAddBaker.amount
-    });
+    {.title = "Amount to stake", .text = (char *) global.signAddBaker.amount});
 UX_STEP_NOCB(
     ux_sign_add_baker_2_step,
     bnnn_paging,
-    {
-        .title = "Restake earnings",
-        .text = (char *) global.signAddBaker.restake
-    });
-UX_FLOW(ux_sign_add_baker,
+    {.title = "Restake earnings", .text = (char *) global.signAddBaker.restake});
+UX_FLOW(
+    ux_sign_add_baker,
     &ux_sign_flow_shared_review,
     &ux_sign_flow_account_sender_view,
     &ux_sign_add_baker_1_step,
     &ux_sign_add_baker_2_step,
     &ux_sign_flow_shared_sign,
-    &ux_sign_flow_shared_decline
-);
+    &ux_sign_flow_shared_decline);
 
-UX_STEP_NOCB(
-    ux_sign_update_baker_keys_0_step,
-    nn,
-    {
-      "Update baker",
-      "keys"
-    });
-UX_FLOW(ux_sign_update_baker_keys,
+UX_STEP_NOCB(ux_sign_update_baker_keys_0_step, nn, {"Update baker", "keys"});
+UX_FLOW(
+    ux_sign_update_baker_keys,
     &ux_sign_flow_shared_review,
     &ux_sign_flow_account_sender_view,
     &ux_sign_update_baker_keys_0_step,
     &ux_sign_flow_shared_sign,
-    &ux_sign_flow_shared_decline
-);
+    &ux_sign_flow_shared_decline);
 
-#define P1_INITIAL                  0x00    // Key path, transaction header and kind.
-#define P1_VERIFY_KEYS              0x01    // The three verification keys.
-#define P1_PROOFS_AMOUNT_RESTAKE    0x02    // Proofs for the verification keys, stake amount and whether or not to restake.
+#define P1_INITIAL               0x00  // Key path, transaction header and kind.
+#define P1_VERIFY_KEYS           0x01  // The three verification keys.
+#define P1_PROOFS_AMOUNT_RESTAKE 0x02  // Proofs for the verification keys, stake amount and whether or not to restake.
 
-#define P2_ADD_BAKER                0x00    // Sign an add baker transaction.
-#define P2_UPDATE_BAKER_KEYS        0x01    // Sign an update baker keys transaction.
+#define P2_ADD_BAKER         0x00  // Sign an add baker transaction.
+#define P2_UPDATE_BAKER_KEYS 0x01  // Sign an update baker keys transaction.
 
-void handleSignAddBakerOrUpdateBakerKeys(uint8_t *cdata, uint8_t p1, uint8_t p2, volatile unsigned int *flags, bool isInitialCall) {
+void handleSignAddBakerOrUpdateBakerKeys(
+    uint8_t *cdata,
+    uint8_t p1,
+    uint8_t p2,
+    volatile unsigned int *flags,
+    bool isInitialCall) {
     if (p2 != P2_ADD_BAKER && p2 != P2_UPDATE_BAKER_KEYS) {
         THROW(ERROR_INVALID_PARAM);
     }

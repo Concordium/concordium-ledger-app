@@ -1,7 +1,8 @@
 #include <os.h>
-#include "util.h"
-#include "sign.h"
+
 #include "responseCodes.h"
+#include "sign.h"
+#include "util.h"
 
 static signUpdateKeysWithRootKeysContext_t *ctx = &global.signUpdateKeysWithRootKeysContext;
 static tx_state_t *tx_state = &global_tx_state;
@@ -10,45 +11,36 @@ UX_STEP_CB(
     ux_sign_root_keys_review_1_step,
     nn,
     sendSuccessNoIdle(),
-    {
-      "Update",
-      (char *) global.signUpdateKeysWithRootKeysContext.type
-    });
-UX_FLOW(ux_sign_root_keys_review,
-    &ux_sign_flow_shared_review,
-    &ux_sign_root_keys_review_1_step
-);
+    {"Update", (char *) global.signUpdateKeysWithRootKeysContext.type});
+UX_FLOW(ux_sign_root_keys_review, &ux_sign_flow_shared_review, &ux_sign_root_keys_review_1_step);
 
 UX_STEP_CB(
     ux_sign_root_keys_update_1_step,
     bnnn_paging,
     sendSuccessNoIdle(),
-    {
-      .title = "Update key",
-      .text = (char *) global.signUpdateKeysWithRootKeysContext.updateVerificationKey
-    });
-UX_FLOW(ux_sign_root_keys_update_key,
-    &ux_sign_root_keys_update_1_step
-);
+    {.title = "Update key", .text = (char *) global.signUpdateKeysWithRootKeysContext.updateVerificationKey});
+UX_FLOW(ux_sign_root_keys_update_key, &ux_sign_root_keys_update_1_step);
 
 UX_STEP_NOCB(
     ux_sign_root_keys_update_threshold_0_step,
     bnnn_paging,
-    {
-      .title = "Threshold",
-      .text = (char *) global.signUpdateKeysWithRootKeysContext.threshold
-    });
-UX_FLOW(ux_sign_root_keys_update_threshold,
+    {.title = "Threshold", .text = (char *) global.signUpdateKeysWithRootKeysContext.threshold});
+UX_FLOW(
+    ux_sign_root_keys_update_threshold,
     &ux_sign_root_keys_update_threshold_0_step,
     &ux_sign_flow_shared_sign,
-    &ux_sign_flow_shared_decline
-);
+    &ux_sign_flow_shared_decline);
 
-#define P1_INITIAL      0x00
-#define P1_UPDATE_KEYS  0x01
-#define P1_THRESHOLD    0x02
+#define P1_INITIAL     0x00
+#define P1_UPDATE_KEYS 0x01
+#define P1_THRESHOLD   0x02
 
-void handleSignHigherLevelKeys(uint8_t *cdata, uint8_t p1, uint8_t updateType, volatile unsigned int *flags, bool isInitialCall) {
+void handleSignHigherLevelKeys(
+    uint8_t *cdata,
+    uint8_t p1,
+    uint8_t updateType,
+    volatile unsigned int *flags,
+    bool isInitialCall) {
     if (isInitialCall) {
         ctx->state = TX_UPDATE_KEYS_INITIAL;
     }

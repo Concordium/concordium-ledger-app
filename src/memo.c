@@ -1,7 +1,8 @@
 #include <os.h>
-#include "util.h"
-#include "sign.h"
+
 #include "responseCodes.h"
+#include "sign.h"
+#include "util.h"
 
 static memoContext_t *ctx = &global.withMemo.memoContext;
 
@@ -13,25 +14,20 @@ UX_STEP_CB(
     ux_sign_transfer_memo_step,
     bnnn_paging,
     handleMemoStep(),
-    {
-        "Memo",
-        (char *) global.withMemo.memoContext.memo
-    });
+    {"Memo", (char *) global.withMemo.memoContext.memo});
 
-UX_FLOW(ux_sign_transfer_memo,
-    &ux_sign_transfer_memo_step
-);
+UX_FLOW(ux_sign_transfer_memo, &ux_sign_transfer_memo_step);
 
 void handleMemoStep(void) {
     if (ctx->memoLength < 0) {
         THROW(ERROR_INVALID_STATE);
     } else {
-        sendSuccessNoIdle();   // Request more data from the computer.
+        sendSuccessNoIdle();  // Request more data from the computer.
     }
 }
 
 void readMemoInitial(uint8_t *cdata, uint8_t dataLength) {
-    if(ctx->memoLength > MAX_MEMO_SIZE) {
+    if (ctx->memoLength > MAX_MEMO_SIZE) {
         // Don't sign memos, which exceed the max size accepted by the blockchain.
         THROW(ERROR_INVALID_PARAM);
     }
@@ -87,7 +83,7 @@ void readMemoInitial(uint8_t *cdata, uint8_t dataLength) {
             // negative integer
             memmove(ctx->memo, "-", 1);
             if (length == UINT64_MAX) {
-                bin2dec(ctx->memo + 1, sizeof(ctx->memo) - 1 , length);
+                bin2dec(ctx->memo + 1, sizeof(ctx->memo) - 1, length);
                 memmove(ctx->memo + 1 + 20, " - 1", 4);
             } else {
                 bin2dec(ctx->memo + 1, sizeof(ctx->memo) - 1, 1 + length);

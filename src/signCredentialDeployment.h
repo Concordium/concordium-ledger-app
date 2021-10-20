@@ -1,12 +1,22 @@
 #ifndef _CONCORDIUM_APP_SIGN_CREDENTIAL_DEPLOYMENT_H_
 #define _CONCORDIUM_APP_SIGN_CREDENTIAL_DEPLOYMENT_H_
 
-#include "os.h"
 #include "cx.h"
+#include "os.h"
 
-void handleSignCredentialDeployment(uint8_t *dataBuffer, uint8_t p1, uint8_t p2, volatile unsigned int *flags, bool isInitialCall);
+void handleSignCredentialDeployment(
+    uint8_t *dataBuffer,
+    uint8_t p1,
+    uint8_t p2,
+    volatile unsigned int *flags,
+    bool isInitialCall);
 
-void handleSignUpdateCredential(uint8_t *dataBuffer, uint8_t p1, uint8_t p2, volatile unsigned int *flags, bool isInitialCall);
+void handleSignUpdateCredential(
+    uint8_t *dataBuffer,
+    uint8_t p1,
+    uint8_t p2,
+    volatile unsigned int *flags,
+    bool isInitialCall);
 
 typedef enum {
     TX_CREDENTIAL_DEPLOYMENT_INITIAL = 4,
