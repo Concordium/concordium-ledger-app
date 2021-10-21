@@ -134,7 +134,8 @@ typedef struct {
         signTransferContext_t signTransferContext;
         signEncryptedAmountToTransfer_t signEncryptedAmountToTransfer;
         signTransferWithScheduleContext_t signTransferWithScheduleContext;
-    };
+        signRegisterData_t signRegisterData;
+   };
     memoContext_t memoContext;
 
 } transferWithMemo_t;
@@ -156,7 +157,6 @@ typedef union {
     signAddBakerContext_t signAddBaker;
     signUpdateBakerStakeContext_t signUpdateBakerStake;
     signUpdateBakerRestakeEarningsContext_t signUpdateBakerRestakeEarnings;
-    signRegisterData_t signRegisterData;
 
     signExchangeRateContext_t signExchangeRateContext;
     signUpdateAuthorizations_t signUpdateAuthorizations;

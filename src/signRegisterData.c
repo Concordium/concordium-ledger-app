@@ -1,10 +1,12 @@
 #include <os.h>
+#include <ux.h>
 #include "util.h"
 #include "accountSenderView.h"
 #include "sign.h"
 #include "responseCodes.h"
 
-static signRegisterData_t *ctx = &global.signRegisterData;
+static signRegisterData_t *ctx = &global.withMemo.signRegisterData;
+static memoContext_t *memo_ctx = &global.withMemo.memoContext;
 static tx_state_t *tx_state = &global_tx_state;
 
 void handleData();
@@ -19,11 +21,11 @@ UX_STEP_VALID(
             });
 UX_STEP_VALID(
     ux_register_data_display_data_step,
-    nn_paging,
+    bnnn_paging,
     handleData(),
     {
         "Data",
-            .text = (char *) global.signRegisterData.display
+            (char *) global.withMemo.memoContext.memo
             });
 UX_FLOW(ux_register_data_initial,
         &ux_sign_flow_shared_review,
@@ -58,20 +60,34 @@ void handleSignRegisterData(uint8_t *cdata, uint8_t p1, uint8_t dataLength, vola
 
         // hash the data length
         ctx->dataLength = U2BE(cdata, 0);
+        memo_ctx->memoLength = ctx->dataLength;
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 2, NULL, 0);
 
-        ctx->state = TX_REGISTER_DATA_PAYLOAD;
+        ctx->state = TX_REGISTER_DATA_PAYLOAD_START;
         ux_flow_init(0, ux_register_data_initial, NULL);
         *flags |= IO_ASYNCH_REPLY;
-    } else if (p1 == P1_DATA && ctx->state == TX_REGISTER_DATA_PAYLOAD) {
+    } else if (p1 == P1_DATA) {
         if (ctx->dataLength < dataLength) {
-            // We received more bytes than expected, and so the received
-            // transaction is invalid.
             THROW(ERROR_INVALID_TRANSACTION);
         }
         ctx->dataLength -= dataLength;
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, dataLength, NULL, 0);
-        memmove(ctx->display, cdata, dataLength);
+
+        switch (ctx->state) {
+            case TX_REGISTER_DATA_PAYLOAD_START:
+                ctx->state = TX_REGISTER_DATA_PAYLOAD;
+                readMemoInitial(cdata, dataLength);
+                break;
+            case TX_REGISTER_DATA_PAYLOAD:
+                if (ctx->dataLength != 0) {
+                    // The data size is <=256 bytes, so we should always have received all the data by this point
+                    THROW(ERROR_INVALID_STATE);
+                }
+                readMemoContent(cdata, dataLength);
+                break;
+            default:
+                THROW(ERROR_INVALID_STATE);
+        }
 
         ux_flow_init(0, ux_register_data_payload, NULL);
         *flags |= IO_ASYNCH_REPLY;
