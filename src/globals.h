@@ -8,6 +8,7 @@
 
 #include "getPublicKey.h"
 #include "exportPrivateKeySeed.h"
+#include "verifyAddress.h"
 
 #include "signCredentialDeployment.h"
 #include "signPublicInformationForIp.h"
@@ -145,6 +146,7 @@ typedef struct {
 typedef union {
     exportPrivateKeySeedContext_t exportPrivateKeySeedContext;
     exportPublicKeyContext_t exportPublicKeyContext;
+    verifyAddressContext_t verifyAddressContext;
 
     signPublicInformationForIp_t signPublicInformationForIp;
     signCredentialDeploymentContext_t signCredentialDeploymentContext;

@@ -159,7 +159,7 @@ void toPaginatedHex(uint8_t *byteArray, const uint64_t len, char *asHex, const s
     static uint8_t const hex[] = "0123456789abcdef";
 
     if (asHexSize < len * 2 + len / 16 + 1) {
-        return;
+        THROW(ERROR_BUFFER_OVERFLOW);
     }
 
     uint8_t offset = 0;

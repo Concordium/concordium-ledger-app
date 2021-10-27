@@ -45,6 +45,7 @@
 #include "signUpdateBakerStakeThreshold.h"
 #include "signHigherLevelKeyUpdate.h"
 #include "ux.h"
+#include "verifyAddress.h"
 #include <string.h>
 #include "seproxyhal_protocol.h"
 #include "globals.h"
@@ -114,6 +115,8 @@ accountSender_t global_account_sender;
 #define INS_ENCRYPTED_AMOUNT_TRANSFER_WITH_MEMO 0x33
 #define INS_SIGN_TRANSFER_WITH_SCHEDULE_AND_MEMO 0x34
 
+#define INS_VERIFY_ADDRESS 0x36
+
 // Main entry of application that listens for APDU commands that will be received from the
 // computer. The APDU commands control what flow is activated, i.e. which control flow is initiated.
 static void concordium_main(void) {
@@ -164,6 +167,9 @@ static void concordium_main(void) {
                 switch (INS) {
                     case INS_GET_PUBLIC_KEY:
                         handleGetPublicKey(cdata, p1, p2, &flags);
+                        break;
+                    case INS_VERIFY_ADDRESS:
+                        handleVerifyAddress(cdata, &flags);
                         break;
                     case INS_SIGN_TRANSFER:
                         handleSignTransfer(cdata, &flags);
