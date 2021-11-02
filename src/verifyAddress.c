@@ -84,37 +84,63 @@ void blsKeygen(const uint8_t *seed, size_t seedLength, uint8_t *dst, size_t dstL
 cx_err_t getCredId(uint8_t *prf, size_t prfSize, uint32_t cred_counter, uint8_t *credId, size_t credIdSize) {
     cx_err_t error = 0;
 
+    // get bn lock to allow working with binary numbers and elliptic curves
     cx_bn_lock(16, 0);
+    // Initialize binary numbers
     cx_bn_t prf_exp, tmp_bn, r_bn, cc_bn, prf_bn;
     CX_CHECK(cx_bn_alloc(&prf_exp, 32));
-    CX_CHECK(cx_bn_alloc(&cc_bn, 32));
     CX_CHECK(cx_bn_alloc(&tmp_bn, 32));
     CX_CHECK(cx_bn_alloc_init(&prf_bn, 32, prf, prfSize));
     CX_CHECK(cx_bn_alloc_init(&r_bn, 32, r, sizeof(r)));
-
+    CX_CHECK(cx_bn_alloc(&cc_bn, 32));
     CX_CHECK(cx_bn_set_u32(cc_bn, cred_counter));
+
+    // Apply cred counter offset
     CX_CHECK(cx_bn_mod_add(tmp_bn, prf_bn, cc_bn, r_bn));
 
+    // Inverse of prf + cred_counter is our prf_exp
     CX_CHECK(cx_bn_mod_invert_nprime(prf_exp, tmp_bn, r_bn));
 
+    // clean up binary numbers
     CX_CHECK(cx_bn_destroy(&tmp_bn));
     CX_CHECK(cx_bn_destroy(&r_bn));
     CX_CHECK(cx_bn_destroy(&prf_bn));
     CX_CHECK(cx_bn_destroy(&cc_bn));
 
-    uint32_t sign = 0;
-
+    // initialize elliptic curve point given by global commitmentKey
     cx_ecpoint_t commitmentKey;
     CX_CHECK(cx_ecpoint_alloc(&commitmentKey, CX_CURVE_BLS12_381_G1));
     CX_CHECK(cx_ecpoint_init(&commitmentKey, gX, sizeof(gX), gY, sizeof(gY)));
+
+    //  multipy commitmentKey with prf_exp
     CX_CHECK(cx_ecpoint_scalarmul_bn(&commitmentKey, prf_exp));
     CX_CHECK(cx_bn_destroy(&prf_exp));
 
-    CX_CHECK(cx_ecpoint_compress(&commitmentKey, credId, credIdSize, &sign));
+    // calculate credId which is the compressed version of commitmentKey * prf_exp
+    cx_bn_t x,y,negy;
+    CX_CHECK(cx_bn_alloc(&x, 48));
+    CX_CHECK(cx_bn_alloc(&y, 48));
+    CX_CHECK(cx_bn_alloc(&negy, 48));
 
-    credId[0] += 0x80; // Indicate this is on compressed form
-    if (sign == 1) {
-        credId[0] += 0x20; // Indicate that y is the larger of the two possibilities
+    CX_CHECK(cx_ecpoint_export_bn(&commitmentKey, &x, &y));
+    CX_CHECK(cx_bn_export(x, credId, credIdSize));
+
+    // Calculate negation of the point to get -y
+    CX_CHECK(cx_ecpoint_neg(&commitmentKey));
+    CX_CHECK(cx_ecpoint_export_bn(&commitmentKey, &x, &negy));
+
+    int diff;
+    CX_CHECK(cx_bn_cmp(y,negy,&diff));
+
+    // cleanup binary numbers
+    CX_CHECK(cx_bn_destroy(&x));
+    CX_CHECK(cx_bn_destroy(&y));
+    CX_CHECK(cx_bn_destroy(&negy));
+    CX_CHECK(cx_ecpoint_destroy(&commitmentKey));
+
+    credId[0] |= 0x80; // Indicate this is on compressed form
+    if (diff > 0) {
+        credId[0] |= 0x20; // Indicate that y > -y
     }
 
 end:
