@@ -1,8 +1,9 @@
 #include <os.h>
-#include "util.h"
+
 #include "accountSenderView.h"
-#include "sign.h"
 #include "responseCodes.h"
+#include "sign.h"
+#include "util.h"
 
 static signTransferToPublic_t *ctx = &global.signTransferToPublic;
 static tx_state_t *tx_state = &global_tx_state;
@@ -10,23 +11,25 @@ static tx_state_t *tx_state = &global_tx_state;
 UX_STEP_NOCB(
     ux_sign_transfer_to_public_1_step,
     bnnn_paging,
-    {
-      .title = "Unshield amount",
-      .text = (char *) global.signTransferToPublic.amount
-    });
-UX_FLOW(ux_sign_transfer_to_public,
+    {.title = "Unshield amount", .text = (char *) global.signTransferToPublic.amount});
+UX_FLOW(
+    ux_sign_transfer_to_public,
     &ux_sign_flow_shared_review,
     &ux_sign_flow_account_sender_view,
     &ux_sign_transfer_to_public_1_step,
     &ux_sign_flow_shared_sign,
-    &ux_sign_flow_shared_decline
-);
+    &ux_sign_flow_shared_decline);
 
 #define P1_INITIAL          0x00
 #define P1_REMAINING_AMOUNT 0x01
 #define P1_PROOF            0x02
 
-void handleSignTransferToPublic(uint8_t *cdata, uint8_t p1, uint8_t dataLength, volatile unsigned int *flags, bool isInitialCall) {
+void handleSignTransferToPublic(
+    uint8_t *cdata,
+    uint8_t p1,
+    uint8_t dataLength,
+    volatile unsigned int *flags,
+    bool isInitialCall) {
     if (isInitialCall) {
         ctx->state = TX_TRANSFER_TO_PUBLIC_INITIAL;
     }

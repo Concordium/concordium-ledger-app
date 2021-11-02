@@ -6,8 +6,18 @@
  * account transaction.
  * @param cdata please see /doc/ins_encrypted_amount_transfer.md
  */
-void handleSignEncryptedAmountTransfer(uint8_t *cdata, uint8_t p1, uint8_t dataLength, volatile unsigned int *flags, bool isInitialCall);
-void handleSignEncryptedAmountTransferWithMemo(uint8_t *cdata, uint8_t p1, uint8_t dataLength, volatile unsigned int *flags, bool isInitialCall);
+void handleSignEncryptedAmountTransfer(
+    uint8_t *cdata,
+    uint8_t p1,
+    uint8_t dataLength,
+    volatile unsigned int *flags,
+    bool isInitialCall);
+void handleSignEncryptedAmountTransferWithMemo(
+    uint8_t *cdata,
+    uint8_t p1,
+    uint8_t dataLength,
+    volatile unsigned int *flags,
+    bool isInitialCall);
 
 typedef enum {
     TX_ENCRYPTED_AMOUNT_TRANSFER_INITIAL = 15,

@@ -1,6 +1,7 @@
 #include <os.h>
-#include "util.h"
+
 #include "sign.h"
+#include "util.h"
 
 static signUpdateMintDistribution_t *ctx = &global.signUpdateMintDistribution;
 static tx_state_t *tx_state = &global_tx_state;
@@ -8,32 +9,23 @@ static tx_state_t *tx_state = &global_tx_state;
 UX_STEP_NOCB(
     ux_sign_mint_rate_1_step,
     bnnn_paging,
-    {
-      .title = "Mint rate",
-      .text = (char *) global.signUpdateMintDistribution.mintRate
-    });
+    {.title = "Mint rate", .text = (char *) global.signUpdateMintDistribution.mintRate});
 UX_STEP_NOCB(
     ux_sign_mint_rate_2_step,
     bnnn_paging,
-    {
-      .title = "Baker reward",
-      .text = (char *) global.signUpdateMintDistribution.bakerReward
-    });
+    {.title = "Baker reward", .text = (char *) global.signUpdateMintDistribution.bakerReward});
 UX_STEP_NOCB(
     ux_sign_mint_rate_3_step,
     bnnn_paging,
-    {
-      .title = "Finalization reward",
-      .text = (char *) global.signUpdateMintDistribution.finalizationReward
-    });
-UX_FLOW(ux_sign_mint_rate,
+    {.title = "Finalization reward", .text = (char *) global.signUpdateMintDistribution.finalizationReward});
+UX_FLOW(
+    ux_sign_mint_rate,
     &ux_sign_flow_shared_review,
     &ux_sign_mint_rate_1_step,
     &ux_sign_mint_rate_2_step,
     &ux_sign_mint_rate_3_step,
     &ux_sign_flow_shared_sign,
-    &ux_sign_flow_shared_decline
-);
+    &ux_sign_flow_shared_decline);
 
 void handleSignUpdateMintDistribution(uint8_t *cdata, volatile unsigned int *flags) {
     int bytesRead = parseKeyDerivationPath(cdata);
@@ -66,7 +58,8 @@ void handleSignUpdateMintDistribution(uint8_t *cdata, volatile unsigned int *fla
 
     // Finalization reward
     uint32_t finalizationReward = U4BE(cdata, 0);
-    int finalizationRewardLength = numberToText(ctx->finalizationReward, sizeof(ctx->finalizationReward), finalizationReward);
+    int finalizationRewardLength =
+        numberToText(ctx->finalizationReward, sizeof(ctx->finalizationReward), finalizationReward);
     cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 4, NULL, 0);
     memmove(ctx->finalizationReward + finalizationRewardLength, fraction, 8);
 

@@ -1,7 +1,8 @@
 #include <os.h>
-#include "util.h"
-#include "sign.h"
+
 #include "responseCodes.h"
+#include "sign.h"
+#include "util.h"
 
 static signAddIdentityProviderContext_t *ctx = &global.withDescription.signAddIdentityProviderContext;
 static descriptionContext_t *desc_ctx = &global.withDescription.descriptionContext;
@@ -11,45 +12,31 @@ UX_STEP_CB(
     ux_sign_add_identity_provider_ipIdentity,
     bn,
     sendSuccessNoIdle(),
-    {
-        "Identity provider",
-        (char *) global.withDescription.signAddIdentityProviderContext.ipIdentity
-    });
-UX_FLOW(ux_sign_add_identity_provider_start,
-    &ux_sign_flow_shared_review,
-    &ux_sign_add_identity_provider_ipIdentity
-);
+    {"Identity provider", (char *) global.withDescription.signAddIdentityProviderContext.ipIdentity});
+UX_FLOW(ux_sign_add_identity_provider_start, &ux_sign_flow_shared_review, &ux_sign_add_identity_provider_ipIdentity);
 
 UX_STEP_CB(
     ux_sign_add_identity_provider_verify_key_hash,
     bnnn_paging,
     sendSuccessNoIdle(),
-    {
-        "Verify Key Hash",
-        (char *) global.withDescription.signAddIdentityProviderContext.verifyKeyHash
-    });
-UX_FLOW(ux_sign_add_identity_provider_verify_key,
-    &ux_sign_add_identity_provider_verify_key_hash
-);
+    {"Verify Key Hash", (char *) global.withDescription.signAddIdentityProviderContext.verifyKeyHash});
+UX_FLOW(ux_sign_add_identity_provider_verify_key, &ux_sign_add_identity_provider_verify_key_hash);
 
 UX_STEP_NOCB(
     ux_sign_add_identity_provider_cdi_key,
     bnnn_paging,
-    {
-        "CDI Verify key",
-        (char *) global.withDescription.signAddIdentityProviderContext.cdiVerifyKey
-    });
-UX_FLOW(ux_sign_add_identity_provider_finish,
+    {"CDI Verify key", (char *) global.withDescription.signAddIdentityProviderContext.cdiVerifyKey});
+UX_FLOW(
+    ux_sign_add_identity_provider_finish,
     &ux_sign_add_identity_provider_cdi_key,
     &ux_sign_flow_shared_sign,
-    &ux_sign_flow_shared_decline
-);
+    &ux_sign_flow_shared_decline);
 
-#define P1_INITIAL                     0x00
-#define P1_DESCRIPTION_LENGTH          0x01        // Used for the name, url, description.
-#define P1_DESCRIPTION                 0x02        // Used for the name, url, description.
-#define P1_VERIFY_KEY                  0x03
-#define P1_CDI_VERIFY_KEY              0x04
+#define P1_INITIAL            0x00
+#define P1_DESCRIPTION_LENGTH 0x01  // Used for the name, url, description.
+#define P1_DESCRIPTION        0x02  // Used for the name, url, description.
+#define P1_VERIFY_KEY         0x03
+#define P1_CDI_VERIFY_KEY     0x04
 
 #define CDI_VERIFY_KEY_LENGTH 32
 
@@ -68,7 +55,12 @@ void checkIfDescriptionPartIsDoneIdentityProvider() {
     }
 }
 
-void handleSignAddIdentityProvider(uint8_t *cdata, uint8_t p1, uint8_t dataLength, volatile unsigned int *flags, bool isInitialCall) {
+void handleSignAddIdentityProvider(
+    uint8_t *cdata,
+    uint8_t p1,
+    uint8_t dataLength,
+    volatile unsigned int *flags,
+    bool isInitialCall) {
     if (isInitialCall) {
         ctx->state = TX_ADD_IDENTITY_PROVIDER_INITIAL;
     }

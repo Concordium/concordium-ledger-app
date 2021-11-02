@@ -1,6 +1,7 @@
 #include <os.h>
-#include "util.h"
+
 #include "sign.h"
+#include "util.h"
 
 static signUpdateBakerStakeThresholdContext_t *ctx = &global.signUpdateBakerStakeThreshold;
 static tx_state_t *tx_state = &global_tx_state;
@@ -8,16 +9,13 @@ static tx_state_t *tx_state = &global_tx_state;
 UX_STEP_NOCB(
     ux_sign_baker_stake_threshold_1_step,
     bnnn_paging,
-    {
-      .title = "Stake threshold",
-      .text = (char *) global.signUpdateBakerStakeThreshold.stakeThreshold
-    });
-UX_FLOW(ux_sign_baker_stake_threshold,
+    {.title = "Stake threshold", .text = (char *) global.signUpdateBakerStakeThreshold.stakeThreshold});
+UX_FLOW(
+    ux_sign_baker_stake_threshold,
     &ux_sign_flow_shared_review,
     &ux_sign_baker_stake_threshold_1_step,
     &ux_sign_flow_shared_sign,
-    &ux_sign_flow_shared_decline
-);
+    &ux_sign_flow_shared_decline);
 
 void handleSignUpdateBakerStakeThreshold(uint8_t *cdata, volatile unsigned int *flags) {
     cdata += parseKeyDerivationPath(cdata);

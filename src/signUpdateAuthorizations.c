@@ -1,12 +1,13 @@
 #include <os.h>
 #include <os_io_seproxyhal.h>
-#include "cx.h"
 #include <stdint.h>
-#include "menu.h"
-#include "util.h"
 #include <string.h>
-#include "sign.h"
+
+#include "cx.h"
+#include "menu.h"
 #include "responseCodes.h"
+#include "sign.h"
+#include "util.h"
 
 static signUpdateAuthorizations_t *ctx = &global.signUpdateAuthorizations;
 static tx_state_t *tx_state = &global_tx_state;
@@ -18,14 +19,11 @@ UX_STEP_CB(
     ux_sign_update_authorizations_review_1_step,
     nn,
     sendSuccessNoIdle(),
-    {
-      "Update",
-      (char *) global.signUpdateAuthorizations.type
-    });
-UX_FLOW(ux_sign_update_authorizations_review,
+    {"Update", (char *) global.signUpdateAuthorizations.type});
+UX_FLOW(
+    ux_sign_update_authorizations_review,
     &ux_sign_flow_shared_review,
-    &ux_sign_update_authorizations_review_1_step
-);
+    &ux_sign_update_authorizations_review_1_step);
 
 // UI for displaying access structure key indices. It displays the type of access
 // structure and the key index to be authorized.
@@ -33,64 +31,62 @@ UX_STEP_CB(
     ux_update_authorizations_0_step,
     nn,
     processKeyIndices(),
-    {
-      (char *) global.signUpdateAuthorizations.title,
-      (char *) global.signUpdateAuthorizations.displayKeyIndex
-    });
-UX_FLOW(ux_update_authorizations,
-    &ux_update_authorizations_0_step
-);
+    {(char *) global.signUpdateAuthorizations.title, (char *) global.signUpdateAuthorizations.displayKeyIndex});
+UX_FLOW(ux_update_authorizations, &ux_update_authorizations_0_step);
 
 // UI for displaying the key threshold for an access structure.
 UX_STEP_CB(
     ux_update_authorizations_threshold_0_step,
     nn,
     processThreshold(),
-    {
-      (char *) global.signUpdateAuthorizations.title,
-      (char *) global.signUpdateAuthorizations.displayKeyIndex
-    });
-UX_FLOW(ux_update_authorizations_threshold,
-    &ux_update_authorizations_threshold_0_step
-);
+    {(char *) global.signUpdateAuthorizations.title, (char *) global.signUpdateAuthorizations.displayKeyIndex});
+UX_FLOW(ux_update_authorizations_threshold, &ux_update_authorizations_threshold_0_step);
 
 // UI for displaying the list of public-keys that are being authorized.
 UX_STEP_CB(
     ux_update_authorizations_public_key_0_step,
     bnnn_paging,
     sendSuccessNoIdle(),
-    {
-        "Public key",
-        (char *) global.signUpdateAuthorizations.publicKey
-    });
-UX_FLOW(ux_update_authorizations_public_key,
-    &ux_update_authorizations_public_key_0_step
-);
+    {"Public key", (char *) global.signUpdateAuthorizations.publicKey});
+UX_FLOW(ux_update_authorizations_public_key, &ux_update_authorizations_public_key_0_step);
 
 /**
  * Helper method for mapping an authorization type, i.e. the type of the access
  * structure currently being processed, to a display text that we can show to
  * the user in the UI.
- * 
- * Note: An error is thrown if this method is called with the AUTHORIZATION_END 
+ *
+ * Note: An error is thrown if this method is called with the AUTHORIZATION_END
  * type, as that value is only used to register that all access structures have
  * been processed.
- */ 
-const char* getAuthorizationName(authorizationType_e type) {
+ */
+const char *getAuthorizationName(authorizationType_e type) {
     switch (type) {
-        case AUTHORIZATION_EMERGENCY: return "Emergency";
-        case AUTHORIZATION_PROTOCOL: return "Protocol";
-        case AUTHORIZATION_ELECTION_DIFFICULTY: return "Election difficulty";
-        case AUTHORIZATION_EURO_PER_ENERGY: return "Euro per energy";
-        case AUTHORIZATION_MICRO_GTU_PER_EURO: return "uGTU per Euro";
-        case AUTHORIZATION_FOUNDATION_ACCOUNT: return "Foundation account";
-        case AUTHORIZATION_MINT_DISTRIBUTION: return "Mint distribution";
-        case AUTHORIZATION_TRANSACTION_FEE_DISTRIBUTION: return "Transaction fee distribution";
-        case AUTHORIZATION_GAS_REWARDS: return "GAS rewards";
-        case AUTHORIZATION_BAKER_STAKE_THRESHOLD: return "Baker stake threshold";
-        case AUTHORIZATION_ADD_ANONYMITY_REVOKER: return "Add anonymity revoker";
-        case AUTHORIZATION_ADD_IDENTITY_PROVIDER: return "Add identity provider";
-        case AUTHORIZATION_END: THROW(ERROR_INVALID_STATE);
+        case AUTHORIZATION_EMERGENCY:
+            return "Emergency";
+        case AUTHORIZATION_PROTOCOL:
+            return "Protocol";
+        case AUTHORIZATION_ELECTION_DIFFICULTY:
+            return "Election difficulty";
+        case AUTHORIZATION_EURO_PER_ENERGY:
+            return "Euro per energy";
+        case AUTHORIZATION_MICRO_GTU_PER_EURO:
+            return "uGTU per Euro";
+        case AUTHORIZATION_FOUNDATION_ACCOUNT:
+            return "Foundation account";
+        case AUTHORIZATION_MINT_DISTRIBUTION:
+            return "Mint distribution";
+        case AUTHORIZATION_TRANSACTION_FEE_DISTRIBUTION:
+            return "Transaction fee distribution";
+        case AUTHORIZATION_GAS_REWARDS:
+            return "GAS rewards";
+        case AUTHORIZATION_BAKER_STAKE_THRESHOLD:
+            return "Baker stake threshold";
+        case AUTHORIZATION_ADD_ANONYMITY_REVOKER:
+            return "Add anonymity revoker";
+        case AUTHORIZATION_ADD_IDENTITY_PROVIDER:
+            return "Add identity provider";
+        case AUTHORIZATION_END:
+            THROW(ERROR_INVALID_STATE);
     }
 }
 
@@ -139,13 +135,21 @@ void processKeyIndices(void) {
     }
 }
 
-#define P1_INITIAL                      0x00    // Contains key derivation path, update header and update kind, update key type and count of incoming public update keys.
-#define P1_PUBLIC_KEY                   0x01    // Contains one public-key per command.
-#define P1_ACCESS_STRUCTURE_INITIAL     0x02    // Contains the number of public-key indices for the current access.
-#define P1_ACCESS_STRUCTURE             0x03    // Contains the public-key indices for the current access structure.
-#define P1_ACCESS_STRUCTURE_THRESHOLD   0x04    // Contains the threshold for the current access structure.
+#define P1_INITIAL \
+    0x00  // Contains key derivation path, update header and update kind, update key type and count of incoming public
+          // update keys.
+#define P1_PUBLIC_KEY                 0x01  // Contains one public-key per command.
+#define P1_ACCESS_STRUCTURE_INITIAL   0x02  // Contains the number of public-key indices for the current access.
+#define P1_ACCESS_STRUCTURE           0x03  // Contains the public-key indices for the current access structure.
+#define P1_ACCESS_STRUCTURE_THRESHOLD 0x04  // Contains the threshold for the current access structure.
 
-void handleSignUpdateAuthorizations(uint8_t *cdata, uint8_t p1, uint8_t updateType, uint8_t dataLength, volatile unsigned int *flags, bool isInitialCall) {
+void handleSignUpdateAuthorizations(
+    uint8_t *cdata,
+    uint8_t p1,
+    uint8_t updateType,
+    uint8_t dataLength,
+    volatile unsigned int *flags,
+    bool isInitialCall) {
     if (isInitialCall) {
         ctx->state = TX_UPDATE_AUTHORIZATIONS_INITIAL;
     }
@@ -173,7 +177,8 @@ void handleSignUpdateAuthorizations(uint8_t *cdata, uint8_t p1, uint8_t updateTy
         ctx->state = TX_UPDATE_AUTHORIZATIONS_PUBLIC_KEY;
         ux_flow_init(0, ux_sign_update_authorizations_review, NULL);
         *flags |= IO_ASYNCH_REPLY;
-    } else if (p1 == P1_PUBLIC_KEY && ctx->state == TX_UPDATE_AUTHORIZATIONS_PUBLIC_KEY && ctx->publicKeyListLength > 0) {
+    } else if (
+        p1 == P1_PUBLIC_KEY && ctx->state == TX_UPDATE_AUTHORIZATIONS_PUBLIC_KEY && ctx->publicKeyListLength > 0) {
         // Hash the schemeId
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 1, NULL, 0);
         cdata += 1;
@@ -205,7 +210,8 @@ void handleSignUpdateAuthorizations(uint8_t *cdata, uint8_t p1, uint8_t updateTy
         processKeyIndices();
         *flags |= IO_ASYNCH_REPLY;
 
-    } else if (p1 == P1_ACCESS_STRUCTURE_THRESHOLD && ctx->state == TX_UPDATE_AUTHORIZATIONS_ACCESS_STRUCTURE_THRESHOLD) {
+    } else if (
+        p1 == P1_ACCESS_STRUCTURE_THRESHOLD && ctx->state == TX_UPDATE_AUTHORIZATIONS_ACCESS_STRUCTURE_THRESHOLD) {
         uint16_t threshold = U2BE(cdata, 0);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 2, NULL, 0);
         bin2dec(ctx->displayKeyIndex, sizeof(ctx->displayKeyIndex), threshold);

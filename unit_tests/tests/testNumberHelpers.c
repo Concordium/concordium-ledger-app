@@ -1,13 +1,9 @@
-#include <stdarg.h>
-#include <stddef.h>
 #include <setjmp.h>
-#include <stdint.h>
+#include <stdarg.h>
 #include <stdbool.h>
-#include <string.h>
-
-#include <stdint.h>  // uint*_t
 #include <stddef.h>  // size_t
-
+#include <stdint.h>  // uint*_t
+#include <string.h>
 #include <cmocka.h>
 
 #include "numberHelpers.c"
@@ -178,7 +174,6 @@ static void test_amountToGtuDisplay_with_thousand_separator() {
     assert_string_equal(text, "1,111,111,111.111111");
 }
 
-
 static void test_amountToGtuDisplay_max() {
     uint8_t text[26];
     int result = amountToGtuDisplay(text, sizeof(text), 18446744073709551615ULL);
@@ -188,7 +183,7 @@ static void test_amountToGtuDisplay_max() {
 
 static void test_toPaginatedHex() {
     char text[70];
-    uint8_t bytes[] = { 171, 34, 31, 72, 83, 171, 34, 29, 72, 83, 34, 29, 31, 72, 34, 29, 31, 72, 34, 29, 31, 72 };
+    uint8_t bytes[] = {171, 34, 31, 72, 83, 171, 34, 29, 72, 83, 34, 29, 31, 72, 34, 29, 31, 72, 34, 29, 31, 72};
     toPaginatedHex(bytes, 22, text, sizeof(text));
     assert_string_equal(text, "ab221f4853ab221d 4853221d1f48221d 1f48221d1f48");
 }
@@ -196,7 +191,7 @@ static void test_toPaginatedHex() {
 static void test_toPaginatedHex_stops_after_given_length() {
     char text[12];
     text[11] = 100;
-    uint8_t bytes[] = { 171, 34, 31, 72, 83, 170, 34, 1, 1, 1 };
+    uint8_t bytes[] = {171, 34, 31, 72, 83, 170, 34, 1, 1, 1};
     toPaginatedHex(bytes, 5, text, sizeof(text));
     assert_string_equal(text, "ab221f4853");
     assert_int_equal(text[10], '\0');
@@ -205,7 +200,7 @@ static void test_toPaginatedHex_stops_after_given_length() {
 
 static void test_toPaginatedHex_does_not_have_trailing_space() {
     char text[18];
-    uint8_t bytes[] = { 171, 34, 31, 72, 83, 171, 34, 29 };
+    uint8_t bytes[] = {171, 34, 31, 72, 83, 171, 34, 29};
     toPaginatedHex(bytes, 8, text, sizeof(text));
     assert_string_equal(text, "ab221f4853ab221d");
     assert_int_equal(text[16], '\0');
@@ -213,7 +208,7 @@ static void test_toPaginatedHex_does_not_have_trailing_space() {
 
 static void test_toPaginatedHex_inserts_white_space() {
     char text[20];
-    uint8_t bytes[] = { 171, 34, 31, 72, 83, 171, 34, 29, 171 };
+    uint8_t bytes[] = {171, 34, 31, 72, 83, 171, 34, 29, 171};
     toPaginatedHex(bytes, 9, text, sizeof(text));
     assert_string_equal(text, "ab221f4853ab221d ab");
     assert_int_equal(text[19], '\0');

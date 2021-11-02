@@ -1,5 +1,6 @@
-#include "os.h"
 #include "numberHelpers.h"
+
+#include "os.h"
 #include "responseCodes.h"
 
 size_t lengthOfNumber(uint64_t number) {
@@ -164,8 +165,8 @@ void toPaginatedHex(uint8_t *byteArray, const uint64_t len, char *asHex, const s
 
     uint8_t offset = 0;
     for (uint64_t i = 0; i < len; i++) {
-        asHex[2 * i + offset] = hex[(byteArray[i]>>4) & 0x0F];
-        asHex[2 * i + (offset + 1)] = hex[(byteArray[i]>>0) & 0x0F];
+        asHex[2 * i + offset] = hex[(byteArray[i] >> 4) & 0x0F];
+        asHex[2 * i + (offset + 1)] = hex[(byteArray[i] >> 0) & 0x0F];
 
         // Insert a space to force the Ledger to paginate the string every
         // 16 characters.

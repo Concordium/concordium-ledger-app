@@ -1,7 +1,8 @@
 #include <os.h>
-#include "util.h"
-#include "sign.h"
+
 #include "responseCodes.h"
+#include "sign.h"
+#include "util.h"
 
 static signExchangeRateContext_t *ctx = &global.signExchangeRateContext;
 static tx_state_t *tx_state = &global_tx_state;
@@ -9,19 +10,16 @@ static tx_state_t *tx_state = &global_tx_state;
 UX_STEP_NOCB(
     ux_sign_exchange_rate_1_step,
     bnnn_paging,
-    {
-      .title = (char *) global.signExchangeRateContext.type,
-      .text = (char *) global.signExchangeRateContext.ratio
-    });
-UX_FLOW(ux_sign_exchange_rate,
+    {.title = (char *) global.signExchangeRateContext.type, .text = (char *) global.signExchangeRateContext.ratio});
+UX_FLOW(
+    ux_sign_exchange_rate,
     &ux_sign_flow_shared_review,
     &ux_sign_exchange_rate_1_step,
     &ux_sign_flow_shared_sign,
-    &ux_sign_flow_shared_decline
-);
+    &ux_sign_flow_shared_decline);
 
 // Handles signing update transactions for updating an exchange rate. The signing method
-// is shared as the update payloads (except for the type declaration) are identical for 
+// is shared as the update payloads (except for the type declaration) are identical for
 // these types of transactions.
 //
 // Currently it supports two update transactions:

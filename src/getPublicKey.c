@@ -1,9 +1,9 @@
-#include "os.h"
-#include "ux.h"
-#include "util.h"
-#include "menu.h"
-#include "responseCodes.h"
 #include "globals.h"
+#include "menu.h"
+#include "os.h"
+#include "responseCodes.h"
+#include "util.h"
+#include "ux.h"
 
 static keyDerivationPath_t *keyPath = &path;
 static exportPublicKeyContext_t *ctx = &global.exportPublicKeyContext;
@@ -17,24 +17,9 @@ UX_STEP_VALID(
     ux_generate_public_flow_0_step,
     pnn,
     sendPublicKey(true),
-    {
-      &C_icon_validate_14,
-      "Public key",
-      (char *) global.exportPublicKeyContext.display
-    });
-UX_STEP_VALID(
-    ux_generate_public_flow_1_step,
-    pb,
-    sendUserRejection(),
-    {
-      &C_icon_crossmark,
-      "Decline"
-    });
-UX_FLOW(ux_generate_public_flow,
-    &ux_generate_public_flow_0_step,
-    &ux_generate_public_flow_1_step,
-    FLOW_LOOP
-);
+    {&C_icon_validate_14, "Public key", (char *) global.exportPublicKeyContext.display});
+UX_STEP_VALID(ux_generate_public_flow_1_step, pb, sendUserRejection(), {&C_icon_crossmark, "Decline"});
+UX_FLOW(ux_generate_public_flow, &ux_generate_public_flow_0_step, &ux_generate_public_flow_1_step, FLOW_LOOP);
 
 // UI definitions for comparison of public-key on the device
 // with the public-key that the caller received.
@@ -42,13 +27,8 @@ UX_STEP_VALID(
     ux_sign_compare_public_key_0_step,
     bnnn_paging,
     ui_idle(),
-    {
-      .title = "Compare",
-      .text = (char *) global.exportPublicKeyContext.publicKey
-    });
-UX_FLOW(ux_sign_compare_public_key,
-    &ux_sign_compare_public_key_0_step
-);
+    {.title = "Compare", .text = (char *) global.exportPublicKeyContext.publicKey});
+UX_FLOW(ux_sign_compare_public_key, &ux_sign_compare_public_key_0_step);
 
 /**
  * Derive the public-key for the given path, and then write it to
@@ -73,7 +53,6 @@ void sendPublicKey(bool compare) {
         memmove(G_io_apdu_buffer + tx, signedPublicKey, sizeof(signedPublicKey));
         tx += sizeof(signedPublicKey);
     }
-
 
     // Send back success response including the public-key (and signature, if wanted).
     if (compare) {

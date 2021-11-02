@@ -1,5 +1,9 @@
 # Changelog
 
+# 2.0.2
+
+* An acceptance step has been added to the export of private key seeds.
+
 ## 2.0.1
 
 * Fixed an issue in the add baker UI, where a response could be sent before signing or declining.

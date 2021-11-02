@@ -72,6 +72,22 @@ jobs:
                   make clean
                   scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build --status-bugs make default
 
+    lint:
+        name: Lint
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v2
+
+            - name: Lint
+              uses: DoozyX/clang-format-lint-action@v0.12
+              with:
+                source: './src ./unit_tests'
+                extensions: 'c,h'
+                clangFormatVersion: 9
+                style: file
+                inplace: false
+
     e2e-tests:
         name: End to end tests
         needs: [compile-nano-s, compile-nano-x]
