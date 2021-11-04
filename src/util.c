@@ -224,21 +224,23 @@ void sign(uint8_t *input, uint8_t *signatureOnInput) {
     END_TRY;
 }
 
-#define l_CONST                48 // ceil((3 * ceil(log2(r))) / 16)
+#define l_CONST        48  // ceil((3 * ceil(log2(r))) / 16)
 #define BLS_KEY_LENGTH 32
 
-static const uint8_t l_bytes[2] =  {0, l_CONST};
+static const uint8_t l_bytes[2] = {0, l_CONST};
 
-/** This implements the bls key generation algorithm specified in https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-2.3,
- * The optional parameter key_info is hardcoded to an empty string.
- * Uses sha256 as the hash function.
- * The generated key has length 32, and dst should have atleast that length, or the function throws an error.
+/** This implements the bls key generation algorithm specified in
+ * https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-2.3, The optional parameter key_info
+ * is hardcoded to an empty string. Uses sha256 as the hash function. The generated key has length 32, and dst should
+ * have atleast that length, or the function throws an error.
  */
 void blsKeygen(const uint8_t *seed, size_t seedLength, uint8_t *dst, size_t dstLength) {
     uint8_t sk[l_CONST];
     uint8_t prk[32];
-    uint8_t salt[32] = {66, 76, 83, 45, 83, 73, 71, 45, 75, 69, 89, 71, 69, 78, 45, 83, 65, 76, 84, 45}; // Initially set to the byte representation of "BLS-SIG-KEYGEN-SALT-"
-    size_t saltSize = 20; // 20 = size of initial salt seed
+    uint8_t salt[32] = {
+        66, 76, 83, 45, 83, 73, 71, 45, 75, 69,
+        89, 71, 69, 78, 45, 83, 65, 76, 84, 45};  // Initially set to the byte representation of "BLS-SIG-KEYGEN-SALT-"
+    size_t saltSize = 20;                         // 20 = size of initial salt seed
     uint8_t ikm[seedLength + 1];
 
     memcpy(ikm, seed, seedLength);
@@ -271,4 +273,3 @@ void getBlsPrivateKey(uint32_t *keyPath, uint8_t keyPathLength, uint8_t *private
     }
     END_TRY;
 }
-

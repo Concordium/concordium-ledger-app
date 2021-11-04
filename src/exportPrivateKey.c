@@ -110,7 +110,7 @@ void exportPrivateKey(void) {
 // Export seeds
 #define P2_SEED 0x01
 // Export the BLS keys
-#define P2_KEY   0x02
+#define P2_KEY 0x02
 
 void handleExportPrivateKey(uint8_t *dataBuffer, uint8_t p1, uint8_t p2, volatile unsigned int *flags) {
     if ((p1 != P1_BOTH && p1 != P1_PRF_KEY && p1 != P1_PRF_KEY_RECOVERY) || (p2 != P2_KEY && p2 != P2_SEED)) {

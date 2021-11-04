@@ -16,3 +16,11 @@ void cx_ecfp_generate_pair() {
 }
 void cx_eddsa_sign() {
 }
+void cx_hkdf_extract() {
+}
+void cx_hkdf_expand() {
+}
+void cx_math_modm() {
+}
+void cx_math_is_zero() {
+}

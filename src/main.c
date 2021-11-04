@@ -84,8 +84,8 @@ accountSender_t global_account_sender;
 // An INS instruction containing 0x04 means that we should start the credential deployment signing flow.
 #define INS_CREDENTIAL_DEPLOYMENT 0x04
 
-#define INS_EXPORT_PRIVATE_KEY 0x05
-#define INS_UPDATE_EXCHANGE_RATE    0x06
+#define INS_EXPORT_PRIVATE_KEY   0x05
+#define INS_UPDATE_EXCHANGE_RATE 0x06
 
 #define INS_ENCRYPTED_AMOUNT_TRANSFER 0x10
 #define INS_TRANSFER_TO_ENCRYPTED     0x11
