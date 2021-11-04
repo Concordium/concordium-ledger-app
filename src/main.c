@@ -20,7 +20,7 @@
 
 #include "os.h"
 #include "cx.h"
-#include "exportPrivateKeySeed.h"
+#include "exportPrivateKey.h"
 #include "getPublicKey.h"
 #include "globals.h"
 #include "glyphs.h"
@@ -84,7 +84,7 @@ accountSender_t global_account_sender;
 // An INS instruction containing 0x04 means that we should start the credential deployment signing flow.
 #define INS_CREDENTIAL_DEPLOYMENT 0x04
 
-#define INS_EXPORT_PRIVATE_KEY_SEED 0x05
+#define INS_EXPORT_PRIVATE_KEY 0x05
 #define INS_UPDATE_EXCHANGE_RATE    0x06
 
 #define INS_ENCRYPTED_AMOUNT_TRANSFER 0x10
@@ -187,8 +187,8 @@ static void concordium_main(void) {
                     case INS_CREDENTIAL_DEPLOYMENT:
                         handleSignCredentialDeployment(cdata, p1, p2, &flags, isInitialCall);
                         break;
-                    case INS_EXPORT_PRIVATE_KEY_SEED:
-                        handleExportPrivateKeySeed(cdata, p1, p2, &flags);
+                    case INS_EXPORT_PRIVATE_KEY:
+                        handleExportPrivateKey(cdata, p1, p2, &flags);
                         break;
                     case INS_UPDATE_EXCHANGE_RATE:
                         handleSignUpdateExchangeRate(cdata, &flags);

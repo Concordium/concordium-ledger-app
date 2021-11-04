@@ -8,21 +8,21 @@
 #include "util.h"
 #include "ux.h"
 
-// Allow the user to decline exporting the private keys seeds.
+// Allow the user to decline exporting the private keys.
 
 // This class allows for the export of a number of very specific private keys. These private keys are made
 // exportable as they are used in computations that are not feasible to carry out on the Ledger device.
 // The key derivation paths that are allowed are restricted so that it is not possible to export
 // keys that are used for signing.
 static const uint32_t HARDENED_OFFSET = 0x80000000;
-static exportPrivateKeySeedContext_t *ctx = &global.exportPrivateKeySeedContext;
+static exportPrivateKeyContext_t *ctx = &global.exportPrivateKeyContext;
 
 void exportPrivateKey(void);
 
 UX_STEP_NOCB(
     ux_export_private_key_0_step,
     nn,
-    {(char *) global.exportPrivateKeySeedContext.displayHeader, (char *) global.exportPrivateKeySeedContext.display});
+    {(char *) global.exportPrivateKeyContext.displayHeader, (char *) global.exportPrivateKeyContext.display});
 UX_STEP_CB(ux_export_private_key_accept_step, pb, exportPrivateKey(), {&C_icon_validate_14, "Accept"});
 UX_STEP_CB(ux_export_private_key_decline_step, pb, sendUserRejection(), {&C_icon_crossmark, "Decline"});
 UX_FLOW(
@@ -101,16 +101,18 @@ void exportPrivateKey(void) {
 #define ACCOUNT_SUBTREE 0
 #define NORMAL_ACCOUNTS 0
 
-// Export the PRF key seed
+// Export the PRF key
 #define P1_PRF_KEY          0x00
 #define P1_PRF_KEY_RECOVERY 0x01
-// Export the PRF key seed and the IdCredSec seed
+// Export the PRF key and the IdCredSec
 #define P1_BOTH 0x02
 
+// Export seeds
 #define P2_SEED 0x01
-#define P2_KEY 0x02
+// Export the BLS keys
+#define P2_KEY   0x02
 
-void handleExportPrivateKeySeed(uint8_t *dataBuffer, uint8_t p1, uint8_t p2, volatile unsigned int *flags) {
+void handleExportPrivateKey(uint8_t *dataBuffer, uint8_t p1, uint8_t p2, volatile unsigned int *flags) {
     if ((p1 != P1_BOTH && p1 != P1_PRF_KEY && p1 != P1_PRF_KEY_RECOVERY) || (p2 != P2_KEY && p2 != P2_SEED)) {
         THROW(ERROR_INVALID_PARAM);
     }

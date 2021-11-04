@@ -6,7 +6,7 @@
 #include "os.h"
 #include "cx.h"
 #include "descriptionView.h"
-#include "exportPrivateKeySeed.h"
+#include "exportPrivateKey.h"
 #include "verifyAddress.h"
 
 #include "getPublicKey.h"
@@ -139,7 +139,7 @@ typedef struct {
  * consuming instruction context.
  */
 typedef union {
-    exportPrivateKeySeedContext_t exportPrivateKeySeedContext;
+    exportPrivateKeyContext_t exportPrivateKeyContext;
     exportPublicKeyContext_t exportPublicKeyContext;
     verifyAddressContext_t verifyAddressContext;
 
