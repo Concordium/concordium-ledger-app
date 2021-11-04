@@ -2,6 +2,7 @@ use ledger::{ApduCommand, LedgerApp};
 
 fn main() {
     let ledger = LedgerApp::new().unwrap();
+    // [Identity, credCounter]
     let data = hex::decode(format!("{}{}", "00000000", "00000000")).unwrap();
 
     let command = ApduCommand {

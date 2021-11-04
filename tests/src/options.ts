@@ -18,7 +18,7 @@ export const optionsNanoX: StartOptions = {
     X11: false,
     logging: true,
     startDelay: 3000,
-    custom: `-s "${SEED_PHRASE}" -k 2.0`,
+    custom: `-s "${SEED_PHRASE}" `,
 };
 
 export const NANOS_ELF_PATH = resolve('bin/nanos/concordium_nanos.elf');

@@ -1,48 +1,31 @@
 use ledger::{ApduCommand, LedgerApp};
 
-fn main() {
+pub fn export_private_key(p1: u8, p2: u8, identity: Vec<u8>) -> String {
     let ledger = LedgerApp::new().unwrap();
 
-    let identity = hex::decode("FFFFFFFF").unwrap();
-
-    let prf_command = ApduCommand {
+    let command = ApduCommand {
         cla: 224,
         ins: 5,
-        p1: 0,
-        p2: 2,
-        length: 0,
-        data: identity.clone()
-    };
-
-    let result = ledger.exchange(prf_command).unwrap();
-    let prf_key_seed = hex::encode(result.data);
-    println!("prf_key seed (hex): {}", prf_key_seed);
-
-    let prf_recovery_command = ApduCommand {
-        cla: 224,
-        ins: 5,
-        p1: 1,
-        p2: 2,
-        length: 0,
-        data: identity.clone()
-    };
-
-    let result = ledger.exchange(prf_recovery_command).unwrap();
-    let prf_key_seed = hex::encode(result.data);
-    println!("prf_key seed (hex): {}", prf_key_seed);
-
-    let both_command = ApduCommand {
-        cla: 224,
-        ins: 5,
-        p1: 2,
-        p2: 2,
+        p1: p1,
+        p2: p2,
         length: 0,
         data: identity
     };
 
-    let result = ledger.exchange(both_command).unwrap();
-    let prf_seed = &result.data[..32];
-    println!("prf_key seed (hex): {}", hex::encode(prf_seed));
-    let id_cred_seed = &result.data[32..64];
-    println!("id_cred seed (hex): {}", hex::encode(id_cred_seed));
+    let result = ledger.exchange(command).unwrap();
+    return hex::encode(result.data);
+}
+
+#[allow(dead_code)]
+fn main() {
+    let identity = hex::decode("FFFFFFFF").unwrap();
+
+    println!("prf_key (hex): {}", export_private_key(0, 2, identity.clone()));
+    println!("prf_key (hex): {}", export_private_key(1, 2, identity.clone()));
+
+    let result = export_private_key(2, 2, identity.clone());
+    let prf_seed = &result[..64];
+    println!("prf_key (hex): {}", prf_seed);
+    let id_cred_seed = &result[64..128];
+    println!("id_cred (hex): {}", id_cred_seed);
 }
