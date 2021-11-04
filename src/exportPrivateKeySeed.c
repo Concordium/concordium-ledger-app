@@ -36,7 +36,7 @@ UX_FLOW(
 
 #define pathLength 6
 
-void exportPrivateKey(void) {
+void exportPrivateKeySeed(void) {
     cx_ecfp_private_key_t privateKey;
     BEGIN_TRY {
         TRY {
@@ -64,6 +64,40 @@ void exportPrivateKey(void) {
     END_TRY;
 }
 
+void exportPrivateKeyBls(void) {
+    uint8_t privateKey[32];
+    BEGIN_TRY {
+        TRY {
+            ctx->path[5] = PRF_KEY | HARDENED_OFFSET;
+            getBlsPrivateKey(ctx->path, pathLength, privateKey, sizeof(privateKey));
+            uint8_t tx = 0;
+            memmove(G_io_apdu_buffer, privateKey, sizeof(privateKey));
+            tx += sizeof(privateKey);
+
+            if (ctx->exportBoth) {
+                ctx->path[5] = ID_CRED_SEC | HARDENED_OFFSET;
+                getBlsPrivateKey(ctx->path, pathLength, privateKey, sizeof(privateKey));
+                memmove(G_io_apdu_buffer + tx, privateKey, sizeof(privateKey));
+                tx += sizeof(privateKey);
+            }
+
+            sendSuccess(tx);
+        }
+        FINALLY {
+            explicit_bzero(&privateKey, sizeof(privateKey));
+        }
+    }
+    END_TRY;
+}
+
+void exportPrivateKey(void) {
+    if (ctx->exportSeed) {
+        exportPrivateKeySeed();
+    } else {
+        exportPrivateKeyBls();
+    }
+}
+
 #define ACCOUNT_SUBTREE 0
 #define NORMAL_ACCOUNTS 0
 
@@ -73,8 +107,11 @@ void exportPrivateKey(void) {
 // Export the PRF key seed and the IdCredSec seed
 #define P1_BOTH 0x02
 
+#define P2_SEED 0x01
+#define P2_KEY 0x02
+
 void handleExportPrivateKeySeed(uint8_t *dataBuffer, uint8_t p1, uint8_t p2, volatile unsigned int *flags) {
-    if ((p1 != P1_BOTH && p1 != P1_PRF_KEY && p1 != P1_PRF_KEY_RECOVERY) || p2 != 0x01) {
+    if ((p1 != P1_BOTH && p1 != P1_PRF_KEY && p1 != P1_PRF_KEY_RECOVERY) || (p2 != P2_KEY && p2 != P2_SEED)) {
         THROW(ERROR_INVALID_PARAM);
     }
 
@@ -87,6 +124,7 @@ void handleExportPrivateKeySeed(uint8_t *dataBuffer, uint8_t p1, uint8_t p2, vol
     memmove(ctx->path, keyDerivationPath, sizeof(keyDerivationPath));
 
     ctx->exportBoth = p1 == P1_BOTH;
+    ctx->exportSeed = p2 == P2_SEED;
 
     memmove(ctx->display, "ID #", 4);
     bin2dec(ctx->display + 4, sizeof(ctx->display) - 4, identity);

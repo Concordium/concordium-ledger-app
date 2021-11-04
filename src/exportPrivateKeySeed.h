@@ -14,6 +14,7 @@ typedef struct {
     uint8_t displayHeader[20];
     uint8_t display[15];
     bool exportBoth;
+    bool exportSeed;
     uint32_t path[6];
     uint8_t pathLength;
 } exportPrivateKeySeedContext_t;

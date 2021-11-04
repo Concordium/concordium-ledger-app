@@ -103,7 +103,9 @@ void handleGetPublicKey(uint8_t *cdata, uint8_t p1, uint8_t p2, volatile unsigne
                     THROW(ERROR_INVALID_PATH);
             }
         } else {
-            getIdentityAccountDisplay(ctx->display, sizeof(ctx->display));
+            uint32_t identityIndex = keyPath->rawKeyDerivationPath[4];
+            uint32_t accountIndex = keyPath->rawKeyDerivationPath[6];
+            getIdentityAccountDisplay(ctx->display, sizeof(ctx->display), identityIndex, accountIndex);
         }
 
         // Display the UI for the public-key flow, where the user can validate that the
