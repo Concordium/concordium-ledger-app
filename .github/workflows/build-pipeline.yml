@@ -37,7 +37,7 @@ jobs:
         name: Compile for Nano X
         runs-on: ubuntu-latest
 
-        container: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
+        container: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:2.1.0-rc3
 
         steps:
             - uses: actions/checkout@v2
