@@ -103,7 +103,7 @@ cx_err_t getCredId(uint8_t *prf, size_t prfSize, uint32_t credCounter, uint8_t *
         credId[0] |= 0x20;  // Indicate that y > -y
     }
 
-    //CX_CHECK label to goto in case of an error
+    // CX_CHECK label to goto in case of an error
 end:
     cx_bn_unlock();
     return error;
@@ -150,4 +150,3 @@ void handleVerifyAddress(uint8_t *cdata, volatile unsigned int *flags) {
     ux_flow_init(0, ux_verify_address, NULL);
     *flags |= IO_ASYNCH_REPLY;
 }
- 
