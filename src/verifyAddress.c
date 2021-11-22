@@ -47,25 +47,25 @@ cx_err_t getCredId(uint8_t *prf, size_t prfSize, uint32_t credCounter, uint8_t *
     // get bn lock to allow working with binary numbers and elliptic curves
     cx_bn_lock(16, 0);
     // Initialize binary numbers
-    cx_bn_t prf_exp, tmp_bn, r_bn, cc_bn, prf_bn;
-    CX_CHECK(cx_bn_alloc(&prf_exp, 32));
-    CX_CHECK(cx_bn_alloc(&tmp_bn, 32));
-    CX_CHECK(cx_bn_alloc_init(&prf_bn, 32, prf, prfSize));
-    CX_CHECK(cx_bn_alloc_init(&r_bn, 32, r, sizeof(r)));
-    CX_CHECK(cx_bn_alloc(&cc_bn, 32));
-    CX_CHECK(cx_bn_set_u32(cc_bn, credCounter));
+    cx_bn_t credIdExponentBn, tmpBn, rBn, ccBn, prfBn;
+    CX_CHECK(cx_bn_alloc(&credIdExponentBn, 32));
+    CX_CHECK(cx_bn_alloc(&tmpBn, 32));
+    CX_CHECK(cx_bn_alloc_init(&prfBn, 32, prf, prfSize));
+    CX_CHECK(cx_bn_alloc_init(&rBn, 32, r, sizeof(r)));
+    CX_CHECK(cx_bn_alloc(&ccBn, 32));
+    CX_CHECK(cx_bn_set_u32(ccBn, credCounter));
 
     // Apply cred counter offset
-    CX_CHECK(cx_bn_mod_add(tmp_bn, prf_bn, cc_bn, r_bn));
+    CX_CHECK(cx_bn_mod_add(tmpBn, prfBn, ccBn, rBn));
 
-    // Inverse of prf + cred_counter is our prf_exp
-    CX_CHECK(cx_bn_mod_invert_nprime(prf_exp, tmp_bn, r_bn));
+    // Inverse of (prf + cred_counter) is the exponent for calculating the credId
+    CX_CHECK(cx_bn_mod_invert_nprime(credIdExponentBn, tmpBn, rBn));
 
     // clean up binary numbers
-    CX_CHECK(cx_bn_destroy(&tmp_bn));
-    CX_CHECK(cx_bn_destroy(&r_bn));
-    CX_CHECK(cx_bn_destroy(&prf_bn));
-    CX_CHECK(cx_bn_destroy(&cc_bn));
+    CX_CHECK(cx_bn_destroy(&tmpBn));
+    CX_CHECK(cx_bn_destroy(&rBn));
+    CX_CHECK(cx_bn_destroy(&prfBn));
+    CX_CHECK(cx_bn_destroy(&ccBn));
 
     // initialize elliptic curve point given by global commitmentKey
     cx_ecpoint_t commitmentKey;
@@ -73,8 +73,8 @@ cx_err_t getCredId(uint8_t *prf, size_t prfSize, uint32_t credCounter, uint8_t *
     CX_CHECK(cx_ecpoint_init(&commitmentKey, gX, sizeof(gX), gY, sizeof(gY)));
 
     //  multipy commitmentKey with prf_exp
-    CX_CHECK(cx_ecpoint_scalarmul_bn(&commitmentKey, prf_exp));
-    CX_CHECK(cx_bn_destroy(&prf_exp));
+    CX_CHECK(cx_ecpoint_scalarmul_bn(&commitmentKey, credIdExponentBn));
+    CX_CHECK(cx_bn_destroy(&credIdExponentBn));
 
     // calculate credId which is the compressed version of commitmentKey * prf_exp
     cx_bn_t x, y, negy;
@@ -103,6 +103,7 @@ cx_err_t getCredId(uint8_t *prf, size_t prfSize, uint32_t credCounter, uint8_t *
         credId[0] |= 0x20;  // Indicate that y > -y
     }
 
+    //CX_CHECK label to goto in case of an error
 end:
     cx_bn_unlock();
     return error;
@@ -149,3 +150,4 @@ void handleVerifyAddress(uint8_t *cdata, volatile unsigned int *flags) {
     ux_flow_init(0, ux_verify_address, NULL);
     *flags |= IO_ASYNCH_REPLY;
 }
+ 

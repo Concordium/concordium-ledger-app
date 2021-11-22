@@ -8,8 +8,6 @@
 #include "util.h"
 #include "ux.h"
 
-// Allow the user to decline exporting the private keys.
-
 // This class allows for the export of a number of very specific private keys. These private keys are made
 // exportable as they are used in computations that are not feasible to carry out on the Ledger device.
 // The key derivation paths that are allowed are restricted so that it is not possible to export
@@ -107,7 +105,7 @@ void exportPrivateKey(void) {
 // Export the PRF key and the IdCredSec
 #define P1_BOTH 0x02
 
-// Export seeds
+// Export seeds (Deprecated)
 #define P2_SEED 0x01
 // Export the BLS keys
 #define P2_KEY 0x02

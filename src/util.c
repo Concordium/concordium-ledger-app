@@ -235,6 +235,10 @@ static const uint8_t l_bytes[2] = {0, l_CONST};
  * have atleast that length, or the function throws an error.
  */
 void blsKeygen(const uint8_t *seed, size_t seedLength, uint8_t *dst, size_t dstLength) {
+    if (dstLength < BLS_KEY_LENGTH) {
+        THROW(ERROR_BUFFER_OVERFLOW);
+    }
+
     uint8_t sk[l_CONST];
     uint8_t prk[32];
     uint8_t salt[32] = {
@@ -254,9 +258,7 @@ void blsKeygen(const uint8_t *seed, size_t seedLength, uint8_t *dst, size_t dstL
         cx_math_modm(sk, sizeof(sk), r, sizeof(r));
     } while (cx_math_is_zero(sk, sizeof(sk)));
 
-    if (dstLength < BLS_KEY_LENGTH) {
-        THROW(ERROR_BUFFER_OVERFLOW);
-    }
+    // Skip the first 16 bytes, because they are 0 due to calculating modulo r, which is 32 bytes (and sk has 48 bytes).
     memmove(dst, sk + l_CONST - BLS_KEY_LENGTH, BLS_KEY_LENGTH);
 }
 

@@ -9,8 +9,9 @@ The two key types that can be exported are exactly these:
 1. PRF-key
 1. IdCredSec
 
-If P2 = 0x01, the exported key are derived using SLIP10 for ed25519. 
-These can be used as the key seed for the KeyGen algorithm for generating BLS12-381 private keys.
+If P2 = 0x01, the exported keys are derived using SLIP10 for ed25519. 
+These must be used as the key seed for the KeyGen algorithm for generating BLS12-381 private keys.
+This endpoint is deprecated and should not be used. (Available to support legacy accounts from the desktop wallet)
 
 If P2 = 0x02, the BLS12-381 private keys will be exported instead. (Generated using the corresponding ed25519 key as key seed)
 
@@ -20,9 +21,9 @@ If P2 = 0x02, the BLS12-381 private keys will be exported instead. (Generated us
 
 | P1 | P2 | CDATA | Comment |
 |--------|--------|------------|----|
-| `0x00` | `0x01` | `identity[uint32]` | Export of PRF key |
-| `0x01` | `0x01` | `identity[uint32]` | Export of PRF key with alternative display (for recovery) |
-| `0x02` | `0x01` | `identity[uint32]` | Export of PRF key and IdCredSec |
+| `0x00` | `0x01` | `identity[uint32]` | Export of PRF key seed for the BLS12-381 KeyGen algorithm (Deprecated) |
+| `0x01` | `0x01` | `identity[uint32]` | Export of PRF key seed for the BLS12-381 KeyGen algorithm with alternative display (for recovery) (Deprecated) |
+| `0x02` | `0x01` | `identity[uint32]` | Export of PRF key and IdCredSec seeds for the BLS12-381 KeyGen algorithm (Deprecated) |
 | `0x00` | `0x02` | `identity[uint32]` | Export of PRF key (BLS12-381) |
 | `0x01` | `0x02` | `identity[uint32]` | Export of PRF key with alternative display (for recovery) (BLS12-381) |
 | `0x02` | `0x02` | `identity[uint32]` | Export of PRF key and IdCredSec (BLS12-381) |

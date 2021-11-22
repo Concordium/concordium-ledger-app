@@ -24,8 +24,8 @@ fn main() {
     println!("prf_key (hex): {}", export_private_key(1, 2, identity.clone()));
 
     let result = export_private_key(2, 2, identity.clone());
-    let prf_seed = &result[..64];
-    println!("prf_key (hex): {}", prf_seed);
-    let id_cred_seed = &result[64..128];
-    println!("id_cred (hex): {}", id_cred_seed);
+    let prf_key = &result[..64];
+    println!("prf_key (hex): {}", prf_key);
+    let id_cred_sec = &result[64..128];
+    println!("id_cred (hex): {}", id_cred_sec);
 }
