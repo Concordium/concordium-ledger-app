@@ -21,7 +21,7 @@ async function sharedCredentialDeployment(
     let data = Buffer.from('01', 'hex');
     await transport.send(0xe0, ins, 0x0A, p2, data);
 
-    data = Buffer.from('00f78929ec8a9819f6ae2e10e79522b6b311949635fecc3d924d9d1e23f8e9e1c3', 'hex');
+    data = Buffer.from('0000f78929ec8a9819f6ae2e10e79522b6b311949635fecc3d924d9d1e23f8e9e1c3', 'hex');
     transport.send(0xe0, ins, 0x01, p2, data);
     await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
     const snapshot1 = await handleKeyUi();
