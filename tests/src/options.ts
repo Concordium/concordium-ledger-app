@@ -9,7 +9,7 @@ export const optionsNanoS: StartOptions = {
     model: 'nanos',
     X11: false,
     logging: true,
-    startDelay: 0,
+    startDelay: 3000,
     custom: `-s "${SEED_PHRASE}" `,
     startText: 'ready',
 };
@@ -18,7 +18,7 @@ export const optionsNanoX: StartOptions = {
     model: 'nanox',
     X11: false,
     logging: true,
-    startDelay: 0,
+    startDelay: 3000,
     custom: `-s "${SEED_PHRASE}" `,
     startText: 'ready',
 };
