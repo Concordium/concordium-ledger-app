@@ -29,6 +29,7 @@ async function addIdentityProviderShared(sim: Zemu, transport: Transport) {
     transport.send(0xe0, 0x2d, 0x02, 0x00, data);
     Zemu.sleep(1000);
     await sim.waitUntilScreenIsNot(snapshot2);
+    // This right click is unnecessary for Nano X, but does nothing
     await sim.clickRight();
     const snapshot3 = await sim.clickBoth();
 
@@ -50,7 +51,6 @@ test('[NANO S] Add identity provider', setupZemu('nanos', async (sim, transport)
     let data = Buffer.from('00000010', 'hex');
     transport.send(0xe0, 0x2d, 0x03, 0x00, data);
     await sim.waitUntilScreenIsNot(snapshot4);
-    await sim.clickRight();
     await sim.clickRight();
     await sim.clickRight();
     await sim.clickRight();
@@ -85,6 +85,7 @@ test('[NANO X] Add identity provider', setupZemu('nanox', async (sim, transport)
     data = Buffer.from('37efcc5b9180fc9c43a5a51a2f27d6581e63e4b2b3dad75b8510061b8c2db39f', 'hex');
     const tx = transport.send(0xe0, 0x2d, 0x04, 0x00, data);
     await sim.waitUntilScreenIsNot(snapshot5);
+    await sim.clickRight();
     await sim.clickRight();
     await sim.clickBoth();
 
