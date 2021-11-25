@@ -58,7 +58,8 @@ fn main() {
         ledger.exchange(verification_key_list_length_command).unwrap();
         println!("Verification key length OK.");
 
-        let mut key_blob = hex::decode("00").unwrap();
+        // This time we send the keyIndex (00) and schemeId (00) and verificationKey
+        let mut key_blob = hex::decode("0000").unwrap();
         key_blob.append(&mut verification_key);
 
         let verification_key_command = ApduCommand {
