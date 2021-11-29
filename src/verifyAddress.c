@@ -72,11 +72,11 @@ cx_err_t getCredId(uint8_t *prf, size_t prfSize, uint32_t credCounter, uint8_t *
     CX_CHECK(cx_ecpoint_alloc(&commitmentKey, CX_CURVE_BLS12_381_G1));
     CX_CHECK(cx_ecpoint_init(&commitmentKey, gX, sizeof(gX), gY, sizeof(gY)));
 
-    //  multipy commitmentKey with prf_exp
+    //  multipy commitmentKey with credIdExponent
     CX_CHECK(cx_ecpoint_scalarmul_bn(&commitmentKey, credIdExponentBn));
     CX_CHECK(cx_bn_destroy(&credIdExponentBn));
 
-    // calculate credId which is the compressed version of commitmentKey * prf_exp
+    // calculate credId which is the compressed version of commitmentKey * credIdExponent
     cx_bn_t x, y, negy;
     CX_CHECK(cx_bn_alloc(&x, 48));
     CX_CHECK(cx_bn_alloc(&y, 48));
