@@ -10,10 +10,7 @@ static signTransferContext_t *ctx = &global.withMemo.signTransferContext;
 static memoContext_t *memo_ctx = &global.withMemo.memoContext;
 static tx_state_t *tx_state = &global_tx_state;
 
-UX_STEP_NOCB(
-    ux_sign_flow_1_step,
-    bnnn_paging,
-    {"Amount (GTU)", (char *) global.withMemo.signTransferContext.displayAmount});
+UX_STEP_NOCB(ux_sign_flow_1_step, bnnn_paging, {"Amount", (char *) global.withMemo.signTransferContext.displayAmount});
 
 UX_STEP_NOCB(
     ux_sign_flow_2_step,
