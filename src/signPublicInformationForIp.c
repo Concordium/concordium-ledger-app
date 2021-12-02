@@ -1,71 +1,47 @@
 #include <os.h>
-#include "util.h"
-#include "sign.h"
+
 #include "responseCodes.h"
+#include "sign.h"
+#include "util.h"
 
 static signPublicInformationForIp_t *ctx = &global.signPublicInformationForIp;
 static tx_state_t *tx_state = &global_tx_state;
 
-UX_STEP_CB(
-    ux_sign_public_info_review,
-    nn,
-    sendSuccessNoIdle(),
-    {
-      "Review identity",
-      "provider info"
-    });
-UX_FLOW(ux_review_public_info_for_ip,
-    &ux_sign_public_info_review
-);
+UX_STEP_CB(ux_sign_public_info_review, nn, sendSuccessNoIdle(), {"Review identity", "provider info"});
+UX_FLOW(ux_review_public_info_for_ip, &ux_sign_public_info_review);
 
 UX_STEP_CB(
     ux_sign_public_info_for_i_public_key_0_step,
     bnnn_paging,
     sendSuccessNoIdle(),
-    {
-      .title = "Public key",
-      .text = (char *) global.signPublicInformationForIp.publicKey
-    });
-UX_FLOW(ux_sign_public_info_for_i_public_key,
-    &ux_sign_public_info_for_i_public_key_0_step
-);
+    {.title = "Public key", .text = (char *) global.signPublicInformationForIp.publicKey});
+UX_FLOW(ux_sign_public_info_for_i_public_key, &ux_sign_public_info_for_i_public_key_0_step);
 
 UX_STEP_CB(
     ux_sign_public_info_for_ip_sign,
     pnn,
     buildAndSignTransactionHash(),
-    {
-      &C_icon_validate_14,
-      "Sign identity",
-      "provider info"
-    });
+    {&C_icon_validate_14, "Sign identity", "provider info"});
 
 UX_STEP_CB(
     ux_sign_public_info_for_ip_decline,
     pnn,
     sendUserRejection(),
-    {
-      &C_icon_crossmark,
-      "Decline to",
-      "sign info"
-    });
+    {&C_icon_crossmark, "Decline to", "sign info"});
 
 UX_STEP_NOCB(
     ux_sign_public_info_for_ip_threshold_0_step,
     bn,
-    {
-      "Signature threshold",
-      (char *) global.signPublicInformationForIp.threshold
-    });
-UX_FLOW(ux_sign_public_info_for_ip_threshold,
+    {"Signature threshold", (char *) global.signPublicInformationForIp.threshold});
+UX_FLOW(
+    ux_sign_public_info_for_ip_threshold,
     &ux_sign_public_info_for_ip_threshold_0_step,
     &ux_sign_public_info_for_ip_sign,
-    &ux_sign_public_info_for_ip_decline
-);
+    &ux_sign_public_info_for_ip_decline);
 
-#define P1_INITIAL              0x00
-#define P1_VERIFICATION_KEY     0x01
-#define P1_THRESHOLD            0x02
+#define P1_INITIAL          0x00
+#define P1_VERIFICATION_KEY 0x01
+#define P1_THRESHOLD        0x02
 
 void handleSignPublicInformationForIp(uint8_t *cdata, uint8_t p1, volatile unsigned int *flags, bool isInitialCall) {
     if (isInitialCall) {

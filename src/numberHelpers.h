@@ -2,6 +2,7 @@
 #define _NUMBER_HELPERS_H_
 
 #include <stddef.h>
+#include "stdint.h"
 
 /**
  * Writes the input amount of µGTU to the supplied destination as its value in
@@ -29,7 +30,8 @@ size_t numberToText(uint8_t *dst, size_t dstLength, uint64_t number);
  * @param dst where to write the text representation of the integer
  * @param dstLength the number of bytes that may be written to 'dst'
  * @param number the integer to convert to characters
- * @return number of bytes written to 'dst', i.e. the number of characters in the integer 'number' + 1 for string termination
+ * @return number of bytes written to 'dst', i.e. the number of characters in the integer 'number' + 1 for string
+ * termination
  */
 size_t bin2dec(uint8_t *dst, size_t dstLength, uint64_t number);
 

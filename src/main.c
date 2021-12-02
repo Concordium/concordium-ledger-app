@@ -1,54 +1,55 @@
 /*******************************************************************************
-*
-*   (c) 2016 Ledger
-*
-*  Licensed under the Apache License, Version 2.0 (the "License");
-*  you may not use this file except in compliance with the License.
-*  You may obtain a copy of the License at
-*
-*      http://www.apache.org/licenses/LICENSE-2.0
-*
-*  Unless required by applicable law or agreed to in writing, software
-*  distributed under the License is distributed on an "AS IS" BASIS,
-*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-*  See the License for the specific language governing permissions and
-*  limitations under the License.
-********************************************************************************/
+ *
+ *   (c) 2016 Ledger
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ ********************************************************************************/
 
-#include "glyphs.h"
+#include <stdbool.h>
+#include <string.h>
+
 #include "os.h"
 #include "cx.h"
-#include "os_io_seproxyhal.h"
-#include <stdbool.h>
-#include "menu.h"
-#include "getPublicKey.h"
-#include "signTransfer.h"
-#include "signTransferWithSchedule.h"
-#include "signCredentialDeployment.h"
-#include "signUpdateAuthorizations.h"
 #include "exportPrivateKeySeed.h"
-#include "signUpdateExchangeRate.h"
-#include "signTransferToEncrypted.h"
+#include "getPublicKey.h"
+#include "globals.h"
+#include "glyphs.h"
+#include "menu.h"
+#include "os_io_seproxyhal.h"
+#include "responseCodes.h"
+#include "seproxyhal_protocol.h"
+#include "signAddBakerOrUpdateBakerKeys.h"
+#include "signCredentialDeployment.h"
 #include "signEncryptedAmountTransfer.h"
+#include "signHigherLevelKeyUpdate.h"
 #include "signPublicInformationForIp.h"
+#include "signRemoveBaker.h"
+#include "signTransfer.h"
+#include "signTransferToEncrypted.h"
 #include "signTransferToPublic.h"
+#include "signTransferWithSchedule.h"
+#include "signUpdateAuthorizations.h"
+#include "signUpdateBakerRestakeEarnings.h"
+#include "signUpdateBakerStake.h"
+#include "signUpdateBakerStakeThreshold.h"
+#include "signUpdateElectionDifficulty.h"
+#include "signUpdateExchangeRate.h"
+#include "signUpdateFoundationAccount.h"
+#include "signUpdateGasRewards.h"
+#include "signUpdateMintDistribution.h"
 #include "signUpdateProtocol.h"
 #include "signUpdateTransactionFeeDistribution.h"
-#include "signUpdateGasRewards.h"
-#include "signUpdateFoundationAccount.h"
-#include "signUpdateMintDistribution.h"
-#include "signUpdateElectionDifficulty.h"
-#include "signAddBakerOrUpdateBakerKeys.h"
-#include "signRemoveBaker.h"
-#include "signUpdateBakerStake.h"
-#include "signUpdateBakerRestakeEarnings.h"
-#include "signUpdateBakerStakeThreshold.h"
-#include "signHigherLevelKeyUpdate.h"
 #include "ux.h"
-#include <string.h>
-#include "seproxyhal_protocol.h"
-#include "globals.h"
-#include "responseCodes.h"
 
 // Global variable definitions
 instructionContext global;
@@ -80,38 +81,38 @@ accountSender_t global_account_sender;
 // An INS instruction containing 0x04 means that we should start the credential deployment signing flow.
 #define INS_CREDENTIAL_DEPLOYMENT 0x04
 
-#define INS_EXPORT_PRIVATE_KEY_SEED     0x05
-#define INS_UPDATE_EXCHANGE_RATE        0x06
+#define INS_EXPORT_PRIVATE_KEY_SEED 0x05
+#define INS_UPDATE_EXCHANGE_RATE    0x06
 
-#define INS_ENCRYPTED_AMOUNT_TRANSFER   0x10
-#define INS_TRANSFER_TO_ENCRYPTED       0x11
-#define INS_TRANSFER_TO_PUBLIC          0x12
+#define INS_ENCRYPTED_AMOUNT_TRANSFER 0x10
+#define INS_TRANSFER_TO_ENCRYPTED     0x11
+#define INS_TRANSFER_TO_PUBLIC        0x12
 
-#define INS_ADD_BAKER_OR_UPDATE_KEYS    0x13
-#define INS_REMOVE_BAKER                0x14
-#define INS_UPDATE_BAKER_STAKE          0x15
-#define INS_UPDATE_BAKER_RESTAKE_EARNINGS   0x16
+#define INS_ADD_BAKER_OR_UPDATE_KEYS      0x13
+#define INS_REMOVE_BAKER                  0x14
+#define INS_UPDATE_BAKER_STAKE            0x15
+#define INS_UPDATE_BAKER_RESTAKE_EARNINGS 0x16
 
-#define INS_PUBLIC_INFO_FOR_IP          0x20
-#define INS_UPDATE_PROTOCOL             0x21
-#define INS_UPDATE_TRANSACTION_FEE_DIST 0x22
-#define INS_UPDATE_GAS_REWARDS          0x23
-#define INS_UPDATE_FOUNDATION_ACCOUNT   0x24
-#define INS_UPDATE_MINT_DISTRIBUTION    0x25
-#define INS_UPDATE_ELECTION_DIFFICULTY  0x26
-#define INS_UPDATE_BAKER_STAKE_THRESHOLD    0x27
+#define INS_PUBLIC_INFO_FOR_IP           0x20
+#define INS_UPDATE_PROTOCOL              0x21
+#define INS_UPDATE_TRANSACTION_FEE_DIST  0x22
+#define INS_UPDATE_GAS_REWARDS           0x23
+#define INS_UPDATE_FOUNDATION_ACCOUNT    0x24
+#define INS_UPDATE_MINT_DISTRIBUTION     0x25
+#define INS_UPDATE_ELECTION_DIFFICULTY   0x26
+#define INS_UPDATE_BAKER_STAKE_THRESHOLD 0x27
 
-#define INS_UPDATE_ROOT_KEYS 0x28
-#define INS_UPDATE_LEVEL1_KEYS 0x29
-#define INS_UPDATE_LEVEL2_KEYS_ROOT 0x2A
+#define INS_UPDATE_ROOT_KEYS          0x28
+#define INS_UPDATE_LEVEL1_KEYS        0x29
+#define INS_UPDATE_LEVEL2_KEYS_ROOT   0x2A
 #define INS_UPDATE_LEVEL2_KEYS_LEVEL1 0x2B
-#define INS_ADD_ANONYMITY_REVOKER 0x2C
-#define INS_ADD_IDENTITY_PROVIDER 0x2D
+#define INS_ADD_ANONYMITY_REVOKER     0x2C
+#define INS_ADD_IDENTITY_PROVIDER     0x2D
 
-#define INS_SIGN_UPDATE_CREDENTIAL      0x31
+#define INS_SIGN_UPDATE_CREDENTIAL 0x31
 
-#define INS_SIGN_TRANSFER_WITH_MEMO 0x32
-#define INS_ENCRYPTED_AMOUNT_TRANSFER_WITH_MEMO 0x33
+#define INS_SIGN_TRANSFER_WITH_MEMO              0x32
+#define INS_ENCRYPTED_AMOUNT_TRANSFER_WITH_MEMO  0x33
 #define INS_SIGN_TRANSFER_WITH_SCHEDULE_AND_MEMO 0x34
 #define INS_REGISTER_DATA 0x35
 
@@ -128,8 +129,8 @@ static void concordium_main(void) {
         BEGIN_TRY {
             TRY {
                 rx = tx;
-                tx = 0; // ensure no race in catch_other if io_exchange throws
-                        // an error
+                tx = 0;  // ensure no race in catch_other if io_exchange throws
+                         // an error
                 rx = io_exchange(CHANNEL_APDU | flags, rx);
                 flags = 0;
 
@@ -147,7 +148,7 @@ static void concordium_main(void) {
                 uint8_t p1 = G_io_apdu_buffer[OFFSET_P1];
                 uint8_t p2 = G_io_apdu_buffer[OFFSET_P2];
                 uint8_t lc = G_io_apdu_buffer[OFFSET_LC];
-                uint8_t* cdata = G_io_apdu_buffer + OFFSET_CDATA;
+                uint8_t *cdata = G_io_apdu_buffer + OFFSET_CDATA;
 
                 bool isInitialCall = false;
                 if (global_tx_state.currentInstruction == -1) {
@@ -156,7 +157,7 @@ static void concordium_main(void) {
                     isInitialCall = true;
                 } else if (global_tx_state.currentInstruction != INS) {
                     // Caller attempted to switch instruction in the middle
-                    // of a multi command flow. This is not allowed, as in the 
+                    // of a multi command flow. This is not allowed, as in the
                     // worst case, an attacker could trick a user to sign a mixed
                     // transaction.
                     THROW(ERROR_INVALID_STATE);
@@ -248,10 +249,22 @@ static void concordium_main(void) {
                         handleSignHigherLevelKeys(cdata, p1, UPDATE_TYPE_UPDATE_LEVEL1_KEYS, &flags, isInitialCall);
                         break;
                     case INS_UPDATE_LEVEL2_KEYS_ROOT:
-                        handleSignUpdateAuthorizations(cdata, p1, UPDATE_TYPE_UPDATE_ROOT_KEYS, lc, &flags, isInitialCall);
+                        handleSignUpdateAuthorizations(
+                            cdata,
+                            p1,
+                            UPDATE_TYPE_UPDATE_ROOT_KEYS,
+                            lc,
+                            &flags,
+                            isInitialCall);
                         break;
                     case INS_UPDATE_LEVEL2_KEYS_LEVEL1:
-                        handleSignUpdateAuthorizations(cdata, p1, UPDATE_TYPE_UPDATE_LEVEL1_KEYS, lc, &flags, isInitialCall);
+                        handleSignUpdateAuthorizations(
+                            cdata,
+                            p1,
+                            UPDATE_TYPE_UPDATE_LEVEL1_KEYS,
+                            lc,
+                            &flags,
+                            isInitialCall);
                         break;
                     case INS_ADD_IDENTITY_PROVIDER:
                         handleSignAddIdentityProvider(cdata, p1, lc, &flags, isInitialCall);
@@ -283,7 +296,7 @@ static void concordium_main(void) {
                         tx += 2;
                         break;
                     default:
-                        // An unknown error was thrown. Reset the device if 
+                        // An unknown error was thrown. Reset the device if
                         // this happens.
                         io_seproxyhal_se_reset();
                         break;
@@ -303,15 +316,15 @@ static void concordium_main(void) {
 unsigned char G_io_seproxyhal_spi_buffer[IO_SEPROXYHAL_BUFFER_SIZE_B];
 
 void io_seproxyhal_display(const bagl_element_t *element) {
-    io_seproxyhal_display_default((bagl_element_t *)element);
+    io_seproxyhal_display_default((bagl_element_t *) element);
 }
 
 unsigned char io_event(__attribute__((unused)) unsigned char channel) {
-	// can't have more than one tag in the reply, not supported yet.
-	switch (G_io_seproxyhal_spi_buffer[0]) {
+    // can't have more than one tag in the reply, not supported yet.
+    switch (G_io_seproxyhal_spi_buffer[0]) {
         case SEPROXYHAL_TAG_FINGER_EVENT:
-    		UX_FINGER_EVENT(G_io_seproxyhal_spi_buffer);
-	    	break;
+            UX_FINGER_EVENT(G_io_seproxyhal_spi_buffer);
+            break;
 
         case SEPROXYHAL_TAG_BUTTON_PUSH_EVENT:
             UX_BUTTON_PUSH_EVENT(G_io_seproxyhal_spi_buffer);
@@ -319,8 +332,7 @@ unsigned char io_event(__attribute__((unused)) unsigned char channel) {
 
         case SEPROXYHAL_TAG_STATUS_EVENT:
             if (G_io_apdu_media == IO_APDU_MEDIA_USB_HID &&
-                !(U4BE(G_io_seproxyhal_spi_buffer, 3) &
-                SEPROXYHAL_TAG_STATUS_EVENT_FLAG_USB_POWERED)) {
+                !(U4BE(G_io_seproxyhal_spi_buffer, 3) & SEPROXYHAL_TAG_STATUS_EVENT_FLAG_USB_POWERED)) {
                 THROW(EXCEPTION_IO_RESET);
             }
             UX_DEFAULT_EVENT();
@@ -339,34 +351,34 @@ unsigned char io_event(__attribute__((unused)) unsigned char channel) {
             break;
     }
 
-	// close the event if not done previously (by a display or whatever)
-	if (!io_seproxyhal_spi_is_status_sent()) {
-		io_seproxyhal_general_status();
-	}
+    // close the event if not done previously (by a display or whatever)
+    if (!io_seproxyhal_spi_is_status_sent()) {
+        io_seproxyhal_general_status();
+    }
 
-	// command has been processed, DO NOT reset the current APDU transport
-	return 1;
+    // command has been processed, DO NOT reset the current APDU transport
+    return 1;
 }
 
 unsigned short io_exchange_al(unsigned char channel, unsigned short tx_len) {
-	switch (channel & ~(IO_FLAGS)) {
-	case CHANNEL_KEYBOARD:
-		break;
-	// multiplexed io exchange over a SPI channel and TLV encapsulated protocol
-	case CHANNEL_SPI:
-		if (tx_len) {
-			io_seproxyhal_spi_send(G_io_apdu_buffer, tx_len);
-			if (channel & IO_RESET_AFTER_REPLIED) {
-				reset();
-			}
-			return 0; // nothing received from the master so far (it's a tx transaction)
-		} else {
-			return io_seproxyhal_spi_recv(G_io_apdu_buffer, sizeof(G_io_apdu_buffer), 0);
-		}
-	default:
-		THROW(INVALID_PARAMETER);
-	}
-	return 0;
+    switch (channel & ~(IO_FLAGS)) {
+        case CHANNEL_KEYBOARD:
+            break;
+        // multiplexed io exchange over a SPI channel and TLV encapsulated protocol
+        case CHANNEL_SPI:
+            if (tx_len) {
+                io_seproxyhal_spi_send(G_io_apdu_buffer, tx_len);
+                if (channel & IO_RESET_AFTER_REPLIED) {
+                    reset();
+                }
+                return 0;  // nothing received from the master so far (it's a tx transaction)
+            } else {
+                return io_seproxyhal_spi_recv(G_io_apdu_buffer, sizeof(G_io_apdu_buffer), 0);
+            }
+        default:
+            THROW(INVALID_PARAMETER);
+    }
+    return 0;
 }
 
 void app_exit(void) {

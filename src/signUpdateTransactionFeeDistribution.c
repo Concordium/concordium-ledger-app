@@ -1,7 +1,8 @@
 #include <os.h>
-#include "util.h"
-#include "sign.h"
+
 #include "responseCodes.h"
+#include "sign.h"
+#include "util.h"
 
 static signTransactionDistributionFeeContext_t *ctx = &global.signTransactionDistributionFeeContext;
 static tx_state_t *tx_state = &global_tx_state;
@@ -9,24 +10,18 @@ static tx_state_t *tx_state = &global_tx_state;
 UX_STEP_NOCB(
     ux_sign_transaction_dist_1_step,
     bnnn_paging,
-    {
-      .title = "Baker fee",
-      .text = (char *) global.signTransactionDistributionFeeContext.baker
-    });
+    {.title = "Baker fee", .text = (char *) global.signTransactionDistributionFeeContext.baker});
 UX_STEP_NOCB(
     ux_sign_transaction_dist_2_step,
     bnnn_paging,
-    {
-      .title = "GAS account fee",
-      .text = (char *) global.signTransactionDistributionFeeContext.gasAccount
-    });
-UX_FLOW(ux_sign_transaction_dist,
+    {.title = "GAS account fee", .text = (char *) global.signTransactionDistributionFeeContext.gasAccount});
+UX_FLOW(
+    ux_sign_transaction_dist,
     &ux_sign_flow_shared_review,
     &ux_sign_transaction_dist_1_step,
     &ux_sign_transaction_dist_2_step,
     &ux_sign_flow_shared_sign,
-    &ux_sign_flow_shared_decline
-);
+    &ux_sign_flow_shared_decline);
 
 void handleSignUpdateTransactionFeeDistribution(uint8_t *cdata, volatile unsigned int *flags) {
     int bytesRead = parseKeyDerivationPath(cdata);

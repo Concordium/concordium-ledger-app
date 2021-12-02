@@ -1,10 +1,11 @@
 #include <os.h>
-#include "util.h"
+
 #include "accountSenderView.h"
-#include "memo.h"
-#include "sign.h"
 #include "base58check.h"
+#include "memo.h"
 #include "responseCodes.h"
+#include "sign.h"
+#include "util.h"
 
 static signEncryptedAmountToTransfer_t *ctx = &global.withMemo.signEncryptedAmountToTransfer;
 static memoContext_t *memo_ctx = &global.withMemo.memoContext;
@@ -12,36 +13,27 @@ static tx_state_t *tx_state = &global_tx_state;
 
 // UI for displaying encrypted transfer transaction. It only shows the user the recipient address
 // as the amounts are encrypted and can't be validated by the user.
-UX_STEP_NOCB(
-    ux_sign_encrypted_amount_transfer_1_step,
-    nn,
-    {
-        "Shielded",
-        "transfer"
-    });
+UX_STEP_NOCB(ux_sign_encrypted_amount_transfer_1_step, nn, {"Shielded", "transfer"});
 UX_STEP_CB(
     ux_sign_encrypted_amount_transfer_2_step,
     bnnn_paging,
     sendSuccessNoIdle(),
-    {
-        .title = "Recipient",
-        .text = (char *) global.withMemo.signEncryptedAmountToTransfer.to
-    });
-UX_FLOW(ux_sign_encrypted_amount_transfer,
+    {.title = "Recipient", .text = (char *) global.withMemo.signEncryptedAmountToTransfer.to});
+UX_FLOW(
+    ux_sign_encrypted_amount_transfer,
     &ux_sign_flow_shared_review,
     &ux_sign_encrypted_amount_transfer_1_step,
     &ux_sign_flow_account_sender_view,
     &ux_sign_encrypted_amount_transfer_2_step,
     &ux_sign_flow_shared_sign,
-    &ux_sign_flow_shared_decline
-);
+    &ux_sign_flow_shared_decline);
 
-UX_FLOW(ux_sign_encrypted_amount_transfer_initial,
+UX_FLOW(
+    ux_sign_encrypted_amount_transfer_initial,
     &ux_sign_flow_shared_review,
     &ux_sign_encrypted_amount_transfer_1_step,
     &ux_sign_flow_account_sender_view,
-    &ux_sign_encrypted_amount_transfer_2_step
-);
+    &ux_sign_encrypted_amount_transfer_2_step);
 
 #define P1_INITIAL                              0x00
 #define P1_REMAINING_AMOUNT                     0x01
@@ -70,7 +62,11 @@ void handleTransferAmountAggIndexProofSize(uint8_t *cdata) {
     sendSuccessNoIdle();
 }
 
-void handleProofs(uint8_t *cdata, uint8_t dataLength, volatile unsigned int *flags,  const ux_flow_step_t* const *finishedFlow) {
+void handleProofs(
+    uint8_t *cdata,
+    uint8_t dataLength,
+    volatile unsigned int *flags,
+    const ux_flow_step_t *const *finishedFlow) {
     cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, dataLength, NULL, 0);
     ctx->proofSize -= dataLength;
 
@@ -93,7 +89,12 @@ void finishMemoEncrypted(volatile unsigned int *flags) {
     *flags |= IO_ASYNCH_REPLY;
 }
 
-void handleSignEncryptedAmountTransferWithMemo(uint8_t *cdata, uint8_t p1, uint8_t dataLength, volatile unsigned int *flags, bool isInitialCall) {
+void handleSignEncryptedAmountTransferWithMemo(
+    uint8_t *cdata,
+    uint8_t p1,
+    uint8_t dataLength,
+    volatile unsigned int *flags,
+    bool isInitialCall) {
     if (isInitialCall) {
         ctx->state = TX_ENCRYPTED_AMOUNT_TRANSFER_INITIAL;
     }
@@ -134,7 +135,8 @@ void handleSignEncryptedAmountTransferWithMemo(uint8_t *cdata, uint8_t p1, uint8
         finishMemoEncrypted(flags);
     } else if (p1 == P1_REMAINING_AMOUNT && ctx->state == TX_ENCRYPTED_AMOUNT_TRANSFER_REMAINING_AMOUNT) {
         handleRemainingAmount(cdata);
-    } else if (p1 == P1_TRANSFER_AMOUNT_AGG_INDEX_PROOF_SIZE && ctx->state == TX_ENCRYPTED_AMOUNT_TRANSFER_TRANSFER_AMOUNT) {
+    } else if (
+        p1 == P1_TRANSFER_AMOUNT_AGG_INDEX_PROOF_SIZE && ctx->state == TX_ENCRYPTED_AMOUNT_TRANSFER_TRANSFER_AMOUNT) {
         handleTransferAmountAggIndexProofSize(cdata);
     } else if (p1 == P1_PROOF && ctx->state == TX_ENCRYPTED_AMOUNT_TRANSFER_PROOFS) {
         handleProofs(cdata, dataLength, flags, ux_sign_flow_shared);
@@ -143,7 +145,12 @@ void handleSignEncryptedAmountTransferWithMemo(uint8_t *cdata, uint8_t p1, uint8
     }
 }
 
-void handleSignEncryptedAmountTransfer(uint8_t *cdata, uint8_t p1, uint8_t dataLength, volatile unsigned int *flags, bool isInitialCall) {
+void handleSignEncryptedAmountTransfer(
+    uint8_t *cdata,
+    uint8_t p1,
+    uint8_t dataLength,
+    volatile unsigned int *flags,
+    bool isInitialCall) {
     if (isInitialCall) {
         ctx->state = TX_ENCRYPTED_AMOUNT_TRANSFER_INITIAL;
     }
@@ -153,7 +160,8 @@ void handleSignEncryptedAmountTransfer(uint8_t *cdata, uint8_t p1, uint8_t dataL
         sendSuccessNoIdle();
     } else if (p1 == P1_REMAINING_AMOUNT && ctx->state == TX_ENCRYPTED_AMOUNT_TRANSFER_REMAINING_AMOUNT) {
         handleRemainingAmount(cdata);
-    } else if (p1 == P1_TRANSFER_AMOUNT_AGG_INDEX_PROOF_SIZE && ctx->state == TX_ENCRYPTED_AMOUNT_TRANSFER_TRANSFER_AMOUNT) {
+    } else if (
+        p1 == P1_TRANSFER_AMOUNT_AGG_INDEX_PROOF_SIZE && ctx->state == TX_ENCRYPTED_AMOUNT_TRANSFER_TRANSFER_AMOUNT) {
         handleTransferAmountAggIndexProofSize(cdata);
     } else if (p1 == P1_PROOF && ctx->state == TX_ENCRYPTED_AMOUNT_TRANSFER_PROOFS) {
         handleProofs(cdata, dataLength, flags, ux_sign_encrypted_amount_transfer);

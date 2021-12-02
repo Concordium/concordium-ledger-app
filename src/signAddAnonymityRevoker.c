@@ -1,8 +1,9 @@
 #include <os.h>
-#include "util.h"
-#include "sign.h"
-#include "responseCodes.h"
+
 #include "descriptionView.h"
+#include "responseCodes.h"
+#include "sign.h"
+#include "util.h"
 
 static signAddAnonymityRevokerContext_t *ctx = &global.withDescription.signAddAnonymityRevokerContext;
 static descriptionContext_t *desc_ctx = &global.withDescription.descriptionContext;
@@ -12,35 +13,26 @@ UX_STEP_CB(
     ux_sign_add_anonymity_revoker_arIdentity,
     bn,
     sendSuccessNoIdle(),
-    {
-        "AR Identity",
-        (char *) global.withDescription.signAddAnonymityRevokerContext.arIdentity
-    });
-UX_FLOW(ux_sign_add_anonymity_revoker_start,
-    &ux_sign_flow_shared_review,
-    &ux_sign_add_anonymity_revoker_arIdentity
-);
+    {"AR Identity", (char *) global.withDescription.signAddAnonymityRevokerContext.arIdentity});
+UX_FLOW(ux_sign_add_anonymity_revoker_start, &ux_sign_flow_shared_review, &ux_sign_add_anonymity_revoker_arIdentity);
 
 UX_STEP_NOCB(
     ux_sign_add_anonymity_revoker_public_key,
     bnnn_paging,
-    {
-        "Public key",
-        (char *) global.withDescription.signAddAnonymityRevokerContext.publicKey
-    });
-UX_FLOW(ux_sign_add_anonymity_revoker_finish,
+    {"Public key", (char *) global.withDescription.signAddAnonymityRevokerContext.publicKey});
+UX_FLOW(
+    ux_sign_add_anonymity_revoker_finish,
     &ux_sign_add_anonymity_revoker_public_key,
     &ux_sign_flow_shared_sign,
-    &ux_sign_flow_shared_decline
-);
+    &ux_sign_flow_shared_decline);
 
-#define P1_INITIAL                     0x00
-#define P1_DESCRIPTION_LENGTH          0x01        // Used for the name, url, description.
-#define P1_DESCRIPTION                 0x02        // Used for the name, url, description.
-#define P1_PUBLIC_KEY                  0x03
+#define P1_INITIAL            0x00
+#define P1_DESCRIPTION_LENGTH 0x01  // Used for the name, url, description.
+#define P1_DESCRIPTION        0x02  // Used for the name, url, description.
+#define P1_PUBLIC_KEY         0x03
 
 void checkIfDescriptionPartIsDoneAnonymityRevoker(void) {
-    if (desc_ctx->textLength==0) {
+    if (desc_ctx->textLength == 0) {
         // If we have received all of the current part of the description, update the state.
         switch (desc_ctx->descriptionState) {
             case DESC_DESCRIPTION:
@@ -53,7 +45,12 @@ void checkIfDescriptionPartIsDoneAnonymityRevoker(void) {
     }
 }
 
-void handleSignAddAnonymityRevoker(uint8_t *cdata, uint8_t p1, uint8_t dataLength, volatile unsigned int *flags, bool isInitialCall) {
+void handleSignAddAnonymityRevoker(
+    uint8_t *cdata,
+    uint8_t p1,
+    uint8_t dataLength,
+    volatile unsigned int *flags,
+    bool isInitialCall) {
     if (isInitialCall) {
         ctx->state = TX_ADD_ANONYMITY_REVOKER_INITIAL;
     }

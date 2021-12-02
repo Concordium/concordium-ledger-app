@@ -1,5 +1,16 @@
 # Changelog
 
+## 2.0.3 - 2021-11-29
+
+### Changed
+
+* Removed references to GTU in the UI.
+
+## 2.0.2 - 2021-10-21
+
+### Added
+* An acceptance step has been added to the export of private key seeds.
+
 ## 2.0.1
 
 * Fixed an issue in the add baker UI, where a response could be sent before signing or declining.

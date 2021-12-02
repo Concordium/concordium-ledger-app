@@ -21,7 +21,7 @@ async function sharedCredentialDeployment(
     let data = Buffer.from('01', 'hex');
     await transport.send(0xe0, ins, 0x0A, p2, data);
 
-    data = Buffer.from('00f78929ec8a9819f6ae2e10e79522b6b311949635fecc3d924d9d1e23f8e9e1c3', 'hex');
+    data = Buffer.from('0000f78929ec8a9819f6ae2e10e79522b6b311949635fecc3d924d9d1e23f8e9e1c3', 'hex');
     transport.send(0xe0, ins, 0x01, p2, data);
     await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
     const snapshot1 = await handleKeyUi();
@@ -128,7 +128,7 @@ async function updateCredentials(
     await sim.clickBoth();
 
     await expect(tx).resolves.toEqual(
-        Buffer.from('07a6ad227b8c474cefe1d0232f1d1402bae482a073d22b1e8febdcfb075c9fa3ab6eae75dcd62a38a70f8e17d7785b2a89748445096d55fcb29a05a7dd5877019000', 'hex'),
+        Buffer.from('f51a30bc002751498b348f5b7ad8bd73afd20126aa498f8eede9840bc6d2f9e72342297528404baf3a89b4b67cba04dab4b3fd75248ffb42037bb546bf67a7019000', 'hex'),
     );
 }
 
@@ -191,7 +191,7 @@ test('[NANO S] Credential deployment for new account', setupZemu('nanos', async 
         sim,
         transport,
         CredentialDeploymentType.NEW,
-        '00b0173e6d05ce14745bbe5ced4160c15072aeba56da028a452cc0b4dab9ca2c01f88210174020ca05251910f4a4341f5925dfa9fc1122c3c4843ae81720490b9000',
+        '3a7d502e14ffd0e833bde629c798afc0721a6964af71f1c4dc54fdcde6ba0ce13db70f58bf9b3c2b9bd3fa100e1d6e21fe8b902237264c8662307bc8f7634f019000',
         async () => {
             await sim.clickRight();
             await sim.clickRight();
@@ -210,9 +210,8 @@ test('[NANO S] Credential deployment for an existing account', setupZemu('nanos'
         sim,
         transport,
         CredentialDeploymentType.EXISTING,
-        'd573d7facf4c2c53a4fb21f76dcb06090ef287f81628b9fa65d60796072c595a3016db12053a350c966aeff3bcc52787482e2781b4787f6a2cf9dd14df6d15069000',
+        '3ccfcb7408e20a322dcf5bad01e285ded3f97df4ceb31851597222a4bdbd9a471c70d08bf51b583ee8552fa0b6bae00565a2ff36ba1bfa44a52a4a73f370b2079000',
         async () => {
-            await sim.clickRight();
             await sim.clickRight();
             await sim.clickRight();
             await sim.clickRight();
@@ -234,7 +233,7 @@ test('[NANO X] Credential deployment for new account', setupZemu('nanox', async 
         sim,
         transport,
         CredentialDeploymentType.NEW,
-        '00b0173e6d05ce14745bbe5ced4160c15072aeba56da028a452cc0b4dab9ca2c01f88210174020ca05251910f4a4341f5925dfa9fc1122c3c4843ae81720490b9000',
+        '3a7d502e14ffd0e833bde629c798afc0721a6964af71f1c4dc54fdcde6ba0ce13db70f58bf9b3c2b9bd3fa100e1d6e21fe8b902237264c8662307bc8f7634f019000',
         async () => {
             await sim.clickRight();
             return sim.clickBoth();
@@ -250,12 +249,13 @@ test('[NANO X] Credential deployment for an existing account', setupZemu('nanox'
         sim,
         transport,
         CredentialDeploymentType.EXISTING,
-        'd573d7facf4c2c53a4fb21f76dcb06090ef287f81628b9fa65d60796072c595a3016db12053a350c966aeff3bcc52787482e2781b4787f6a2cf9dd14df6d15069000',
+        '3ccfcb7408e20a322dcf5bad01e285ded3f97df4ceb31851597222a4bdbd9a471c70d08bf51b583ee8552fa0b6bae00565a2ff36ba1bfa44a52a4a73f370b2079000',
         async () => {
             await sim.clickRight();
             return sim.clickBoth();
         },
         async () => {
+            await sim.clickRight();
             await sim.clickRight();
             await sim.clickBoth();
         },

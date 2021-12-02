@@ -1,11 +1,12 @@
-#ifndef  _CONCORDIUM_APP_UTIL_H_
+#ifndef _CONCORDIUM_APP_UTIL_H_
 #define _CONCORDIUM_APP_UTIL_H_
 
-#include "os.h"
 #include <stdbool.h>
 #include <string.h>
-#include "numberHelpers.h"
+
 #include "globals.h"
+#include "numberHelpers.h"
+#include "os.h"
 
 /**
  * Converts bytes into uint64_t (big endian).
@@ -16,21 +17,21 @@
  * Send a user rejection back to the caller, which will indicate to
  * the caller that the user has rejected the incoming command at some
  * step in the process, i.e. if the user does not want to sign the
- * incoming transaction. 
- * 
+ * incoming transaction.
+ *
  * After sending the rejection the display will return to the menu.
  */
 void sendUserRejection();
 
 /**
- * Send a success back to the caller without returning the display to the 
+ * Send a success back to the caller without returning the display to the
  * idle menu. This method should be used in instructions that span multiple
  * commands to avoid resetting the display back to the menu inbetween commands.
  */
 void sendSuccessNoIdle();
 
 /**
- * Send a success with a result back to the caller without returning the display to the 
+ * Send a success with a result back to the caller without returning the display to the
  * idle menu.
  */
 void sendSuccessResultNoIdle(uint8_t tx);
@@ -45,10 +46,10 @@ void sendSuccess(uint8_t tx);
 
 /**
  * Gets the private-key for the provided key path.
- * 
- * Note that any method using this method MUST zero the private key right after use of the private key, 
+ *
+ * Note that any method using this method MUST zero the private key right after use of the private key,
  * as to limit any risk of leaking a private key.
- * 
+ *
  * @param keyPath the key derivation path to get the private key for
  * @param keyPathLength length of the key derivation path
  * @param privateKey [out] where to write the derived private key to
@@ -56,7 +57,7 @@ void sendSuccess(uint8_t tx);
 void getPrivateKey(uint32_t *keyPath, uint8_t keyPathLength, cx_ecfp_private_key_t *privateKey);
 
 /**
- * Gets the public-key for the keypath that has been loaded into the state. It is a 
+ * Gets the public-key for the keypath that has been loaded into the state. It is a
  * pre-condition that 'parseKeyDerivation' has been run prior to this function.
  * @param publicKeyArray [out] the public-key is written here
  */
@@ -107,7 +108,7 @@ int hashAccountTransactionHeaderAndKind(uint8_t *cdata, uint8_t validTransaction
 int hashUpdateHeaderAndType(uint8_t *cdata, uint8_t validUpdateType);
 
 /**
- * Adds the account transaction header and the recipient address to the transaction hash, and 
+ * Adds the account transaction header and the recipient address to the transaction hash, and
  * writes the base58 encoded recipient address for later display.
  * @param cdata the incoming command data pointing to the start of the input, i.e. with the key path at the start
  * @param kind the transaction type
