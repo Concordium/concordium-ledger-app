@@ -130,7 +130,7 @@ typedef struct {
         signEncryptedAmountToTransfer_t signEncryptedAmountToTransfer;
         signTransferWithScheduleContext_t signTransferWithScheduleContext;
         signRegisterData_t signRegisterData;
-   };
+    };
     memoContext_t memoContext;
 
 } transferWithMemo_t;

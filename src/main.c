@@ -114,7 +114,7 @@ accountSender_t global_account_sender;
 #define INS_SIGN_TRANSFER_WITH_MEMO              0x32
 #define INS_ENCRYPTED_AMOUNT_TRANSFER_WITH_MEMO  0x33
 #define INS_SIGN_TRANSFER_WITH_SCHEDULE_AND_MEMO 0x34
-#define INS_REGISTER_DATA 0x35
+#define INS_REGISTER_DATA                        0x35
 
 // Main entry of application that listens for APDU commands that will be received from the
 // computer. The APDU commands control what flow is activated, i.e. which control flow is initiated.

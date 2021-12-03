@@ -6,7 +6,12 @@
  * account transaction.
  * @param cdata please see /doc/ins_register_data.md
  */
-void handleSignRegisterData(uint8_t *cdata, uint8_t p1, uint8_t dataLength, volatile unsigned int *flags, bool isInitialCall);
+void handleSignRegisterData(
+    uint8_t *cdata,
+    uint8_t p1,
+    uint8_t dataLength,
+    volatile unsigned int *flags,
+    bool isInitialCall);
 
 typedef enum {
     TX_REGISTER_DATA_INITIAL = 57,
