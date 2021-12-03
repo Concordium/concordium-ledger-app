@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+### Added
+* Added support for register data transaction.
+
 ## 2.0.3 - 2021-11-29
 
 ### Changed
