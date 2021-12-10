@@ -8,10 +8,7 @@
 FROM ledgerhq/ledger-app-builder:latest
 
 RUN apt-get update --allow-releaseinfo-change && apt-get upgrade -qy && \
-    apt-get install -qy zip && \
-    apt-get autoclean -y && \
-    apt-get autoremove -y && \
-    apt-get clean
+    apt-get install -qy zip
 
 ENV NANOS_SDK=/app/nanos-secure-sdk
 ENV NANOX_SDK=/app/nanox-secure-sdk
