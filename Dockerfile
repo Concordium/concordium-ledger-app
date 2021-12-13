@@ -5,7 +5,7 @@
 
 # Run commands from makefile (load, delete, release, etc.)
 
-FROM ledgerhq/ledger-app-builder:latest
+FROM ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
 
 RUN apt-get update --allow-releaseinfo-change && apt-get upgrade -qy && \
     apt-get install -qy zip
