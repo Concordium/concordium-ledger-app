@@ -20,7 +20,7 @@
 
 #include "os.h"
 #include "cx.h"
-#include "exportPrivateKeySeed.h"
+#include "exportPrivateKey.h"
 #include "getPublicKey.h"
 #include "globals.h"
 #include "glyphs.h"
@@ -50,6 +50,7 @@
 #include "signUpdateProtocol.h"
 #include "signUpdateTransactionFeeDistribution.h"
 #include "ux.h"
+#include "verifyAddress.h"
 
 // Global variable definitions
 instructionContext global;
@@ -69,6 +70,8 @@ accountSender_t global_account_sender;
 #define OFFSET_LC    0x04
 #define OFFSET_CDATA 0x05
 
+#define INS_VERIFY_ADDRESS 0x00
+
 // An INS instruction containing 0x01 means that we should start the public-key flow.
 #define INS_GET_PUBLIC_KEY 0x01
 
@@ -81,8 +84,8 @@ accountSender_t global_account_sender;
 // An INS instruction containing 0x04 means that we should start the credential deployment signing flow.
 #define INS_CREDENTIAL_DEPLOYMENT 0x04
 
-#define INS_EXPORT_PRIVATE_KEY_SEED 0x05
-#define INS_UPDATE_EXCHANGE_RATE    0x06
+#define INS_EXPORT_PRIVATE_KEY   0x05
+#define INS_UPDATE_EXCHANGE_RATE 0x06
 
 #define INS_ENCRYPTED_AMOUNT_TRANSFER 0x10
 #define INS_TRANSFER_TO_ENCRYPTED     0x11
@@ -166,6 +169,9 @@ static void concordium_main(void) {
                     case INS_GET_PUBLIC_KEY:
                         handleGetPublicKey(cdata, p1, p2, &flags);
                         break;
+                    case INS_VERIFY_ADDRESS:
+                        handleVerifyAddress(cdata, &flags);
+                        break;
                     case INS_SIGN_TRANSFER:
                         handleSignTransfer(cdata, &flags);
                         break;
@@ -181,8 +187,8 @@ static void concordium_main(void) {
                     case INS_CREDENTIAL_DEPLOYMENT:
                         handleSignCredentialDeployment(cdata, p1, p2, &flags, isInitialCall);
                         break;
-                    case INS_EXPORT_PRIVATE_KEY_SEED:
-                        handleExportPrivateKeySeed(cdata, p1, p2, &flags);
+                    case INS_EXPORT_PRIVATE_KEY:
+                        handleExportPrivateKey(cdata, p1, p2, &flags);
                         break;
                     case INS_UPDATE_EXCHANGE_RATE:
                         handleSignUpdateExchangeRate(cdata, &flags);

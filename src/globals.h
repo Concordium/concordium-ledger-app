@@ -6,7 +6,9 @@
 #include "os.h"
 #include "cx.h"
 #include "descriptionView.h"
-#include "exportPrivateKeySeed.h"
+#include "exportPrivateKey.h"
+#include "verifyAddress.h"
+
 #include "getPublicKey.h"
 #include "memo.h"
 #include "signAddAnonymityRevoker.h"
@@ -137,8 +139,9 @@ typedef struct {
  * consuming instruction context.
  */
 typedef union {
-    exportPrivateKeySeedContext_t exportPrivateKeySeedContext;
+    exportPrivateKeyContext_t exportPrivateKeyContext;
     exportPublicKeyContext_t exportPublicKeyContext;
+    verifyAddressContext_t verifyAddressContext;
 
     signPublicInformationForIp_t signPublicInformationForIp;
     signCredentialDeploymentContext_t signCredentialDeploymentContext;

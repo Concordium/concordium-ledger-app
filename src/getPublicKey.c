@@ -30,19 +30,6 @@ UX_STEP_VALID(
     {.title = "Compare", .text = (char *) global.exportPublicKeyContext.publicKey});
 UX_FLOW(ux_sign_compare_public_key, &ux_sign_compare_public_key_0_step);
 
-// Builds a display version of the identity/account path. A pre-condition
-// for running this method is that 'parseKeyDerivation' has been
-// run prior to it.
-void getIdentityAccountDisplay(uint8_t *dst, size_t dstLength) {
-    uint32_t identityIndex = keyPath->rawKeyDerivationPath[4];
-    uint32_t accountIndex = keyPath->rawKeyDerivationPath[6];
-
-    int offset = numberToText(dst, dstLength, identityIndex);
-    memmove(dst + offset, "/", 1);
-    offset += 1;
-    bin2dec(dst + offset, dstLength - offset, accountIndex);
-}
-
 /**
  * Derive the public-key for the given path, and then write it to
  * the APDU buffer to be returned to the caller.
@@ -116,7 +103,9 @@ void handleGetPublicKey(uint8_t *cdata, uint8_t p1, uint8_t p2, volatile unsigne
                     THROW(ERROR_INVALID_PATH);
             }
         } else {
-            getIdentityAccountDisplay(ctx->display, sizeof(ctx->display));
+            uint32_t identityIndex = keyPath->rawKeyDerivationPath[4];
+            uint32_t accountIndex = keyPath->rawKeyDerivationPath[6];
+            getIdentityAccountDisplay(ctx->display, sizeof(ctx->display), identityIndex, accountIndex);
         }
 
         // Display the UI for the public-key flow, where the user can validate that the

@@ -9,6 +9,13 @@
 #include "os.h"
 
 /**
+ * BLS12-381 subgroup G1's order:
+ */
+static const uint8_t r[32] = {0x73, 0xed, 0xa7, 0x53, 0x29, 0x9d, 0x7d, 0x48, 0x33, 0x39, 0xd8,
+                              0x08, 0x09, 0xa1, 0xd8, 0x05, 0x53, 0xbd, 0xa4, 0x02, 0xff, 0xfe,
+                              0x5b, 0xfe, 0xff, 0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0x01};
+
+/**
  * Converts bytes into uint64_t (big endian).
  */
 #define U8BE(buf, off) (((uint64_t)(U4BE(buf, off)) << 32) | ((uint64_t)(U4BE(buf, off + 4)) & 0xFFFFFFFF))
@@ -82,13 +89,13 @@ int parseKeyDerivationPath(uint8_t *cdata);
 void sign(uint8_t *input, uint8_t *signatureOnInput);
 
 /**
- * Builds a human-readable representation of the identity/account path. A
- * pre-condotion for running this method is that 'parseKeyDerivation' has been
- * run prior to it.
+ * Builds a human-readable representation of the identity/account path.
  * @param dst [out] where to write the identity/account string
  * @param dstLength length of dst
+ * @param identityIndex
+ * @param accountIndex
  */
-void getIdentityAccountDisplay(uint8_t *dst, size_t dstLength);
+void getIdentityAccountDisplay(uint8_t *dst, size_t dstLength, uint32_t identityIndex, uint32_t accountIndex);
 
 /**
  * Adds the account transaction header and transaction kind to the current
@@ -116,5 +123,18 @@ int hashUpdateHeaderAndType(uint8_t *cdata, uint8_t validUpdateType);
  * @param recipientSize the size of the recipient destination
  */
 int handleHeaderAndToAddress(uint8_t *cdata, uint8_t kind, uint8_t *recipientDst, size_t recipientSize);
+
+/**
+ * Calculates a BLS12-381 private-key using the seed at the provided key path.
+ *
+ * Note that any method using this method MUST zero the private key right after use of the private key,
+ * as to limit any risk of leaking a private key.
+ *
+ * @param keyPath the key derivation path to get the private key seed from
+ * @param keyPathLength length of the key derivation path
+ * @param privateKey [out] where to write the derived private key to
+ * @param privateKeyLength length of privateKey
+ */
+void getBlsPrivateKey(uint32_t *keyPath, uint8_t keyPathLength, uint8_t *privateKey, size_t privateKeyLength);
 
 #endif
