@@ -53,6 +53,9 @@ void handleSignRegisterData(
 
         // hash the data length
         ctx->dataLength = U2BE(cdata, 0);
+        if (ctx->dataLength > 256) {
+            THROW(ERROR_INVALID_PARAM);
+        }
         memo_ctx->memoLength = ctx->dataLength;
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 2, NULL, 0);
 
