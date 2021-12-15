@@ -136,6 +136,13 @@ void sendSuccessResultNoIdle(uint8_t tx) {
     io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, tx);
 }
 
+void getIdentityAccountDisplay(uint8_t *dst, size_t dstLength, uint32_t identityIndex, uint32_t accountIndex) {
+    int offset = numberToText(dst, dstLength, identityIndex);
+    memmove(dst + offset, "/", 1);
+    offset += 1;
+    bin2dec(dst + offset, dstLength - offset, accountIndex);
+}
+
 void getPrivateKey(uint32_t *keyPath, uint8_t keyPathLength, cx_ecfp_private_key_t *privateKey) {
     uint8_t privateKeyData[32];
 
@@ -212,6 +219,58 @@ void sign(uint8_t *input, uint8_t *signatureOnInput) {
         FINALLY {
             // Clean up the private key, so that we cannot leak it.
             explicit_bzero(&privateKey, sizeof(privateKey));
+        }
+    }
+    END_TRY;
+}
+
+#define l_CONST        48  // ceil((3 * ceil(log2(r))) / 16)
+#define BLS_KEY_LENGTH 32
+
+static const uint8_t l_bytes[2] = {0, l_CONST};
+
+/** This implements the bls key generation algorithm specified in
+ * https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-2.3, The optional parameter key_info
+ * is hardcoded to an empty string. Uses sha256 as the hash function. The generated key has length 32, and dst should
+ * have atleast that length, or the function throws an error.
+ */
+void blsKeygen(const uint8_t *seed, size_t seedLength, uint8_t *dst, size_t dstLength) {
+    if (dstLength < BLS_KEY_LENGTH) {
+        THROW(ERROR_BUFFER_OVERFLOW);
+    }
+
+    uint8_t sk[l_CONST];
+    uint8_t prk[32];
+    uint8_t salt[32] = {
+        66, 76, 83, 45, 83, 73, 71, 45, 75, 69,
+        89, 71, 69, 78, 45, 83, 65, 76, 84, 45};  // Initially set to the byte representation of "BLS-SIG-KEYGEN-SALT-"
+    size_t saltSize = 20;                         // 20 = size of initial salt seed
+    uint8_t ikm[seedLength + 1];
+
+    memcpy(ikm, seed, seedLength);
+    ikm[seedLength] = 0;
+
+    do {
+        cx_hash_sha256(salt, saltSize, salt, sizeof(salt));
+        saltSize = sizeof(salt);
+        cx_hkdf_extract(CX_SHA256, ikm, sizeof(ikm), salt, sizeof(salt), prk);
+        cx_hkdf_expand(CX_SHA256, prk, sizeof(prk), l_bytes, sizeof(l_bytes), sk, sizeof(sk));
+        cx_math_modm(sk, sizeof(sk), r, sizeof(r));
+    } while (cx_math_is_zero(sk, sizeof(sk)));
+
+    // Skip the first 16 bytes, because they are 0 due to calculating modulo r, which is 32 bytes (and sk has 48 bytes).
+    memmove(dst, sk + l_CONST - BLS_KEY_LENGTH, BLS_KEY_LENGTH);
+}
+
+void getBlsPrivateKey(uint32_t *keyPath, uint8_t keyPathLength, uint8_t *privateKey, size_t privateKeySize) {
+    cx_ecfp_private_key_t privateKeySeed;
+    BEGIN_TRY {
+        TRY {
+            getPrivateKey(keyPath, keyPathLength, &privateKeySeed);
+            blsKeygen(privateKeySeed.d, sizeof(privateKeySeed.d), privateKey, privateKeySize);
+        }
+        FINALLY {
+            explicit_bzero(&privateKeySeed, sizeof(privateKeySeed));
         }
     }
     END_TRY;

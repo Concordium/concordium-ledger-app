@@ -35,6 +35,22 @@ make delete
 Both scripts require you to respond to the installation UI on the device for the installation or deletion
 to complete.
 
+### Building using the provided Dockerfile
+
+First, build the docker image
+
+```bash
+docker build -t concordium/ledger-app-builder .
+```
+Then, run the docker container
+
+```bash
+docker run --rm -ti -v "$(realpath .):/app" --privileged concordium/ledger-app-builder
+```
+
+This launches bash inside ubuntu. The app can now be built using the commands from the Makefile. 
+It still seems like it's only possible to load the application onto the ledger with `make load` on an Ubuntu machine, due to docker not having access to usb.
+
 ### Switching the SDK
 
 Please note that it is necessary to run

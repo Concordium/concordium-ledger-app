@@ -6,6 +6,7 @@
 
 typedef struct cx_ecfp_private_key_t {
     uint8_t W[33];
+    uint8_t d[32];
 } cx_ecfp_private_key_t, cx_ecfp_public_key_t;
 
 int G_io_apdu_buffer[100];
@@ -27,6 +28,7 @@ int G_io_apdu_buffer[100];
 #define CX_RND_RFC6979     1
 #define CX_LAST            1
 #define CX_SHA512          1
+#define CX_SHA256          1
 
 // redefining U2BE, U4BE
 #define U2BE(buf, off) ((((buf)[off] & 0xFF) << 8) | ((buf)[off + 1] & 0xFF))
