@@ -4,37 +4,37 @@
 #include "sign.h"
 #include "util.h"
 
-static memoContext_t *ctx = &global.withMemo.memoContext;
+static CborContext_t *ctx = &global.withDataBlob.cborContext;
 
-#define MAX_MEMO_SIZE 256
+#define MAX_DATABLOB_SIZE 256
 
-void handleMemoStep(void);
+void handleCborStep(void);
 
 UX_STEP_CB(
-    ux_sign_transfer_memo_step,
+    ux_display_cbor_step,
     bnnn_paging,
-    handleMemoStep(),
-    {"Memo", (char *) global.withMemo.memoContext.memo});
+    handleCborStep(),
+    {"Memo", (char *) global.withDataBlob.cborContext.display});
 
-UX_FLOW(ux_sign_transfer_memo, &ux_sign_transfer_memo_step);
+UX_FLOW(ux_display_cbor, &ux_display_cbor_step);
 
-void handleMemoStep(void) {
-    if (ctx->memoLength < 0) {
+void handleCborStep(void) {
+    if (ctx->cborLength < 0) {
         THROW(ERROR_INVALID_STATE);
     } else {
         sendSuccessNoIdle();  // Request more data from the computer.
     }
 }
 
-void readMemoInitial(uint8_t *cdata, uint8_t dataLength) {
-    if (ctx->memoLength > MAX_MEMO_SIZE) {
+void readCborInitial(uint8_t *cdata, uint8_t dataLength) {
+    if (ctx->cborLength > MAX_DATABLOB_SIZE) {
         // Don't sign memos, which exceed the max size accepted by the blockchain.
         THROW(ERROR_INVALID_PARAM);
     }
 
     uint8_t header = cdata[0];
     cdata += 1;
-    ctx->memoLength -= 1;
+    ctx->cborLength -= 1;
     // the first byte of an cbor encoding contains the type (3 high bits) and the shortCount (5 lower bits);
     ctx->majorType = header >> 5;
     uint8_t shortCount = header & 0x1f;
@@ -45,7 +45,7 @@ void readMemoInitial(uint8_t *cdata, uint8_t dataLength) {
     // length: payload byte size.
     uint64_t length = 0;
 
-    ctx->memoDisplayUsed = 0;
+    ctx->displayUsed = 0;
 
     if (shortCount < 24) {
         // shortCount is the length, no extra bytes are used.
@@ -70,46 +70,46 @@ void readMemoInitial(uint8_t *cdata, uint8_t dataLength) {
     }
     cdata += sizeLength;
 
-    ctx->memoLength -= sizeLength;
+    ctx->cborLength -= sizeLength;
     switch (ctx->majorType) {
         case 0:
             // non-negative integer
-            bin2dec(ctx->memo, sizeof(ctx->memo), length);
-            if (ctx->memoLength != 0) {
+            bin2dec(ctx->display, sizeof(ctx->display), length);
+            if (ctx->cborLength != 0) {
                 THROW(ERROR_INVALID_STATE);
             }
             break;
         case 1:
             // negative integer
-            memmove(ctx->memo, "-", 1);
+            memmove(ctx->display, "-", 1);
             if (length == UINT64_MAX) {
-                bin2dec(ctx->memo + 1, sizeof(ctx->memo) - 1, length);
-                memmove(ctx->memo + 1 + 20, " - 1", 4);
+                bin2dec(ctx->display + 1, sizeof(ctx->display) - 1, length);
+                memmove(ctx->display + 1 + 20, " - 1", 4);
             } else {
-                bin2dec(ctx->memo + 1, sizeof(ctx->memo) - 1, 1 + length);
+                bin2dec(ctx->display + 1, sizeof(ctx->display) - 1, 1 + length);
             }
-            if (ctx->memoLength != 0) {
+            if (ctx->cborLength != 0) {
                 THROW(ERROR_INVALID_STATE);
             }
             break;
         case 3:
             // utf-8 string
-            if (ctx->memoLength != length) {
+            if (ctx->cborLength != length) {
                 THROW(ERROR_INVALID_STATE);
             }
-            readMemoContent(cdata, dataLength - 1 - sizeLength);
+            readCborContent(cdata, dataLength - 1 - sizeLength);
             break;
         default:
             THROW(ERROR_UNSUPPORTED_CBOR);
     }
 }
 
-void readMemoContent(uint8_t *cdata, uint8_t contentLength) {
-    ctx->memoLength -= contentLength;
+void readCborContent(uint8_t *cdata, uint8_t contentLength) {
+    ctx->cborLength -= contentLength;
     switch (ctx->majorType) {
         case 3:
-            memmove(ctx->memo + ctx->memoDisplayUsed, cdata, contentLength);
-            ctx->memoDisplayUsed += contentLength;
+            memmove(ctx->display + ctx->displayUsed, cdata, contentLength);
+            ctx->displayUsed += contentLength;
             break;
         case 0:
         case 1:

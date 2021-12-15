@@ -5,8 +5,8 @@
 #include "sign.h"
 #include "responseCodes.h"
 
-static signRegisterData_t *ctx = &global.withMemo.signRegisterData;
-static memoContext_t *memo_ctx = &global.withMemo.memoContext;
+static signRegisterData_t *ctx = &global.withDataBlob.signRegisterData;
+static CborContext_t *data_ctx = &global.withDataBlob.cborContext;
 static tx_state_t *tx_state = &global_tx_state;
 
 void handleData();
@@ -16,7 +16,7 @@ UX_STEP_VALID(
     ux_register_data_display_data_step,
     bnnn_paging,
     handleData(),
-    {"Data", (char *) global.withMemo.memoContext.memo});
+    {"Data", (char *) global.withDataBlob.cborContext.display});
 UX_FLOW(
     ux_register_data_initial,
     &ux_sign_flow_shared_review,
@@ -56,7 +56,7 @@ void handleSignRegisterData(
         if (ctx->dataLength > 256) {
             THROW(ERROR_INVALID_PARAM);
         }
-        memo_ctx->memoLength = ctx->dataLength;
+        data_ctx->cborLength = ctx->dataLength;
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 2, NULL, 0);
 
         ctx->state = TX_REGISTER_DATA_PAYLOAD_START;
@@ -72,14 +72,14 @@ void handleSignRegisterData(
         switch (ctx->state) {
             case TX_REGISTER_DATA_PAYLOAD_START:
                 ctx->state = TX_REGISTER_DATA_PAYLOAD;
-                readMemoInitial(cdata, dataLength);
+                readCborInitial(cdata, dataLength);
                 break;
             case TX_REGISTER_DATA_PAYLOAD:
                 if (ctx->dataLength != 0) {
                     // The data size is <=256 bytes, so we should always have received all the data by this point
                     THROW(ERROR_INVALID_STATE);
                 }
-                readMemoContent(cdata, dataLength);
+                readCborContent(cdata, dataLength);
                 break;
             default:
                 THROW(ERROR_INVALID_STATE);

@@ -10,7 +10,7 @@
 #include "verifyAddress.h"
 
 #include "getPublicKey.h"
-#include "memo.h"
+#include "displayCbor.h"
 #include "signAddAnonymityRevoker.h"
 #include "signAddBakerOrUpdateBakerKeys.h"
 #include "signAddIdentityProvider.h"
@@ -133,9 +133,9 @@ typedef struct {
         signTransferWithScheduleContext_t signTransferWithScheduleContext;
         signRegisterData_t signRegisterData;
     };
-    memoContext_t memoContext;
+    CborContext_t cborContext;
 
-} transferWithMemo_t;
+} transactionWithDataBlob_t;
 
 /**
  * As the memory we have available is very limited, the context for each instruction is stored
@@ -167,7 +167,7 @@ typedef union {
     signUpdateBakerStakeThresholdContext_t signUpdateBakerStakeThreshold;
     signUpdateKeysWithRootKeysContext_t signUpdateKeysWithRootKeysContext;
     updateWithDescription_t withDescription;
-    transferWithMemo_t withMemo;
+    transactionWithDataBlob_t withDataBlob;
 } instructionContext;
 extern instructionContext global;
 

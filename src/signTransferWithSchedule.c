@@ -7,8 +7,8 @@
 #include "time.h"
 #include "util.h"
 
-static signTransferWithScheduleContext_t *ctx = &global.withMemo.signTransferWithScheduleContext;
-static memoContext_t *memo_ctx = &global.withMemo.memoContext;
+static signTransferWithScheduleContext_t *ctx = &global.withDataBlob.signTransferWithScheduleContext;
+static CborContext_t *memo_ctx = &global.withDataBlob.cborContext;
 static tx_state_t *tx_state = &global_tx_state;
 
 void processNextScheduledAmount(uint8_t *buffer);
@@ -18,7 +18,7 @@ void processNextScheduledAmount(uint8_t *buffer);
 UX_STEP_NOCB(
     ux_scheduled_transfer_initial_flow_1_step,
     bnnn_paging,
-    {.title = "Recipient", .text = (char *) global.withMemo.signTransferWithScheduleContext.displayStr});
+    {.title = "Recipient", .text = (char *) global.withDataBlob.signTransferWithScheduleContext.displayStr});
 UX_STEP_VALID(ux_scheduled_transfer_initial_flow_2_step, nn, sendSuccessNoIdle(), {"Continue", "with transaction"});
 UX_FLOW(
     ux_scheduled_transfer_initial_flow,
@@ -31,11 +31,11 @@ UX_FLOW(
 UX_STEP_NOCB(
     ux_sign_scheduled_transfer_pair_flow_0_step,
     bnnn_paging,
-    {"Release time (UTC)", (char *) global.withMemo.signTransferWithScheduleContext.displayTimestamp});
+    {"Release time (UTC)", (char *) global.withDataBlob.signTransferWithScheduleContext.displayTimestamp});
 UX_STEP_NOCB(
     ux_sign_scheduled_transfer_pair_flow_1_step,
     bnnn_paging,
-    {"Amount", (char *) global.withMemo.signTransferWithScheduleContext.displayAmount});
+    {"Amount", (char *) global.withDataBlob.signTransferWithScheduleContext.displayAmount});
 UX_STEP_CB(
     ux_sign_scheduled_transfer_pair_flow_2_step,
     nn,
@@ -118,7 +118,7 @@ void handleTransferPairs(uint8_t *cdata, volatile unsigned int *flags) {
 void finishMemoScheduled(volatile unsigned int *flags) {
     cx_hash((cx_hash_t *) &tx_state->hash, 0, &ctx->remainingNumberOfScheduledAmounts, 1, NULL, 0);
     ctx->state = TX_TRANSFER_WITH_SCHEDULE_TRANSFER_PAIRS;
-    ux_flow_init(0, ux_sign_transfer_memo, NULL);
+    ux_flow_init(0, ux_display_cbor, NULL);
     *flags |= IO_ASYNCH_REPLY;
 }
 
@@ -141,7 +141,7 @@ void handleSignTransferWithScheduleAndMemo(
         cdata += 1;
 
         // Hash memo length
-        memo_ctx->memoLength = U2BE(cdata, 0);
+        memo_ctx->cborLength = U2BE(cdata, 0);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 2, NULL, 0);
 
         // Update the state to expect the next message to contain the first bytes of the memo.
@@ -154,9 +154,9 @@ void handleSignTransferWithScheduleAndMemo(
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, dataLength, NULL, 0);
 
         // Read initial part of memo and then display it:
-        readMemoInitial(cdata, dataLength);
+        readCborInitial(cdata, dataLength);
 
-        if (memo_ctx->memoLength == 0) {
+        if (memo_ctx->cborLength == 0) {
             finishMemoScheduled(flags);
         } else {
             ctx->state = TX_TRANSFER_WITH_SCHEDULE_MEMO;
@@ -167,9 +167,9 @@ void handleSignTransferWithScheduleAndMemo(
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, dataLength, NULL, 0);
 
         // Read current part of memo and then display it:
-        readMemoContent(cdata, dataLength);
+        readCborContent(cdata, dataLength);
 
-        if (memo_ctx->memoLength != 0) {
+        if (memo_ctx->cborLength != 0) {
             // The memo size is <=256 bytes, so we should always have received the complete memo by this point;
             THROW(ERROR_INVALID_STATE);
         }
