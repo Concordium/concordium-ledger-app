@@ -30,12 +30,22 @@ UX_STEP_NOCB(
     bnnn_paging,
     {.title = "Verify Address", .text = (char *) global.verifyAddressContext.display});
 
-UX_STEP_CB(
+UX_STEP_NOCB(
     ux_verify_address_1_step,
     bnnn_paging,
-    sendSuccess(0),
     {.title = "Address", .text = (char *) global.verifyAddressContext.address});
-UX_FLOW(ux_verify_address, &ux_verify_address_0_step, &ux_verify_address_1_step);
+UX_STEP_CB(
+    ux_verify_address_approve_step,
+    pb,
+    sendSuccess(0),
+    {&C_icon_validate_14, "Approve"});
+UX_STEP_CB(
+    ux_verify_address_reject_step,
+    pb,
+    sendUserRejection(),
+    {&C_icon_crossmark, "Reject"});
+UX_FLOW(ux_verify_address, &ux_verify_address_0_step, &ux_verify_address_1_step, &ux_verify_address_approve_step, &ux_verify_address_reject_step);
+
 
 /*
  * Calculates the credId from the given prf key and credential counter.
