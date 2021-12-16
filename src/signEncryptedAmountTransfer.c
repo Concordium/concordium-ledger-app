@@ -104,6 +104,10 @@ void handleSignEncryptedAmountTransferWithMemo(
 
         // Hash memo length
         memo_ctx->cborLength = U2BE(cdata, 0);
+        if (memo_ctx->cborLength > MAX_MEMO_SIZE) {
+            THROW(ERROR_INVALID_PARAM);
+        }
+
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 2, NULL, 0);
 
         ctx->state = TX_ENCRYPTED_AMOUNT_TRANSFER_MEMO_START;

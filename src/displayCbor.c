@@ -6,8 +6,6 @@
 
 static CborContext_t *ctx = &global.withDataBlob.cborContext;
 
-#define MAX_DATABLOB_SIZE 256
-
 void handleCborStep(void);
 
 UX_STEP_CB(
@@ -27,11 +25,6 @@ void handleCborStep(void) {
 }
 
 void readCborInitial(uint8_t *cdata, uint8_t dataLength) {
-    if (ctx->cborLength > MAX_DATABLOB_SIZE) {
-        // Don't sign memos, which exceed the max size accepted by the blockchain.
-        THROW(ERROR_INVALID_PARAM);
-    }
-
     uint8_t header = cdata[0];
     cdata += 1;
     ctx->cborLength -= 1;

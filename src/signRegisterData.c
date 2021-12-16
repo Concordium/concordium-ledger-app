@@ -53,7 +53,7 @@ void handleSignRegisterData(
 
         // hash the data length
         ctx->dataLength = U2BE(cdata, 0);
-        if (ctx->dataLength > 256) {
+        if (ctx->dataLength > MAX_DATA_SIZE) {
             THROW(ERROR_INVALID_PARAM);
         }
         data_ctx->cborLength = ctx->dataLength;

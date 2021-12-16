@@ -142,6 +142,10 @@ void handleSignTransferWithScheduleAndMemo(
 
         // Hash memo length
         memo_ctx->cborLength = U2BE(cdata, 0);
+        if (memo_ctx->cborLength > MAX_MEMO_SIZE) {
+            THROW(ERROR_INVALID_PARAM);
+        }
+
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 2, NULL, 0);
 
         // Update the state to expect the next message to contain the first bytes of the memo.
