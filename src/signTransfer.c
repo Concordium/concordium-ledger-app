@@ -7,7 +7,7 @@
 #include "util.h"
 
 static signTransferContext_t *ctx = &global.withDataBlob.signTransferContext;
-static CborContext_t *memo_ctx = &global.withDataBlob.cborContext;
+static cborContext_t *memo_ctx = &global.withDataBlob.cborContext;
 static tx_state_t *tx_state = &global_tx_state;
 
 UX_STEP_NOCB(
@@ -64,7 +64,7 @@ void handleSignTransfer(uint8_t *cdata, volatile unsigned int *flags) {
 
 void finishMemo(volatile unsigned int *flags) {
     ctx->state = TX_TRANSFER_AMOUNT;
-    ux_flow_init(0, ux_display_cbor, NULL);
+    ux_flow_init(0, ux_display_memo, NULL);
     *flags |= IO_ASYNCH_REPLY;
 }
 

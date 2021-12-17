@@ -6,7 +6,7 @@
 #include "responseCodes.h"
 
 static signRegisterData_t *ctx = &global.withDataBlob.signRegisterData;
-static CborContext_t *data_ctx = &global.withDataBlob.cborContext;
+static cborContext_t *data_ctx = &global.withDataBlob.cborContext;
 static tx_state_t *tx_state = &global_tx_state;
 
 void handleData();

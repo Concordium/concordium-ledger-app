@@ -133,7 +133,7 @@ typedef struct {
         signTransferWithScheduleContext_t signTransferWithScheduleContext;
         signRegisterData_t signRegisterData;
     };
-    CborContext_t cborContext;
+    cborContext_t cborContext;
 
 } transactionWithDataBlob_t;
 

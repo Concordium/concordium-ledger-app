@@ -8,7 +8,7 @@
 #include "util.h"
 
 static signTransferWithScheduleContext_t *ctx = &global.withDataBlob.signTransferWithScheduleContext;
-static CborContext_t *memo_ctx = &global.withDataBlob.cborContext;
+static cborContext_t *memo_ctx = &global.withDataBlob.cborContext;
 static tx_state_t *tx_state = &global_tx_state;
 
 void processNextScheduledAmount(uint8_t *buffer);
@@ -118,7 +118,7 @@ void handleTransferPairs(uint8_t *cdata, volatile unsigned int *flags) {
 void finishMemoScheduled(volatile unsigned int *flags) {
     cx_hash((cx_hash_t *) &tx_state->hash, 0, &ctx->remainingNumberOfScheduledAmounts, 1, NULL, 0);
     ctx->state = TX_TRANSFER_WITH_SCHEDULE_TRANSFER_PAIRS;
-    ux_flow_init(0, ux_display_cbor, NULL);
+    ux_flow_init(0, ux_display_memo, NULL);
     *flags |= IO_ASYNCH_REPLY;
 }
 

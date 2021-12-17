@@ -8,7 +8,7 @@
 #include "util.h"
 
 static signEncryptedAmountToTransfer_t *ctx = &global.withDataBlob.signEncryptedAmountToTransfer;
-static CborContext_t *memo_ctx = &global.withDataBlob.cborContext;
+static cborContext_t *memo_ctx = &global.withDataBlob.cborContext;
 static tx_state_t *tx_state = &global_tx_state;
 
 // UI for displaying encrypted transfer transaction. It only shows the user the recipient address
@@ -85,7 +85,7 @@ void handleProofs(
 
 void finishMemoEncrypted(volatile unsigned int *flags) {
     ctx->state = TX_ENCRYPTED_AMOUNT_TRANSFER_REMAINING_AMOUNT;
-    ux_flow_init(0, ux_display_cbor, NULL);
+    ux_flow_init(0, ux_display_memo, NULL);
     *flags |= IO_ASYNCH_REPLY;
 }
 

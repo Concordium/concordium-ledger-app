@@ -4,17 +4,17 @@
 #include "sign.h"
 #include "util.h"
 
-static CborContext_t *ctx = &global.withDataBlob.cborContext;
+static cborContext_t *ctx = &global.withDataBlob.cborContext;
 
 void handleCborStep(void);
 
 UX_STEP_CB(
-    ux_display_cbor_step,
+    ux_display_memo_step,
     bnnn_paging,
     handleCborStep(),
     {"Memo", (char *) global.withDataBlob.cborContext.display});
 
-UX_FLOW(ux_display_cbor, &ux_display_cbor_step);
+UX_FLOW(ux_display_memo, &ux_display_memo_step);
 
 void handleCborStep(void) {
     if (ctx->cborLength < 0) {
