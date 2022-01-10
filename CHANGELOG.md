@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.1.0 - TBD
+
+### Added
+
+* Added flow to verify account address.
+
 ## 2.0.3 - 2021-11-29
 
 ### Changed
