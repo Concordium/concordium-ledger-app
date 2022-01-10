@@ -1,21 +1,24 @@
 #include <os.h>
 
 #include "accountSenderView.h"
-#include "memo.h"
+#include "displayCbor.h"
 #include "responseCodes.h"
 #include "sign.h"
 #include "util.h"
 
-static signTransferContext_t *ctx = &global.withMemo.signTransferContext;
-static memoContext_t *memo_ctx = &global.withMemo.memoContext;
+static signTransferContext_t *ctx = &global.withDataBlob.signTransferContext;
+static cborContext_t *memo_ctx = &global.withDataBlob.cborContext;
 static tx_state_t *tx_state = &global_tx_state;
 
-UX_STEP_NOCB(ux_sign_flow_1_step, bnnn_paging, {"Amount", (char *) global.withMemo.signTransferContext.displayAmount});
+UX_STEP_NOCB(
+    ux_sign_flow_1_step,
+    bnnn_paging,
+    {"Amount", (char *) global.withDataBlob.signTransferContext.displayAmount});
 
 UX_STEP_NOCB(
     ux_sign_flow_2_step,
     bnnn_paging,
-    {.title = "Recipient", .text = (char *) global.withMemo.signTransferContext.displayStr});
+    {.title = "Recipient", .text = (char *) global.withDataBlob.signTransferContext.displayStr});
 UX_FLOW(
     ux_sign_flow,
     &ux_sign_flow_shared_review,
@@ -29,7 +32,7 @@ UX_STEP_CB(
     ux_sign_flow_2_step_cb,
     bnnn_paging,
     sendSuccessNoIdle(),
-    {.title = "Recipient", .text = (char *) global.withMemo.signTransferContext.displayStr});
+    {.title = "Recipient", .text = (char *) global.withDataBlob.signTransferContext.displayStr});
 
 UX_FLOW(
     ux_transfer_initial_flow_memo,
@@ -61,7 +64,7 @@ void handleSignTransfer(uint8_t *cdata, volatile unsigned int *flags) {
 
 void finishMemo(volatile unsigned int *flags) {
     ctx->state = TX_TRANSFER_AMOUNT;
-    ux_flow_init(0, ux_sign_transfer_memo, NULL);
+    ux_flow_init(0, ux_display_memo, NULL);
     *flags |= IO_ASYNCH_REPLY;
 }
 
@@ -79,7 +82,11 @@ void handleSignTransferWithMemo(
         cdata += handleHeaderAndToAddress(cdata, TRANSFER_WITH_MEMO, ctx->displayStr, sizeof(ctx->displayStr));
 
         // hash the memo length
-        memo_ctx->memoLength = U2BE(cdata, 0);
+        memo_ctx->cborLength = U2BE(cdata, 0);
+        if (memo_ctx->cborLength > MAX_MEMO_SIZE) {
+            THROW(ERROR_INVALID_PARAM);
+        }
+
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 2, NULL, 0);
 
         ctx->state = TX_TRANSFER_MEMO_INITIAL;
@@ -90,9 +97,9 @@ void handleSignTransferWithMemo(
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, dataLength, NULL, 0);
 
         // Read initial part of memo and then display it:
-        readMemoInitial(cdata, dataLength);
+        readCborInitial(cdata, dataLength);
 
-        if (memo_ctx->memoLength == 0) {
+        if (memo_ctx->cborLength == 0) {
             finishMemo(flags);
         } else {
             ctx->state = TX_TRANSFER_MEMO;
@@ -102,9 +109,9 @@ void handleSignTransferWithMemo(
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, dataLength, NULL, 0);
 
         // Read current part of memo and then display it:
-        readMemoContent(cdata, dataLength);
+        readCborContent(cdata, dataLength);
 
-        if (memo_ctx->memoLength != 0) {
+        if (memo_ctx->cborLength != 0) {
             // The memo size is <=256 bytes, so we should always have received the complete memo by this point
             THROW(ERROR_INVALID_STATE);
         }

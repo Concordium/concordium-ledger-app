@@ -8,6 +8,9 @@
 #include "numberHelpers.h"
 #include "os.h"
 
+#define MAX_MEMO_SIZE 256
+#define MAX_DATA_SIZE (MAX_MEMO_SIZE)
+
 /**
  * BLS12-381 subgroup G1's order:
  */

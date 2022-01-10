@@ -10,7 +10,7 @@
 #include "verifyAddress.h"
 
 #include "getPublicKey.h"
-#include "memo.h"
+#include "displayCbor.h"
 #include "signAddAnonymityRevoker.h"
 #include "signAddBakerOrUpdateBakerKeys.h"
 #include "signAddIdentityProvider.h"
@@ -24,6 +24,8 @@
 #include "signTransferWithSchedule.h"
 #include "signUpdateAuthorizations.h"
 #include "signUpdateBakerRestakeEarnings.h"
+#include "signRegisterData.h"
+
 #include "signUpdateBakerStakeThreshold.h"
 #include "signUpdateElectionDifficulty.h"
 #include "signUpdateExchangeRate.h"
@@ -58,6 +60,7 @@ typedef enum {
     TRANSFER_TO_PUBLIC = 18,
     TRANSFER_WITH_SCHEDULE = 19,
     UPDATE_CREDENTIALS = 20,
+    REGISTER_DATA = 21,
     TRANSFER_WITH_MEMO = 22,
     ENCRYPTED_AMOUNT_TRANSFER_WITH_MEMO = 23,
     TRANSFER_WITH_SCHEDULE_WITH_MEMO = 24
@@ -128,10 +131,11 @@ typedef struct {
         signTransferContext_t signTransferContext;
         signEncryptedAmountToTransfer_t signEncryptedAmountToTransfer;
         signTransferWithScheduleContext_t signTransferWithScheduleContext;
+        signRegisterData_t signRegisterData;
     };
-    memoContext_t memoContext;
+    cborContext_t cborContext;
 
-} transferWithMemo_t;
+} transactionWithDataBlob_t;
 
 /**
  * As the memory we have available is very limited, the context for each instruction is stored
@@ -163,7 +167,7 @@ typedef union {
     signUpdateBakerStakeThresholdContext_t signUpdateBakerStakeThreshold;
     signUpdateKeysWithRootKeysContext_t signUpdateKeysWithRootKeysContext;
     updateWithDescription_t withDescription;
-    transferWithMemo_t withMemo;
+    transactionWithDataBlob_t withDataBlob;
 } instructionContext;
 extern instructionContext global;
 

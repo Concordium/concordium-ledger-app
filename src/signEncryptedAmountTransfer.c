@@ -2,13 +2,13 @@
 
 #include "accountSenderView.h"
 #include "base58check.h"
-#include "memo.h"
+#include "displayCbor.h"
 #include "responseCodes.h"
 #include "sign.h"
 #include "util.h"
 
-static signEncryptedAmountToTransfer_t *ctx = &global.withMemo.signEncryptedAmountToTransfer;
-static memoContext_t *memo_ctx = &global.withMemo.memoContext;
+static signEncryptedAmountToTransfer_t *ctx = &global.withDataBlob.signEncryptedAmountToTransfer;
+static cborContext_t *memo_ctx = &global.withDataBlob.cborContext;
 static tx_state_t *tx_state = &global_tx_state;
 
 // UI for displaying encrypted transfer transaction. It only shows the user the recipient address
@@ -18,7 +18,7 @@ UX_STEP_CB(
     ux_sign_encrypted_amount_transfer_2_step,
     bnnn_paging,
     sendSuccessNoIdle(),
-    {.title = "Recipient", .text = (char *) global.withMemo.signEncryptedAmountToTransfer.to});
+    {.title = "Recipient", .text = (char *) global.withDataBlob.signEncryptedAmountToTransfer.to});
 UX_FLOW(
     ux_sign_encrypted_amount_transfer,
     &ux_sign_flow_shared_review,
@@ -85,7 +85,7 @@ void handleProofs(
 
 void finishMemoEncrypted(volatile unsigned int *flags) {
     ctx->state = TX_ENCRYPTED_AMOUNT_TRANSFER_REMAINING_AMOUNT;
-    ux_flow_init(0, ux_sign_transfer_memo, NULL);
+    ux_flow_init(0, ux_display_memo, NULL);
     *flags |= IO_ASYNCH_REPLY;
 }
 
@@ -103,7 +103,11 @@ void handleSignEncryptedAmountTransferWithMemo(
         cdata += handleHeaderAndToAddress(cdata, ENCRYPTED_AMOUNT_TRANSFER_WITH_MEMO, ctx->to, sizeof(ctx->to));
 
         // Hash memo length
-        memo_ctx->memoLength = U2BE(cdata, 0);
+        memo_ctx->cborLength = U2BE(cdata, 0);
+        if (memo_ctx->cborLength > MAX_MEMO_SIZE) {
+            THROW(ERROR_INVALID_PARAM);
+        }
+
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 2, NULL, 0);
 
         ctx->state = TX_ENCRYPTED_AMOUNT_TRANSFER_MEMO_START;
@@ -113,9 +117,9 @@ void handleSignEncryptedAmountTransferWithMemo(
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, dataLength, NULL, 0);
 
         // Read initial part of memo and then display it:
-        readMemoInitial(cdata, dataLength);
+        readCborInitial(cdata, dataLength);
 
-        if (memo_ctx->memoLength == 0) {
+        if (memo_ctx->cborLength == 0) {
             finishMemoEncrypted(flags);
         } else {
             ctx->state = TX_ENCRYPTED_AMOUNT_TRANSFER_MEMO;
@@ -125,9 +129,9 @@ void handleSignEncryptedAmountTransferWithMemo(
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, dataLength, NULL, 0);
 
         // Read current part of memo and then display it:
-        readMemoContent(cdata, dataLength);
+        readCborContent(cdata, dataLength);
 
-        if (memo_ctx->memoLength != 0) {
+        if (memo_ctx->cborLength != 0) {
             // The memo size is <=256 bytes, so we should always have received the complete memo by this point;
             THROW(ERROR_INVALID_STATE);
         }
