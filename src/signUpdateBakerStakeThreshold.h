@@ -4,7 +4,7 @@
 /**
  * Handles the signing flow for an 'UpdateBakerStakeThreshold' transaction. It validates that
  * the correct UpdateType is supplied (9) and will fail otherwise.
- * 
+ *
  * @param cdata please see /doc/ins_update_baker_stake_threshold.md for details
  */
 void handleSignUpdateBakerStakeThreshold(uint8_t *cdata, volatile unsigned int *flags);

@@ -1,8 +1,9 @@
 #include <os.h>
-#include "util.h"
+
 #include "accountSenderView.h"
-#include "sign.h"
 #include "responseCodes.h"
+#include "sign.h"
+#include "util.h"
 
 static signTransferToPublic_t *ctx = &global.signTransferToPublic;
 static tx_state_t *tx_state = &global_tx_state;
@@ -10,23 +11,25 @@ static tx_state_t *tx_state = &global_tx_state;
 UX_STEP_NOCB(
     ux_sign_transfer_to_public_1_step,
     bnnn_paging,
-    {
-      .title = "Unshield amount",
-      .text = (char *) global.signTransferToPublic.amount
-    });
-UX_FLOW(ux_sign_transfer_to_public,
+    {.title = "Unshield amount", .text = (char *) global.signTransferToPublic.amount});
+UX_FLOW(
+    ux_sign_transfer_to_public,
     &ux_sign_flow_shared_review,
     &ux_sign_flow_account_sender_view,
     &ux_sign_transfer_to_public_1_step,
     &ux_sign_flow_shared_sign,
-    &ux_sign_flow_shared_decline
-);
+    &ux_sign_flow_shared_decline);
 
 #define P1_INITIAL          0x00
 #define P1_REMAINING_AMOUNT 0x01
 #define P1_PROOF            0x02
 
-void handleSignTransferToPublic(uint8_t *cdata, uint8_t p1, uint8_t dataLength, volatile unsigned int *flags, bool isInitialCall) {
+void handleSignTransferToPublic(
+    uint8_t *cdata,
+    uint8_t p1,
+    uint8_t dataLength,
+    volatile unsigned int *flags,
+    bool isInitialCall) {
     if (isInitialCall) {
         ctx->state = TX_TRANSFER_TO_PUBLIC_INITIAL;
     }
@@ -34,10 +37,10 @@ void handleSignTransferToPublic(uint8_t *cdata, uint8_t p1, uint8_t dataLength, 
     if (p1 == P1_INITIAL && ctx->state == TX_TRANSFER_TO_PUBLIC_INITIAL) {
         cdata += parseKeyDerivationPath(cdata);
         cx_sha256_init(&tx_state->hash);
-        cdata += hashAccountTransactionHeaderAndKind(cdata, TRANSFER_TO_PUBLIC);
+        hashAccountTransactionHeaderAndKind(cdata, TRANSFER_TO_PUBLIC);
 
-        // Ask the caller for the next command.
         ctx->state = TX_TRANSFER_TO_PUBLIC_REMAINING_AMOUNT;
+        // Ask the caller for the next command.
         sendSuccessNoIdle();
     } else if (p1 == P1_REMAINING_AMOUNT && ctx->state == TX_TRANSFER_TO_PUBLIC_REMAINING_AMOUNT) {
         // Hash remaining amount. Remaining amount is encrypted, and so we cannot display it.
@@ -46,7 +49,7 @@ void handleSignTransferToPublic(uint8_t *cdata, uint8_t p1, uint8_t dataLength, 
 
         // Parse transaction amount so it can be displayed.
         uint64_t amountToPublic = U8BE(cdata, 0);
-        amountToGtuDisplay(ctx->amount, amountToPublic);
+        amountToGtuDisplay(ctx->amount, sizeof(ctx->amount), amountToPublic);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 8, NULL, 0);
         cdata += 8;
 

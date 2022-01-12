@@ -58,7 +58,8 @@ fn main() {
         ledger.exchange(verification_key_list_length_command).unwrap();
         println!("Verification key length OK.");
 
-        let mut key_blob = hex::decode("00").unwrap();
+        // This time we send the keyIndex (00) and schemeId (00) and verificationKey
+        let mut key_blob = hex::decode("0000").unwrap();
         key_blob.append(&mut verification_key);
 
         let verification_key_command = ApduCommand {
@@ -74,7 +75,7 @@ fn main() {
         let mut signature_threshold = hex::decode("FF").unwrap();
         let mut reg_id_cred = hex::decode("85d8a7aa296c162e4e2f0d6bfbdc562db240e28942f7f3ddef6979a1133b5c719ec3581869aaf88388824b0f6755e63c").unwrap();
         let mut identity_provider_identity = hex::decode("0000F013").unwrap();
-        let mut revocation_threshold = hex::decode("0F").unwrap();
+        let mut revocation_threshold = hex::decode("01").unwrap();
 
         let mut anonymity_revocation_length = hex::decode("0001").unwrap();
 

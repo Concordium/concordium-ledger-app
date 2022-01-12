@@ -1,8 +1,22 @@
-#include "os.h"
-#include "cx.h"
-#include "globals.h"
+#ifndef _CONCORDIUM_APP_UTIL_H_
+#define _CONCORDIUM_APP_UTIL_H_
+
 #include <stdbool.h>
 #include <string.h>
+
+#include "globals.h"
+#include "numberHelpers.h"
+#include "os.h"
+
+#define MAX_MEMO_SIZE 256
+#define MAX_DATA_SIZE (MAX_MEMO_SIZE)
+
+/**
+ * BLS12-381 subgroup G1's order:
+ */
+static const uint8_t r[32] = {0x73, 0xed, 0xa7, 0x53, 0x29, 0x9d, 0x7d, 0x48, 0x33, 0x39, 0xd8,
+                              0x08, 0x09, 0xa1, 0xd8, 0x05, 0x53, 0xbd, 0xa4, 0x02, 0xff, 0xfe,
+                              0x5b, 0xfe, 0xff, 0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0x01};
 
 /**
  * Converts bytes into uint64_t (big endian).
@@ -13,21 +27,21 @@
  * Send a user rejection back to the caller, which will indicate to
  * the caller that the user has rejected the incoming command at some
  * step in the process, i.e. if the user does not want to sign the
- * incoming transaction. 
- * 
+ * incoming transaction.
+ *
  * After sending the rejection the display will return to the menu.
  */
 void sendUserRejection();
 
 /**
- * Send a success back to the caller without returning the display to the 
+ * Send a success back to the caller without returning the display to the
  * idle menu. This method should be used in instructions that span multiple
  * commands to avoid resetting the display back to the menu inbetween commands.
  */
 void sendSuccessNoIdle();
 
 /**
- * Send a success with a result back to the caller without returning the display to the 
+ * Send a success with a result back to the caller without returning the display to the
  * idle menu.
  */
 void sendSuccessResultNoIdle(uint8_t tx);
@@ -41,38 +55,11 @@ void sendSuccessResultNoIdle(uint8_t tx);
 void sendSuccess(uint8_t tx);
 
 /**
- * Writes the input amount of µGTU to the supplied destination as its value in
- * GTU with thousand separators. 
- * @param dst where to write the thousand separated representation of the µGTU
- * @param number the integer µGTU amount to convert to a GTU display version
- * @return number of bytes written to 'dst'
- */ 
-int amountToGtuDisplay(uint8_t *dst, uint64_t microGtuAmount);
-
-/**
- * Helper method that writes the input integer to a format that the device
- * can display on screen. The result is not string terminated.
- * @param dst where to write the text representation of the integer
- * @param number the integer to convert to characters
- * @return number of bytes written to 'dst', i.e. the number of characters in the integer 'number'
- */
-int numberToText(uint8_t *dst, uint64_t number);
-
-/**
- * Helper method that writes the input integer to a format that the device can 
- * display on the screen.
- * @param dst where to write the text representation of the integer
- * @param number the integer to convert to characters
- * @return number of bytes written to 'dst', i.e. the number of characters in the integer 'number' + 1 for string termination
- */
-int bin2dec(uint8_t *dst, uint64_t number);
-
-/**
  * Gets the private-key for the provided key path.
- * 
- * Note that any method using this method MUST zero the private key right after use of the private key, 
+ *
+ * Note that any method using this method MUST zero the private key right after use of the private key,
  * as to limit any risk of leaking a private key.
- * 
+ *
  * @param keyPath the key derivation path to get the private key for
  * @param keyPathLength length of the key derivation path
  * @param privateKey [out] where to write the derived private key to
@@ -80,23 +67,11 @@ int bin2dec(uint8_t *dst, uint64_t number);
 void getPrivateKey(uint32_t *keyPath, uint8_t keyPathLength, cx_ecfp_private_key_t *privateKey);
 
 /**
- * Gets the public-key for the keypath that has been loaded into the state. It is a 
+ * Gets the public-key for the keypath that has been loaded into the state. It is a
  * pre-condition that 'parseKeyDerivation' has been run prior to this function.
  * @param publicKeyArray [out] the public-key is written here
  */
 void getPublicKey(uint8_t *publicKeyArray);
-
-/**
- * Helper method for converting a byte array into a character array, where the bytes
- * are translated into their hexadecimal representation. This is used for getting human-readable
- * representations of e.g. keys and credential ids. The output array is 'paginated' by inserting
- * a space after 16 characters, as this will make the Ledger pagination change page after 
- * 16 characters.
- * @param byteArray [in] the bytes to convert to paginated hex
- * @param len the length of 'byteArray', i.e. the number of bytes to convert to paginated hex
- * @param asHex [out] where to write the output hexadecimal characters
- */
-void toPaginatedHex(uint8_t *byteArray, const uint64_t len, char *asHex);
 
 /**
  * Parses the key derivation path for the command to be executed. This method should
@@ -117,12 +92,13 @@ int parseKeyDerivationPath(uint8_t *cdata);
 void sign(uint8_t *input, uint8_t *signatureOnInput);
 
 /**
- * Builds a human-readable representation of the identity/account path. A
- * pre-condotion for running this method is that 'parseKeyDerivation' has been
- * run prior to it.
+ * Builds a human-readable representation of the identity/account path.
  * @param dst [out] where to write the identity/account string
+ * @param dstLength length of dst
+ * @param identityIndex
+ * @param accountIndex
  */
-void getIdentityAccountDisplay(uint8_t *dst);
+void getIdentityAccountDisplay(uint8_t *dst, size_t dstLength, uint32_t identityIndex, uint32_t accountIndex);
 
 /**
  * Adds the account transaction header and transaction kind to the current
@@ -140,3 +116,28 @@ int hashAccountTransactionHeaderAndKind(uint8_t *cdata, uint8_t validTransaction
  * @return the count of hashed bytes from cdata
  */
 int hashUpdateHeaderAndType(uint8_t *cdata, uint8_t validUpdateType);
+
+/**
+ * Adds the account transaction header and the recipient address to the transaction hash, and
+ * writes the base58 encoded recipient address for later display.
+ * @param cdata the incoming command data pointing to the start of the input, i.e. with the key path at the start
+ * @param kind the transaction type
+ * @param recipientDst the destination where to write the base58 encoded recipient address
+ * @param recipientSize the size of the recipient destination
+ */
+int handleHeaderAndToAddress(uint8_t *cdata, uint8_t kind, uint8_t *recipientDst, size_t recipientSize);
+
+/**
+ * Calculates a BLS12-381 private-key using the seed at the provided key path.
+ *
+ * Note that any method using this method MUST zero the private key right after use of the private key,
+ * as to limit any risk of leaking a private key.
+ *
+ * @param keyPath the key derivation path to get the private key seed from
+ * @param keyPathLength length of the key derivation path
+ * @param privateKey [out] where to write the derived private key to
+ * @param privateKeyLength length of privateKey
+ */
+void getBlsPrivateKey(uint32_t *keyPath, uint8_t keyPathLength, uint8_t *privateKey, size_t privateKeyLength);
+
+#endif

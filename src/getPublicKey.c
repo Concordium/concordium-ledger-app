@@ -1,8 +1,9 @@
-#include "os.h"
-#include "ux.h"
-#include "util.h"
+#include "globals.h"
 #include "menu.h"
+#include "os.h"
 #include "responseCodes.h"
+#include "util.h"
+#include "ux.h"
 
 static keyDerivationPath_t *keyPath = &path;
 static exportPublicKeyContext_t *ctx = &global.exportPublicKeyContext;
@@ -16,24 +17,9 @@ UX_STEP_VALID(
     ux_generate_public_flow_0_step,
     pnn,
     sendPublicKey(true),
-    {
-      &C_icon_validate_14,
-      "Public key",
-      (char *) global.exportPublicKeyContext.display
-    });
-UX_STEP_VALID(
-    ux_generate_public_flow_1_step,
-    pb,
-    sendUserRejection(),
-    {
-      &C_icon_crossmark,
-      "Decline"
-    });
-UX_FLOW(ux_generate_public_flow,
-    &ux_generate_public_flow_0_step,
-    &ux_generate_public_flow_1_step,
-    FLOW_LOOP
-);
+    {&C_icon_validate_14, "Public key", (char *) global.exportPublicKeyContext.display});
+UX_STEP_VALID(ux_generate_public_flow_1_step, pb, sendUserRejection(), {&C_icon_crossmark, "Decline"});
+UX_FLOW(ux_generate_public_flow, &ux_generate_public_flow_0_step, &ux_generate_public_flow_1_step, FLOW_LOOP);
 
 // UI definitions for comparison of public-key on the device
 // with the public-key that the caller received.
@@ -41,14 +27,8 @@ UX_STEP_VALID(
     ux_sign_compare_public_key_0_step,
     bnnn_paging,
     ui_idle(),
-    {
-      .title = "Compare",
-      .text = (char *) global.exportPublicKeyContext.publicKey
-    });
-UX_FLOW(ux_sign_compare_public_key,
-    &ux_sign_compare_public_key_0_step
-);
-
+    {.title = "Compare", .text = (char *) global.exportPublicKeyContext.publicKey});
+UX_FLOW(ux_sign_compare_public_key, &ux_sign_compare_public_key_0_step);
 
 /**
  * Derive the public-key for the given path, and then write it to
@@ -74,30 +54,28 @@ void sendPublicKey(bool compare) {
         tx += sizeof(signedPublicKey);
     }
 
-
     // Send back success response including the public-key (and signature, if wanted).
     if (compare) {
         // Show the public-key so that the user can verify the public-key.
         sendSuccessResultNoIdle(tx);
-        toPaginatedHex(publicKey, sizeof(publicKey), ctx->publicKey);
+        toPaginatedHex(publicKey, sizeof(publicKey), ctx->publicKey, sizeof(ctx->publicKey));
         // Allow for receiving a new instruction even while comparing public keys.
         tx_state->currentInstruction = -1;
-        ux_flow_init(0, ux_sign_compare_public_key, NULL);    
+        ux_flow_init(0, ux_sign_compare_public_key, NULL);
     } else {
         sendSuccess(tx);
     }
 }
 
 void handleGetPublicKey(uint8_t *cdata, uint8_t p1, uint8_t p2, volatile unsigned int *flags) {
-    int bytesRead = parseKeyDerivationPath(cdata);
-    cdata += bytesRead;
+    parseKeyDerivationPath(cdata);
 
     // If P2 == 0x01, then the public-key is signed by its corresponding private key, and
     // appended to the returned public-key. This is used when it is needed to provide
     // proof of the knowledge of the corresponding private key.
     ctx->signPublicKey = p2 == 0x01;
 
-    // If P1 == 0x01, then we skip displaying the key being exported. This is used when it 
+    // If P1 == 0x01, then we skip displaying the key being exported. This is used when it
     // it is not important for the user to validate the key.
     if (p1 == 0x01) {
         sendPublicKey(false);
@@ -125,7 +103,9 @@ void handleGetPublicKey(uint8_t *cdata, uint8_t p1, uint8_t p2, volatile unsigne
                     THROW(ERROR_INVALID_PATH);
             }
         } else {
-            getIdentityAccountDisplay(ctx->display);
+            uint32_t identityIndex = keyPath->rawKeyDerivationPath[4];
+            uint32_t accountIndex = keyPath->rawKeyDerivationPath[6];
+            getIdentityAccountDisplay(ctx->display, sizeof(ctx->display), identityIndex, accountIndex);
         }
 
         // Display the UI for the public-key flow, where the user can validate that the

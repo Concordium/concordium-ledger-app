@@ -1,44 +1,48 @@
-#include "os.h"
-#include "ux.h"
-#include "cx.h"
+#ifndef _GLOBALS_H_
+#define _GLOBALS_H_
+
 #include <stdbool.h>
 
+#include "os.h"
+#include "cx.h"
+#include "descriptionView.h"
+#include "exportPrivateKey.h"
+#include "verifyAddress.h"
+
 #include "getPublicKey.h"
-#include "exportPrivateKeySeed.h"
-
+#include "displayCbor.h"
+#include "signAddAnonymityRevoker.h"
+#include "signAddBakerOrUpdateBakerKeys.h"
+#include "signAddIdentityProvider.h"
 #include "signCredentialDeployment.h"
+#include "signEncryptedAmountTransfer.h"
+#include "signHigherLevelKeyUpdate.h"
 #include "signPublicInformationForIp.h"
-
 #include "signTransfer.h"
 #include "signTransferToEncrypted.h"
 #include "signTransferToPublic.h"
 #include "signTransferWithSchedule.h"
-#include "signEncryptedAmountTransfer.h"
-#include "signAddBakerOrUpdateBakerKeys.h"
-#include "signUpdateBakerRestakeEarnings.h"
-
-#include "signUpdateExchangeRate.h"
 #include "signUpdateAuthorizations.h"
+#include "signUpdateBakerRestakeEarnings.h"
+#include "signRegisterData.h"
+
+#include "signUpdateBakerStakeThreshold.h"
+#include "signUpdateElectionDifficulty.h"
+#include "signUpdateExchangeRate.h"
+#include "signUpdateFoundationAccount.h"
+#include "signUpdateGasRewards.h"
+#include "signUpdateMintDistribution.h"
 #include "signUpdateProtocol.h"
 #include "signUpdateTransactionFeeDistribution.h"
-#include "signUpdateGasRewards.h"
-#include "signUpdateFoundationAccount.h"
-#include "signUpdateMintDistribution.h"
-#include "signUpdateElectionDifficulty.h"
-#include "signUpdateBakerStakeThreshold.h"
-#include "signHigherLevelKeyUpdate.h"
-#include "signAddIdentityProvider.h"
+#include "ux.h"
 
-#ifndef _GLOBALS_H_
-#define _GLOBALS_H_
-
-#define CONCORDIUM_PURPOSE 1105
+#define CONCORDIUM_PURPOSE   1105
 #define CONCORDIUM_COIN_TYPE 0
 
 #define MAX_CDATA_LENGTH 255
 
 #define ACCOUNT_TRANSACTION_HEADER_LENGTH 60
-#define UPDATE_HEADER_LENGTH 28
+#define UPDATE_HEADER_LENGTH              28
 
 typedef enum {
     DEPLOY_MODULE = 0,
@@ -55,7 +59,11 @@ typedef enum {
     TRANSFER_TO_ENCRYPTED = 17,
     TRANSFER_TO_PUBLIC = 18,
     TRANSFER_WITH_SCHEDULE = 19,
-    UPDATE_CREDENTIALS = 20
+    UPDATE_CREDENTIALS = 20,
+    REGISTER_DATA = 21,
+    TRANSFER_WITH_MEMO = 22,
+    ENCRYPTED_AMOUNT_TRANSFER_WITH_MEMO = 23,
+    TRANSFER_WITH_SCHEDULE_WITH_MEMO = 24
 } transactionKind_e;
 
 /**
@@ -77,7 +85,7 @@ typedef enum {
     UPDATE_TYPE_BAKER_STAKE_THRESHOLD = 9,
     UPDATE_TYPE_UPDATE_ROOT_KEYS = 10,
     UPDATE_TYPE_UPDATE_LEVEL1_KEYS = 11,
-    UPDATE_TYPE_UPDATE_LEVEL2_KEYS = 12,
+    UPDATE_TYPE_ADD_ANONYMITY_REVOKER = 12,
     UPDATE_TYPE_ADD_IDENTITY_PROVIDER = 13
 } updateType_e;
 
@@ -109,23 +117,41 @@ typedef struct {
 } accountSender_t;
 extern accountSender_t global_account_sender;
 
+typedef struct {
+    union {
+        signAddAnonymityRevokerContext_t signAddAnonymityRevokerContext;
+        signAddIdentityProviderContext_t signAddIdentityProviderContext;
+    };
+    descriptionContext_t descriptionContext;
+
+} updateWithDescription_t;
+
+typedef struct {
+    union {
+        signTransferContext_t signTransferContext;
+        signEncryptedAmountToTransfer_t signEncryptedAmountToTransfer;
+        signTransferWithScheduleContext_t signTransferWithScheduleContext;
+        signRegisterData_t signRegisterData;
+    };
+    cborContext_t cborContext;
+
+} transactionWithDataBlob_t;
+
 /**
  * As the memory we have available is very limited, the context for each instruction is stored
  * in a shared global union, so that we do not use more memory than that of the most memory
  * consuming instruction context.
  */
 typedef union {
-    exportPrivateKeySeedContext_t exportPrivateKeySeedContext;
+    exportPrivateKeyContext_t exportPrivateKeyContext;
     exportPublicKeyContext_t exportPublicKeyContext;
+    verifyAddressContext_t verifyAddressContext;
 
     signPublicInformationForIp_t signPublicInformationForIp;
     signCredentialDeploymentContext_t signCredentialDeploymentContext;
 
-    signTransferWithScheduleContext_t signTransferWithScheduleContext;
-    signTransferContext_t signTransferContext;
     signTransferToEncrypted_t signTransferToEncrypted;
     signTransferToPublic_t signTransferToPublic;
-    signEncryptedAmountToTransfer_t signEncryptedAmountToTransfer;
     signAddBakerContext_t signAddBaker;
     signUpdateBakerStakeContext_t signUpdateBakerStake;
     signUpdateBakerRestakeEarningsContext_t signUpdateBakerRestakeEarnings;
@@ -140,7 +166,8 @@ typedef union {
     signElectionDifficultyContext_t signElectionDifficulty;
     signUpdateBakerStakeThresholdContext_t signUpdateBakerStakeThreshold;
     signUpdateKeysWithRootKeysContext_t signUpdateKeysWithRootKeysContext;
-    signAddIdentityProviderContext_t signAddIdentityProviderContext;
+    updateWithDescription_t withDescription;
+    transactionWithDataBlob_t withDataBlob;
 } instructionContext;
 extern instructionContext global;
 

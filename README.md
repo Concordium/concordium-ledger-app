@@ -12,11 +12,9 @@ git submodule update --init
 ```
 
 ## Building and deploying application to Ledger Nano S
-
-Start by following the [official guide](https://developers.ledger.com/docs/nano-app/quickstart/) to 
-set your environment up correctly with the required dependencies. Note that it is important to use the correct 
-version of `clang` for the build to work (currently 9.0.0, as linked by Ledger [here](https://developers.ledger.com/docs/nano-app/deepdive/)). 
-If your version is incompatible, then it is quite likely that you will see an error stating that 
+Ledger has documentation on [how to build an application](https://developers.ledger.com/docs/nano-app/build/) and [load it onto a Nano S](https://developers.ledger.com/docs/nano-app/load/), using a docker image. 
+If you try to setup your local environment to build, note that it is important to use the correct version of `clang` for the build to work (currently 9.0.0).
+If your version is incompatible, then it is quite likely that you will see an error stating that
 `ld.lld doesn't exist`.
 
 The Makefile is responsible for loading the application onto the device. This is done with the load
@@ -37,6 +35,22 @@ make delete
 Both scripts require you to respond to the installation UI on the device for the installation or deletion
 to complete.
 
+### Building using the provided Dockerfile
+
+First, build the docker image
+
+```bash
+docker build -t concordium/ledger-app-builder .
+```
+Then, run the docker container
+
+```bash
+docker run --rm -ti -v "$(realpath .):/app" --privileged concordium/ledger-app-builder
+```
+
+This launches bash inside ubuntu. The app can now be built using the commands from the Makefile. 
+It still seems like it's only possible to load the application onto the ledger with `make load` on an Ubuntu machine, due to docker not having access to usb.
+
 ### Switching the SDK
 
 Please note that it is necessary to run
@@ -49,7 +63,7 @@ when switching the SDK used to build the application.
 
 Refer to the official documentation provided by Ledger. For quick development when deploying to the 
 device, make sure to deploy a custom certificate to the device. See the "PIN Bypass" section 
-[here](https://ledger.readthedocs.io/en/latest/userspace/debugging.html).
+[here](https://developers.ledger.com/docs/nano-app/debug/).
 
 For documentation of the exposed functionality and how to integrate with the Concordium specific 
 applications, please take a look [here](doc/api.md).
@@ -65,12 +79,55 @@ make emulator
 ```
 The file will be available at `bin/app.elf`.
 
+## Linting
+A make target is available for linting:
+```bash
+make lint
+```
+
+## Testing
+
+### Running unit tests
+There are unit tests on some of the functions that do not rely on Ledger specific libraries.
+First, you must have the following installed:
+
+- CMake >= 3.10
+- CMocka >= 1.1.5
+
+To build the tests:
+```bash
+cd unit_tests
+cmake -Bbuild -H. && make -C build
+```
+While still in the `unit_tests` directory, execute the following to run the unit tests:
+```bash
+CTEST_OUTPUT_ON_FAILURE=1 make -C build test
+```
+
+### Running end to end tests
+An end to end test is available for each instruction implemented in the application. The end
+to end tests depends on having built the application for Nano S and Nano X, and having placed
+their `.elf` files correctly. This can achieved by running:
+```bash
+cd tests
+./build_binaries.sh
+```
+To fetch the required dependencies run:
+```bash
+yarn
+```
+
+While still in the `tests` directory, execute the following to run the end to end tests:
+```bash
+yarn test
+```
+
 ## Building a release
 
 Note that it is only possible to build a release for the Nano S.
 
 To make a new release of the Concordium Ledger application you must have set up the build
-environment like described in the [official guide](https://ledger.readthedocs.io/en/latest/userspace/getting_started.html).
+environment like described in the [official guide](https://developers.ledger.com/docs/nano-app/build/).
 Additionally you must set the following environment variables
 ```
 LEDGER_SIGNING_KEY=private_key_used_for_signing_releases

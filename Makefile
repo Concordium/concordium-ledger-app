@@ -29,7 +29,7 @@ ICONNAME = nanos-concordium-icon.gif
 
 # Version must be no greater than 99.99.999, otherwise
 # extra memory must be allocated in menu.c.
-APPVERSION_MAJOR=1
+APPVERSION_MAJOR=2
 APPVERSION_MINOR=1
 APPVERSION_PATCH=0
 APPVERSION=$(APPVERSION_MAJOR).$(APPVERSION_MINOR).$(APPVERSION_PATCH)
@@ -198,6 +198,9 @@ load: all
 
 delete:
 	python3 -m ledgerblue.deleteApp $(COMMON_DELETE_PARAMS)
+
+lint:
+	find . -regex './src/.*\.\(c\|h\)\|./unit_tests/.*\.\(c\|h\)' -exec clang-format -style=file -i {} \;
 
 # Import rules to compile the glyphs supplied in the glyphs/ directory
 include $(BOLOS_SDK)/Makefile.glyphs

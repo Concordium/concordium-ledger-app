@@ -1,11 +1,14 @@
-#include "os.h"
-#include "cx.h"
+#include "util.h"
+
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
-#include "util.h"
-#include "menu.h"
+
 #include "base58check.h"
+#include "cx.h"
+#include "menu.h"
+#include "numberHelpers.h"
+#include "os.h"
 #include "responseCodes.h"
 
 static tx_state_t *tx_state = &global_tx_state;
@@ -34,157 +37,11 @@ int parseKeyDerivationPath(uint8_t *cdata) {
     return 1 + (4 * keyPath->pathLength);
 }
 
-int lengthOfNumber(uint64_t number) {
-	int len = 0;
-	for (uint64_t nn = number; nn != 0; nn /= 10) {
-		len++;
-    }
-    return len;
-}
-
-int numberToText(uint8_t *dst, uint64_t number) {
-	if (number == 0) {
-		dst[0] = '0';
-		return 1;
-	}
-    int len = lengthOfNumber(number);
-
-	// Build the number in big-endian order.
-	for (int i = len - 1; i >= 0; i--) {
-		dst[i] = (number % 10) + '0';
-		number /= 10;
-	}
-	return len;
-}
-
-int bin2dec(uint8_t *dst, uint64_t number) {
-    int characterLength = numberToText(dst, number);
-    dst[characterLength] = '\0';
-    return characterLength + 1;
-}
-
-/**
- * Write the display version of the decimal part of a GTU amount,
- * i.e. the numbers on the right-side of the decimal point.
- */
-int decimalAmountToGtuDisplay(uint8_t *dst, uint64_t microGtuAmount) {
-    // Fill with zeroes if the number is less than 6 digits,
-    // so that input like 5304 become 005304 in their display version.
-    int length = lengthOfNumber(microGtuAmount);
-    int zeroFillLength = 6 - length;
-    for (int i = 0; i < zeroFillLength; i++) {
-        dst[i] = '0';
-    }
-
-    // Remove any non-significant zeroes from the number.
-    // This avoids displaying numbers like 5300, as it will
-    // instead become 53.
-    for (int i = length - 1; i >= 0; i--) {
-		uint64_t currentNumber = (microGtuAmount % 10);
-        if (currentNumber != 0) {
-            break;
-        } else {
-            microGtuAmount /= 10;
-        }
-	}
-
-    return numberToText(dst + zeroFillLength, microGtuAmount) + zeroFillLength;
-}
-
-/**
- * Constructs a display text version of a micro GTU amount, so that it
- * can displayed as GTU, i.e. not as the micro version, as it is easier
- * to relate to in the GUI.
- */
-int amountToGtuDisplay(uint8_t *dst, uint64_t microGtuAmount) {
-    // A zero amount should be displayed as a plain '0'.
-    if (microGtuAmount == 0) {
-        dst[0] = '0';
-        dst[1] = '\0';
-        return 2;
-    }
-
-    int length = lengthOfNumber(microGtuAmount);
-
-    // If the amount is less than than the resolution (micro), then the 
-    // GTU amount has to be prefixed by '0.' as it will purely consist 
-    // of the decimals.
-    if (microGtuAmount < 1000000) {
-        dst[0] = '0';
-        dst[1] = '.';
-        int length = decimalAmountToGtuDisplay(dst + 2, microGtuAmount) + 2;
-        dst[length] = '\0';
-        return length + 1;
-    }
-
-    // If we reach this case, then the number is greater than 1.000.000 and we will
-    // need to consider thousand separators for the whole number part.
-    int wholeNumberLength = length - 6;
-    int current = 0;
-    int separatorCount = wholeNumberLength / 3;
-    if (wholeNumberLength % 3 == 0) {
-        separatorCount -= 1;
-    }
-
-    // 100,000
-    
-    // The first 6 digits should be without thousand separators,
-    // as they are part of the decimal part of the number. Write those
-    // characters first to the destination output and separate with ','
-    uint8_t decimalSeparatorCount = 0;
-    int decimalPartLength = 0;
-    uint64_t decimalPart = microGtuAmount % 1000000;
-    if (decimalPart != 0) {
-        decimalPartLength = decimalAmountToGtuDisplay(dst + wholeNumberLength + separatorCount + 1, decimalPart);
-        dst[wholeNumberLength + separatorCount] = '.';
-        decimalSeparatorCount = 1;
-
-        // Adjust length, as we might not have exactly 6 decimals anymore, as we have removed
-        // non-significant zeroes at the end of the number.
-        length -= 6 - decimalPartLength;
-    } else {
-        // The number does not have any decimals (they are all 0), so we reduce the total
-        // length of the number to remove the decimals, as we don't need them to display the number.
-        length -= 6;
-    }
-    microGtuAmount /= 1000000;
-
-    // Write the whole number part of the amount to the output destination. This
-    // part has to have thousand separators added.
-    for (int i = wholeNumberLength - 1 + separatorCount; i >= 0; i--) {
-		dst[i] = (microGtuAmount % 10) + '0';
-		microGtuAmount /= 10;
-        
-        current += 1;
-        if (current == 3 && i != 0) {
-            dst[i - 1] = ',';
-            i--;
-            current = 0;
-        }
-    }
-
-    dst[length + separatorCount + decimalSeparatorCount] = '\0';
-    return length + separatorCount + decimalSeparatorCount + 1;
-}
-
-// Builds a display version of the identity/account path. A pre-condition
-// for running this method is that 'parseKeyDerivation' has been
-// run prior to it.
-void getIdentityAccountDisplay(uint8_t *dst) {
-    uint32_t identityIndex = keyPath->rawKeyDerivationPath[4];
-    uint32_t accountIndex = keyPath->rawKeyDerivationPath[6];
-
-    int offset = bin2dec(dst, identityIndex) - 1;
-    memmove(dst + offset, "/", 1);
-    offset = offset + 1;
-    offset = offset + bin2dec(dst + offset, accountIndex);
-}
-
 /**
  * Generic method for hashing and validating header and type for a transaction.
- * Use hashAccountTransactionHeaderAndKind or hashUpdateHeaderAndType 
+ * Use hashAccountTransactionHeaderAndKind or hashUpdateHeaderAndType
  * instead of using this method directly.
- */ 
+ */
 int hashHeaderAndType(uint8_t *cdata, uint8_t headerLength, uint8_t validType) {
     cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, headerLength, NULL, 0);
     cdata += headerLength;
@@ -194,16 +51,15 @@ int hashHeaderAndType(uint8_t *cdata, uint8_t headerLength, uint8_t validType) {
         THROW(ERROR_INVALID_TRANSACTION);
     }
     cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 1, NULL, 0);
-    cdata += 1;
 
     return headerLength + 1;
 }
 
 /**
- * Adds the account transaction header and the transaction kind to the hash. The 
+ * Adds the account transaction header and the transaction kind to the hash. The
  * transaction kind is verified to have the supplied value to prevent processing
  * invalid transactions.
- * 
+ *
  * A side effect of this method is that the sender address from the transaction header
  * is parsed and saved in a global variable, so that it is available to be displayed
  * for all account transactions.
@@ -227,6 +83,33 @@ int hashAccountTransactionHeaderAndKind(uint8_t *cdata, uint8_t validTransaction
  */
 int hashUpdateHeaderAndType(uint8_t *cdata, uint8_t validUpdateType) {
     return hashHeaderAndType(cdata, UPDATE_HEADER_LENGTH, validUpdateType);
+}
+
+int handleHeaderAndToAddress(uint8_t *cdata, uint8_t kind, uint8_t *recipientDst, size_t recipientSize) {
+    // Parse the key derivation path, which should always be the first thing received
+    // in a command to the Ledger application.
+    int keyPathLength = parseKeyDerivationPath(cdata);
+    cdata += keyPathLength;
+
+    // Initialize the hash that will be the hash of the whole transaction, which is what will be signed
+    // if the user approves.
+    cx_sha256_init(&tx_state->hash);
+    int headerLength = hashAccountTransactionHeaderAndKind(cdata, kind);
+    cdata += headerLength;
+
+    // Extract the recipient address and add to the hash.
+    uint8_t toAddress[32];
+    memmove(toAddress, cdata, 32);
+    cx_hash((cx_hash_t *) &tx_state->hash, 0, toAddress, 32, NULL, 0);
+
+    // The recipient address is in a base58 format, so we need to encode it to be
+    // able to display in a human-readable way.
+    if (base58check_encode(toAddress, sizeof(toAddress), recipientDst, &recipientSize) != 0) {
+        // The received address bytes are not a valid base58 encoding.
+        THROW(ERROR_INVALID_TRANSACTION);
+    }
+    recipientDst[55] = '\0';
+    return keyPathLength + headerLength + 32;
 }
 
 void sendUserRejection() {
@@ -253,21 +136,11 @@ void sendSuccessResultNoIdle(uint8_t tx) {
     io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, tx);
 }
 
-void toPaginatedHex(uint8_t *byteArray, const uint64_t len, char *asHex) {
-    static uint8_t const hex[] = "0123456789abcdef";
-    uint8_t offset = 0;
-    for (uint64_t i = 0; i < len; i++) {
-        asHex[2 * i + offset] = hex[(byteArray[i]>>4) & 0x0F];
-        asHex[2 * i + (offset + 1)] = hex[(byteArray[i]>>0) & 0x0F];
-
-        // Insert a space to force the Ledger to paginate the string every
-        // 16 characters.
-        if ((2 * (i + 1)) % 16 == 0 && i != len - 1) {
-            asHex[2 * i + (offset + 2)] = ' ';
-            offset += 1;
-        }
-    }
-    asHex[2 * len + offset] = '\0';
+void getIdentityAccountDisplay(uint8_t *dst, size_t dstLength, uint32_t identityIndex, uint32_t accountIndex) {
+    int offset = numberToText(dst, dstLength, identityIndex);
+    memmove(dst + offset, "/", 1);
+    offset += 1;
+    bin2dec(dst + offset, dstLength - offset, accountIndex);
 }
 
 void getPrivateKey(uint32_t *keyPath, uint8_t keyPathLength, cx_ecfp_private_key_t *privateKey) {
@@ -277,7 +150,15 @@ void getPrivateKey(uint32_t *keyPath, uint8_t keyPathLength, cx_ecfp_private_key
     // Wrap in try/finally to ensure that private key information is cleaned up, even if a system call fails.
     BEGIN_TRY {
         TRY {
-            os_perso_derive_node_bip32_seed_key(HDW_ED25519_SLIP10, CX_CURVE_Ed25519, keyPath, keyPathLength, privateKeyData, NULL, (unsigned char*) "ed25519 seed", 12);
+            os_perso_derive_node_bip32_seed_key(
+                HDW_ED25519_SLIP10,
+                CX_CURVE_Ed25519,
+                keyPath,
+                keyPathLength,
+                privateKeyData,
+                NULL,
+                (unsigned char *) "ed25519 seed",
+                12);
             cx_ecfp_init_private_key(CX_CURVE_Ed25519, privateKeyData, 32, privateKey);
         }
         FINALLY {
@@ -292,12 +173,11 @@ void getPublicKey(uint8_t *publicKeyArray) {
     cx_ecfp_private_key_t privateKey;
     cx_ecfp_public_key_t publicKey;
 
-    getPrivateKey(keyPath->keyDerivationPath, keyPath->pathLength, &privateKey);
-
-    // Invoke the device method for generating a public-key pair.
     // Wrap in try/finally to ensure private key information is cleaned up, even if the system call fails.
     BEGIN_TRY {
         TRY {
+            getPrivateKey(keyPath->keyDerivationPath, keyPath->pathLength, &privateKey);
+            // Invoke the device method for generating a public-key pair.
             cx_ecfp_generate_pair(CX_CURVE_Ed25519, &publicKey, &privateKey, 1);
         }
         FINALLY {
@@ -324,11 +204,73 @@ void sign(uint8_t *input, uint8_t *signatureOnInput) {
     BEGIN_TRY {
         TRY {
             getPrivateKey(keyPath->keyDerivationPath, keyPath->pathLength, &privateKey);
-            cx_eddsa_sign(&privateKey, CX_RND_RFC6979 | CX_LAST, CX_SHA512, input, 32, NULL, 0, signatureOnInput, 64, NULL);
+            cx_eddsa_sign(
+                &privateKey,
+                CX_RND_RFC6979 | CX_LAST,
+                CX_SHA512,
+                input,
+                32,
+                NULL,
+                0,
+                signatureOnInput,
+                64,
+                NULL);
         }
         FINALLY {
             // Clean up the private key, so that we cannot leak it.
             explicit_bzero(&privateKey, sizeof(privateKey));
+        }
+    }
+    END_TRY;
+}
+
+#define l_CONST        48  // ceil((3 * ceil(log2(r))) / 16)
+#define BLS_KEY_LENGTH 32
+
+static const uint8_t l_bytes[2] = {0, l_CONST};
+
+/** This implements the bls key generation algorithm specified in
+ * https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-2.3, The optional parameter key_info
+ * is hardcoded to an empty string. Uses sha256 as the hash function. The generated key has length 32, and dst should
+ * have atleast that length, or the function throws an error.
+ */
+void blsKeygen(const uint8_t *seed, size_t seedLength, uint8_t *dst, size_t dstLength) {
+    if (dstLength < BLS_KEY_LENGTH) {
+        THROW(ERROR_BUFFER_OVERFLOW);
+    }
+
+    uint8_t sk[l_CONST];
+    uint8_t prk[32];
+    uint8_t salt[32] = {
+        66, 76, 83, 45, 83, 73, 71, 45, 75, 69,
+        89, 71, 69, 78, 45, 83, 65, 76, 84, 45};  // Initially set to the byte representation of "BLS-SIG-KEYGEN-SALT-"
+    size_t saltSize = 20;                         // 20 = size of initial salt seed
+    uint8_t ikm[seedLength + 1];
+
+    memcpy(ikm, seed, seedLength);
+    ikm[seedLength] = 0;
+
+    do {
+        cx_hash_sha256(salt, saltSize, salt, sizeof(salt));
+        saltSize = sizeof(salt);
+        cx_hkdf_extract(CX_SHA256, ikm, sizeof(ikm), salt, sizeof(salt), prk);
+        cx_hkdf_expand(CX_SHA256, prk, sizeof(prk), l_bytes, sizeof(l_bytes), sk, sizeof(sk));
+        cx_math_modm(sk, sizeof(sk), r, sizeof(r));
+    } while (cx_math_is_zero(sk, sizeof(sk)));
+
+    // Skip the first 16 bytes, because they are 0 due to calculating modulo r, which is 32 bytes (and sk has 48 bytes).
+    memmove(dst, sk + l_CONST - BLS_KEY_LENGTH, BLS_KEY_LENGTH);
+}
+
+void getBlsPrivateKey(uint32_t *keyPath, uint8_t keyPathLength, uint8_t *privateKey, size_t privateKeySize) {
+    cx_ecfp_private_key_t privateKeySeed;
+    BEGIN_TRY {
+        TRY {
+            getPrivateKey(keyPath, keyPathLength, &privateKeySeed);
+            blsKeygen(privateKeySeed.d, sizeof(privateKeySeed.d), privateKey, privateKeySize);
+        }
+        FINALLY {
+            explicit_bzero(&privateKeySeed, sizeof(privateKeySeed));
         }
     }
     END_TRY;
