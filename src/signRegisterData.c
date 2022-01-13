@@ -85,8 +85,12 @@ void handleSignRegisterData(
                 THROW(ERROR_INVALID_STATE);
         }
 
-        ux_flow_init(0, ux_register_data_payload, NULL);
-        *flags |= IO_ASYNCH_REPLY;
+        if (ctx->dataLength == 0) {
+            ux_flow_init(0, ux_register_data_payload, NULL);
+            *flags |= IO_ASYNCH_REPLY;
+        } else {
+            sendSuccessNoIdle();
+        }
     } else {
         THROW(ERROR_INVALID_STATE);
     }
