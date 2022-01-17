@@ -35,7 +35,7 @@ void startDisplay() {
     if (ctx->hasCapital) {
         ux_sign_configure_delegation[index++] = &ux_sign_configure_delegation_capital_step;
     }
-    
+
     if (ctx->hasRestakeEarnings) {
         ux_sign_configure_delegation[index++] = &ux_sign_configure_delegation_restake_step;
     }
