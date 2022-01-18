@@ -21,7 +21,7 @@ typedef enum {
 
 typedef struct {
     uint8_t display[255];
-    uint32_t dataLength;
+    uint16_t dataLength;
     registerDataState_t state;
 } signRegisterData_t;
 
