@@ -29,6 +29,7 @@
 #include "responseCodes.h"
 #include "seproxyhal_protocol.h"
 #include "signAddBakerOrUpdateBakerKeys.h"
+#include "signConfigureBaker.h"
 #include "signConfigureDelegation.h"
 #include "signCredentialDeployment.h"
 #include "signEncryptedAmountTransfer.h"
@@ -97,6 +98,7 @@ accountSender_t global_account_sender;
 #define INS_UPDATE_BAKER_STAKE            0x15
 #define INS_UPDATE_BAKER_RESTAKE_EARNINGS 0x16
 #define INS_CONFIGURE_DELEGATION          0x17
+#define INS_CONFIGURE_BAKER               0x18
 
 #define INS_PUBLIC_INFO_FOR_IP           0x20
 #define INS_UPDATE_PROTOCOL              0x21
@@ -243,6 +245,9 @@ static void concordium_main(void) {
                         break;
                     case INS_UPDATE_BAKER_RESTAKE_EARNINGS:
                         handleSignUpdateBakerRestakeEarnings(cdata, &flags);
+                        break;
+                    case INS_CONFIGURE_BAKER:
+                        handleSignConfigureBaker(cdata, p1, &flags, isInitialCall);
                         break;
                     case INS_CONFIGURE_DELEGATION:
                         handleSignConfigureDelegation(cdata, &flags);

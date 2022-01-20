@@ -1,0 +1,240 @@
+#include <os.h>
+
+#include "accountSenderView.h"
+#include "responseCodes.h"
+#include "sign.h"
+#include "util.h"
+static signConfigureBaker_t *ctx = &global.signConfigureBaker;
+static tx_state_t *tx_state = &global_tx_state;
+
+const ux_flow_step_t *ux_sign_configure_baker_first[8];
+const ux_flow_step_t *ux_sign_configure_baker_url[6];
+
+UX_STEP_NOCB(
+    ux_sign_configure_baker_capital_step,
+    bnnn_paging,
+    {.title = "Capital", .text = (char *) global.signConfigureBaker.displayCapital});
+
+UX_STEP_NOCB(
+    ux_sign_configure_baker_restake_step,
+    bnnn_paging,
+    {.title = "Restake earnings", .text = (char *) global.signConfigureBaker.displayRestake});
+
+UX_STEP_NOCB(
+    ux_sign_configure_baker_open_status_step,
+    bnnn_paging,
+    {.title = "Open status", .text = (char *) global.signConfigureBaker.displayOpenForDelegation});
+
+UX_STEP_CB(
+    ux_sign_configure_baker_url_step,
+    bnnn_paging,
+    sendSuccessNoIdle(),
+    {.title = "URL", .text = (char *) global.signConfigureBaker.url});
+
+UX_STEP_CB(ux_sign_configure_baker_continue, nn, sendSuccessNoIdle(), {"Continue", "with transaction"});
+
+void startConfigureBakerUrlDisplay(bool lastUrlPage) {
+    uint8_t index = 0;
+
+    // If no of the optional fields prior to the URL part, and if this is the
+    // first display call for the URL, then this has to also display the 
+    // generic review transaction screen and sender screen.
+    if (ctx->firstUrl && !ctx->hasCapital && !ctx->hasRestakeEarnings && !ctx->hasOpenForDelegation && !ctx->hasSignatureVerifyKey && !ctx->hasElectionVerifyKey && !ctx->hasAggregationVerifyKey) {
+        ux_sign_configure_baker_url[index++] = &ux_sign_flow_shared_review;
+        ux_sign_configure_baker_url[index++] = &ux_sign_flow_account_sender_view;
+        ctx->firstUrl = false;
+    }
+
+    if (!lastUrlPage) {
+        ux_sign_configure_baker_url[index++] = &ux_sign_configure_baker_url_step;
+    } else {
+        // TODO: This should not have a callback function on it in the case of it
+        // being the final page for the URL. Fix this later.
+        ux_sign_configure_baker_url[index++] = &ux_sign_configure_baker_url_step;
+
+        // If there are additional steps show the continue screen, otherwise go
+        // to signing screens.
+        if (ctx->hasTransactionFeeCommission || ctx->hasBakingRewardCommission || ctx->hasFinalizationRewardCommission) {
+            ux_sign_configure_baker_url[index++] = &ux_sign_configure_baker_continue;
+        } else {
+            ux_sign_configure_baker_url[index++] = &ux_sign_flow_shared_sign;
+            ux_sign_configure_baker_url[index++] = &ux_sign_flow_shared_decline;
+        }
+    }
+
+    ux_sign_configure_baker_url[index++] = FLOW_END_STEP;
+    ux_flow_init(0, ux_sign_configure_baker_url, NULL);
+}
+
+void startConfigureBakerDisplay() {
+    uint8_t index = 0;
+
+    ux_sign_configure_baker_first[index++] = &ux_sign_flow_shared_review;
+    ux_sign_configure_baker_first[index++] = &ux_sign_flow_account_sender_view;
+
+    if (ctx->hasCapital) {
+        ux_sign_configure_baker_first[index++] = &ux_sign_configure_baker_capital_step;
+    }
+
+    if (ctx->hasRestakeEarnings) {
+        ux_sign_configure_baker_first[index++] = &ux_sign_configure_baker_restake_step;
+    }
+
+    if (ctx->hasOpenForDelegation) {
+        ux_sign_configure_baker_first[index++] = &ux_sign_configure_baker_open_status_step;
+    }
+
+    // TODO: Fix display for keys. We will have to show them so that an update to the
+    // keys is shown and does not just look like an empty transaction.
+
+    // If there are additional steps, then show continue screen. If this is the last step,
+    // then show signing screens.
+    if (ctx->hasMetadataUrl || ctx->hasTransactionFeeCommission || ctx->hasBakingRewardCommission || ctx->hasFinalizationRewardCommission) {
+        ux_sign_configure_baker_first[index++] = &ux_sign_configure_baker_continue;
+    } else {
+        ux_sign_configure_baker_first[index++] = &ux_sign_flow_shared_sign;
+        ux_sign_configure_baker_first[index++] = &ux_sign_flow_shared_decline;
+    }
+
+    ux_sign_configure_baker_first[index++] = FLOW_END_STEP;
+    ux_flow_init(0, ux_sign_configure_baker_first, NULL);
+}
+
+
+#define P1_INITIAL 0x00
+#define P1_FIRST_BATCH 0x01
+#define P1_URL_LENGTH  0x02
+#define P1_URL         0x03
+
+void handleSignConfigureBaker(uint8_t *cdata, uint8_t p1, volatile unsigned int *flags, bool isInitialCall) {
+    if (P1_INITIAL == p1) {
+        cdata += parseKeyDerivationPath(cdata);
+        cx_sha256_init(&tx_state->hash);
+        cdata += hashAccountTransactionHeaderAndKind(cdata, CONFIGURE_BAKER);
+
+        // The initial 2 bytes tells us the fields we are receiving.
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 2, NULL, 0);
+        uint16_t bitmap = U2BE(cdata, 0);
+
+        // An empty transaction with none of the optionals available is invalid,
+        // or any transaction with a bit set after the 10th bits place (as there are 10
+        // optionals).
+        if (bitmap == 0 || bitmap > 1023) {
+            THROW(ERROR_INVALID_TRANSACTION);
+        }
+        cdata += 2;
+
+        ctx->hasCapital = (bitmap >> 0) & 1;
+        ctx->hasRestakeEarnings = (bitmap >> 1) & 1;
+        ctx->hasOpenForDelegation = (bitmap >> 2) & 1;
+        ctx->hasSignatureVerifyKey = (bitmap >> 3) & 1;
+        ctx->hasElectionVerifyKey = (bitmap >> 4) & 1;
+        ctx->hasAggregationVerifyKey = (bitmap >> 5) & 1;
+        ctx->hasMetadataUrl = (bitmap >> 6) & 1;
+        ctx->hasTransactionFeeCommission = (bitmap >> 7) & 1;
+        ctx->hasBakingRewardCommission = (bitmap >> 8) & 1;
+        ctx->hasFinalizationRewardCommission = (bitmap >> 9) & 1;
+
+        // If one key is to be set/updated, then all keys are required to be set/updated.
+        if (ctx->hasSignatureVerifyKey || ctx->hasElectionVerifyKey || ctx->hasAggregationVerifyKey) {
+            if (!(ctx->hasSignatureVerifyKey && ctx->hasElectionVerifyKey && ctx->hasAggregationVerifyKey)) {
+                THROW(ERROR_INVALID_TRANSACTION);
+            }
+        }
+
+        // TODO: Determine state based on the above booleans. If any in the first
+        // section, then expect that part and so on...
+        sendSuccessNoIdle();
+    } else if (P1_FIRST_BATCH == p1) {
+
+        if (ctx->hasCapital) {
+            uint64_t capitalAmount = U8BE(cdata, 0);
+            amountToGtuDisplay(ctx->displayCapital, sizeof(ctx->displayCapital), capitalAmount);
+            cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 8, NULL, 0);
+            cdata += 8;
+        }
+
+        if (ctx->hasRestakeEarnings) {
+            uint8_t restake = cdata[0];
+            cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 1, NULL, 0);
+            cdata += 1;
+            if (restake == 0) {
+                memmove(ctx->displayRestake, "No", 3);
+            } else if (restake == 1) {
+                memmove(ctx->displayRestake, "Yes", 4);
+            } else {
+                THROW(ERROR_INVALID_TRANSACTION);
+            }
+        }
+
+        if (ctx->hasOpenForDelegation) {
+            uint8_t openForDelegation = cdata[0];
+            cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 1, NULL, 0);
+            cdata += 1;
+
+            if (openForDelegation == 0) {
+                memmove(ctx->displayOpenForDelegation, "Open for all", 13);
+            } else if (openForDelegation == 1) {
+                memmove(ctx->displayOpenForDelegation, "Closed for new", 15);
+            } else if (openForDelegation == 2) {
+                memmove(ctx->displayOpenForDelegation, "Closed for all", 15);
+            } else {
+                THROW(ERROR_INVALID_TRANSACTION);
+            }
+        }
+
+        // In the initial command we verify that if one key is available, then all
+        // of them must be available. Therefore we just check for all here, and not
+        // one by one.
+        if (ctx->hasSignatureVerifyKey && ctx->hasElectionVerifyKey && ctx->hasAggregationVerifyKey) {
+            // We do not display the verification keys to the user, as they are difficult
+            // for the user to verify. If need be, we can start showing them by parsing
+            // the values into hex strings here.
+            // Signature verify key
+            cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 32, NULL, 0);
+            cdata += 32;
+
+            // Election verify key
+            cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 32, NULL, 0);
+            cdata += 32;
+
+            // Aggregation verify key
+            cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 96, NULL, 0);
+        }
+
+        startConfigureBakerDisplay();
+        *flags |= IO_ASYNCH_REPLY;
+    } else if (P1_URL_LENGTH == p1) {
+        if (!ctx->hasMetadataUrl) {
+            THROW(ERROR_INVALID_TRANSACTION);
+        }
+
+        ctx->urlLength = U2BE(cdata, 0);
+        ctx->firstUrl = true;
+        if (ctx->urlLength > 2048) {
+            THROW(ERROR_INVALID_TRANSACTION);
+        }
+
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 2, NULL, 0);
+        sendSuccessNoIdle();
+    } else if (P1_URL == p1) {
+        // NOTE: We don't have to check the bool here, as the state is checked and 
+        // can only be correct if the bool was set! Nifty!
+
+        // We cannot display strings that are so long... So we actually have to display
+        // one at a time then...
+        if (ctx->urlLength > MAX_CDATA_LENGTH) {
+            cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, MAX_CDATA_LENGTH, NULL, 0);
+            ctx->urlLength -= MAX_CDATA_LENGTH;
+            memmove(ctx->url, cdata, MAX_CDATA_LENGTH);
+            startConfigureBakerUrlDisplay(false);
+            *flags |= IO_ASYNCH_REPLY;
+        } else {
+            memmove(ctx->url, cdata, ctx->urlLength);
+            memmove(ctx->url + ctx->urlLength, "\0", 1);
+            cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, ctx->urlLength, NULL, 0);
+            startConfigureBakerUrlDisplay(true);
+            *flags |= IO_ASYNCH_REPLY;
+        }
+    }
+}
