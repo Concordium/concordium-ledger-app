@@ -8,7 +8,7 @@ fn main() {
     let transaction_kind = "19";
     let mut transaction_payload = hex::decode(transaction_kind).unwrap();
 
-    let mut bitmap = hex::decode("0040").unwrap();
+    let mut bitmap = hex::decode("0100").unwrap();
     transaction_payload.append(&mut bitmap);
 
     let mut command_data = path::generate_key_derivation_path();
@@ -58,42 +58,72 @@ fn main() {
     // };
     // ledger.exchange(command2).expect("Configure baker signing failed");
 
-    let mut url_length = hex::decode("0800").unwrap();
-    let command3 = ApduCommand {
+    // let mut url_length = hex::decode("0800").unwrap();
+    // let command3 = ApduCommand {
+    //     cla: 224, 
+    //     ins: 0x18,
+    //     p1: 2,
+    //     p2: 0,
+    //     length: 0,
+    //     data: url_length
+    // };
+    // ledger.exchange(command3).expect("Configure baker signing failed");
+
+    // for n in 1..9 {
+    //     let mut url = b"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa".to_vec();
+    //     let command4 = ApduCommand {
+    //         cla: 224, 
+    //         ins: 0x18,
+    //         p1: 3,
+    //         p2: 0,
+    //         length: 0,
+    //         data: url
+    //     };
+    //     ledger.exchange(command4).expect("Configure baker signing failed");
+    //     println!("Sent!");
+    // }
+
+    // let mut url = b"cccccccc".to_vec();
+    // println!("{}", url.len());
+    // let command4 = ApduCommand {
+    //     cla: 224, 
+    //     ins: 0x18,
+    //     p1: 3,
+    //     p2: 0,
+    //     length: 0,
+    //     data: url
+    // };
+
+    // let result = ledger.exchange(command4).expect("Configure baker signing failed");
+    // println!("Signature: {}", hex::encode(result.data));
+
+    let mut numerator_transaction_fee = hex::decode("0000000000000001").unwrap();
+    let mut denominator_transaction_fee = hex::decode("00000000000000F2").unwrap();
+
+    let mut numerator_baking_reward = hex::decode("00000000000000F1").unwrap();
+    let mut denominator_baking_reward = hex::decode("00000000000000B2").unwrap();
+
+    let mut numerator_finalization_reward = hex::decode("00000000000D0001").unwrap();
+    let mut denominator_finalization_reward = hex::decode("00000000000C00F2").unwrap();
+
+    let mut commission_data = Vec::new();
+    commission_data.append(&mut numerator_transaction_fee);
+    commission_data.append(&mut denominator_transaction_fee);
+    commission_data.append(&mut numerator_baking_reward);
+    commission_data.append(&mut denominator_baking_reward);
+    commission_data.append(&mut numerator_finalization_reward);
+    commission_data.append(&mut denominator_finalization_reward);
+
+    println!("{}", hex::encode(&commission_data));
+
+    let command7 = ApduCommand {
         cla: 224, 
         ins: 0x18,
-        p1: 2,
+        p1: 4,
         p2: 0,
         length: 0,
-        data: url_length
+        data: commission_data
     };
-    ledger.exchange(command3).expect("Configure baker signing failed");
-
-    for n in 1..9 {
-        let mut url = b"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa".to_vec();
-        let command4 = ApduCommand {
-            cla: 224, 
-            ins: 0x18,
-            p1: 3,
-            p2: 0,
-            length: 0,
-            data: url
-        };
-        ledger.exchange(command4).expect("Configure baker signing failed");
-        println!("Sent!");
-    }
-
-    let mut url = b"cccccccc".to_vec();
-    println!("{}", url.len());
-    let command4 = ApduCommand {
-        cla: 224, 
-        ins: 0x18,
-        p1: 3,
-        p2: 0,
-        length: 0,
-        data: url
-    };
-
-    let result = ledger.exchange(command4).expect("Configure baker signing failed");
+    let result = ledger.exchange(command7).expect("Configure baker signing failed");
     println!("Signature: {}", hex::encode(result.data));
 }

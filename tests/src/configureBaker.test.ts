@@ -40,6 +40,40 @@ async function configureBakerUrlStep(signature: string, sim: Zemu, transport: Tr
     );
 }
 
+async function configureBakerCommissionStep(transactionFee: boolean, bakingReward: boolean, finalizationReward: boolean, navigationDir: string, signature: string, sim: Zemu, transport: Transport) {
+    let serializedCommissionRates = Buffer.alloc(0);
+    let navigationSteps = 6;
+
+    if (transactionFee) {
+        const transactionFeeCommissionNumerator = Buffer.from("0000000000000001", "hex");
+        const transactionFeeCommissionDenominator = Buffer.from("00000000F010B001", "hex");
+        serializedCommissionRates = Buffer.concat([transactionFeeCommissionNumerator, transactionFeeCommissionDenominator]);
+        navigationSteps += 1;   
+    }
+
+    if (bakingReward) {
+        const bakingRewardCommissionNumerator = Buffer.from("000000000000C001", "hex");
+        const bakingRewardCommissionDenominator = Buffer.from("0000000000000201", "hex");
+        serializedCommissionRates = Buffer.concat([serializedCommissionRates, bakingRewardCommissionNumerator, bakingRewardCommissionDenominator]);
+        navigationSteps += 1;
+    }
+
+    if (finalizationReward) {
+        const finalizationRewardCommissionNumerator = Buffer.from("0000000000000B11", "hex");
+        const finalizationRewardCommissionDenominator = Buffer.from("0000000000000F01", "hex");
+        serializedCommissionRates = Buffer.concat([serializedCommissionRates, finalizationRewardCommissionNumerator, finalizationRewardCommissionDenominator]);
+        navigationSteps += 1;
+    }
+
+    let tx = transport.send(0xe0, 0x18, 0x04, 0x00, serializedCommissionRates);
+    await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
+    await sim.navigateAndCompareSnapshots('.', 'nanos_configure_baker/' + navigationDir, [navigationSteps, 0]);
+    
+    await expect(tx).resolves.toEqual(
+        Buffer.from(signature, "hex")
+    );
+}
+
 test('[NANO S] Configure baker (none)', setupZemu('nanos', async (sim, transport) => {
     const data = Buffer.from('08000004510000000000000000000000000000000000000002000000000000000020a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7000000000000000a0000000000000064000000290000000063de5da7190000', 'hex');
     transport.send(0xe0, 0x18, 0x00, 0x00, data).catch((e) => expect(e.statusCode).toEqual(27396));
@@ -72,3 +106,16 @@ test('[NANO S] URL only', setupZemu('nanos', async (sim, transport) => {
     await configureBakerUrlStep("19dcff841796ee7b0fca422bf6fc0f6eb5d91a9185d065463541dc2b494cf9fbcdcc8ecb88a9f023b5eb9c1c28b549ff97ef4684d689494f93fb8ec93ca9740d9000", sim, transport);
 }));
 
+test('[NANO S] Commission rates only', setupZemu('nanos', async (sim, transport) => {
+    const data = Buffer.from('08000004510000000000000000000000000000000000000002000000000000000020a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7000000000000000a0000000000000064000000290000000063de5da7190380', 'hex');
+    await transport.send(0xe0, 0x18, 0x00, 0x00, data);
+    await configureBakerCommissionStep(true, true, true, "commission_rates", "33418b5501f85a4e5d1820b2eb7f72ddbd65fcbf81e7c342ec7351df1ea2c7f95119c955dacc4e985d439ea03065954c4fdf24837eb06c7057be22c1d9248c009000", sim, transport);
+}));
+
+test('[NANO S] Single commission rate', setupZemu('nanos', async (sim, transport) => {
+    const data = Buffer.from('08000004510000000000000000000000000000000000000002000000000000000020a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7000000000000000a0000000000000064000000290000000063de5da7190100', 'hex');
+    await transport.send(0xe0, 0x18, 0x00, 0x00, data);
+    await configureBakerCommissionStep(false, true, false, "single_commission_rate" ,"eca675c1f30619e15c33f6b86c26d786588edc61a761d91efac13eb74fceb69268d3b4da04d1d8c3332ee30a400ee253321db4d57a63c08e32fba00f9f1ff9079000", sim, transport);
+}));
+
+// TODO: Add a test with onl keys.
