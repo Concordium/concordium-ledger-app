@@ -70,6 +70,7 @@ void startConfigureBakerDisplay() {
 
     ux_sign_configure_baker_first[index++] = &ux_sign_flow_shared_review;
     ux_sign_configure_baker_first[index++] = &ux_sign_flow_account_sender_view;
+    ctx->firstDisplay = false;
 
     if (ctx->hasCapital) {
         ux_sign_configure_baker_first[index++] = &ux_sign_configure_baker_capital_step;
@@ -115,12 +116,10 @@ void startConfigureBakerDisplay() {
 void startConfigureBakerUrlDisplay(bool lastUrlPage) {
     uint8_t index = 0;
 
-    if (ctx->firstUrl && !ctx->hasCapital && !ctx->hasRestakeEarnings && !ctx->hasOpenForDelegation 
-        && !ctx->hasSignatureVerifyKey && !ctx->hasElectionVerifyKey && !ctx->hasAggregationVerifyKey
-    ) {
+    if (ctx->firstDisplay) {
         ux_sign_configure_baker_url[index++] = &ux_sign_flow_shared_review;
         ux_sign_configure_baker_url[index++] = &ux_sign_flow_account_sender_view;
-        ctx->firstUrl = false;
+        ctx->firstDisplay = false;
     }
 
     if (!lastUrlPage) {
@@ -152,12 +151,10 @@ void startConfigureBakerUrlDisplay(bool lastUrlPage) {
 void startConfigureBakerCommissionDisplay() {
     uint8_t index = 0;
 
-    if (!ctx->hasCapital && !ctx->hasRestakeEarnings && !ctx->hasOpenForDelegation && 
-        !ctx->hasSignatureVerifyKey && !ctx->hasElectionVerifyKey && !ctx->hasAggregationVerifyKey 
-        && !ctx->hasMetadataUrl
-    ) {
+    if (ctx->firstDisplay) {
         ux_sign_configure_baker_commission[index++] = &ux_sign_flow_shared_review;
         ux_sign_configure_baker_commission[index++] = &ux_sign_flow_account_sender_view;
+        ctx->firstDisplay = false;
     }
 
     if (ctx->hasTransactionFeeCommission) {
@@ -182,7 +179,7 @@ void startConfigureBakerCommissionDisplay() {
 // TODO This methods could/should be shared with what we use for the exchange rate.
 /**
  * Helper method for parsing commission rates as they are all equal in structure.
- */ 
+ */
 int parseCommissionRate(uint8_t *cdata, uint8_t *commissionRateDisplay, uint8_t sizeOfCommissionRateDisplay) {
     uint64_t numerator = U8BE(cdata, 0);
     int offset = numberToText(commissionRateDisplay, sizeOfCommissionRateDisplay, numerator);
@@ -203,9 +200,10 @@ int parseCommissionRate(uint8_t *cdata, uint8_t *commissionRateDisplay, uint8_t 
 
 #define P1_INITIAL 0x00
 #define P1_FIRST_BATCH 0x01
-#define P1_URL_LENGTH  0x02
-#define P1_URL         0x03
-#define P1_COMMISSION_RATES 0x04
+#define P1_AGGREGATION_KEY 0x02
+#define P1_URL_LENGTH  0x03
+#define P1_URL         0x04
+#define P1_COMMISSION_RATES 0x05
 
 void handleCommissionRates(uint8_t *cdata) {
     if (ctx->hasTransactionFeeCommission) {
@@ -223,11 +221,12 @@ void handleCommissionRates(uint8_t *cdata) {
     startConfigureBakerCommissionDisplay();
 }
 
-void handleSignConfigureBaker(uint8_t *cdata, uint8_t p1, volatile unsigned int *flags, bool isInitialCall) {
+void handleSignConfigureBaker(uint8_t *cdata, uint8_t p1, uint8_t dataLength, volatile unsigned int *flags, bool isInitialCall) {
     if (P1_INITIAL == p1) {
         cdata += parseKeyDerivationPath(cdata);
         cx_sha256_init(&tx_state->hash);
         cdata += hashAccountTransactionHeaderAndKind(cdata, CONFIGURE_BAKER);
+        ctx->firstDisplay = true;
 
         // The initial 2 bytes tells us the fields we are receiving.
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 2, NULL, 0);
@@ -263,18 +262,21 @@ void handleSignConfigureBaker(uint8_t *cdata, uint8_t p1, volatile unsigned int 
         // section, then expect that part and so on...
         sendSuccessNoIdle();
     } else if (P1_FIRST_BATCH == p1) {
+        int lengthCheck = dataLength;
 
         if (ctx->hasCapital) {
             uint64_t capitalAmount = U8BE(cdata, 0);
             amountToGtuDisplay(ctx->displayCapital, sizeof(ctx->displayCapital), capitalAmount);
             cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 8, NULL, 0);
             cdata += 8;
+            lengthCheck -= 8;
         }
 
         if (ctx->hasRestakeEarnings) {
             uint8_t restake = cdata[0];
             cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 1, NULL, 0);
             cdata += 1;
+            lengthCheck -= 1;
             if (restake == 0) {
                 memmove(ctx->displayRestake, "No", 3);
             } else if (restake == 1) {
@@ -288,6 +290,7 @@ void handleSignConfigureBaker(uint8_t *cdata, uint8_t p1, volatile unsigned int 
             uint8_t openForDelegation = cdata[0];
             cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 1, NULL, 0);
             cdata += 1;
+            lengthCheck -= 1;
 
             if (openForDelegation == 0) {
                 memmove(ctx->displayOpenForDelegation, "Open for all", 13);
@@ -301,9 +304,12 @@ void handleSignConfigureBaker(uint8_t *cdata, uint8_t p1, volatile unsigned int 
         }
 
         // In the initial command we verify that if one key is available, then all
-        // of them must be available. Therefore we just check for all here, and not
-        // one by one.
-        if (ctx->hasSignatureVerifyKey && ctx->hasElectionVerifyKey && ctx->hasAggregationVerifyKey) {
+        // of them must be available. Therefore we just check for one of them.
+        if (ctx->hasSignatureVerifyKey) {
+            if (lengthCheck != 192) {
+                THROW(ERROR_INVALID_TRANSACTION);
+            }
+
             // We do not display the verification keys to the user, as they are difficult
             // for the user to verify. If need be, we can start showing them by parsing
             // the values into hex strings here.
@@ -311,13 +317,38 @@ void handleSignConfigureBaker(uint8_t *cdata, uint8_t p1, volatile unsigned int 
             cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 32, NULL, 0);
             cdata += 32;
 
+            // Signature Proof
+            cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 64, NULL, 0);
+            cdata += 64;
+
             // Election verify key
             cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 32, NULL, 0);
             cdata += 32;
 
-            // Aggregation verify key
-            cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 96, NULL, 0);
+            // Election Proof
+            cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 64, NULL, 0);
+            cdata += 64;
+
+            // We delay the display until we get the aggregation key.
+            sendSuccessNoIdle();
+        } else {
+            if (lengthCheck != 0) {
+                THROW(ERROR_INVALID_TRANSACTION);
+            }
+            startConfigureBakerDisplay();
+            *flags |= IO_ASYNCH_REPLY;
         }
+    } else if (P1_AGGREGATION_KEY == p1) {
+        if (!ctx->hasAggregationVerifyKey) {
+            THROW(ERROR_INVALID_TRANSACTION);
+        }
+
+        // Aggregation verify key
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 96, NULL, 0);
+
+        // Election Proof
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 64, NULL, 0);
+        cdata += 64;
 
         startConfigureBakerDisplay();
         *flags |= IO_ASYNCH_REPLY;
@@ -327,7 +358,6 @@ void handleSignConfigureBaker(uint8_t *cdata, uint8_t p1, volatile unsigned int 
         }
 
         ctx->urlLength = U2BE(cdata, 0);
-        ctx->firstUrl = true;
         if (ctx->urlLength > 2048) {
             THROW(ERROR_INVALID_TRANSACTION);
         }
@@ -335,23 +365,28 @@ void handleSignConfigureBaker(uint8_t *cdata, uint8_t p1, volatile unsigned int 
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 2, NULL, 0);
         sendSuccessNoIdle();
     } else if (P1_URL == p1) {
-        // NOTE: We don't have to check the bool here, as the state is checked and 
+        // NOTE: We don't have to check the bool here, as the state is checked and
         // can only be correct if the bool was set! Nifty!
+        if (dataLength != 8) {
+            THROW(ERROR_INVALID_TRANSACTION);
+        }
 
         // We cannot display strings that are so long... So we actually have to display
         // one at a time then...
-        if (ctx->urlLength > MAX_CDATA_LENGTH) {
-            cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, MAX_CDATA_LENGTH, NULL, 0);
-            ctx->urlLength -= MAX_CDATA_LENGTH;
-            memmove(ctx->url, cdata, MAX_CDATA_LENGTH);
+        if (ctx->urlLength > dataLength) {
+            cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, dataLength, NULL, 0);
+            ctx->urlLength -= dataLength;
+            memmove(ctx->url, cdata, dataLength);
             startConfigureBakerUrlDisplay(false);
             *flags |= IO_ASYNCH_REPLY;
-        } else {
+        } else if (ctx->urlLength == dataLength) {
             memmove(ctx->url, cdata, ctx->urlLength);
             memmove(ctx->url + ctx->urlLength, "\0", 1);
             cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, ctx->urlLength, NULL, 0);
             startConfigureBakerUrlDisplay(true);
             *flags |= IO_ASYNCH_REPLY;
+        } else {
+            THROW(ERROR_INVALID_TRANSACTION);
         }
     } else if (P1_COMMISSION_RATES == p1) {
         handleCommissionRates(cdata);
