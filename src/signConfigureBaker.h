@@ -6,7 +6,12 @@
  * that the correct UpdateType is supplied and will fail otherwise.
  * @param cdata please see /doc/ins_configure_delegation.md for details
  */
-void handleSignConfigureBaker(uint8_t *cdata, uint8_t p1, uint8_t dataLength, volatile unsigned int *flags, bool isInitialCall);
+void handleSignConfigureBaker(
+    uint8_t *cdata,
+    uint8_t p1,
+    uint8_t dataLength,
+    volatile unsigned int *flags,
+    bool isInitialCall);
 
 // TODO: Consider making a union type between the 3 different
 // steps as we will not be using the memory at the same time,

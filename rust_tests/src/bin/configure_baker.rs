@@ -121,22 +121,16 @@ fn main() {
      ledger.exchange(command4).expect("Configure baker signing failed");
     println!("test");
 
-    let mut numerator_transaction_fee = hex::decode("0000000000000001").unwrap();
-    let mut denominator_transaction_fee = hex::decode("00000000000000F2").unwrap();
+    let mut transaction_fee = hex::decode("00000001").unwrap();
 
-    let mut numerator_baking_reward = hex::decode("00000000000000F1").unwrap();
-    let mut denominator_baking_reward = hex::decode("00000000000000B2").unwrap();
+    let mut baking_reward = hex::decode("000000F1").unwrap();
 
-    let mut numerator_finalization_reward = hex::decode("00000000000D0001").unwrap();
-    let mut denominator_finalization_reward = hex::decode("00000000000C00F2").unwrap();
+    let mut finalization_reward = hex::decode("000D0001").unwrap();
 
     let mut commission_data = Vec::new();
-    commission_data.append(&mut numerator_transaction_fee);
-    commission_data.append(&mut denominator_transaction_fee);
-    commission_data.append(&mut numerator_baking_reward);
-    commission_data.append(&mut denominator_baking_reward);
-    commission_data.append(&mut numerator_finalization_reward);
-    commission_data.append(&mut denominator_finalization_reward);
+    commission_data.append(&mut transaction_fee);
+    commission_data.append(&mut baking_reward);
+    commission_data.append(&mut finalization_reward);
 
     println!("{}", hex::encode(&commission_data));
 
@@ -145,7 +139,7 @@ fn main() {
         ins: 0x18,
         p1: 5,
         p2: 0,
-        length: 0,
+        length: commission_data.len() as u8,
         data: commission_data
     };
     let result = ledger.exchange(command7).expect("Configure baker signing failed");

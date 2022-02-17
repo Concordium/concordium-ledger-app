@@ -90,7 +90,8 @@ void startConfigureBakerDisplay() {
 
     // If there are additional steps, then show continue screen. If this is the last step,
     // then show signing screens.
-    if (ctx->hasMetadataUrl || ctx->hasTransactionFeeCommission || ctx->hasBakingRewardCommission || ctx->hasFinalizationRewardCommission) {
+    if (ctx->hasMetadataUrl || ctx->hasTransactionFeeCommission || ctx->hasBakingRewardCommission ||
+        ctx->hasFinalizationRewardCommission) {
         ux_sign_configure_baker_first[index++] = &ux_sign_configure_baker_continue;
     } else {
         ux_sign_configure_baker_first[index++] = &ux_sign_flow_shared_sign;
@@ -129,7 +130,8 @@ void startConfigureBakerUrlDisplay(bool lastUrlPage) {
 
         // If there are additional steps show the continue screen, otherwise go
         // to signing screens.
-        if (ctx->hasTransactionFeeCommission || ctx->hasBakingRewardCommission || ctx->hasFinalizationRewardCommission) {
+        if (ctx->hasTransactionFeeCommission || ctx->hasBakingRewardCommission ||
+            ctx->hasFinalizationRewardCommission) {
             ux_sign_configure_baker_url[index++] = &ux_sign_configure_baker_continue;
         } else {
             ux_sign_configure_baker_url[index++] = &ux_sign_flow_shared_sign;
@@ -147,7 +149,7 @@ void startConfigureBakerUrlDisplay(bool lastUrlPage) {
  *   the UI starts with the shared review transaction screens.
  * - Only shows the commission rates that have been indicated to be part of the transaction.
  * - Shows the signing / decline screens.
- */ 
+ */
 void startConfigureBakerCommissionDisplay() {
     uint8_t index = 0;
 
@@ -180,48 +182,64 @@ void startConfigureBakerCommissionDisplay() {
 /**
  * Helper method for parsing commission rates as they are all equal in structure.
  */
-int parseCommissionRate(uint8_t *cdata, uint8_t *commissionRateDisplay, uint8_t sizeOfCommissionRateDisplay) {
-    uint64_t numerator = U8BE(cdata, 0);
-    int offset = numberToText(commissionRateDisplay, sizeOfCommissionRateDisplay, numerator);
-    cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 8, NULL, 0);
-    cdata += 8;
+uint8_t parseCommissionRate(uint8_t *cdata, uint8_t *commissionRateDisplay, uint8_t sizeOfCommissionRateDisplay) {
+    uint8_t fraction[8] = "/100000";
 
-    memmove(commissionRateDisplay + offset, " / ", 3);
-    offset += 3;
-
-    // Denominator is the last 8 bytes.
-    uint64_t denominator = U8BE(cdata, 0);
-    bin2dec(commissionRateDisplay + offset, sizeOfCommissionRateDisplay - offset, denominator);
-    cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 8, NULL, 0);
-    cdata += 8;
-
-    return 16;
+    // Baker GAS bytes
+    uint32_t rate = U4BE(cdata, 0);
+    int rateLength = numberToText(commissionRateDisplay, sizeOfCommissionRateDisplay, rate);
+    cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 4, NULL, 0);
+    cdata += 4;
+    memmove(commissionRateDisplay + rateLength, fraction, 8);
+    return 4;
 }
 
-#define P1_INITIAL 0x00
-#define P1_FIRST_BATCH 0x01
-#define P1_AGGREGATION_KEY 0x02
-#define P1_URL_LENGTH  0x03
-#define P1_URL         0x04
+#define P1_INITIAL          0x00
+#define P1_FIRST_BATCH      0x01
+#define P1_AGGREGATION_KEY  0x02
+#define P1_URL_LENGTH       0x03
+#define P1_URL              0x04
 #define P1_COMMISSION_RATES 0x05
 
-void handleCommissionRates(uint8_t *cdata) {
+void handleCommissionRates(uint8_t *cdata, uint8_t dataLength) {
+    uint8_t rateLength;
+
     if (ctx->hasTransactionFeeCommission) {
-        cdata += parseCommissionRate(cdata, ctx->transactionFeeCommissionRate, sizeof(ctx->transactionFeeCommissionRate));
+        rateLength =
+            parseCommissionRate(cdata, ctx->transactionFeeCommissionRate, sizeof(ctx->transactionFeeCommissionRate));
+        cdata += rateLength;
+        dataLength -= rateLength;
     }
 
     if (ctx->hasBakingRewardCommission) {
-        cdata += parseCommissionRate(cdata, ctx->bakingRewardCommissionRate, sizeof(ctx->bakingRewardCommissionRate));
+        rateLength =
+            parseCommissionRate(cdata, ctx->bakingRewardCommissionRate, sizeof(ctx->bakingRewardCommissionRate));
+        cdata += rateLength;
+        dataLength -= rateLength;
     }
 
     if (ctx->hasFinalizationRewardCommission) {
-        parseCommissionRate(cdata, ctx->finalizationRewardCommissionRate, sizeof(ctx->finalizationRewardCommissionRate));
+        rateLength = parseCommissionRate(
+            cdata,
+            ctx->finalizationRewardCommissionRate,
+            sizeof(ctx->finalizationRewardCommissionRate));
+        cdata += rateLength;
+        dataLength -= rateLength;
+    }
+
+    if (dataLength != 0) {
+        THROW(ERROR_INVALID_TRANSACTION);
     }
 
     startConfigureBakerCommissionDisplay();
 }
 
-void handleSignConfigureBaker(uint8_t *cdata, uint8_t p1, uint8_t dataLength, volatile unsigned int *flags, bool isInitialCall) {
+void handleSignConfigureBaker(
+    uint8_t *cdata,
+    uint8_t p1,
+    uint8_t dataLength,
+    volatile unsigned int *flags,
+    bool isInitialCall) {
     if (P1_INITIAL == p1) {
         cdata += parseKeyDerivationPath(cdata);
         cx_sha256_init(&tx_state->hash);
@@ -367,9 +385,6 @@ void handleSignConfigureBaker(uint8_t *cdata, uint8_t p1, uint8_t dataLength, vo
     } else if (P1_URL == p1) {
         // NOTE: We don't have to check the bool here, as the state is checked and
         // can only be correct if the bool was set! Nifty!
-        if (dataLength != 8) {
-            THROW(ERROR_INVALID_TRANSACTION);
-        }
 
         // We cannot display strings that are so long... So we actually have to display
         // one at a time then...
@@ -389,7 +404,7 @@ void handleSignConfigureBaker(uint8_t *cdata, uint8_t p1, uint8_t dataLength, vo
             THROW(ERROR_INVALID_TRANSACTION);
         }
     } else if (P1_COMMISSION_RATES == p1) {
-        handleCommissionRates(cdata);
+        handleCommissionRates(cdata, dataLength);
         *flags |= IO_ASYNCH_REPLY;
     }
 }
