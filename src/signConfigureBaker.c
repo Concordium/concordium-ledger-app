@@ -28,6 +28,8 @@ UX_STEP_NOCB(
     bnnn_paging,
     {.title = "Open status", .text = (char *) global.signConfigureBaker.displayOpenForDelegation});
 
+UX_STEP_NOCB(ux_sign_configure_baker_keys_step, nn, {"Update baker", "keys"});
+
 UX_STEP_CB(
     ux_sign_configure_baker_url_cb_step,
     bnnn_paging,
@@ -82,6 +84,10 @@ void startConfigureBakerDisplay() {
 
     if (ctx->hasOpenForDelegation) {
         ux_sign_configure_baker_first[index++] = &ux_sign_configure_baker_open_status_step;
+    }
+
+    if (ctx->hasSignatureVerifyKey) {
+        ux_sign_configure_baker_first[index++] = &ux_sign_configure_baker_keys_step;
     }
 
     // TODO: Fix display for keys. We probably want to show them so that an update to the
@@ -178,18 +184,16 @@ void startConfigureBakerCommissionDisplay() {
     ux_flow_init(0, ux_sign_configure_baker_commission, NULL);
 }
 
-// TODO This methods could/should be shared with what we use for the exchange rate.
+// TODO This methods could/should be shared with what we use for the other reward fractions.
 /**
  * Helper method for parsing commission rates as they are all equal in structure.
  */
 uint8_t parseCommissionRate(uint8_t *cdata, uint8_t *commissionRateDisplay, uint8_t sizeOfCommissionRateDisplay) {
     uint8_t fraction[8] = "/100000";
 
-    // Baker GAS bytes
     uint32_t rate = U4BE(cdata, 0);
     int rateLength = numberToText(commissionRateDisplay, sizeOfCommissionRateDisplay, rate);
     cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 4, NULL, 0);
-    cdata += 4;
     memmove(commissionRateDisplay + rateLength, fraction, 8);
     return 4;
 }
@@ -223,7 +227,6 @@ void handleCommissionRates(uint8_t *cdata, uint8_t dataLength) {
             cdata,
             ctx->finalizationRewardCommissionRate,
             sizeof(ctx->finalizationRewardCommissionRate));
-        cdata += rateLength;
         dataLength -= rateLength;
     }
 
@@ -240,7 +243,7 @@ void handleSignConfigureBaker(
     uint8_t dataLength,
     volatile unsigned int *flags,
     bool isInitialCall) {
-    if (P1_INITIAL == p1) {
+    if (P1_INITIAL == p1 && isInitialCall) {
         cdata += parseKeyDerivationPath(cdata);
         cx_sha256_init(&tx_state->hash);
         cdata += hashAccountTransactionHeaderAndKind(cdata, CONFIGURE_BAKER);
@@ -256,7 +259,6 @@ void handleSignConfigureBaker(
         if (bitmap == 0 || bitmap > 1023) {
             THROW(ERROR_INVALID_TRANSACTION);
         }
-        cdata += 2;
 
         ctx->hasCapital = (bitmap >> 0) & 1;
         ctx->hasRestakeEarnings = (bitmap >> 1) & 1;
@@ -324,6 +326,8 @@ void handleSignConfigureBaker(
         // In the initial command we verify that if one key is available, then all
         // of them must be available. Therefore we just check for one of them.
         if (ctx->hasSignatureVerifyKey) {
+            // We are expecting the signature and election verification keys (each 32 bytes) and their proofs (each 64
+            // bytes).
             if (lengthCheck != 192) {
                 THROW(ERROR_INVALID_TRANSACTION);
             }
@@ -345,7 +349,6 @@ void handleSignConfigureBaker(
 
             // Election Proof
             cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 64, NULL, 0);
-            cdata += 64;
 
             // We delay the display until we get the aggregation key.
             sendSuccessNoIdle();
@@ -357,16 +360,16 @@ void handleSignConfigureBaker(
             *flags |= IO_ASYNCH_REPLY;
         }
     } else if (P1_AGGREGATION_KEY == p1) {
-        if (!ctx->hasAggregationVerifyKey) {
+        if (!ctx->hasAggregationVerifyKey || dataLength != 160) {
             THROW(ERROR_INVALID_TRANSACTION);
         }
 
         // Aggregation verify key
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 96, NULL, 0);
+        cdata += 96;
 
         // Election Proof
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 64, NULL, 0);
-        cdata += 64;
 
         startConfigureBakerDisplay();
         *flags |= IO_ASYNCH_REPLY;
@@ -406,5 +409,7 @@ void handleSignConfigureBaker(
     } else if (P1_COMMISSION_RATES == p1) {
         handleCommissionRates(cdata, dataLength);
         *flags |= IO_ASYNCH_REPLY;
+    } else {
+        THROW(ERROR_INVALID_STATE);
     }
 }

@@ -67,7 +67,7 @@ fn main() {
         ins: 0x18,
         p1: 2,
         p2: 0,
-        length: 0,
+        length: aggregation_verify_key.len() as u8,
         data: aggregation_verify_key
     };
     ledger.exchange(command2).expect("Configure baker signing failed");
