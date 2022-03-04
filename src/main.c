@@ -49,6 +49,7 @@
 #include "signUpdateMintDistribution.h"
 #include "signUpdateProtocol.h"
 #include "signUpdateTransactionFeeDistribution.h"
+#include "signUpdateTimeParameters.h"
 #include "ux.h"
 #include "verifyAddress.h"
 
@@ -112,12 +113,17 @@ accountSender_t global_account_sender;
 #define INS_ADD_ANONYMITY_REVOKER     0x2C
 #define INS_ADD_IDENTITY_PROVIDER     0x2D
 
+#define INS_UPDATE_COOLDOWN_PARAMETERS 0x40
+#define INS_UPDATE_POOL_PARAMETERS 0x41
+#define INS_UPDATE_TIME_PARAMETERS 0x42
+
 #define INS_SIGN_UPDATE_CREDENTIAL 0x31
 
 #define INS_SIGN_TRANSFER_WITH_MEMO              0x32
 #define INS_ENCRYPTED_AMOUNT_TRANSFER_WITH_MEMO  0x33
 #define INS_SIGN_TRANSFER_WITH_SCHEDULE_AND_MEMO 0x34
 #define INS_REGISTER_DATA                        0x35
+
 
 // Main entry of application that listens for APDU commands that will be received from the
 // computer. The APDU commands control what flow is activated, i.e. which control flow is initiated.
@@ -277,6 +283,9 @@ static void concordium_main(void) {
                         break;
                     case INS_ADD_ANONYMITY_REVOKER:
                         handleSignAddAnonymityRevoker(cdata, p1, lc, &flags, isInitialCall);
+                        break;
+                    case INS_UPDATE_TIME_PARAMETERS:
+                        handleSignUpdateTimeParameters(cdata, &flags);
                         break;
                     default:
                         THROW(ERROR_INVALID_INSTRUCTION);

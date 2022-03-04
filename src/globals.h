@@ -34,6 +34,7 @@
 #include "signUpdateMintDistribution.h"
 #include "signUpdateProtocol.h"
 #include "signUpdateTransactionFeeDistribution.h"
+#include "signUpdateTimeParameters.h"
 #include "ux.h"
 
 #define CONCORDIUM_PURPOSE   1105
@@ -86,7 +87,10 @@ typedef enum {
     UPDATE_TYPE_UPDATE_ROOT_KEYS = 10,
     UPDATE_TYPE_UPDATE_LEVEL1_KEYS = 11,
     UPDATE_TYPE_ADD_ANONYMITY_REVOKER = 12,
-    UPDATE_TYPE_ADD_IDENTITY_PROVIDER = 13
+    UPDATE_TYPE_ADD_IDENTITY_PROVIDER = 13,
+    UPDATE_TYPE_COOLDOWN_PARAMETERS = 14,
+    UPDATE_TYPE_POOL_PARAMETERS = 15,
+    UPDATE_TYPE_TIME_PARAMETERS = 16
 } updateType_e;
 
 typedef struct {
@@ -165,6 +169,7 @@ typedef union {
     signUpdateMintDistribution_t signUpdateMintDistribution;
     signElectionDifficultyContext_t signElectionDifficulty;
     signUpdateBakerStakeThresholdContext_t signUpdateBakerStakeThreshold;
+    signUpdateTimeParametersContext_t signTimeParameters;
     signUpdateKeysWithRootKeysContext_t signUpdateKeysWithRootKeysContext;
     updateWithDescription_t withDescription;
     transactionWithDataBlob_t withDataBlob;
