@@ -50,6 +50,7 @@
 #include "signUpdateProtocol.h"
 #include "signUpdateTransactionFeeDistribution.h"
 #include "signUpdateTimeParameters.h"
+#include "signUpdateCooldownParameters.h"
 #include "ux.h"
 #include "verifyAddress.h"
 
@@ -286,6 +287,9 @@ static void concordium_main(void) {
                         break;
                     case INS_UPDATE_TIME_PARAMETERS:
                         handleSignUpdateTimeParameters(cdata, &flags);
+                        break;
+                    case INS_UPDATE_COOLDOWN_PARAMETERS:
+                        handleSignUpdateCooldownParameters(cdata, &flags);
                         break;
                     default:
                         THROW(ERROR_INVALID_INSTRUCTION);

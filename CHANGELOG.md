@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Added
+* Support for the "Time parameter" update.
+* Support for the "Cooldown parameter" update.
+ 
 ## 2.1.0 - TBD
 
 ### Added
