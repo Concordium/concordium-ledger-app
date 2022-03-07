@@ -15,6 +15,7 @@
 void handleSignUpdateAuthorizations(
     uint8_t *cdata,
     uint8_t p1,
+    uint8_t p2,
     uint8_t updateType,
     uint8_t dataLength,
     volatile unsigned int *flags,
@@ -43,8 +44,9 @@ typedef enum {
     AUTHORIZATION_GAS_REWARDS,
     AUTHORIZATION_BAKER_STAKE_THRESHOLD,
     AUTHORIZATION_ADD_ANONYMITY_REVOKER,
-    AUTHORIZATION_ADD_IDENTITY_PROVIDER,
-    AUTHORIZATION_END
+    AUTHORIZATION_ADD_IDENTITY_PROVIDER, // Last for v0
+    AUTHORIZATION_COOLDOWN_PARAMETERS,
+    AUTHORIZATION_TIME_PARAMETERS // Last for v1
 } authorizationType_e;
 
 typedef struct {
@@ -63,6 +65,7 @@ typedef struct {
 
     updateAuthorizationsState_t state;
     authorizationType_e authorizationType;
+    authorizationType_e lastAuthorizationType;
 } signUpdateAuthorizations_t;
 
 #endif

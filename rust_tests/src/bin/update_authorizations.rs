@@ -9,9 +9,10 @@ fn main() {
     let mut update_type = hex::decode("0A").unwrap();
     let mut prefix = hex::decode("02").unwrap();
     let mut public_key_list_length = hex::decode("0002").unwrap();
+    let p2 = 1;
 
     let ledger = LedgerApp::new().unwrap();
-    
+
     let mut cdata = Vec::new();
     cdata.append(&mut key_derivation_path);
     cdata.append(&mut update_transaction_header::generate_update_transaction_header());
@@ -23,7 +24,7 @@ fn main() {
         cla: 224, // Has to be this value for all commands.
         ins: 0x2A,
         p1: 0,
-        p2: 0,
+        p2: p2,
         length: cdata.len() as u8,
         data: cdata
     };
@@ -39,14 +40,21 @@ fn main() {
             cla: 224,
             ins: 0x2A,
             p1: 1,
-            p2: 0,
+            p2: p2,
             length: 0,
             data: public_key.clone()
         };
         ledger.exchange(command).unwrap();
     }
+    let mut result = None;
 
-    for i in 0..12 {
+    let structure_count = if p2 == 0 {
+        12
+    } else {
+        14
+    };
+
+    for _ in 0..structure_count {
         // Access structure
         let mut size = hex::decode("0003").unwrap();
 
@@ -57,7 +65,7 @@ fn main() {
             cla: 224, // Has to be this value for all commands.
             ins: 0x2A,   // Sign update authorizations
             p1: 2,
-            p2: 0,
+            p2: p2,
             length: command_data.len() as u8,
             data: command_data
         };
@@ -77,7 +85,7 @@ fn main() {
             cla: 224,
             ins: 0x2A,
             p1: 3,
-            p2: 0,
+            p2: p2,
             length: access_structure_cdata.len() as u8,
             data: access_structure_cdata
         };
@@ -91,13 +99,13 @@ fn main() {
             cla: 224,
             ins: 0x2A,
             p1: 4,
-            p2: 0,
+            p2: p2,
             length: threshold_cdata.len() as u8,
             data: threshold_cdata
         };
-        let result = ledger.exchange(command).unwrap();
-        if i == 11 {
-            println!("Signature: {}", hex::encode(result.data));
-        }
+        result = Some(ledger.exchange(command).unwrap());
+    }
+    if let Some(r) = result {
+        println!("Signature: {}", hex::encode(r.data));
     }
 }

@@ -85,7 +85,11 @@ const char *getAuthorizationName(authorizationType_e type) {
             return "Add anonymity revoker";
         case AUTHORIZATION_ADD_IDENTITY_PROVIDER:
             return "Add identity provider";
-        case AUTHORIZATION_END:
+        case AUTHORIZATION_COOLDOWN_PARAMETERS:
+            return "Cooldown parameters";
+        case AUTHORIZATION_TIME_PARAMETERS:
+            return "Time parameters";
+        default:
             THROW(ERROR_INVALID_STATE);
     }
 }
@@ -96,11 +100,10 @@ const char *getAuthorizationName(authorizationType_e type) {
  * continue to the signing flow as this marks the end of the transaction.
  */
 void processThreshold(void) {
-    ctx->authorizationType += 1;
-
-    if (ctx->authorizationType == AUTHORIZATION_END) {
+    if (ctx->authorizationType == ctx->lastAuthorizationType) {
         ux_flow_init(0, ux_sign_flow_shared, NULL);
     } else {
+        ctx->authorizationType += 1;
         // Ask for the next access structure, as we have not processed all of
         // them yet.
         ctx->state = TX_UPDATE_AUTHORIZATIONS_ACCESS_STRUCTURE_SIZE;
@@ -143,9 +146,13 @@ void processKeyIndices(void) {
 #define P1_ACCESS_STRUCTURE           0x03  // Contains the public-key indices for the current access structure.
 #define P1_ACCESS_STRUCTURE_THRESHOLD 0x04  // Contains the threshold for the current access structure.
 
+#define P2_V0        0x00
+#define P2_V1        0x01
+
 void handleSignUpdateAuthorizations(
     uint8_t *cdata,
     uint8_t p1,
+    uint8_t p2,
     uint8_t updateType,
     uint8_t dataLength,
     volatile unsigned int *flags,
@@ -159,6 +166,14 @@ void handleSignUpdateAuthorizations(
         cx_sha256_init(&tx_state->hash);
         cdata += hashUpdateHeaderAndType(cdata, updateType);
         ctx->authorizationType = 0;
+
+        if (p2 == P2_V0) {
+            ctx->lastAuthorizationType = AUTHORIZATION_ADD_IDENTITY_PROVIDER;
+        } else if (p2 == P2_V1){
+            ctx->lastAuthorizationType = AUTHORIZATION_TIME_PARAMETERS;
+        } else {
+            THROW(ERROR_INVALID_PARAM);
+        }
 
         uint8_t keyUpdateType = cdata[0];
         if (keyUpdateType == ROOT_UPDATE_LEVEL_2) {
