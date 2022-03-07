@@ -51,6 +51,7 @@
 #include "signUpdateTransactionFeeDistribution.h"
 #include "signUpdateTimeParameters.h"
 #include "signUpdateCooldownParameters.h"
+#include "signUpdatePoolParameters.h"
 #include "ux.h"
 #include "verifyAddress.h"
 
@@ -290,6 +291,9 @@ static void concordium_main(void) {
                         break;
                     case INS_UPDATE_COOLDOWN_PARAMETERS:
                         handleSignUpdateCooldownParameters(cdata, &flags);
+                        break;
+                    case INS_UPDATE_POOL_PARAMETERS:
+                        handleSignUpdatePoolParameters(cdata, p1, &flags, isInitialCall);
                         break;
                     default:
                         THROW(ERROR_INVALID_INSTRUCTION);

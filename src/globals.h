@@ -36,6 +36,7 @@
 #include "signUpdateTransactionFeeDistribution.h"
 #include "signUpdateTimeParameters.h"
 #include "signUpdateCooldownParameters.h"
+#include "signUpdatePoolParameters.h"
 #include "ux.h"
 
 #define CONCORDIUM_PURPOSE   1105
@@ -172,6 +173,7 @@ typedef union {
     signUpdateBakerStakeThresholdContext_t signUpdateBakerStakeThreshold;
     signUpdateTimeParametersContext_t signTimeParameters;
     signUpdateCooldownParametersContext_t signCooldownParameters;
+    signUpdatePoolParametersContext_t signPoolParameters;
     signUpdateKeysWithRootKeysContext_t signUpdateKeysWithRootKeysContext;
     updateWithDescription_t withDescription;
     transactionWithDataBlob_t withDataBlob;
