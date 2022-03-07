@@ -8,15 +8,15 @@ fn main() {
     let mut key_derivation_path = path::generate_key_derivation_path();
     let mut update_type = hex::decode("0F").unwrap();
 
-    let mut transaction_fee_l_pool = hex::decode("0000EA60").unwrap();
-    let mut baking_reward_l_pool = hex::decode("00001000").unwrap();
-    let mut finalization_reward_l_pool = hex::decode("0000EA60").unwrap();
-    let mut transaction_fee_min = hex::decode("0000EA60").unwrap();
-    let mut baking_reward_min = hex::decode("00001000").unwrap();
-    let mut finalization_reward_min = hex::decode("0000EA60").unwrap();
-    let mut transaction_fee_max = hex::decode("0000EA60").unwrap();
-    let mut baking_reward_max = hex::decode("00001000").unwrap();
-    let mut finalization_reward_max = hex::decode("0000EA60").unwrap();
+    let mut transaction_fee_l_pool = hex::decode("0000EA30").unwrap();
+    let mut baking_reward_l_pool = hex::decode("00000200").unwrap();
+    let mut finalization_reward_l_pool = hex::decode("0000EA04").unwrap();
+    let mut transaction_fee_min = hex::decode("00001001").unwrap();
+    let mut transaction_fee_max = hex::decode("0000EA64").unwrap();
+    let mut baking_reward_min = hex::decode("0000EA63").unwrap();
+    let mut baking_reward_max = hex::decode("0000EA65").unwrap();
+    let mut finalization_reward_min = hex::decode("00001000").unwrap();
+    let mut finalization_reward_max = hex::decode("0000EA62").unwrap();
 
     let mut min_capital = hex::decode("00000A00C60D5000").unwrap();
     let mut capital_bound = hex::decode("C60D5000").unwrap();
@@ -30,11 +30,13 @@ fn main() {
     command_data.append(&mut baking_reward_l_pool);
     command_data.append(&mut finalization_reward_l_pool);
 
-    transaction_fee_max.append(&mut transaction_fee_min);
-    transaction_fee_max.append(&mut baking_reward_max);
-    transaction_fee_max.append(&mut baking_reward_min);
-    transaction_fee_max.append(&mut finalization_reward_max);
-    transaction_fee_max.append(&mut finalization_reward_min);
+    let mut bounds = Vec::new();
+    bounds.append(&mut transaction_fee_min);
+    bounds.append(&mut transaction_fee_max);
+    bounds.append(&mut baking_reward_min);
+    bounds.append(&mut baking_reward_max);
+    bounds.append(&mut finalization_reward_min);
+    bounds.append(&mut finalization_reward_max);
 
     min_capital.append(&mut capital_bound);
     min_capital.append(&mut leverage_bound);
@@ -57,8 +59,8 @@ fn main() {
         ins: 65,    // Sign time parameters update
         p1: 1,
         p2: 0,
-        length: transaction_fee_max.len() as u8,
-        data: transaction_fee_max
+        length: bounds.len() as u8,
+        data: bounds
     };
 
     ledger.exchange(command_bounds).unwrap();

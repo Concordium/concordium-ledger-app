@@ -10,7 +10,7 @@ fn main() {
 
     let mut reward_period_length = hex::decode("000075300000EA60").unwrap();
     let mut mint_rate_mantissa = hex::decode("00734B9F").unwrap();
-    let mut mint_rate_exponent = hex::decode("10").unwrap();
+    let mut mint_rate_exponent = hex::decode("09").unwrap();
 
     let mut command_data = Vec::new();
     command_data.append(&mut key_derivation_path);
