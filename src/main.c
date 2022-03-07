@@ -233,7 +233,7 @@ static void concordium_main(void) {
                         handleSignUpdateFoundationAccount(cdata, &flags);
                         break;
                     case INS_UPDATE_MINT_DISTRIBUTION:
-                        handleSignUpdateMintDistribution(cdata, &flags);
+                        handleSignUpdateMintDistribution(cdata, p2, &flags);
                         break;
                     case INS_UPDATE_ELECTION_DIFFICULTY:
                         handleSignUpdateElectionDifficulty(cdata, &flags);

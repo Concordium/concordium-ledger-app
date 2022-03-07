@@ -1,5 +1,6 @@
 #include <os.h>
 
+#include "responseCodes.h"
 #include "sign.h"
 #include "util.h"
 
@@ -19,34 +20,50 @@ UX_STEP_NOCB(
     bnnn_paging,
     {.title = "Finalization reward", .text = (char *) global.signUpdateMintDistribution.finalizationReward});
 UX_FLOW(
-    ux_sign_mint_rate,
+    ux_sign_mint_rate_v0,
     &ux_sign_flow_shared_review,
     &ux_sign_mint_rate_1_step,
     &ux_sign_mint_rate_2_step,
     &ux_sign_mint_rate_3_step,
     &ux_sign_flow_shared_sign,
     &ux_sign_flow_shared_decline);
+UX_FLOW(
+    ux_sign_mint_rate_v1,
+    &ux_sign_flow_shared_review,
+    &ux_sign_mint_rate_2_step,
+    &ux_sign_mint_rate_3_step,
+    &ux_sign_flow_shared_sign,
+    &ux_sign_flow_shared_decline);
 
-void handleSignUpdateMintDistribution(uint8_t *cdata, volatile unsigned int *flags) {
+#define P2_V0        0x00
+#define P2_V1        0x01  // Does not include the mint rate
+
+void handleSignUpdateMintDistribution(uint8_t *cdata, uint8_t p2, volatile unsigned int *flags) {
+    if (p2 != P2_V1 && p2 != P2_V0) {
+        THROW(ERROR_INVALID_PARAM);
+    }
+
     int bytesRead = parseKeyDerivationPath(cdata);
     cdata += bytesRead;
 
     cx_sha256_init(&tx_state->hash);
     cdata += hashUpdateHeaderAndType(cdata, UPDATE_TYPE_MINT_DISTRIBUTION);
 
-    // Mint rate consists of 4 bytes of mantissa, and a 1 byte exponent.
-    uint32_t mintRateMantissa = U4BE(cdata, 0);
-    uint8_t mintRateExponent = cdata[4];
-    cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 5, NULL, 0);
-    cdata += 5;
+    if (p2 == P2_V0) {
+        // Mint rate consists of 4 bytes of mantissa, and a 1 byte exponent.
+        uint32_t mintRateMantissa = U4BE(cdata, 0);
+        uint8_t mintRateExponent = cdata[4];
+        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 5, NULL, 0);
+        cdata += 5;
 
-    // Build display of the mint rate as 'mintRateMantissa*10^(-mintRateExponent)'
-    int offset = numberToText(ctx->mintRate, sizeof(ctx->mintRate), mintRateMantissa);
-    uint8_t multiplication[6] = "*10^(-";
-    memmove(ctx->mintRate + offset, multiplication, 6);
-    offset += 6;
-    offset += numberToText(ctx->mintRate + offset, sizeof(ctx->mintRate) - offset, mintRateExponent);
-    memmove(ctx->mintRate + offset, ")", 2);
+        // Build display of the mint rate as 'mintRateMantissa*10^(-mintRateExponent)'
+        int offset = numberToText(ctx->mintRate, sizeof(ctx->mintRate), mintRateMantissa);
+        uint8_t multiplication[6] = "*10^(-";
+        memmove(ctx->mintRate + offset, multiplication, 6);
+        offset += 6;
+        offset += numberToText(ctx->mintRate + offset, sizeof(ctx->mintRate) - offset, mintRateExponent);
+        memmove(ctx->mintRate + offset, ")", 2);
+    }
 
     // Baker reward
     uint8_t fraction[8] = "/100000";
@@ -63,6 +80,10 @@ void handleSignUpdateMintDistribution(uint8_t *cdata, volatile unsigned int *fla
     cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 4, NULL, 0);
     memmove(ctx->finalizationReward + finalizationRewardLength, fraction, 8);
 
-    ux_flow_init(0, ux_sign_mint_rate, NULL);
+    if (p2 == P2_V1) {
+        ux_flow_init(0, ux_sign_mint_rate_v1, NULL);
+    } else {
+        ux_flow_init(0, ux_sign_mint_rate_v0, NULL);
+    }
     *flags |= IO_ASYNCH_REPLY;
 }
