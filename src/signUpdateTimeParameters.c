@@ -29,7 +29,7 @@ void handleSignUpdateTimeParameters(uint8_t *cdata, volatile unsigned int *flags
     cx_sha256_init(&tx_state->hash);
     cdata += hashUpdateHeaderAndType(cdata, UPDATE_TYPE_TIME_PARAMETERS);
 
-    //RewardPeriodLength is a 64-bit number
+    // RewardPeriodLength is a 64-bit number
     uint64_t rewardPeriodLength = U8BE(cdata, 0);
     cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 8, NULL, 0);
     cdata += 8;
@@ -39,7 +39,6 @@ void handleSignUpdateTimeParameters(uint8_t *cdata, volatile unsigned int *flags
     uint32_t mintRateMantissa = U4BE(cdata, 0);
     uint8_t mintRateExponent = cdata[4];
     cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 5, NULL, 0);
-    cdata += 5;
 
     // Build display of the mint rate as 'mintRateMantissa*10^(-mintRateExponent)'
     int offset = numberToText(ctx->mintRate, sizeof(ctx->mintRate), mintRateMantissa);

@@ -8,13 +8,11 @@
  */
 void handleSignUpdatePoolParameters(uint8_t *cdata, uint8_t p1, volatile unsigned int *flags, bool isInitialCall);
 
-
 typedef enum {
     TX_UPDATE_POOL_PARAMETERS_INITIAL = 60,
     TX_UPDATE_POOL_PARAMETERS_BOUNDS = 61,
     TX_UPDATE_POOL_PARAMETERS_EQUITY = 62,
 } updatePoolParametersState_t;
-
 
 typedef struct {
     // Used both for l pool rate and max bound:

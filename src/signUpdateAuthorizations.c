@@ -146,8 +146,8 @@ void processKeyIndices(void) {
 #define P1_ACCESS_STRUCTURE           0x03  // Contains the public-key indices for the current access structure.
 #define P1_ACCESS_STRUCTURE_THRESHOLD 0x04  // Contains the threshold for the current access structure.
 
-#define P2_V0        0x00
-#define P2_V1        0x01
+#define P2_V0 0x00
+#define P2_V1 0x01
 
 void handleSignUpdateAuthorizations(
     uint8_t *cdata,
@@ -169,7 +169,7 @@ void handleSignUpdateAuthorizations(
 
         if (p2 == P2_V0) {
             ctx->lastAuthorizationType = AUTHORIZATION_ADD_IDENTITY_PROVIDER;
-        } else if (p2 == P2_V1){
+        } else if (p2 == P2_V1) {
             ctx->lastAuthorizationType = AUTHORIZATION_TIME_PARAMETERS;
         } else {
             THROW(ERROR_INVALID_PARAM);

@@ -35,8 +35,8 @@ UX_FLOW(
     &ux_sign_flow_shared_sign,
     &ux_sign_flow_shared_decline);
 
-#define P2_V0        0x00
-#define P2_V1        0x01  // Does not include the mint rate
+#define P2_V0 0x00
+#define P2_V1 0x01  // Does not include the mint rate
 
 void handleSignUpdateMintDistribution(uint8_t *cdata, uint8_t p2, volatile unsigned int *flags) {
     if (p2 != P2_V1 && p2 != P2_V0) {

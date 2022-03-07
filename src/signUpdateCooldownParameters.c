@@ -29,16 +29,15 @@ void handleSignUpdateCooldownParameters(uint8_t *cdata, volatile unsigned int *f
     cx_sha256_init(&tx_state->hash);
     cdata += hashUpdateHeaderAndType(cdata, UPDATE_TYPE_COOLDOWN_PARAMETERS);
 
-    //RewardPeriodLength is a 64-bit number
+    // RewardPeriodLength is a 64-bit number
     uint64_t delegatorCooldown = U8BE(cdata, 0);
     cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 8, NULL, 0);
     cdata += 8;
     numberToText(ctx->delegatorCooldown, sizeof(ctx->delegatorCooldown), delegatorCooldown);
 
-    //RewardPeriodLength is a 64-bit number
+    // RewardPeriodLength is a 64-bit number
     uint64_t poolOwnerCooldown = U8BE(cdata, 0);
     cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 8, NULL, 0);
-    cdata += 8;
     numberToText(ctx->poolOwnerCooldown, sizeof(ctx->poolOwnerCooldown), poolOwnerCooldown);
 
     ux_flow_init(0, ux_sign_cooldown_parameters, NULL);

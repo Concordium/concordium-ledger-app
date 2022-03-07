@@ -3,7 +3,10 @@
 ## Unreleased
 
 ### Added
+* Support for version 1 of the "Authorizations" update.
+* Support for version 1 of the "Mint distribtion" update.
 * Support for the "Time parameter" update.
+* Support for the "Pool parameter" update.
 * Support for the "Cooldown parameter" update.
  
 ## 2.1.0 - TBD

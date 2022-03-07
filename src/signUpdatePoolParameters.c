@@ -65,8 +65,7 @@ UX_FLOW(
     &ux_sign_flow_shared_review,
     &ux_sign_pool_parameters_transaction_fee_step,
     &ux_sign_pool_parameters_baking_reward_step,
-    &ux_sign_pool_parameters_finalization_reward_step
-    );
+    &ux_sign_pool_parameters_finalization_reward_step);
 UX_FLOW(
     ux_sign_pool_parameters_commision_bounds,
     &ux_sign_pool_parameters_transaction_fee_min_step,
@@ -74,16 +73,14 @@ UX_FLOW(
     &ux_sign_pool_parameters_baking_reward_min_step,
     &ux_sign_pool_parameters_baking_reward_max_step,
     &ux_sign_pool_parameters_finalization_reward_min_step,
-    &ux_sign_pool_parameters_finalization_reward_max_step
-    );
+    &ux_sign_pool_parameters_finalization_reward_max_step);
 UX_FLOW(
     ux_sign_pool_parameters_commision_final,
     &ux_sign_pool_parameters_minimum_capital_step,
     &ux_sign_pool_parameters_capital_bound_step,
     &ux_sign_pool_parameters_leverage_bound_step,
     &ux_sign_flow_shared_sign,
-    &ux_sign_flow_shared_decline
-    );
+    &ux_sign_flow_shared_decline);
 
 // TODO This methods could/should be shared with what we use for the other reward fractions.
 /**
@@ -99,9 +96,9 @@ uint8_t parseCommissionRate(uint8_t *cdata, uint8_t *commissionRateDisplay, uint
     return 4;
 }
 
-#define P1_INITIAL            0x00
-#define P1_COMMISION_BOUNDS        0x01  // Used for both the message text and the specification URL.
-#define P1_EQUITY               0x02  // Used for both the message text and the specification URL.
+#define P1_INITIAL          0x00
+#define P1_COMMISION_BOUNDS 0x01  // Used for both the message text and the specification URL.
+#define P1_EQUITY           0x02  // Used for both the message text and the specification URL.
 
 void handleSignUpdatePoolParameters(uint8_t *cdata, uint8_t p1, volatile unsigned int *flags, bool isInitialCall) {
     if (isInitialCall) {
@@ -115,21 +112,36 @@ void handleSignUpdatePoolParameters(uint8_t *cdata, uint8_t p1, volatile unsigne
         cx_sha256_init(&tx_state->hash);
         cdata += hashUpdateHeaderAndType(cdata, UPDATE_TYPE_POOL_PARAMETERS);
 
-        cdata += parseCommissionRate(cdata, ctx->transactionFeeCommissionRate, sizeof(ctx->transactionFeeCommissionRate));
+        cdata +=
+            parseCommissionRate(cdata, ctx->transactionFeeCommissionRate, sizeof(ctx->transactionFeeCommissionRate));
         cdata += parseCommissionRate(cdata, ctx->bakingRewardCommissionRate, sizeof(ctx->bakingRewardCommissionRate));
-        parseCommissionRate(cdata, ctx->finalizationRewardCommissionRate, sizeof(ctx->finalizationRewardCommissionRate));
+        parseCommissionRate(
+            cdata,
+            ctx->finalizationRewardCommissionRate,
+            sizeof(ctx->finalizationRewardCommissionRate));
 
         ctx->state = TX_UPDATE_POOL_PARAMETERS_BOUNDS;
 
         ux_flow_init(0, ux_sign_pool_parameters_initial, NULL);
         *flags |= IO_ASYNCH_REPLY;
     } else if (p1 == P1_COMMISION_BOUNDS && ctx->state == TX_UPDATE_POOL_PARAMETERS_BOUNDS) {
-        cdata += parseCommissionRate(cdata, ctx->transactionFeeCommissionRateMin, sizeof(ctx->transactionFeeCommissionRateMin));
-        cdata += parseCommissionRate(cdata, ctx->transactionFeeCommissionRate, sizeof(ctx->transactionFeeCommissionRate));
-        cdata += parseCommissionRate(cdata, ctx->bakingRewardCommissionRateMin, sizeof(ctx->bakingRewardCommissionRateMin));
+        cdata += parseCommissionRate(
+            cdata,
+            ctx->transactionFeeCommissionRateMin,
+            sizeof(ctx->transactionFeeCommissionRateMin));
+        cdata +=
+            parseCommissionRate(cdata, ctx->transactionFeeCommissionRate, sizeof(ctx->transactionFeeCommissionRate));
+        cdata +=
+            parseCommissionRate(cdata, ctx->bakingRewardCommissionRateMin, sizeof(ctx->bakingRewardCommissionRateMin));
         cdata += parseCommissionRate(cdata, ctx->bakingRewardCommissionRate, sizeof(ctx->bakingRewardCommissionRate));
-        cdata += parseCommissionRate(cdata, ctx->finalizationRewardCommissionRateMin, sizeof(ctx->finalizationRewardCommissionRateMin));
-        parseCommissionRate(cdata, ctx->finalizationRewardCommissionRate, sizeof(ctx->finalizationRewardCommissionRate));
+        cdata += parseCommissionRate(
+            cdata,
+            ctx->finalizationRewardCommissionRateMin,
+            sizeof(ctx->finalizationRewardCommissionRateMin));
+        parseCommissionRate(
+            cdata,
+            ctx->finalizationRewardCommissionRate,
+            sizeof(ctx->finalizationRewardCommissionRate));
 
         ctx->state = TX_UPDATE_POOL_PARAMETERS_EQUITY;
 
@@ -152,7 +164,10 @@ void handleSignUpdatePoolParameters(uint8_t *cdata, uint8_t p1, volatile unsigne
 
         int numLength = numberToText(ctx->leverageBound, sizeof(ctx->leverageBound), leverageBoundNumerator);
         memmove(ctx->leverageBound + numLength, "/", 1);
-        numberToText(ctx->leverageBound + numLength + 1, sizeof(ctx->leverageBound) - (numLength + 1), leverageBoundDenominator);
+        numberToText(
+            ctx->leverageBound + numLength + 1,
+            sizeof(ctx->leverageBound) - (numLength + 1),
+            leverageBoundDenominator);
 
         ux_flow_init(0, ux_sign_pool_parameters_commision_final, NULL);
         *flags |= IO_ASYNCH_REPLY;
