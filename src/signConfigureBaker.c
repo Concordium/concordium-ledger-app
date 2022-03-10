@@ -86,7 +86,7 @@ void startConfigureBakerDisplay() {
         ux_sign_configure_baker_first[index++] = &ux_sign_configure_baker_open_status_step;
     }
 
-    if (ctx->hasSignatureVerifyKey) {
+    if (ctx->hasKeys) {
         ux_sign_configure_baker_first[index++] = &ux_sign_configure_baker_keys_step;
     }
 
@@ -263,20 +263,11 @@ void handleSignConfigureBaker(
         ctx->hasCapital = (bitmap >> 0) & 1;
         ctx->hasRestakeEarnings = (bitmap >> 1) & 1;
         ctx->hasOpenForDelegation = (bitmap >> 2) & 1;
-        ctx->hasSignatureVerifyKey = (bitmap >> 3) & 1;
-        ctx->hasElectionVerifyKey = (bitmap >> 4) & 1;
-        ctx->hasAggregationVerifyKey = (bitmap >> 5) & 1;
-        ctx->hasMetadataUrl = (bitmap >> 6) & 1;
-        ctx->hasTransactionFeeCommission = (bitmap >> 7) & 1;
-        ctx->hasBakingRewardCommission = (bitmap >> 8) & 1;
-        ctx->hasFinalizationRewardCommission = (bitmap >> 9) & 1;
-
-        // If one key is to be set/updated, then all keys are required to be set/updated.
-        if (ctx->hasSignatureVerifyKey || ctx->hasElectionVerifyKey || ctx->hasAggregationVerifyKey) {
-            if (!(ctx->hasSignatureVerifyKey && ctx->hasElectionVerifyKey && ctx->hasAggregationVerifyKey)) {
-                THROW(ERROR_INVALID_TRANSACTION);
-            }
-        }
+        ctx->hasKeys = (bitmap >> 3) & 1;
+        ctx->hasMetadataUrl = (bitmap >> 4) & 1;
+        ctx->hasTransactionFeeCommission = (bitmap >> 5) & 1;
+        ctx->hasBakingRewardCommission = (bitmap >> 6) & 1;
+        ctx->hasFinalizationRewardCommission = (bitmap >> 7) & 1;
 
         // TODO: Determine state based on the above booleans. If any in the first
         // section, then expect that part and so on...
@@ -323,9 +314,7 @@ void handleSignConfigureBaker(
             }
         }
 
-        // In the initial command we verify that if one key is available, then all
-        // of them must be available. Therefore we just check for one of them.
-        if (ctx->hasSignatureVerifyKey) {
+        if (ctx->hasKeys) {
             // We are expecting the signature and election verification keys (each 32 bytes) and their proofs (each 64
             // bytes).
             if (lengthCheck != 192) {
@@ -360,7 +349,7 @@ void handleSignConfigureBaker(
             *flags |= IO_ASYNCH_REPLY;
         }
     } else if (P1_AGGREGATION_KEY == p1) {
-        if (!ctx->hasAggregationVerifyKey || dataLength != 160) {
+        if (!ctx->hasKeys || dataLength != 160) {
             THROW(ERROR_INVALID_TRANSACTION);
         }
 

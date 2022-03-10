@@ -27,9 +27,7 @@ typedef struct {
     bool hasCapital;
     bool hasRestakeEarnings;
     bool hasOpenForDelegation;
-    bool hasSignatureVerifyKey;
-    bool hasElectionVerifyKey;
-    bool hasAggregationVerifyKey;
+    bool hasKeys;
     bool hasMetadataUrl;
     bool hasTransactionFeeCommission;
     bool hasBakingRewardCommission;

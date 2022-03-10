@@ -8,7 +8,7 @@ fn main() {
     let transaction_kind = "19";
     let mut transaction_payload = hex::decode(transaction_kind).unwrap();
 
-    let mut bitmap = hex::decode("03FF").unwrap();
+    let mut bitmap = hex::decode("00FF").unwrap();
     transaction_payload.append(&mut bitmap);
 
     let mut command_data = path::generate_key_derivation_path();
