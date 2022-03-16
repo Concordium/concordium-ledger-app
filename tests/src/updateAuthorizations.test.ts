@@ -141,8 +141,8 @@ test('[NANO S] Update level 2 keys with root keys v1', setupZemu('nanos', async 
         0x2a,
         0x01,
         '0a',
-        '02',
-        'da4e5df15a4e6b8253b633ec82facc8a79e1a411ecdce9734aa3b302a7ae9652311634c0a6f98b28ce1d2e070c46b6a971977d86edac95e734091e2b11284f019000',
+        '03',
+        '02f76c94c76d552364e8b054001f86c2cd4417de90343920558ac00529e2bc429f6db1a37c7f75fea69ec663bfadcc847ad568996545de93adfa1674b12d41079000',
         async () => {
             await sim.clickRight();
             await sim.clickRight();
@@ -160,8 +160,8 @@ test('[NANO X] Update level 2 keys with root keys v1', setupZemu('nanox', async 
         0x2a,
         0x01,
         '0a',
-        '02',
-        'da4e5df15a4e6b8253b633ec82facc8a79e1a411ecdce9734aa3b302a7ae9652311634c0a6f98b28ce1d2e070c46b6a971977d86edac95e734091e2b11284f019000',
+        '03',
+        '02f76c94c76d552364e8b054001f86c2cd4417de90343920558ac00529e2bc429f6db1a37c7f75fea69ec663bfadcc847ad568996545de93adfa1674b12d41079000',
         async () => {
             await sim.clickRight();
             return sim.clickBoth();
@@ -176,8 +176,8 @@ test('[NANO S] Update level 2 keys with level 1 keys v1', setupZemu('nanos', asy
         0x2b,
         0x01,
         '0b',
-        '01',
-        'b59fef225994cab4fc3ff9ea2be4e4acf44e7d1f65fecdddacfa73780e1b88d3736d6239d7e3a6b06ffebc0db4938ad138732c47fcda12b6242702f5ddf033069000',
+        '02',
+        'ab92d78f158730042a1a4c2f738600f064ad5100551afad3760053f8f9e28e12d47a4e0484417f879e065332612e3cc4c5315e4f610f3fd4e3d7469c058556019000',
         async () => {
             await sim.clickRight();
             await sim.clickRight();
@@ -195,8 +195,8 @@ test('[NANO X] Update level 2 keys with level 1 keys v1', setupZemu('nanox', asy
         0x2b,
         0x01,
         '0b',
-        '01',
-        'b59fef225994cab4fc3ff9ea2be4e4acf44e7d1f65fecdddacfa73780e1b88d3736d6239d7e3a6b06ffebc0db4938ad138732c47fcda12b6242702f5ddf033069000',
+        '02',
+        'ab92d78f158730042a1a4c2f738600f064ad5100551afad3760053f8f9e28e12d47a4e0484417f879e065332612e3cc4c5315e4f610f3fd4e3d7469c058556019000',
         async () => {
             await sim.clickRight();
             return sim.clickBoth();
