@@ -324,19 +324,19 @@ void handleSignConfigureBaker(
             // We do not display the verification keys to the user, as they are difficult
             // for the user to verify. If need be, we can start showing them by parsing
             // the values into hex strings here.
-            // Signature verify key
-            cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 32, NULL, 0);
-            cdata += 32;
-
-            // Signature Proof
-            cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 64, NULL, 0);
-            cdata += 64;
-
             // Election verify key
             cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 32, NULL, 0);
             cdata += 32;
 
             // Election Proof
+            cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 64, NULL, 0);
+            cdata += 64;
+
+            // Signature verify key
+            cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 32, NULL, 0);
+            cdata += 32;
+
+            // Signature Proof
             cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 64, NULL, 0);
 
             // We delay the display until we get the aggregation key.
