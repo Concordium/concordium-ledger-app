@@ -44,6 +44,11 @@ UX_STEP_NOCB(
 UX_STEP_CB(ux_sign_configure_baker_continue, nn, sendSuccessNoIdle(), {"Continue", "with transaction"});
 
 UX_STEP_NOCB(
+    ux_sign_configure_baker_empty_url_step,
+    bn,
+    {"Empty URL", ""});
+
+UX_STEP_NOCB(
     ux_sign_configure_baker_commission_transaction_fee_step,
     bnnn_paging,
     {.title = "Transaction fee", .text = (char *) global.signConfigureBaker.transactionFeeCommissionRate});
@@ -132,7 +137,12 @@ void startConfigureBakerUrlDisplay(bool lastUrlPage) {
     if (!lastUrlPage) {
         ux_sign_configure_baker_url[index++] = &ux_sign_configure_baker_url_cb_step;
     } else {
-        ux_sign_configure_baker_url[index++] = &ux_sign_configure_baker_url_step;
+
+        if (ctx->urlLength == 0) {
+            ux_sign_configure_baker_url[index++] = &ux_sign_configure_baker_empty_url_step;
+        } else {
+            ux_sign_configure_baker_url[index++] = &ux_sign_configure_baker_url_step;
+        }
 
         // If there are additional steps show the continue screen, otherwise go
         // to signing screens.
@@ -373,7 +383,14 @@ void handleSignConfigureBaker(
         }
 
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 2, NULL, 0);
-        sendSuccessNoIdle();
+
+        if (ctx->urlLength == 0) {
+            // If the url has length zero, we don't wait for the url bytes.
+            startConfigureBakerUrlDisplay(true);
+            *flags |= IO_ASYNCH_REPLY;
+        } else {
+            sendSuccessNoIdle();
+        }
     } else if (P1_URL == p1) {
         // NOTE: We don't have to check the bool here, as the state is checked and
         // can only be correct if the bool was set! Nifty!
