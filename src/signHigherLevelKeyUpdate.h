@@ -27,9 +27,9 @@ void handleSignHigherLevelKeys(
  * a byte depending on the type of key update, which is represented
  * by this enum.
  */
-typedef enum { ROOT_UPDATE_ROOT, ROOT_UPDATE_LEVEL_1, ROOT_UPDATE_LEVEL_2 } rootUpdatePrefix_e;
+typedef enum { ROOT_UPDATE_ROOT, ROOT_UPDATE_LEVEL_1, ROOT_UPDATE_LEVEL_2_V0, ROOT_UPDATE_LEVEL_2_V1 } rootUpdatePrefix_e;
 
-typedef enum { LEVEL1_UPDATE_LEVEL_1, LEVEL1_UPDATE_LEVEL_2 } level1UpdatePrefix_e;
+typedef enum { LEVEL1_UPDATE_LEVEL_1, LEVEL1_UPDATE_LEVEL_2_V0, LEVEL1_UPDATE_LEVEL_2_V1 } level1UpdatePrefix_e;
 
 typedef enum { TX_UPDATE_KEYS_INITIAL = 19, TX_UPDATE_KEYS_KEY = 20, TX_UPDATE_KEYS_THRESHOLD = 21 } updateKeysState_t;
 

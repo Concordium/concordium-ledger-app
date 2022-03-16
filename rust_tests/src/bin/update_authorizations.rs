@@ -7,7 +7,7 @@ use ledger::{ApduCommand, LedgerApp};
 fn main() {
     let mut key_derivation_path = path::generate_key_derivation_path();
     let mut update_type = hex::decode("0B").unwrap();
-    let mut prefix = hex::decode("01").unwrap();
+    let mut prefix = hex::decode("02").unwrap();
     let mut public_key_list_length = hex::decode("0002").unwrap();
     let p2 = 1;
     let ins = 0x2b;

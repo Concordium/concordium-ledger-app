@@ -10,6 +10,11 @@ the transactions each have two versions, which is decided using P2:
 * P2 = 0, contains the authorizations in procotol versions <=3
 * P2 = 1, contains the authorizations in procotol versions 4, which have the cooldown and time parameters added.
 
+Key update types: 
+
+* For P1 = 0, 1 is using lvl1 keys, 2 is using root keys
+* For P2 = 2, 2 is using lvl1 keys, 3 is using root keys
+
 ## Protocol description
 
 * Multiple commands

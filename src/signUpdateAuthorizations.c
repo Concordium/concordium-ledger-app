@@ -167,22 +167,33 @@ void handleSignUpdateAuthorizations(
         cdata += hashUpdateHeaderAndType(cdata, updateType);
         ctx->authorizationType = 0;
 
+        uint8_t keyUpdateType = cdata[0];
+
         if (p2 == P2_V0) {
             ctx->lastAuthorizationType = AUTHORIZATION_ADD_IDENTITY_PROVIDER;
+
+            if (keyUpdateType == ROOT_UPDATE_LEVEL_2_V0) {
+                memmove(ctx->type, "Level 2 w. root keys", 21);
+            } else if (keyUpdateType == LEVEL1_UPDATE_LEVEL_2_V0) {
+                memmove(ctx->type, "Level 2 w. level 1 keys", 24);
+            } else {
+                THROW(ERROR_INVALID_TRANSACTION);
+            }
         } else if (p2 == P2_V1) {
             ctx->lastAuthorizationType = AUTHORIZATION_TIME_PARAMETERS;
+
+            if (keyUpdateType == ROOT_UPDATE_LEVEL_2_V1) {
+                memmove(ctx->type, "Level 2 w. root keys", 21);
+            } else if (keyUpdateType == LEVEL1_UPDATE_LEVEL_2_V1) {
+                memmove(ctx->type, "Level 2 w. level 1 keys", 24);
+            } else {
+                THROW(ERROR_INVALID_TRANSACTION);
+            }
+
         } else {
             THROW(ERROR_INVALID_PARAM);
         }
 
-        uint8_t keyUpdateType = cdata[0];
-        if (keyUpdateType == ROOT_UPDATE_LEVEL_2) {
-            memmove(ctx->type, "Level 2 w. root keys", 21);
-        } else if (keyUpdateType == LEVEL1_UPDATE_LEVEL_2) {
-            memmove(ctx->type, "Level 2 w. level 1 keys", 24);
-        } else {
-            THROW(ERROR_INVALID_TRANSACTION);
-        }
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 1, NULL, 0);
         cdata += 1;
 
