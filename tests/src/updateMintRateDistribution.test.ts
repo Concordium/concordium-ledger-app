@@ -17,7 +17,7 @@ async function updateMintRateDistributionVersion0(sim: Zemu, transport: Transpor
 }
 
 async function updateMintRateDistributionVersion1(sim: Zemu, transport: Transport) {
-    const data = Buffer.from('080000045100000000000000000000000000000000000000020000000000000000000000000000000a00000000000000640000000063de5da700000029060000ea6000007530', 'hex');
+    const data = Buffer.from('080000045100000000000000000000000000000000000000020000000000000000000000000000000a00000000000000640000000063de5da700000029110000ea6000007530', 'hex');
     const tx = transport.send(0xe0, 0x25, 0x00, 0x01, data);
     await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
     await sim.clickRight();
@@ -25,7 +25,7 @@ async function updateMintRateDistributionVersion1(sim: Zemu, transport: Transpor
     await sim.clickRight();
     await sim.clickBoth();
     await expect(tx).resolves.toEqual(
-        Buffer.from('0fc6a8ef9d0d841ed4c269a1ff51f3ff097e780b9b57788c5fdd6cf977dad136b4077c798c14e76a19b59cddb7fb9431a1476c70c5faabc8ca848f6c301ca3089000', 'hex'),
+        Buffer.from('c11fb940dd3c7f514d3727fe5f50164fb5618b3df64ef43efe231835b7c779499e29df1bbdabd97976b045fcaebb25c762e8e0b2228db2f180e62bbeace936029000', 'hex'),
     );
 }
 

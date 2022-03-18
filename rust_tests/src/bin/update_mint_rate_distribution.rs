@@ -6,8 +6,8 @@ use ledger::{ApduCommand, LedgerApp};
 
 fn main() {
     let mut key_derivation_path = path::generate_key_derivation_path();
-    let mut update_type = hex::decode("06").unwrap();
     let p2 = 1;
+    let mut update_type = hex::decode(if p2 == 0 { "06"} else {"11"}).unwrap();
 
     let mut mint_rate_mantissa = hex::decode("00734B9F").unwrap();
     let mut mint_rate_exponent = hex::decode("10").unwrap();

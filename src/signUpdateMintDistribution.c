@@ -43,13 +43,13 @@ void handleSignUpdateMintDistribution(uint8_t *cdata, uint8_t p2, volatile unsig
         THROW(ERROR_INVALID_PARAM);
     }
 
-    int bytesRead = parseKeyDerivationPath(cdata);
-    cdata += bytesRead;
+    cdata += parseKeyDerivationPath(cdata);
 
     cx_sha256_init(&tx_state->hash);
-    cdata += hashUpdateHeaderAndType(cdata, UPDATE_TYPE_MINT_DISTRIBUTION);
 
     if (p2 == P2_V0) {
+        cdata += hashUpdateHeaderAndType(cdata, UPDATE_TYPE_MINT_DISTRIBUTION_V0);
+
         // Mint rate consists of 4 bytes of mantissa, and a 1 byte exponent.
         uint32_t mintRateMantissa = U4BE(cdata, 0);
         uint8_t mintRateExponent = cdata[4];
@@ -63,6 +63,8 @@ void handleSignUpdateMintDistribution(uint8_t *cdata, uint8_t p2, volatile unsig
         offset += 6;
         offset += numberToText(ctx->mintRate + offset, sizeof(ctx->mintRate) - offset, mintRateExponent);
         memmove(ctx->mintRate + offset, ")", 2);
+    } else {
+        cdata += hashUpdateHeaderAndType(cdata, UPDATE_TYPE_MINT_DISTRIBUTION_V1);
     }
 
     // Baker reward

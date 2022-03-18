@@ -8,44 +8,44 @@ static signUpdatePoolParametersContext_t *ctx = &global.signPoolParameters;
 static tx_state_t *tx_state = &global_tx_state;
 
 UX_STEP_NOCB(
-    ux_sign_pool_parameters_transaction_fee_step,
+    ux_sign_pool_parameters_finalization_reward_step,
     bnnn_paging,
-    {.title = "L-pool transaction fee", .text = (char *) global.signPoolParameters.transactionFeeCommissionRate});
+    {.title = "L-pool finalize reward", .text = (char *) global.signPoolParameters.finalizationRewardCommissionRate});
 UX_STEP_NOCB(
     ux_sign_pool_parameters_baking_reward_step,
     bnnn_paging,
     {.title = "L-pool baking reward", .text = (char *) global.signPoolParameters.bakingRewardCommissionRate});
 UX_STEP_CB(
-    ux_sign_pool_parameters_finalization_reward_step,
+    ux_sign_pool_parameters_transaction_fee_step,
     bnnn_paging,
     sendSuccessNoIdle(),
-    {.title = "L-pool finalize reward", .text = (char *) global.signPoolParameters.finalizationRewardCommissionRate});
+    {.title = "L-pool transaction fee", .text = (char *) global.signPoolParameters.transactionFeeCommissionRate});
 
 UX_STEP_NOCB(
-    ux_sign_pool_parameters_transaction_fee_max_step,
+    ux_sign_pool_parameters_finalization_reward_max_step,
     bnnn_paging,
-    {.title = "max transaction fee", .text = (char *) global.signPoolParameters.transactionFeeCommissionRate});
+    {.title = "max finalize reward", .text = (char *) global.signPoolParameters.finalizationRewardCommissionRate});
 UX_STEP_NOCB(
     ux_sign_pool_parameters_baking_reward_max_step,
     bnnn_paging,
     {.title = "max baking reward", .text = (char *) global.signPoolParameters.bakingRewardCommissionRate});
 UX_STEP_CB(
-    ux_sign_pool_parameters_finalization_reward_max_step,
+    ux_sign_pool_parameters_transaction_fee_max_step,
     bnnn_paging,
     sendSuccessNoIdle(),
-    {.title = "max finalize reward", .text = (char *) global.signPoolParameters.finalizationRewardCommissionRate});
+    {.title = "max transaction fee", .text = (char *) global.signPoolParameters.transactionFeeCommissionRate});
 UX_STEP_NOCB(
-    ux_sign_pool_parameters_transaction_fee_min_step,
+    ux_sign_pool_parameters_finalization_reward_min_step,
     bnnn_paging,
-    {.title = "min transaction fee", .text = (char *) global.signPoolParameters.transactionFeeCommissionRateMin});
+    {.title = "min finalize reward", .text = (char *) global.signPoolParameters.finalizationRewardCommissionRateMin});
 UX_STEP_NOCB(
     ux_sign_pool_parameters_baking_reward_min_step,
     bnnn_paging,
     {.title = "min baking reward", .text = (char *) global.signPoolParameters.bakingRewardCommissionRateMin});
 UX_STEP_NOCB(
-    ux_sign_pool_parameters_finalization_reward_min_step,
+    ux_sign_pool_parameters_transaction_fee_min_step,
     bnnn_paging,
-    {.title = "min finalize reward", .text = (char *) global.signPoolParameters.finalizationRewardCommissionRateMin});
+    {.title = "min transaction fee", .text = (char *) global.signPoolParameters.transactionFeeCommissionRateMin});
 
 UX_STEP_NOCB(
     ux_sign_pool_parameters_minimum_capital_step,
@@ -63,17 +63,17 @@ UX_STEP_NOCB(
 UX_FLOW(
     ux_sign_pool_parameters_initial,
     &ux_sign_flow_shared_review,
-    &ux_sign_pool_parameters_transaction_fee_step,
+    &ux_sign_pool_parameters_finalization_reward_step,
     &ux_sign_pool_parameters_baking_reward_step,
-    &ux_sign_pool_parameters_finalization_reward_step);
+    &ux_sign_pool_parameters_transaction_fee_step);
 UX_FLOW(
     ux_sign_pool_parameters_commision_bounds,
-    &ux_sign_pool_parameters_transaction_fee_min_step,
-    &ux_sign_pool_parameters_transaction_fee_max_step,
+    &ux_sign_pool_parameters_finalization_reward_min_step,
+    &ux_sign_pool_parameters_finalization_reward_max_step,
     &ux_sign_pool_parameters_baking_reward_min_step,
     &ux_sign_pool_parameters_baking_reward_max_step,
-    &ux_sign_pool_parameters_finalization_reward_min_step,
-    &ux_sign_pool_parameters_finalization_reward_max_step);
+    &ux_sign_pool_parameters_transaction_fee_min_step,
+    &ux_sign_pool_parameters_transaction_fee_max_step);
 UX_FLOW(
     ux_sign_pool_parameters_commision_final,
     &ux_sign_pool_parameters_minimum_capital_step,
@@ -112,13 +112,13 @@ void handleSignUpdatePoolParameters(uint8_t *cdata, uint8_t p1, volatile unsigne
         cx_sha256_init(&tx_state->hash);
         cdata += hashUpdateHeaderAndType(cdata, UPDATE_TYPE_POOL_PARAMETERS);
 
-        cdata +=
-            parseCommissionRate(cdata, ctx->transactionFeeCommissionRate, sizeof(ctx->transactionFeeCommissionRate));
-        cdata += parseCommissionRate(cdata, ctx->bakingRewardCommissionRate, sizeof(ctx->bakingRewardCommissionRate));
-        parseCommissionRate(
+        cdata += parseCommissionRate(
             cdata,
             ctx->finalizationRewardCommissionRate,
             sizeof(ctx->finalizationRewardCommissionRate));
+        cdata +=
+            parseCommissionRate(cdata, ctx->bakingRewardCommissionRate, sizeof(ctx->bakingRewardCommissionRate));
+        parseCommissionRate(cdata, ctx->transactionFeeCommissionRate, sizeof(ctx->transactionFeeCommissionRate));
 
         ctx->state = TX_UPDATE_POOL_PARAMETERS_BOUNDS;
 
@@ -127,21 +127,22 @@ void handleSignUpdatePoolParameters(uint8_t *cdata, uint8_t p1, volatile unsigne
     } else if (p1 == P1_COMMISION_BOUNDS && ctx->state == TX_UPDATE_POOL_PARAMETERS_BOUNDS) {
         cdata += parseCommissionRate(
             cdata,
-            ctx->transactionFeeCommissionRateMin,
-            sizeof(ctx->transactionFeeCommissionRateMin));
-        cdata +=
-            parseCommissionRate(cdata, ctx->transactionFeeCommissionRate, sizeof(ctx->transactionFeeCommissionRate));
-        cdata +=
-            parseCommissionRate(cdata, ctx->bakingRewardCommissionRateMin, sizeof(ctx->bakingRewardCommissionRateMin));
-        cdata += parseCommissionRate(cdata, ctx->bakingRewardCommissionRate, sizeof(ctx->bakingRewardCommissionRate));
-        cdata += parseCommissionRate(
-            cdata,
             ctx->finalizationRewardCommissionRateMin,
             sizeof(ctx->finalizationRewardCommissionRateMin));
-        parseCommissionRate(
+        cdata += parseCommissionRate(
             cdata,
             ctx->finalizationRewardCommissionRate,
             sizeof(ctx->finalizationRewardCommissionRate));
+
+        cdata +=
+            parseCommissionRate(cdata, ctx->bakingRewardCommissionRateMin, sizeof(ctx->bakingRewardCommissionRateMin));
+        cdata += parseCommissionRate(cdata, ctx->bakingRewardCommissionRate, sizeof(ctx->bakingRewardCommissionRate));
+
+        cdata += parseCommissionRate(
+            cdata,
+            ctx->transactionFeeCommissionRateMin,
+            sizeof(ctx->transactionFeeCommissionRateMin));
+        parseCommissionRate(cdata, ctx->transactionFeeCommissionRate, sizeof(ctx->transactionFeeCommissionRate));
 
         ctx->state = TX_UPDATE_POOL_PARAMETERS_EQUITY;
 
