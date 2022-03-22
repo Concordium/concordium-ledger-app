@@ -116,8 +116,7 @@ void handleSignUpdatePoolParameters(uint8_t *cdata, uint8_t p1, volatile unsigne
             cdata,
             ctx->finalizationRewardCommissionRate,
             sizeof(ctx->finalizationRewardCommissionRate));
-        cdata +=
-            parseCommissionRate(cdata, ctx->bakingRewardCommissionRate, sizeof(ctx->bakingRewardCommissionRate));
+        cdata += parseCommissionRate(cdata, ctx->bakingRewardCommissionRate, sizeof(ctx->bakingRewardCommissionRate));
         parseCommissionRate(cdata, ctx->transactionFeeCommissionRate, sizeof(ctx->transactionFeeCommissionRate));
 
         ctx->state = TX_UPDATE_POOL_PARAMETERS_BOUNDS;
