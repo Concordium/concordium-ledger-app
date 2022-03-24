@@ -51,6 +51,9 @@
 #include "signUpdateMintDistribution.h"
 #include "signUpdateProtocol.h"
 #include "signUpdateTransactionFeeDistribution.h"
+#include "signUpdateTimeParameters.h"
+#include "signUpdateCooldownParameters.h"
+#include "signUpdatePoolParameters.h"
 #include "ux.h"
 #include "verifyAddress.h"
 
@@ -115,6 +118,10 @@ accountSender_t global_account_sender;
 #define INS_UPDATE_LEVEL2_KEYS_LEVEL1 0x2B
 #define INS_ADD_ANONYMITY_REVOKER     0x2C
 #define INS_ADD_IDENTITY_PROVIDER     0x2D
+
+#define INS_UPDATE_COOLDOWN_PARAMETERS 0x40
+#define INS_UPDATE_POOL_PARAMETERS     0x41
+#define INS_UPDATE_TIME_PARAMETERS     0x42
 
 #define INS_SIGN_UPDATE_CREDENTIAL 0x31
 
@@ -229,7 +236,7 @@ static void concordium_main(void) {
                         handleSignUpdateFoundationAccount(cdata, &flags);
                         break;
                     case INS_UPDATE_MINT_DISTRIBUTION:
-                        handleSignUpdateMintDistribution(cdata, &flags);
+                        handleSignUpdateMintDistribution(cdata, p2, &flags);
                         break;
                     case INS_UPDATE_ELECTION_DIFFICULTY:
                         handleSignUpdateElectionDifficulty(cdata, &flags);
@@ -268,6 +275,7 @@ static void concordium_main(void) {
                         handleSignUpdateAuthorizations(
                             cdata,
                             p1,
+                            p2,
                             UPDATE_TYPE_UPDATE_ROOT_KEYS,
                             lc,
                             &flags,
@@ -277,6 +285,7 @@ static void concordium_main(void) {
                         handleSignUpdateAuthorizations(
                             cdata,
                             p1,
+                            p2,
                             UPDATE_TYPE_UPDATE_LEVEL1_KEYS,
                             lc,
                             &flags,
@@ -287,6 +296,15 @@ static void concordium_main(void) {
                         break;
                     case INS_ADD_ANONYMITY_REVOKER:
                         handleSignAddAnonymityRevoker(cdata, p1, lc, &flags, isInitialCall);
+                        break;
+                    case INS_UPDATE_TIME_PARAMETERS:
+                        handleSignUpdateTimeParameters(cdata, &flags);
+                        break;
+                    case INS_UPDATE_COOLDOWN_PARAMETERS:
+                        handleSignUpdateCooldownParameters(cdata, &flags);
+                        break;
+                    case INS_UPDATE_POOL_PARAMETERS:
+                        handleSignUpdatePoolParameters(cdata, p1, &flags, isInitialCall);
                         break;
                     default:
                         THROW(ERROR_INVALID_INSTRUCTION);
