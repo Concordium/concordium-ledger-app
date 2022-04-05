@@ -26,7 +26,7 @@ UX_STEP_NOCB(
 UX_STEP_NOCB(
     ux_sign_configure_baker_open_status_step,
     bnnn_paging,
-    {.title = "Open status", .text = (char *) global.signConfigureBaker.displayOpenForDelegation});
+    {.title = "Pool status", .text = (char *) global.signConfigureBaker.displayOpenForDelegation});
 
 UX_STEP_NOCB(ux_sign_configure_baker_keys_step, nn, {"Update baker", "keys"});
 
@@ -64,7 +64,7 @@ UX_STEP_NOCB(
     {.title = "Finalization reward", .text = (char *) global.signConfigureBaker.finalizationRewardCommissionRate});
 
 /**
- * Dynamically builds and initializes the capital, restake earnings, open status and
+ * Dynamically builds and initializes the capital, restake earnings, pool status and
  * baker keys display.
  * - Ensures that the UI starts with the shared review transaction screens.
  * - Only displays the parts of the transaction that are set in the transaction, and skips
