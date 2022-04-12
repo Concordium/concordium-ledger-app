@@ -2,7 +2,7 @@
 #define _CONCORDIUM_APP_CONFIGURE_BAKER_H_
 
 /**
- * Handles the signing flow for an 'Configure Baker' transaction. It validates
+ * Handles the signing flow for a 'Configure Baker' transaction. It validates
  * that the correct UpdateType is supplied and will fail otherwise.
  * @param cdata please see /doc/ins_configure_delegation.md for details
  */
@@ -13,17 +13,34 @@ void handleSignConfigureBaker(
     volatile unsigned int *flags,
     bool isInitialCall);
 
-// TODO: Consider making a union type between the 3 different
-// steps as we will not be using the memory at the same time,
-// i.e. displayCapital/displayRestake/displayOpenForDelegation in one part,
-// commission rates in their own, and url in its own part.
+typedef enum {
+    CONFIGURE_BAKER_INITIAL = 60,
+    CONFIGURE_BAKER_FIRST = 61,
+    CONFIGURE_BAKER_AGGREGATION_KEY = 62,
+    CONFIGURE_BAKER_URL_LENGTH = 63,
+    CONFIGURE_BAKER_URL = 64,
+    CONFIGURE_BAKER_COMMISSION_RATES = 65,
+    CONFIGURE_BAKER_END = 66
+} configureBakerState_t;
+
 typedef struct {
     uint8_t displayCapital[26];
     uint8_t displayRestake[4];
     uint8_t displayOpenForDelegation[15];
+} configureBakerCapitalRestakeOpenForDelegationBlob_t;
+
+typedef struct {
+    uint16_t urlLength;
+    uint8_t urlDisplay[256];
+} configureBakerUrl_t;
+
+typedef struct {
     uint8_t transactionFeeCommissionRate[43];
     uint8_t bakingRewardCommissionRate[43];
     uint8_t finalizationRewardCommissionRate[43];
+} configureBakerCommisionRates_t;
+
+typedef struct {
     bool hasCapital;
     bool hasRestakeEarnings;
     bool hasOpenForDelegation;
@@ -33,8 +50,14 @@ typedef struct {
     bool hasBakingRewardCommission;
     bool hasFinalizationRewardCommission;
     bool firstDisplay;
-    uint16_t urlLength;
-    uint8_t url[255];
+
+    union {
+        configureBakerCapitalRestakeOpenForDelegationBlob_t capitalRestakeDelegation;
+        configureBakerUrl_t url;
+        configureBakerCommisionRates_t commissionRates;
+    };
+
+    configureBakerState_t state;
 } signConfigureBaker_t;
 
 #endif
