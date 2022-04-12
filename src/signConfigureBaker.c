@@ -43,10 +43,7 @@ UX_STEP_NOCB(
 
 UX_STEP_CB(ux_sign_configure_baker_continue, nn, sendSuccessNoIdle(), {"Continue", "with transaction"});
 
-UX_STEP_NOCB(
-    ux_sign_configure_baker_empty_url_step,
-    bn,
-    {"Empty URL", ""});
+UX_STEP_NOCB(ux_sign_configure_baker_empty_url_step, bn, {"Empty URL", ""});
 
 UX_STEP_NOCB(
     ux_sign_configure_baker_commission_transaction_fee_step,
@@ -137,7 +134,6 @@ void startConfigureBakerUrlDisplay(bool lastUrlPage) {
     if (!lastUrlPage) {
         ux_sign_configure_baker_url[index++] = &ux_sign_configure_baker_url_cb_step;
     } else {
-
         if (ctx->urlLength == 0) {
             ux_sign_configure_baker_url[index++] = &ux_sign_configure_baker_empty_url_step;
         } else {
