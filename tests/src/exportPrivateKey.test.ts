@@ -19,25 +19,25 @@ const exportPrivateKeyTest = (p1: number, p2: number, picture: string, seed: str
 
 const prfKeySeed = 'd9bd8b475cfb4f7c0e42e7059d27906c09f98760e1104c27430624f37da75707';
 const prfKey = '48ba35a69084c13aa3bcd592e77390bc922e7283dcf928bd7068c76b9eb9ba58';
-const bothSeeds = prfKeySeed + '1a2f72de118c37e4029245b3acb6ff541ceffb70911b115800be025d8ed1c24b';
-const bothKeys = prfKey + '60f76c759b19663a1b9cd6e0974e311b52240eb9fe769aafcb63e5da4d5d9ef6';
+const bothSeeds = `${prfKeySeed}1a2f72de118c37e4029245b3acb6ff541ceffb70911b115800be025d8ed1c24b`;
+const bothKeys = `${prfKey}60f76c759b19663a1b9cd6e0974e311b52240eb9fe769aafcb63e5da4d5d9ef6`;
 
 // We want to test that all supported p1 choices are working
 
 test('[NANO S] Export Bls private key for decryption key (PRF-key)', setupZemu('nanos', exportPrivateKeyTest(0x00, 0x02, 'nanos_export_decrypt_prf_key', prfKey)));
 // test('[NANO X] Export Bls private key for decryption key (PRF-key)', setupZemu('nanox', exportPrivateKeyTest(0x00, 0x02, 'nanox_export_decrypt_prf_key', prfKey)));
 test('[NANO S] Export private key seed for decryption key (PRF-key seed)', setupZemu('nanos', exportPrivateKeyTest(0x00, 0x01, 'nanos_export_decrypt_prf_key', prfKeySeed)));
-//test('[NANO X] Export private key seed for decryption key (PRF-key seed)', setupZemu('nanox', exportPrivateKeyTest(0x00, 0x01, 'nanox_export_decrypt_prf_key', prfKeySeed)));
+// test('[NANO X] Export private key seed for decryption key (PRF-key seed)', setupZemu('nanox', exportPrivateKeyTest(0x00, 0x01, 'nanox_export_decrypt_prf_key', prfKeySeed)));
 
 test('[NANO S] Export Bls private key for recovery (PRF-key)', setupZemu('nanos', exportPrivateKeyTest(0x01, 0x02, 'nanos_export_recovery_prf_key', prfKey)));
 // test('[NANO X] Export Bls private key for recovery (PRF-key)', setupZemu('nanox', exportPrivateKeyTest(0x01, 0x02, 'nanox_export_recovery_prf_key', prfKey)));
 test('[NANO S] Export private key seed for recovery (PRF-key seed)', setupZemu('nanos', exportPrivateKeyTest(0x01, 0x01, 'nanos_export_recovery_prf_key', prfKeySeed)));
-//test('[NANO X] Export private key seed for recovery (PRF-key seed)', setupZemu('nanox', exportPrivateKeyTest(0x01, 0x01, 'nanox_export_recovery_prf_key', prfKeySeed)));
+// test('[NANO X] Export private key seed for recovery (PRF-key seed)', setupZemu('nanox', exportPrivateKeyTest(0x01, 0x01, 'nanox_export_recovery_prf_key', prfKeySeed)));
 
 test('[NANO S] Export Bls private key for creating credential (PRF + IdCredSec)', setupZemu('nanos', exportPrivateKeyTest(0x02, 0x02, 'nanos_export_credential_idcredsec', bothKeys)));
 // test('[NANO X] Export Bls private key for creating credential (PRF + IdCredSec)', setupZemu('nanox', exportPrivateKeyTest(0x02, 0x02, 'nanox_export_credential_idcredsec', bothKeys)));
 test('[NANO S] Export private key seed for creating credential (PRF seed + IdCredSec seed)', setupZemu('nanos', exportPrivateKeyTest(0x02, 0x01, 'nanos_export_credential_idcredsec', bothSeeds)));
-//test('[NANO X] Export private key seed for creating credential (PRF seed + IdCredSec seed)', setupZemu('nanox', exportPrivateKeyTest(0x02, 0x01, 'nanox_export_credential_idcredsec', bothSeeds)));
+// test('[NANO X] Export private key seed for creating credential (PRF seed + IdCredSec seed)', setupZemu('nanox', exportPrivateKeyTest(0x02, 0x01, 'nanox_export_credential_idcredsec', bothSeeds)));
 
 const negativePrivateKeyExportTest = (p1: number, p2: number, picture: string) => (async (sim: Zemu, transport: Transport) => {
     expect.assertions(1);
@@ -48,14 +48,13 @@ const negativePrivateKeyExportTest = (p1: number, p2: number, picture: string) =
 });
 
 test('[NANO S] Decline to export private key seed for decryption', setupZemu('nanos', negativePrivateKeyExportTest(0x00, 0x01, 'nanos_decline_decrypt')));
-//test('[NANO X] Decline to export private key seed for decryption', setupZemu('nanox', negativePrivateKeyExportTest(0x00, 0x01, 'nanox_decline_decrypt')));
+// test('[NANO X] Decline to export private key seed for decryption', setupZemu('nanox', negativePrivateKeyExportTest(0x00, 0x01, 'nanox_decline_decrypt')));
 
 test('[NANO S] Decline to export private key seed for recovery', setupZemu('nanos', negativePrivateKeyExportTest(0x01, 0x01, 'nanos_decline_recovery')));
-//test('[NANO X] Decline to export private key seed for recovery', setupZemu('nanox', negativePrivateKeyExportTest(0x01, 0x01, 'nanox_decline_recovery')));
+// test('[NANO X] Decline to export private key seed for recovery', setupZemu('nanox', negativePrivateKeyExportTest(0x01, 0x01, 'nanox_decline_recovery')));
 
 test('[NANO S] Decline to export private key seed for creating credential', setupZemu('nanos', negativePrivateKeyExportTest(0x02, 0x01, 'nanos_decline_create_credential')));
-//test('[NANO X] Decline to export private key seed for creating credential', setupZemu('nanox', negativePrivateKeyExportTest(0x02, 0x01, 'nanox_decline_create_credential')));
-
+// test('[NANO X] Decline to export private key seed for creating credential', setupZemu('nanox', negativePrivateKeyExportTest(0x02, 0x01, 'nanox_decline_create_credential')));
 
 const exportPrivateKeyTestNoPictures = (path: string, p1: number, key: string) => (async (sim: Zemu, transport: Transport) => {
     const data = Buffer.from(path, 'hex');
@@ -68,7 +67,7 @@ const exportPrivateKeyTestNoPictures = (path: string, p1: number, key: string) =
     );
 });
 
-/*** We want to test that the keygen works with different seeds ***/
+/** * We want to test that the keygen works with different seeds ** */
 // Keys have been derived using https://github.com/paulmillr/bls12-381-keygen
 // and double checked with https://github.com/ChainSafe/bls-hd-key
 const tests = [];

@@ -52,15 +52,19 @@ void startDisplay() {
     ux_flow_init(0, ux_sign_configure_delegation, NULL);
 }
 
-void handleSignConfigureDelegation(uint8_t *cdata, volatile unsigned int *flags) {
-    cdata += parseKeyDerivationPath(cdata);
+void handleSignConfigureDelegation(uint8_t *cdata, uint8_t dataLength, volatile unsigned int *flags) {
+    int keyDerivationPathLength = parseKeyDerivationPath(cdata);
+    cdata += keyDerivationPathLength;
+
     cx_sha256_init(&tx_state->hash);
-    cdata += hashAccountTransactionHeaderAndKind(cdata, CONFIGURE_DELEGATION);
+    int accountTransactionHeaderAndKindLength = hashAccountTransactionHeaderAndKind(cdata, CONFIGURE_DELEGATION);
+    cdata += accountTransactionHeaderAndKindLength;
 
     // The initial 2 bytes tells us the fields we are receiving.
     cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 2, NULL, 0);
     uint16_t bitmap = U2BE(cdata, 0);
     cdata += 2;
+    uint8_t expectedDataLength = keyDerivationPathLength + accountTransactionHeaderAndKindLength + 2;
 
     ctx->hasCapital = (bitmap >> 0) & 1;
     ctx->hasRestakeEarnings = (bitmap >> 1) & 1;
@@ -75,12 +79,14 @@ void handleSignConfigureDelegation(uint8_t *cdata, volatile unsigned int *flags)
         uint64_t capitalAmount = U8BE(cdata, 0);
         amountToGtuDisplay(ctx->displayCapital, sizeof(ctx->displayCapital), capitalAmount);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 8, NULL, 0);
+        expectedDataLength += 8;
         cdata += 8;
     }
 
     if (ctx->hasRestakeEarnings) {
         uint8_t restake = cdata[0];
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 1, NULL, 0);
+        expectedDataLength += 1;
         cdata += 1;
         if (restake == 0) {
             memmove(ctx->displayRestake, "No", 3);
@@ -94,18 +100,25 @@ void handleSignConfigureDelegation(uint8_t *cdata, volatile unsigned int *flags)
     if (ctx->hasDelegationTarget) {
         uint8_t delegationType = cdata[0];
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 1, NULL, 0);
+        expectedDataLength += 1;
         cdata += 1;
 
         if (delegationType == 0) {
             memmove(ctx->displayDelegationTarget, "L-pool", 7);
         } else if (delegationType == 1) {
             uint64_t bakerId = U8BE(cdata, 0);
+            expectedDataLength += 8;
             memmove(ctx->displayDelegationTarget, "Baker ID ", 9);
             bin2dec(ctx->displayDelegationTarget + 9, 21, bakerId);
             cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 8, NULL, 0);
         } else {
             THROW(ERROR_INVALID_TRANSACTION);
         }
+    }
+
+    // There was a mismatch between the transaction and the reported data length.
+    if (dataLength != expectedDataLength) {
+        THROW(ERROR_INVALID_TRANSACTION);
     }
 
     startDisplay();
