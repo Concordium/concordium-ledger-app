@@ -38,9 +38,7 @@ void handleSignUpdateElectionDifficulty(uint8_t *cdata, volatile unsigned int *f
     cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 4, NULL, 0);
 
     // Display numerator as "numerator/100000"
-    int numeratorLength = numberToText(ctx->electionDifficulty, sizeof(ctx->electionDifficulty), numerator);
-    uint8_t fraction[8] = "/100000";
-    memmove(ctx->electionDifficulty + numeratorLength, fraction, 8);
+    fractionToText(numerator, ctx->electionDifficulty, sizeof(ctx->electionDifficulty));
 
     ux_flow_init(0, ux_sign_election_difficulty, NULL);
     *flags |= IO_ASYNCH_REPLY;

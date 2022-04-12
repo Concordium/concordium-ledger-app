@@ -197,8 +197,9 @@ void startConfigureBakerCommissionDisplay() {
 
 void handleCommissionRates(uint8_t *cdata, uint8_t dataLength) {
     if (ctx->hasTransactionFeeCommission) {
+        uint32_t rate = U4BE(cdata, 0);
         fractionToText(
-            cdata,
+            rate,
             ctx->commissionRates.transactionFeeCommissionRate,
             sizeof(ctx->commissionRates.transactionFeeCommissionRate));
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 4, NULL, 0);
@@ -207,8 +208,9 @@ void handleCommissionRates(uint8_t *cdata, uint8_t dataLength) {
     }
 
     if (ctx->hasBakingRewardCommission) {
+        uint32_t rate = U4BE(cdata, 0);
         fractionToText(
-            cdata,
+            rate,
             ctx->commissionRates.bakingRewardCommissionRate,
             sizeof(ctx->commissionRates.bakingRewardCommissionRate));
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 4, NULL, 0);
@@ -217,8 +219,9 @@ void handleCommissionRates(uint8_t *cdata, uint8_t dataLength) {
     }
 
     if (ctx->hasFinalizationRewardCommission) {
+        uint32_t rate = U4BE(cdata, 0);
         fractionToText(
-            cdata,
+            rate,
             ctx->commissionRates.finalizationRewardCommissionRate,
             sizeof(ctx->commissionRates.finalizationRewardCommissionRate));
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 4, NULL, 0);
