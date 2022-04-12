@@ -20,14 +20,13 @@ UX_STEP_NOCB(
 
 UX_STEP_NOCB(
     ux_sign_configure_baker_restake_step,
-    bnnn_paging,
-    {.title = "Restake earnings", .text = (char *) global.signConfigureBaker.capitalRestakeDelegation.displayRestake});
+    bn,
+    {"Restake earnings", (char *) global.signConfigureBaker.capitalRestakeDelegation.displayRestake});
 
 UX_STEP_NOCB(
     ux_sign_configure_baker_open_status_step,
-    bnnn_paging,
-    {.title = "Pool status",
-     .text = (char *) global.signConfigureBaker.capitalRestakeDelegation.displayOpenForDelegation});
+    bn,
+    {"Pool status", (char *) global.signConfigureBaker.capitalRestakeDelegation.displayOpenForDelegation});
 
 UX_STEP_NOCB(ux_sign_configure_baker_keys_step, nn, {"Update baker", "keys"});
 
@@ -48,20 +47,18 @@ UX_STEP_NOCB(ux_sign_configure_baker_empty_url_step, bn, {"Empty URL", ""});
 
 UX_STEP_NOCB(
     ux_sign_configure_baker_commission_transaction_fee_step,
-    bnnn_paging,
-    {.title = "Transaction fee",
-     .text = (char *) global.signConfigureBaker.commissionRates.transactionFeeCommissionRate});
+    bn,
+    {"Transaction fee", (char *) global.signConfigureBaker.commissionRates.transactionFeeCommissionRate});
 
 UX_STEP_NOCB(
     ux_sign_configure_baker_commission_baking_reward_step,
-    bnnn_paging,
-    {.title = "Baking reward", .text = (char *) global.signConfigureBaker.commissionRates.bakingRewardCommissionRate});
+    bn,
+    {"Baking reward", (char *) global.signConfigureBaker.commissionRates.bakingRewardCommissionRate});
 
 UX_STEP_NOCB(
     ux_sign_configure_baker_commission_finalization_reward_step,
-    bnnn_paging,
-    {.title = "Finalization reward",
-     .text = (char *) global.signConfigureBaker.commissionRates.finalizationRewardCommissionRate});
+    bn,
+    {"Finalization reward", (char *) global.signConfigureBaker.commissionRates.finalizationRewardCommissionRate});
 
 bool hasCommissionRate() {
     return ctx->hasTransactionFeeCommission || ctx->hasBakingRewardCommission || ctx->hasFinalizationRewardCommission;
