@@ -14,6 +14,7 @@
 #include "signAddAnonymityRevoker.h"
 #include "signAddBakerOrUpdateBakerKeys.h"
 #include "signAddIdentityProvider.h"
+#include "signConfigureDelegation.h"
 #include "signCredentialDeployment.h"
 #include "signEncryptedAmountTransfer.h"
 #include "signHigherLevelKeyUpdate.h"
@@ -63,7 +64,8 @@ typedef enum {
     REGISTER_DATA = 21,
     TRANSFER_WITH_MEMO = 22,
     ENCRYPTED_AMOUNT_TRANSFER_WITH_MEMO = 23,
-    TRANSFER_WITH_SCHEDULE_WITH_MEMO = 24
+    TRANSFER_WITH_SCHEDULE_WITH_MEMO = 24,
+    CONFIGURE_DELEGATION = 26
 } transactionKind_e;
 
 /**
@@ -155,6 +157,7 @@ typedef union {
     signAddBakerContext_t signAddBaker;
     signUpdateBakerStakeContext_t signUpdateBakerStake;
     signUpdateBakerRestakeEarningsContext_t signUpdateBakerRestakeEarnings;
+    signConfigureDelegationContext_t signConfigureDelegation;
 
     signExchangeRateContext_t signExchangeRateContext;
     signUpdateAuthorizations_t signUpdateAuthorizations;

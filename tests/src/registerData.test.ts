@@ -6,12 +6,12 @@ const registerDataTest = (picture: string, steps: number) => (async (sim: Zemu, 
     let data = Buffer.from('08000004510000000000000000000000000000000000000002000000000000000020a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7000000000000000a0000000000000064000000290000000063de5da7150005', 'hex');
     transport.send(0xe0, 0x35, 0x00, 0x00, data);
     await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
-    await sim.navigateAndCompareSnapshots('.', picture + '_0', [steps, 0]);
+    await sim.navigateAndCompareSnapshots('.', `${picture}_0`, [steps, 0]);
     const snapshot1 = await sim.snapshot();
     data = Buffer.from('6474657374', 'hex');
     const tx = transport.send(0xe0, 0x35, 0x01, 0x00, data);
     await sim.waitUntilScreenIsNot(snapshot1);
-    await sim.navigateAndCompareSnapshots('.', picture + '_1', [0, 0]);
+    await sim.navigateAndCompareSnapshots('.', `${picture}_1`, [0, 0]);
     await expect(tx).resolves.toEqual(
         Buffer.from('cd4031eed073a6a4e3c883ab95dd5ad281de88bc17713c540852048522e7cd61c3c6ba06fb07d22447b073fec3c52dc0f847317745838ccbd83930bfe00809099000', 'hex'),
     );
@@ -22,7 +22,7 @@ test('[NANO X] Sign a register data transaction', setupZemu('nanox', registerDat
 
 const registerDataTestTooLargeDataLength = (async (sim: Zemu, transport: Transport) => {
     expect.assertions(1);
-    let data = Buffer.from('08000004510000000000000000000000000000000000000002000000000000000020a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7000000000000000a0000000000000064000000290000000063de5da715045A', 'hex');
+    const data = Buffer.from('08000004510000000000000000000000000000000000000002000000000000000020a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7000000000000000a0000000000000064000000290000000063de5da715045A', 'hex');
     transport.send(0xe0, 0x35, 0x00, 0x00, data).catch((e) => expect(e.statusCode).toEqual(27395));
 });
 
