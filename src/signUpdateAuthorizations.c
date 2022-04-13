@@ -70,7 +70,7 @@ const char *getAuthorizationName(authorizationType_e type) {
         case AUTHORIZATION_EURO_PER_ENERGY:
             return "Euro per energy";
         case AUTHORIZATION_MICRO_GTU_PER_EURO:
-            return "uGTU per Euro";
+            return "uCCD per Euro";
         case AUTHORIZATION_FOUNDATION_ACCOUNT:
             return "Foundation account";
         case AUTHORIZATION_MINT_DISTRIBUTION:
