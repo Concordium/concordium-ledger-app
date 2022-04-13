@@ -11,7 +11,7 @@ async function poolParameters(sim: Zemu, transport: Transport, images: string, e
     data = Buffer.from('00001001' + '0000EA64' + '0000EA63' + '0000EA65' + '00001000' + '0000EA62', 'hex');
     transport.send(0xe0, 0x41, 0x01, 0x00, data);
     await sim.waitUntilScreenIsNot(snapshot);
-    await sim.navigateAndCompareSnapshots('.', images + "_bounds", [5]);
+    await sim.navigateAndCompareSnapshots('.', images + "_ranges", [5]);
     snapshot = await sim.clickBoth();
 
     data = Buffer.from('00000A00C60D5000' + 'C60D5000' + '00000A00C60D5000' + '0000EA600000EA60', 'hex');

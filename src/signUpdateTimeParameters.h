@@ -4,7 +4,7 @@
 /**
  * Handles the signing flow, including updating the display, for the 'update time parameters'
  * update instruction.
- * @param cdata please see /doc/ins_update_mint_distribution.md for details
+ * @param cdata please see /doc/ins_update_time_parameters.md for details
  */
 void handleSignUpdateTimeParameters(uint8_t *cdata, volatile unsigned int *flags);
 

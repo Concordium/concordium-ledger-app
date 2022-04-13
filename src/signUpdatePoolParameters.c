@@ -9,43 +9,43 @@ static tx_state_t *tx_state = &global_tx_state;
 
 UX_STEP_NOCB(
     ux_sign_pool_parameters_finalization_reward_step,
-    bnnn_paging,
-    {.title = "L-pool finalize reward", .text = (char *) global.signPoolParameters.finalizationRewardCommissionRate});
+    bn,
+    {"L-pool finalize reward", (char *) global.signPoolParameters.finalizationRewardCommissionRate});
 UX_STEP_NOCB(
     ux_sign_pool_parameters_baking_reward_step,
-    bnnn_paging,
-    {.title = "L-pool baking reward", .text = (char *) global.signPoolParameters.bakingRewardCommissionRate});
+    bn,
+    {"L-pool baking reward", (char *) global.signPoolParameters.bakingRewardCommissionRate});
 UX_STEP_CB(
     ux_sign_pool_parameters_transaction_fee_step,
-    bnnn_paging,
+    bn,
     sendSuccessNoIdle(),
-    {.title = "L-pool transaction fee", .text = (char *) global.signPoolParameters.transactionFeeCommissionRate});
+    {"L-pool transaction fee", (char *) global.signPoolParameters.transactionFeeCommissionRate});
 
 UX_STEP_NOCB(
     ux_sign_pool_parameters_finalization_reward_max_step,
-    bnnn_paging,
-    {.title = "max finalize reward", .text = (char *) global.signPoolParameters.finalizationRewardCommissionRate});
+    bn,
+    {"max finalize reward", (char *) global.signPoolParameters.finalizationRewardCommissionRate});
 UX_STEP_NOCB(
     ux_sign_pool_parameters_baking_reward_max_step,
-    bnnn_paging,
-    {.title = "max baking reward", .text = (char *) global.signPoolParameters.bakingRewardCommissionRate});
+    bn,
+    {"max baking reward", (char *) global.signPoolParameters.bakingRewardCommissionRate});
 UX_STEP_CB(
     ux_sign_pool_parameters_transaction_fee_max_step,
-    bnnn_paging,
+    bn,
     sendSuccessNoIdle(),
-    {.title = "max transaction fee", .text = (char *) global.signPoolParameters.transactionFeeCommissionRate});
+    {"max transaction fee", (char *) global.signPoolParameters.transactionFeeCommissionRate});
 UX_STEP_NOCB(
     ux_sign_pool_parameters_finalization_reward_min_step,
-    bnnn_paging,
-    {.title = "min finalize reward", .text = (char *) global.signPoolParameters.finalizationRewardCommissionRateMin});
+    bn,
+    {"min finalize reward", (char *) global.signPoolParameters.finalizationRewardCommissionRateMin});
 UX_STEP_NOCB(
     ux_sign_pool_parameters_baking_reward_min_step,
-    bnnn_paging,
-    {.title = "min baking reward", .text = (char *) global.signPoolParameters.bakingRewardCommissionRateMin});
+    bn,
+    {"min baking reward", (char *) global.signPoolParameters.bakingRewardCommissionRateMin});
 UX_STEP_NOCB(
     ux_sign_pool_parameters_transaction_fee_min_step,
-    bnnn_paging,
-    {.title = "min transaction fee", .text = (char *) global.signPoolParameters.transactionFeeCommissionRateMin});
+    bn,
+    {"min transaction fee", (char *) global.signPoolParameters.transactionFeeCommissionRateMin});
 
 UX_STEP_NOCB(
     ux_sign_pool_parameters_minimum_capital_step,
@@ -53,8 +53,8 @@ UX_STEP_NOCB(
     {.title = "min equity capital", .text = (char *) global.signPoolParameters.minimumEquityCapital});
 UX_STEP_NOCB(
     ux_sign_pool_parameters_capital_bound_step,
-    bnnn_paging,
-    {.title = "capital bound", .text = (char *) global.signPoolParameters.capitalBound});
+    bn,
+    {"capital bound", (char *) global.signPoolParameters.capitalBound});
 UX_STEP_NOCB(
     ux_sign_pool_parameters_leverage_bound_step,
     bnnn_paging,
@@ -67,7 +67,7 @@ UX_FLOW(
     &ux_sign_pool_parameters_baking_reward_step,
     &ux_sign_pool_parameters_transaction_fee_step);
 UX_FLOW(
-    ux_sign_pool_parameters_commision_bounds,
+    ux_sign_pool_parameters_commision_ranges,
     &ux_sign_pool_parameters_finalization_reward_min_step,
     &ux_sign_pool_parameters_finalization_reward_max_step,
     &ux_sign_pool_parameters_baking_reward_min_step,
@@ -83,8 +83,18 @@ UX_FLOW(
     &ux_sign_flow_shared_decline);
 
 #define P1_INITIAL          0x00
-#define P1_COMMISION_BOUNDS 0x01  // Used for both the message text and the specification URL.
-#define P1_EQUITY           0x02  // Used for both the message text and the specification URL.
+#define P1_COMMISION_RANGES 0x01
+#define P1_EQUITY           0x02
+
+/**
+ * Helper method for parsing commission rates as they are all equal in structure.
+ */
+uint8_t parseCommissionRate(uint8_t *cdata, uint8_t *commissionRateDisplay, uint8_t sizeOfCommissionRateDisplay) {
+    uint32_t rate = U4BE(cdata, 0);
+    fractionToText(rate, commissionRateDisplay, sizeOfCommissionRateDisplay);
+    cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 4, NULL, 0);
+    return 4;
+}
 
 void handleSignUpdatePoolParameters(uint8_t *cdata, uint8_t p1, volatile unsigned int *flags, bool isInitialCall) {
     if (isInitialCall) {
@@ -105,11 +115,11 @@ void handleSignUpdatePoolParameters(uint8_t *cdata, uint8_t p1, volatile unsigne
         cdata += parseCommissionRate(cdata, ctx->bakingRewardCommissionRate, sizeof(ctx->bakingRewardCommissionRate));
         parseCommissionRate(cdata, ctx->transactionFeeCommissionRate, sizeof(ctx->transactionFeeCommissionRate));
 
-        ctx->state = TX_UPDATE_POOL_PARAMETERS_BOUNDS;
+        ctx->state = TX_UPDATE_POOL_PARAMETERS_RANGES;
 
         ux_flow_init(0, ux_sign_pool_parameters_initial, NULL);
         *flags |= IO_ASYNCH_REPLY;
-    } else if (p1 == P1_COMMISION_BOUNDS && ctx->state == TX_UPDATE_POOL_PARAMETERS_BOUNDS) {
+    } else if (p1 == P1_COMMISION_RANGES && ctx->state == TX_UPDATE_POOL_PARAMETERS_RANGES) {
         cdata += parseCommissionRate(
             cdata,
             ctx->finalizationRewardCommissionRateMin,
@@ -131,7 +141,7 @@ void handleSignUpdatePoolParameters(uint8_t *cdata, uint8_t p1, volatile unsigne
 
         ctx->state = TX_UPDATE_POOL_PARAMETERS_EQUITY;
 
-        ux_flow_init(0, ux_sign_pool_parameters_commision_bounds, NULL);
+        ux_flow_init(0, ux_sign_pool_parameters_commision_ranges, NULL);
         *flags |= IO_ASYNCH_REPLY;
     } else if (p1 == P1_EQUITY && ctx->state == TX_UPDATE_POOL_PARAMETERS_EQUITY) {
         uint64_t minimumEquityCapital = U8BE(cdata, 0);

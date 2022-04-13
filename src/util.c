@@ -112,19 +112,6 @@ int handleHeaderAndToAddress(uint8_t *cdata, uint8_t kind, uint8_t *recipientDst
     return keyPathLength + headerLength + 32;
 }
 
-/**
- * Helper method for parsing commission rates as they are all equal in structure.
- */
-uint8_t parseCommissionRate(uint8_t *cdata, uint8_t *commissionRateDisplay, uint8_t sizeOfCommissionRateDisplay) {
-    uint8_t fraction[9] = "/100000\0";
-
-    uint32_t rate = U4BE(cdata, 0);
-    int rateLength = numberToText(commissionRateDisplay, sizeOfCommissionRateDisplay, rate);
-    cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 4, NULL, 0);
-    memmove(commissionRateDisplay + rateLength, fraction, 9);
-    return 4;
-}
-
 void sendUserRejection() {
     G_io_apdu_buffer[0] = ERROR_REJECTED_BY_USER >> 8;
     G_io_apdu_buffer[1] = ERROR_REJECTED_BY_USER & 0xFF;
