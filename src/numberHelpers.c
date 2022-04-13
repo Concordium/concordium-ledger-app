@@ -2,6 +2,7 @@
 
 #include "os.h"
 #include "responseCodes.h"
+#include <string.h>
 
 size_t lengthOfNumber(uint64_t number) {
     if (number == 0) {
@@ -36,6 +37,13 @@ size_t bin2dec(uint8_t *dst, size_t dstLength, uint64_t number) {
     }
     dst[characterLength] = '\0';
     return characterLength + 1;
+}
+
+uint8_t fractionToText(uint32_t numerator, uint8_t *dst, uint8_t sizeOfDst) {
+    uint8_t fraction[8] = "/100000";
+    int rateLength = numberToText(dst, sizeOfDst, numerator);
+    memmove(dst + rateLength, fraction, 8);
+    return rateLength + 8;
 }
 
 /**

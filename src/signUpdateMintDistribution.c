@@ -68,19 +68,15 @@ void handleSignUpdateMintDistribution(uint8_t *cdata, uint8_t p2, volatile unsig
     }
 
     // Baker reward
-    uint8_t fraction[8] = "/100000";
     uint32_t bakerReward = U4BE(cdata, 0);
-    int bakerRewardLength = numberToText(ctx->bakerReward, sizeof(ctx->bakerReward), bakerReward);
+    fractionToText(bakerReward, ctx->bakerReward, sizeof(ctx->bakerReward));
     cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 4, NULL, 0);
     cdata += 4;
-    memmove(ctx->bakerReward + bakerRewardLength, fraction, 8);
 
     // Finalization reward
     uint32_t finalizationReward = U4BE(cdata, 0);
-    int finalizationRewardLength =
-        numberToText(ctx->finalizationReward, sizeof(ctx->finalizationReward), finalizationReward);
+    fractionToText(finalizationReward, ctx->finalizationReward, sizeof(ctx->finalizationReward));
     cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 4, NULL, 0);
-    memmove(ctx->finalizationReward + finalizationRewardLength, fraction, 8);
 
     if (p2 == P2_V1) {
         ux_flow_init(0, ux_sign_mint_rate_v1, NULL);

@@ -15,8 +15,6 @@ fn main() {
     command_data.append(&mut account_transaction_header::generate_account_transaction_header());
     command_data.append(&mut transaction_payload);
 
-    println!("{}", hex::encode(&command_data));
-
     let command = ApduCommand {
         cla: 224,
         ins: 0x18,
@@ -29,23 +27,21 @@ fn main() {
     let ledger = LedgerApp::new().unwrap();
     ledger.exchange(command).expect("Configure baker signing failed");
 
-     let mut capital = hex::decode("0000FFFFFFFFFFFF").unwrap();
-     let mut restake = hex::decode("01").unwrap();
-     let mut open_status = hex::decode("02").unwrap();
+    let mut capital = hex::decode("0000FFFFFFFFFFFF").unwrap();
+    let mut restake = hex::decode("01").unwrap();
+    let mut open_status = hex::decode("02").unwrap();
 
-     capital.append(&mut restake);
-     capital.append(&mut open_status);
+    capital.append(&mut restake);
+    capital.append(&mut open_status);
 
     let mut sign_verify_key = hex::decode("7873cd57848d7aea7be03fbb3f1e8b9e69987fc73f13e473356776a16f26c96b").unwrap();
     let mut sign_verify_key_proof = hex::decode("a47cdf9133572e9ad5c02c3a7ffd1d05db7bb98860d918092454146153d62788f224c0157c65853ed4a0245ab3e0a593a3f85fa81cc4cb99eeaa643bfc793eab").unwrap();
     let mut election_verify_key = hex::decode("32f892fb3d0dc6138976b6848259cf730e37fa4a61a659c782ec6def978c0828").unwrap();
     let mut election_verify_key_proof = hex::decode("01fc695a8c51d4599cbe032a39832ad49bab900d88105b01d025b760b0d0d555b8c828f2d8fe29cc78c6307d979e6358b8bba9cf4d8200f272cc85b2a3813eff").unwrap();
-     capital.append(&mut sign_verify_key);
+    capital.append(&mut sign_verify_key);
     capital.append(&mut sign_verify_key_proof);
     capital.append(&mut election_verify_key);
     capital.append(&mut election_verify_key_proof);
-
-    println!("{}", hex::encode(&capital));
 
      let command1 = ApduCommand {
          cla: 224,
@@ -72,67 +68,36 @@ fn main() {
     };
     ledger.exchange(command2).expect("Configure baker signing failed");
 
-    // let mut url_length = hex::decode("0800").unwrap();
-    // let command3 = ApduCommand {
-    //     cla: 224,
-    //     ins: 0x18,
-    //     p1: 2,
-    //     p2: 0,
-    //     length: 0,
-    //     data: url_length
-    // };
-    // ledger.exchange(command3).expect("Configure baker signing failed");
+    let url_length = hex::decode("0008").unwrap();
+    let command3 = ApduCommand {
+        cla: 224,
+        ins: 0x18,
+        p1: 3,
+        p2: 0,
+        length: 0,
+        data: url_length
+    };
+    ledger.exchange(command3).expect("Configure baker signing failed");
 
-    // for n in 1..9 {
-    //     let mut url = b"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa".to_vec();
-    //     let command4 = ApduCommand {
-    //         cla: 224,
-    //         ins: 0x18,
-    //         p1: 3,
-    //         p2: 0,
-    //         length: url.len() as u8,
-    //         data: url
-    //     };
-    //     ledger.exchange(command4).expect("Configure baker signing failed");
-    //     println!("Sent!");
-    // }
-
-     let mut url_length = hex::decode("0008").unwrap();
-     let command3 = ApduCommand {
-         cla: 224,
-         ins: 0x18,
-         p1: 3,
-         p2: 0,
-         length: 0,
-         data: url_length
-     };
-     ledger.exchange(command3).expect("Configure baker signing failed");
-
-     let mut url = b"cccccccc".to_vec();
-     println!("{}", url.len());
-     let command4 = ApduCommand {
-         cla: 224,
-         ins: 0x18,
-         p1: 4,
-         p2: 0,
-         length: url.len() as u8,
-         data: url
-     };
-     ledger.exchange(command4).expect("Configure baker signing failed");
-    println!("test");
+    let url = b"cccccccc".to_vec();
+    let command4 = ApduCommand {
+        cla: 224,
+        ins: 0x18,
+        p1: 4,
+        p2: 0,
+        length: url.len() as u8,
+        data: url
+    };
+    ledger.exchange(command4).expect("Configure baker signing failed");
 
     let mut transaction_fee = hex::decode("00000001").unwrap();
-
     let mut baking_reward = hex::decode("000000F1").unwrap();
-
     let mut finalization_reward = hex::decode("000D0001").unwrap();
 
     let mut commission_data = Vec::new();
     commission_data.append(&mut transaction_fee);
     commission_data.append(&mut baking_reward);
     commission_data.append(&mut finalization_reward);
-
-    println!("{}", hex::encode(&commission_data));
 
     let command7 = ApduCommand {
         cla: 224,

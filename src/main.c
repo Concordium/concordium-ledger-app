@@ -257,7 +257,7 @@ static void concordium_main(void) {
                         handleSignConfigureBaker(cdata, p1, lc, &flags, isInitialCall);
                         break;
                     case INS_CONFIGURE_DELEGATION:
-                        handleSignConfigureDelegation(cdata, &flags);
+                        handleSignConfigureDelegation(cdata, lc, &flags);
                         break;
                     case INS_SIGN_UPDATE_CREDENTIAL:
                         handleSignUpdateCredential(cdata, p1, p2, &flags, isInitialCall);
