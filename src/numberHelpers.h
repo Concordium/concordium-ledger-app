@@ -36,6 +36,16 @@ size_t numberToText(uint8_t *dst, size_t dstLength, uint64_t number);
 size_t bin2dec(uint8_t *dst, size_t dstLength, uint64_t number);
 
 /**
+ * Writes a fraction of the form "numerator/100000" to the destination. The numerator
+ * has to be the next 4 bytes in the input.
+ * @param numerator the numerator of the fraction
+ * @param dst where to write the text representation of the fraction
+ * @param sizeOfDst the number of bytes that may be written to 'dst'
+ * @return number of bytes written to 'dst'.
+ */
+uint8_t fractionToText(uint32_t numerator, uint8_t *dst, uint8_t sizeOfDst);
+
+/**
  * Helper method for converting a byte array into a character array, where the bytes
  * are translated into their hexadecimal representation. This is used for getting human-readable
  * representations of e.g. keys and credential ids. The output array is 'paginated' by inserting
