@@ -14,7 +14,7 @@ jobs:
         name: Compile for Nano S
         runs-on: ubuntu-latest
 
-        container: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
+        container: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:sha-bd9dbbc
 
         steps:
             - uses: actions/checkout@v2
@@ -37,7 +37,7 @@ jobs:
         name: Compile for Nano X
         runs-on: ubuntu-latest
 
-        container: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
+        container: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:sha-bd9dbbc
 
         steps:
             - uses: actions/checkout@v2
@@ -60,7 +60,7 @@ jobs:
         name: Run Clang Static Analyzer
         runs-on: ubuntu-latest
 
-        container: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
+        container: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:sha-bd9dbbc
 
         steps:
             - uses: actions/checkout@v2
@@ -125,7 +125,7 @@ jobs:
       runs-on: ubuntu-latest
 
       container:
-        image: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
+        image: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:sha-bd9dbbc
 
       steps:
           - name: Clone
