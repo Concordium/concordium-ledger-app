@@ -9,6 +9,10 @@
 * Support for the configure delegation transaction.
 * Support for the configure baker transaction.
 
+### Changed
+
+* References to GTU in exchange rate update and authorization update changed to CCD.
+
 ## 2.0.3 - 2021-11-29
 
 ### Changed

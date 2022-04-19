@@ -9,6 +9,7 @@ async function updateAuthorizations(
     prefix: string,
     expectedSignature: string,
     handleKeyUi: () => Promise<any>,
+    device: 'nanos' | 'nanox'
 ) {
     const data = Buffer.concat([
         Buffer.from('080000045100000000000000000000000000000000000000020000000000000000000000000000000a00000000000000640000000063de5da700000029', 'hex'),
@@ -44,7 +45,7 @@ async function updateAuthorizations(
         const accessStructureData = Buffer.concat([keyIndex1, keyIndex2, keyIndex3]);
         transport.send(0xe0, ins, 0x03, 0x00, accessStructureData);
         await sim.waitUntilScreenIsNot(snapshot);
-        await sim.clickBoth();
+        await sim.navigateAndCompareSnapshots('.', device + '_update_authorizations/' + i, [0, 0]);
         await sim.clickBoth();
         await sim.clickBoth();
         snapshot = await sim.clickBoth();
@@ -78,6 +79,7 @@ test('[NANO S] Update level 2 keys with root keys', setupZemu('nanos', async (si
             await sim.clickRight();
             return sim.clickBoth();
         },
+        'nanos'
     );
 }));
 
@@ -93,6 +95,7 @@ test('[NANO X] Update level 2 keys with root keys', setupZemu('nanox', async (si
             await sim.clickRight();
             return sim.clickBoth();
         },
+        'nanox'
     );
 }));
 
@@ -111,6 +114,7 @@ test('[NANO S] Update level 2 keys with level 1 keys', setupZemu('nanos', async 
             await sim.clickRight();
             return sim.clickBoth();
         },
+        'nanos'
     );
 }));
 
@@ -126,5 +130,6 @@ test('[NANO X] Update level 2 keys with level 1 keys', setupZemu('nanox', async 
             await sim.clickRight();
             return sim.clickBoth();
         },
+        'nanox'
     );
 }));
