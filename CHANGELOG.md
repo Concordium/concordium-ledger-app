@@ -7,6 +7,7 @@
 * Added flow to verify account address.
 * Added support for register data transaction.
 * Support for the configure delegation transaction.
+* Support for the configure baker transaction.
 
 ### Changed
 
