@@ -146,6 +146,8 @@ void processKeyIndices(void) {
 #define P1_ACCESS_STRUCTURE           0x03  // Contains the public-key indices for the current access structure.
 #define P1_ACCESS_STRUCTURE_THRESHOLD 0x04  // Contains the threshold for the current access structure.
 
+#define P2_V1 0x01
+
 void handleSignUpdateAuthorizations(
     uint8_t *cdata,
     uint8_t p1,
@@ -153,6 +155,11 @@ void handleSignUpdateAuthorizations(
     uint8_t dataLength,
     volatile unsigned int *flags,
     bool isInitialCall) {
+
+    if (p2 != P2_V1) {
+        THROW(ERROR_INVALID_PARAM);
+    }
+
     if (isInitialCall) {
         ctx->state = TX_UPDATE_AUTHORIZATIONS_INITIAL;
     }

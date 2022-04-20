@@ -23,7 +23,13 @@ UX_FLOW(
     &ux_sign_flow_shared_sign,
     &ux_sign_flow_shared_decline);
 
-void handleSignUpdateMintDistribution(uint8_t *cdata, volatile unsigned int *flags) {
+#define P2_V1 0x01  // Does not include the mint rate
+
+void handleSignUpdateMintDistribution(uint8_t *cdata, uint8_t p2, volatile unsigned int *flags) {
+    if (p2 != P2_V1) {
+        THROW(ERROR_INVALID_PARAM);
+    }
+
     cdata += parseKeyDerivationPath(cdata);
 
     cx_sha256_init(&tx_state->hash);

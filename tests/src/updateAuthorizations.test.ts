@@ -5,12 +5,12 @@ import { setupZemu } from './options';
 async function updateAuthorizations(
     sim: Zemu, transport: Transport,
     ins: number,
-    p2: number,
     type: string,
     prefix: string,
     expectedSignature: string,
     handleKeyUi: () => Promise<any>,
 ) {
+    const p2 = 0x00;
     const data = Buffer.concat([
         Buffer.from('080000045100000000000000000000000000000000000000020000000000000000000000000000000a00000000000000640000000063de5da700000029', 'hex'),
         Buffer.from(type, 'hex'),
@@ -33,7 +33,7 @@ async function updateAuthorizations(
         snapshot = await handleKeyUi();
     }
 
-    const structureCount = p2 ? 14 : 12;
+    const structureCount = 14;
     // Go through each access structure
     for (let i = 0; i < structureCount; i += 1) {
         const accessStructureSize = Buffer.from('0003', 'hex');
@@ -64,77 +64,7 @@ async function updateAuthorizations(
     }
 }
 
-test('[NANO S] Update level 2 keys with root keys v0', setupZemu('nanos', async (sim, transport) => {
-    await updateAuthorizations(
-        sim,
-        transport,
-        0x2a,
-        0x00,
-        '0a',
-        '02',
-        'e9740c83110c2bc4fe876da81050cff27c1ab282178a3049327c6e97ebea34f2cd5f038e2b8dff466b1455e4d667d95d050fed1af04ea80c40360854dede12049000',
-        async () => {
-            await sim.clickRight();
-            await sim.clickRight();
-            await sim.clickRight();
-            await sim.clickRight();
-            return sim.clickBoth();
-        },
-    );
-}));
-
-test('[NANO X] Update level 2 keys with root keys v0', setupZemu('nanox', async (sim, transport) => {
-    await updateAuthorizations(
-        sim,
-        transport,
-        0x2a,
-        0x00,
-        '0a',
-        '02',
-        'e9740c83110c2bc4fe876da81050cff27c1ab282178a3049327c6e97ebea34f2cd5f038e2b8dff466b1455e4d667d95d050fed1af04ea80c40360854dede12049000',
-        async () => {
-            await sim.clickRight();
-            return sim.clickBoth();
-        },
-    );
-}));
-
-test('[NANO S] Update level 2 keys with level 1 keys v0', setupZemu('nanos', async (sim, transport) => {
-    await updateAuthorizations(
-        sim,
-        transport,
-        0x2b,
-        0x00,
-        '0b',
-        '01',
-        'b3843361c16bc8f9f7792df766f7192e8b77aae420c958d290d8408b9ac224350998d4c264e4e60c577385963a574391b122948afae0dcb1e0ae7fda8076150e9000',
-        async () => {
-            await sim.clickRight();
-            await sim.clickRight();
-            await sim.clickRight();
-            await sim.clickRight();
-            return sim.clickBoth();
-        },
-    );
-}));
-
-test('[NANO X] Update level 2 keys with level 1 keys v0', setupZemu('nanox', async (sim, transport) => {
-    await updateAuthorizations(
-        sim,
-        transport,
-        0x2b,
-        0x00,
-        '0b',
-        '01',
-        'b3843361c16bc8f9f7792df766f7192e8b77aae420c958d290d8408b9ac224350998d4c264e4e60c577385963a574391b122948afae0dcb1e0ae7fda8076150e9000',
-        async () => {
-            await sim.clickRight();
-            return sim.clickBoth();
-        },
-    );
-}));
-
-test('[NANO S] Update level 2 keys with root keys v1', setupZemu('nanos', async (sim, transport) => {
+test('[NANO S] Update level 2 keys with root keys', setupZemu('nanos', async (sim, transport) => {
     await updateAuthorizations(
         sim,
         transport,
@@ -153,7 +83,7 @@ test('[NANO S] Update level 2 keys with root keys v1', setupZemu('nanos', async 
     );
 }));
 
-test('[NANO X] Update level 2 keys with root keys v1', setupZemu('nanox', async (sim, transport) => {
+test('[NANO X] Update level 2 keys with root keys', setupZemu('nanox', async (sim, transport) => {
     await updateAuthorizations(
         sim,
         transport,
@@ -169,7 +99,7 @@ test('[NANO X] Update level 2 keys with root keys v1', setupZemu('nanox', async 
     );
 }));
 
-test('[NANO S] Update level 2 keys with level 1 keys v1', setupZemu('nanos', async (sim, transport) => {
+test('[NANO S] Update level 2 keys with level 1 keys', setupZemu('nanos', async (sim, transport) => {
     await updateAuthorizations(
         sim,
         transport,
@@ -188,7 +118,7 @@ test('[NANO S] Update level 2 keys with level 1 keys v1', setupZemu('nanos', asy
     );
 }));
 
-test('[NANO X] Update level 2 keys with level 1 keys v1', setupZemu('nanox', async (sim, transport) => {
+test('[NANO X] Update level 2 keys with level 1 keys', setupZemu('nanox', async (sim, transport) => {
     await updateAuthorizations(
         sim,
         transport,
