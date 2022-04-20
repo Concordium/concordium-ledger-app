@@ -100,7 +100,7 @@ const char *getAuthorizationName(authorizationType_e type) {
  * continue to the signing flow as this marks the end of the transaction.
  */
 void processThreshold(void) {
-    if (ctx->authorizationType == ctx->lastAuthorizationType) {
+    if (ctx->authorizationType == AUTHORIZATION_END) {
         ux_flow_init(0, ux_sign_flow_shared, NULL);
     } else {
         ctx->authorizationType += 1;
@@ -146,13 +146,9 @@ void processKeyIndices(void) {
 #define P1_ACCESS_STRUCTURE           0x03  // Contains the public-key indices for the current access structure.
 #define P1_ACCESS_STRUCTURE_THRESHOLD 0x04  // Contains the threshold for the current access structure.
 
-#define P2_V0 0x00
-#define P2_V1 0x01
-
 void handleSignUpdateAuthorizations(
     uint8_t *cdata,
     uint8_t p1,
-    uint8_t p2,
     uint8_t updateType,
     uint8_t dataLength,
     volatile unsigned int *flags,
@@ -169,29 +165,12 @@ void handleSignUpdateAuthorizations(
 
         uint8_t keyUpdateType = cdata[0];
 
-        if (p2 == P2_V0) {
-            ctx->lastAuthorizationType = AUTHORIZATION_ADD_IDENTITY_PROVIDER;
-
-            if (keyUpdateType == ROOT_UPDATE_LEVEL_2_V0) {
-                memmove(ctx->type, "Level 2 w. root keys", 21);
-            } else if (keyUpdateType == LEVEL1_UPDATE_LEVEL_2_V0) {
-                memmove(ctx->type, "Level 2 w. level 1 keys", 24);
-            } else {
-                THROW(ERROR_INVALID_TRANSACTION);
-            }
-        } else if (p2 == P2_V1) {
-            ctx->lastAuthorizationType = AUTHORIZATION_TIME_PARAMETERS;
-
-            if (keyUpdateType == ROOT_UPDATE_LEVEL_2_V1) {
+        if (keyUpdateType == ROOT_UPDATE_LEVEL_2_V1) {
                 memmove(ctx->type, "Level 2 w. root keys", 21);
             } else if (keyUpdateType == LEVEL1_UPDATE_LEVEL_2_V1) {
                 memmove(ctx->type, "Level 2 w. level 1 keys", 24);
             } else {
                 THROW(ERROR_INVALID_TRANSACTION);
-            }
-
-        } else {
-            THROW(ERROR_INVALID_PARAM);
         }
 
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 1, NULL, 0);

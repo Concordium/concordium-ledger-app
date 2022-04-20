@@ -67,7 +67,7 @@ UX_FLOW(
     &ux_sign_pool_parameters_baking_reward_step,
     &ux_sign_pool_parameters_transaction_fee_step);
 UX_FLOW(
-    ux_sign_pool_parameters_commision_ranges,
+    ux_sign_pool_parameters_commission_ranges,
     &ux_sign_pool_parameters_finalization_reward_min_step,
     &ux_sign_pool_parameters_finalization_reward_max_step,
     &ux_sign_pool_parameters_baking_reward_min_step,
@@ -75,7 +75,7 @@ UX_FLOW(
     &ux_sign_pool_parameters_transaction_fee_min_step,
     &ux_sign_pool_parameters_transaction_fee_max_step);
 UX_FLOW(
-    ux_sign_pool_parameters_commision_final,
+    ux_sign_pool_parameters_commission_final,
     &ux_sign_pool_parameters_minimum_capital_step,
     &ux_sign_pool_parameters_capital_bound_step,
     &ux_sign_pool_parameters_leverage_bound_step,
@@ -83,7 +83,7 @@ UX_FLOW(
     &ux_sign_flow_shared_decline);
 
 #define P1_INITIAL          0x00
-#define P1_COMMISION_RANGES 0x01
+#define P1_COMMISSION_RANGES 0x01
 #define P1_EQUITY           0x02
 
 /**
@@ -102,8 +102,7 @@ void handleSignUpdatePoolParameters(uint8_t *cdata, uint8_t p1, volatile unsigne
     }
 
     if (p1 == P1_INITIAL && ctx->state == TX_UPDATE_POOL_PARAMETERS_INITIAL) {
-        int bytesRead = parseKeyDerivationPath(cdata);
-        cdata += bytesRead;
+        cdata += parseKeyDerivationPath(cdata);
 
         cx_sha256_init(&tx_state->hash);
         cdata += hashUpdateHeaderAndType(cdata, UPDATE_TYPE_POOL_PARAMETERS);
@@ -119,7 +118,7 @@ void handleSignUpdatePoolParameters(uint8_t *cdata, uint8_t p1, volatile unsigne
 
         ux_flow_init(0, ux_sign_pool_parameters_initial, NULL);
         *flags |= IO_ASYNCH_REPLY;
-    } else if (p1 == P1_COMMISION_RANGES && ctx->state == TX_UPDATE_POOL_PARAMETERS_RANGES) {
+    } else if (p1 == P1_COMMISSION_RANGES && ctx->state == TX_UPDATE_POOL_PARAMETERS_RANGES) {
         cdata += parseCommissionRate(
             cdata,
             ctx->finalizationRewardCommissionRateMin,
@@ -141,7 +140,7 @@ void handleSignUpdatePoolParameters(uint8_t *cdata, uint8_t p1, volatile unsigne
 
         ctx->state = TX_UPDATE_POOL_PARAMETERS_EQUITY;
 
-        ux_flow_init(0, ux_sign_pool_parameters_commision_ranges, NULL);
+        ux_flow_init(0, ux_sign_pool_parameters_commission_ranges, NULL);
         *flags |= IO_ASYNCH_REPLY;
     } else if (p1 == P1_EQUITY && ctx->state == TX_UPDATE_POOL_PARAMETERS_EQUITY) {
         uint64_t minimumEquityCapital = U8BE(cdata, 0);
@@ -165,7 +164,7 @@ void handleSignUpdatePoolParameters(uint8_t *cdata, uint8_t p1, volatile unsigne
             sizeof(ctx->leverageBound) - (numLength + 1),
             leverageBoundDenominator);
 
-        ux_flow_init(0, ux_sign_pool_parameters_commision_final, NULL);
+        ux_flow_init(0, ux_sign_pool_parameters_commission_final, NULL);
         *flags |= IO_ASYNCH_REPLY;
     } else {
         THROW(ERROR_INVALID_STATE);

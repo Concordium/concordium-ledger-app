@@ -236,7 +236,7 @@ static void concordium_main(void) {
                         handleSignUpdateFoundationAccount(cdata, &flags);
                         break;
                     case INS_UPDATE_MINT_DISTRIBUTION:
-                        handleSignUpdateMintDistribution(cdata, p2, &flags);
+                        handleSignUpdateMintDistribution(cdata, &flags);
                         break;
                     case INS_UPDATE_ELECTION_DIFFICULTY:
                         handleSignUpdateElectionDifficulty(cdata, &flags);
@@ -275,7 +275,6 @@ static void concordium_main(void) {
                         handleSignUpdateAuthorizations(
                             cdata,
                             p1,
-                            p2,
                             UPDATE_TYPE_UPDATE_ROOT_KEYS,
                             lc,
                             &flags,
@@ -285,7 +284,6 @@ static void concordium_main(void) {
                         handleSignUpdateAuthorizations(
                             cdata,
                             p1,
-                            p2,
                             UPDATE_TYPE_UPDATE_LEVEL1_KEYS,
                             lc,
                             &flags,

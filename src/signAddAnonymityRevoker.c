@@ -56,8 +56,7 @@ void handleSignAddAnonymityRevoker(
     }
 
     if (p1 == P1_INITIAL && ctx->state == TX_ADD_ANONYMITY_REVOKER_INITIAL) {
-        int bytesRead = parseKeyDerivationPath(cdata);
-        cdata += bytesRead;
+        cdata += parseKeyDerivationPath(cdata);
 
         cx_sha256_init(&tx_state->hash);
         cdata += hashUpdateHeaderAndType(cdata, UPDATE_TYPE_ADD_ANONYMITY_REVOKER);
