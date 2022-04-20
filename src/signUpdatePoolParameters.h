@@ -15,10 +15,18 @@ typedef enum {
 } updatePoolParametersState_t;
 
 typedef struct {
-    // Used both for l pool rate and max of range:
-    uint8_t finalizationRewardCommissionRate[43];
-    uint8_t bakingRewardCommissionRate[43];
-    uint8_t transactionFeeCommissionRate[43];
+    union {
+        uint8_t passiveFinalizationRewardCommissionRate[43];
+        uint8_t finalizationRewardCommissionRateMax[43];
+    };
+    union {
+        uint8_t passiveBakingRewardCommissionRate[43];
+        uint8_t bakingRewardCommissionRateMax[43];
+    };
+    union {
+        uint8_t passiveTransactionFeeCommissionRate[43];
+        uint8_t transactionFeeCommissionRateMax[43];
+    };
     uint8_t finalizationRewardCommissionRateMin[43];
     uint8_t bakingRewardCommissionRateMin[43];
     uint8_t transactionFeeCommissionRateMin[43];

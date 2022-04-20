@@ -238,7 +238,7 @@ test('[NANO S] Configure-baker: All parameters', setupZemu('nanos', async (sim, 
         await sim.waitScreenChange();
         await sim.navigateAndCompareSnapshots('.', 'nanos_configure_baker/all_parameters_url', [14, 0]);
     });
-    await configureBakerCommissionStep(true, true, true, false, 'nanos', "all_parameters_commision","e4eb1b6720897387b24056dbf5c441087887460a9af1c44f4390c53acab349dedde36e21018a0328556215e82156f1a8c3096d29bd36828250eda5faf44fe20d9000", sim, transport);
+    await configureBakerCommissionStep(true, true, true, false, 'nanos', "all_parameters_commission","e4eb1b6720897387b24056dbf5c441087887460a9af1c44f4390c53acab349dedde36e21018a0328556215e82156f1a8c3096d29bd36828250eda5faf44fe20d9000", sim, transport);
 }));
 
 test('[NANO X] Configure-baker: All parameters', setupZemu('nanox', async (sim, transport) => {
@@ -251,5 +251,5 @@ test('[NANO X] Configure-baker: All parameters', setupZemu('nanox', async (sim, 
         await sim.waitScreenChange();
         await sim.navigateAndCompareSnapshots('.', 'nanox_configure_baker/all_parameters_url', [5, 0]);
     });
-    await configureBakerCommissionStep(true, true, true, false, 'nanox', "all_parameters_commision","e4eb1b6720897387b24056dbf5c441087887460a9af1c44f4390c53acab349dedde36e21018a0328556215e82156f1a8c3096d29bd36828250eda5faf44fe20d9000", sim, transport);
+    await configureBakerCommissionStep(true, true, true, false, 'nanox', "all_parameters_commission","e4eb1b6720897387b24056dbf5c441087887460a9af1c44f4390c53acab349dedde36e21018a0328556215e82156f1a8c3096d29bd36828250eda5faf44fe20d9000", sim, transport);
 }));

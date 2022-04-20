@@ -166,11 +166,11 @@ void handleSignUpdateAuthorizations(
         uint8_t keyUpdateType = cdata[0];
 
         if (keyUpdateType == ROOT_UPDATE_LEVEL_2_V1) {
-                memmove(ctx->type, "Level 2 w. root keys", 21);
-            } else if (keyUpdateType == LEVEL1_UPDATE_LEVEL_2_V1) {
-                memmove(ctx->type, "Level 2 w. level 1 keys", 24);
-            } else {
-                THROW(ERROR_INVALID_TRANSACTION);
+            memmove(ctx->type, "Level 2 w. root keys", 21);
+        } else if (keyUpdateType == LEVEL1_UPDATE_LEVEL_2_V1) {
+            memmove(ctx->type, "Level 2 w. level 1 keys", 24);
+        } else {
+            THROW(ERROR_INVALID_TRANSACTION);
         }
 
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 1, NULL, 0);
