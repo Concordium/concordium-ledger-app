@@ -151,11 +151,11 @@ void processKeyIndices(void) {
 void handleSignUpdateAuthorizations(
     uint8_t *cdata,
     uint8_t p1,
+    uint8_t p2,
     uint8_t updateType,
     uint8_t dataLength,
     volatile unsigned int *flags,
     bool isInitialCall) {
-
     if (p2 != P2_V1) {
         THROW(ERROR_INVALID_PARAM);
     }
