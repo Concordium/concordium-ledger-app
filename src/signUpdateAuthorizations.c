@@ -100,10 +100,11 @@ const char *getAuthorizationName(authorizationType_e type) {
  * continue to the signing flow as this marks the end of the transaction.
  */
 void processThreshold(void) {
+    ctx->authorizationType += 1;
+
     if (ctx->authorizationType == AUTHORIZATION_END) {
         ux_flow_init(0, ux_sign_flow_shared, NULL);
     } else {
-        ctx->authorizationType += 1;
         // Ask for the next access structure, as we have not processed all of
         // them yet.
         ctx->state = TX_UPDATE_AUTHORIZATIONS_ACCESS_STRUCTURE_SIZE;
