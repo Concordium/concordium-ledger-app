@@ -41,7 +41,7 @@ void handleSignUpdateExchangeRate(uint8_t *cdata, volatile unsigned int *flags) 
         memmove(ctx->type, "Euro per energy", 15);
         ctx->type[15] = '\0';
     } else if (updateType == 4) {
-        memmove(ctx->type, "uGTU per Euro", 13);
+        memmove(ctx->type, "uCCD per Euro", 13);
         ctx->type[13] = '\0';
     } else {
         // Received an unsupported exchange rate transaction.

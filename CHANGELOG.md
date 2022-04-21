@@ -14,6 +14,10 @@
 * Support for the "Pool parameter" update.
 * Support for the "Cooldown parameter" update.
 
+### Changed
+
+* References to GTU in exchange rate update and authorization update changed to CCD.
+
 ## 2.0.3 - 2021-11-29
 
 ### Changed
