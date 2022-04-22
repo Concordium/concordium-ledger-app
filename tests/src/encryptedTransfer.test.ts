@@ -53,7 +53,7 @@ async function encryptedTransferWithMemo(
     data = Buffer.from('6474657374', 'hex');
     transport.send(0xe0, 0x33, 0x05, 0x00, data);
     await sim.waitUntilScreenIsNot(snapshot1);
-    const snapshot2 = await sim.clickBoth();
+    const snapshot2 = await sim.clickBoth(undefined, false);
 
     data = Buffer.from('97a9558421515a34f7c27c3b55c8dc561ed8c45a983387edf4f95ef834c5fd12d4fc5bb772490cb5653d249926bd9fc9938768d3921a4aa2361ae620e294637beb2d052cb0351745d81e2b34fee677c1e37cd8fedd1e4afbd66557d08f827db6803e57a7473ee78c7ba2db84c6910d355f497d257f89588a5e7176265b890841add54085462b35c3d0a01d562a29023db80fbac86061bf8970ceb5cf0889cc762e0cc6720ffac0b932c6168038aaec96e824c68cdb95e8cea823fa32792f4360', 'hex');
     await transport.send(0xe0, 0x33, 0x01, 0x00, data);
@@ -68,7 +68,7 @@ async function encryptedTransferWithMemo(
         if (i === chunkedProofs.length - 1) {
             const tx = transport.send(0xe0, 0x33, 0x03, 0x00, chunk);
             await sim.waitUntilScreenIsNot(snapshot2);
-            await sim.clickBoth();
+            await sim.clickBoth(undefined, false);
             await expect(tx).resolves.toEqual(
                 Buffer.from('801517e0be041b74bdbad19f7561aaadf75a12a4c68e7dee943278b2b47d4610429561b304e8e4bf31765b7020fdea8b8c641caafc29d920534f0825d39ccb019000', 'hex'),
             );
@@ -81,7 +81,8 @@ async function encryptedTransferWithMemo(
 test('[NANO S] Encrypted transfer with memo', setupZemu('nanos', async (sim, transport) => {
     await encryptedTransferWithMemo(sim, transport, async () => {
         await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
-        await sim.navigateAndCompareSnapshots('.', 'nanos_encrypted_transfer_with_memo', [11, 0]);
+        await sim.navigateAndCompareSnapshots('.', 'nanos_encrypted_transfer_with_memo', [11]);
+        await sim.clickBoth(undefined, false);
         return sim.snapshot();
     });
 }));
@@ -89,7 +90,8 @@ test('[NANO S] Encrypted transfer with memo', setupZemu('nanos', async (sim, tra
 test('[NANO X] Encrypted transfer with memo', setupZemu('nanox', async (sim, transport) => {
     await encryptedTransferWithMemo(sim, transport, async () => {
         await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
-        await sim.navigateAndCompareSnapshots('.', 'nanox_encrypted_transfer_with_memo', [5, 0]);
+        await sim.navigateAndCompareSnapshots('.', 'nanox_encrypted_transfer_with_memo', [5]);
+        await sim.clickBoth(undefined, false);
         return sim.snapshot();
     });
 }));

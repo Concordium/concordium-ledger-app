@@ -16,12 +16,14 @@ async function updateFoundationAccount(
 
 test('[NANO S] Update foundation account', setupZemu('nanos', async (sim, transport) => {
     await updateFoundationAccount(sim, transport, async () => {
-        await sim.navigateAndCompareSnapshots('.', 'nanos_update_foundation_account', [6, 0]);
+        await sim.navigateAndCompareSnapshots('.', 'nanos_update_foundation_account', [6]);
+        await sim.clickBoth(undefined, false);
     });
 }));
 
 test('[NANO X] Update foundation account', setupZemu('nanox', async (sim, transport) => {
     await updateFoundationAccount(sim, transport, async () => {
-        await sim.navigateAndCompareSnapshots('.', 'nanox_update_foundation_account', [3, 0]);
+        await sim.navigateAndCompareSnapshots('.', 'nanox_update_foundation_account', [3]);
+        await sim.clickBoth(undefined, false);
     });
 }));

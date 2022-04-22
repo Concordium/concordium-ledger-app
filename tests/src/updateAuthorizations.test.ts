@@ -21,7 +21,7 @@ async function updateAuthorizations(
     transport.send(0xe0, ins, 0x00, 0x00, data);
     await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
     await sim.clickRight();
-    let snapshot = await sim.clickBoth();
+    let snapshot = await sim.clickBoth(undefined, false);
 
     const key1 = Buffer.from('00b6bc751f1abfb6440ff5cce27d7cdd1e7b0b8ec174f54de426890635b27e7daf', 'hex');
     const key2 = Buffer.from('0046a3e38ddf8b493be6e979034510b91db5448da9cba48c106139c288d658a004', 'hex');
@@ -45,18 +45,19 @@ async function updateAuthorizations(
         const accessStructureData = Buffer.concat([keyIndex1, keyIndex2, keyIndex3]);
         transport.send(0xe0, ins, 0x03, 0x00, accessStructureData);
         await sim.waitUntilScreenIsNot(snapshot);
-        await sim.navigateAndCompareSnapshots('.', device + '_update_authorizations/' + i, [0, 0]);
-        await sim.clickBoth();
-        await sim.clickBoth();
-        snapshot = await sim.clickBoth();
+        await sim.navigateAndCompareSnapshots('.', device + '_update_authorizations/' + i, [0]);
+        await sim.clickBoth(undefined, false);
+        await sim.clickBoth(undefined, false);
+        await sim.clickBoth(undefined, false);
+        snapshot = await sim.clickBoth(undefined, false);
 
         const threshold = Buffer.from('0002', 'hex');
         const tx = transport.send(0xe0, ins, 0x04, 0x00, threshold);
         await sim.waitUntilScreenIsNot(snapshot);
-        snapshot = await sim.clickBoth();
+        snapshot = await sim.clickBoth(undefined, false);
 
         if (i === 11) {
-            await sim.clickBoth();
+            await sim.clickBoth(undefined, false);
             await expect(tx).resolves.toEqual(
                 Buffer.from(expectedSignature, 'hex'),
             );
@@ -76,8 +77,8 @@ test('[NANO S] Update level 2 keys with root keys', setupZemu('nanos', async (si
             await sim.clickRight();
             await sim.clickRight();
             await sim.clickRight();
-            await sim.clickRight();
-            return sim.clickBoth();
+            await sim.clickRight(undefined, false);
+            return sim.clickBoth(undefined, false);
         },
         'nanos'
     );
@@ -93,7 +94,7 @@ test('[NANO X] Update level 2 keys with root keys', setupZemu('nanox', async (si
         'e9740c83110c2bc4fe876da81050cff27c1ab282178a3049327c6e97ebea34f2cd5f038e2b8dff466b1455e4d667d95d050fed1af04ea80c40360854dede12049000',
         async () => {
             await sim.clickRight();
-            return sim.clickBoth();
+            return sim.clickBoth(undefined, false);
         },
         'nanox'
     );
@@ -111,8 +112,8 @@ test('[NANO S] Update level 2 keys with level 1 keys', setupZemu('nanos', async 
             await sim.clickRight();
             await sim.clickRight();
             await sim.clickRight();
-            await sim.clickRight();
-            return sim.clickBoth();
+            await sim.clickRight(undefined, false);
+            return sim.clickBoth(undefined, false);
         },
         'nanos'
     );
@@ -128,7 +129,7 @@ test('[NANO X] Update level 2 keys with level 1 keys', setupZemu('nanox', async 
         'b3843361c16bc8f9f7792df766f7192e8b77aae420c958d290d8408b9ac224350998d4c264e4e60c577385963a574391b122948afae0dcb1e0ae7fda8076150e9000',
         async () => {
             await sim.clickRight();
-            return sim.clickBoth();
+            return sim.clickBoth(undefined, false);
         },
         'nanox'
     );

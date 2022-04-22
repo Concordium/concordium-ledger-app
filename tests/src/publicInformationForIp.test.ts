@@ -6,7 +6,7 @@ async function identityProvider(device: 'nanos' | 'nanox', sim: Zemu, transport:
     let data = Buffer.from('0800000451000000000000000000000000000000000000000200000000000000008196e718f392ec8d07216b22b555cbb71bcee88037566d3f758b9786b945e3b614660f4bf954dbe57bc2304e5a863d2e89a1f69196a1d0423f4936aa664da95de16f40a639dba085073c5a7c8e710c2a402136cc89a39c12ed044e1035649c0f03', 'hex');
     transport.send(0xe0, 0x20, 0x00, 0x00, data);
     await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
-    const snapshot1 = await sim.clickBoth();
+    const snapshot1 = await sim.clickBoth(undefined, false);
 
     data = Buffer.from('0000b6bc751f1abfb6440ff5cce27d7cdd1e7b0b8ec174f54de426890635b27e7daf', 'hex');
     transport.send(0xe0, 0x20, 0x01, 0x00, data);
@@ -38,14 +38,16 @@ async function identityProvider(device: 'nanos' | 'nanox', sim: Zemu, transport:
 
 test('[NANO S] Public information for identity provider', setupZemu('nanos', async (sim, transport) => {
     await identityProvider('nanos', sim, transport, async (key: string) => {
-        await sim.navigateAndCompareSnapshots('.', `nanos_public_info_for_ip/${key}`, [3, 0]);
+        await sim.navigateAndCompareSnapshots('.', `nanos_public_info_for_ip/${key}`, [3]);
+        await sim.clickBoth(undefined, false);
         return sim.snapshot();
     });
 }));
 
 test('[NANO X] Public information for identity provider', setupZemu('nanox', async (sim, transport) => {
     await identityProvider('nanox', sim, transport, async (key: string) => {
-        await sim.navigateAndCompareSnapshots('.', `nanox_public_info_for_ip/${key}`, [1, 0]);
+        await sim.navigateAndCompareSnapshots('.', `nanox_public_info_for_ip/${key}`, [1]);
+        await sim.clickBoth(undefined, false);
         return sim.snapshot();
     });
 }));

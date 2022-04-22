@@ -15,7 +15,8 @@ async function addBakerShared(transport: Transport) {
 test('[NANO S] Add baker', setupZemu('nanos', async (sim, transport) => {
     const tx = addBakerShared(transport);
     await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
-    await sim.navigateAndCompareSnapshots('.', 'nanos_add_baker', [8, 0]);
+    await sim.navigateAndCompareSnapshots('.', 'nanos_add_baker', [8]);
+    await sim.clickBoth(undefined, false);
 
     await expect(tx).resolves.toEqual(
         Buffer.from('8bde384ab620b1ba6714c1b78521ebfdcae8159cb86e2a6c94964dfd000e21e085c98f2bdef55292bdaf1d8e6dd3e5277c5dc83a8089fca634ffb3713ba9150b9000', 'hex'),
@@ -25,7 +26,8 @@ test('[NANO S] Add baker', setupZemu('nanos', async (sim, transport) => {
 test('[NANO X] Add baker', setupZemu('nanox', async (sim, transport) => {
     const tx = addBakerShared(transport);
     await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
-    await sim.navigateAndCompareSnapshots('.', 'nanox_add_baker', [5, 0]);
+    await sim.navigateAndCompareSnapshots('.', 'nanox_add_baker', [5]);
+    await sim.clickBoth(undefined, false);
 
     await expect(tx).resolves.toEqual(
         Buffer.from('8bde384ab620b1ba6714c1b78521ebfdcae8159cb86e2a6c94964dfd000e21e085c98f2bdef55292bdaf1d8e6dd3e5277c5dc83a8089fca634ffb3713ba9150b9000', 'hex'),
@@ -46,7 +48,8 @@ async function updateBakerKeysShared(transport: Transport) {
 test('[NANO S] Update baker keys', setupZemu('nanos', async (sim, transport) => {
     const tx = updateBakerKeysShared(transport);
     await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
-    await sim.navigateAndCompareSnapshots('.', 'nanos_update_baker_keys', [7, 0]);
+    await sim.navigateAndCompareSnapshots('.', 'nanos_update_baker_keys', [7]);
+    await sim.clickBoth(undefined, false);
 
     await expect(tx).resolves.toEqual(
         Buffer.from('c1347c15432f5277533d999e2b8a847b21b3c55a1ec0f2415273ae4d90cca9e9ac5950ef47483ee5423739cb1d90989bb50472544e65495b5cd8c3ddc85fa2019000', 'hex'),
@@ -56,7 +59,8 @@ test('[NANO S] Update baker keys', setupZemu('nanos', async (sim, transport) => 
 test('[NANO X] Update baker keys', setupZemu('nanox', async (sim, transport) => {
     const tx = updateBakerKeysShared(transport);
     await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
-    await sim.navigateAndCompareSnapshots('.', 'nanox_update_baker_keys', [4, 0]);
+    await sim.navigateAndCompareSnapshots('.', 'nanox_update_baker_keys', [4]);
+    await sim.clickBoth(undefined, false);
 
     await expect(tx).resolves.toEqual(
         Buffer.from('c1347c15432f5277533d999e2b8a847b21b3c55a1ec0f2415273ae4d90cca9e9ac5950ef47483ee5423739cb1d90989bb50472544e65495b5cd8c3ddc85fa2019000', 'hex'),

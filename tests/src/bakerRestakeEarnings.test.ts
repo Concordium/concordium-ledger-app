@@ -14,12 +14,14 @@ async function bakerRestakeShared(sim: Zemu, transport: Transport, handleUi: () 
 
 test('[NANO S] Baker restake earnings', setupZemu('nanos', async (sim, transport) => {
     await bakerRestakeShared(sim, transport, async () => {
-        await sim.navigateAndCompareSnapshots('.', 'nanos_baker_restake_earnings', [7, 0]);
+        await sim.navigateAndCompareSnapshots('.', 'nanos_baker_restake_earnings', [7]);
+        await sim.clickBoth(undefined, false);
     });
 }));
 
 test('[NANO X] Baker restake earnings', setupZemu('nanox', async (sim, transport) => {
     await bakerRestakeShared(sim, transport, async () => {
-        await sim.navigateAndCompareSnapshots('.', 'nanox_baker_restake_earnings', [4, 0]);
+        await sim.navigateAndCompareSnapshots('.', 'nanox_baker_restake_earnings', [4]);
+        await sim.clickBoth(undefined, false);
     });
 }));

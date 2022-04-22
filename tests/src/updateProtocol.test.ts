@@ -40,7 +40,7 @@ async function updateProtocol(
         if (i === chunkedData.length - 1) {
             const tx = transport.send(0xe0, 0x21, 0x04, 0x00, chunk);
             await sim.waitUntilScreenIsNot(snapshot);
-            await sim.clickBoth();
+            await sim.clickBoth(undefined, false);
 
             await expect(tx).resolves.toEqual(
                 Buffer.from('48cd884f4cc25084ea7db8ba2912ca9163ef4a4ae9b847bbe7cdff90836c649d2df04e2102370c4a41b27a4e171664de1c009e850592996c19f7f2e3a8a2050f9000', 'hex'),
@@ -56,34 +56,34 @@ test('[NANO S] Update protocol', setupZemu('nanos', async (sim, transport) => {
     await updateProtocol(sim, transport, async () => {
         await sim.clickRight();
         await sim.clickRight();
-        await sim.clickRight();
-        return sim.clickBoth();
+        await sim.clickRight(undefined, false);
+        return sim.clickBoth(undefined, false);
     },
     async () => {
         await sim.clickRight();
-        return sim.clickBoth();
+        return sim.clickBoth(undefined, false);
     },
     async () => {
         await sim.clickRight();
         await sim.clickRight();
         await sim.clickRight();
-        await sim.clickRight();
-        return sim.clickBoth();
+        await sim.clickRight(undefined, false);
+        return sim.clickBoth(undefined, false);
     });
 }));
 
 test('[NANO X] Update protocol', setupZemu('nanox', async (sim, transport) => {
     await updateProtocol(sim, transport, async () => {
-        await sim.clickRight();
-        return sim.clickBoth();
+        await sim.clickRight(undefined, false);
+        return sim.clickBoth(undefined, false);
+    },
+    async () => {
+        await sim.clickRight(undefined, false);
+        return sim.clickBoth(undefined, false);
     },
     async () => {
         await sim.clickRight();
-        return sim.clickBoth();
-    },
-    async () => {
-        await sim.clickRight();
-        await sim.clickRight();
-        return sim.clickBoth();
+        await sim.clickRight(undefined, false);
+        return sim.clickBoth(undefined, false);
     });
 }));

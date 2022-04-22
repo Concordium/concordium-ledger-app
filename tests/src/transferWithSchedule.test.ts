@@ -30,14 +30,16 @@ async function transferWithSchedule(
 
 test('[NANO S] Transfer with schedule', setupZemu('nanos', async (sim, transport) => {
     await transferWithSchedule(sim, transport, async () => {
-        await sim.navigateAndCompareSnapshots('.', 'nanos_transfer_with_schedule', [11, 0]);
+        await sim.navigateAndCompareSnapshots('.', 'nanos_transfer_with_schedule', [11]);
+        await sim.clickBoth(undefined, false);
         return sim.snapshot();
     });
 }));
 
 test('[NANO X] Transfer with schedule', setupZemu('nanox', async (sim, transport) => {
     await transferWithSchedule(sim, transport, async () => {
-        await sim.navigateAndCompareSnapshots('.', 'nanox_transfer_with_schedule', [5, 0]);
+        await sim.navigateAndCompareSnapshots('.', 'nanox_transfer_with_schedule', [5]);
+        await sim.clickBoth(undefined, false);
         return sim.snapshot();
     });
 }));
@@ -53,7 +55,7 @@ async function transferWithScheduleWithMemo(
     data = Buffer.from('6474657374', 'hex');
     transport.send(0xe0, 0x34, 0x03, 0x00, data);
     await sim.waitUntilScreenIsNot(snapshot);
-    snapshot = await sim.clickBoth();
+    snapshot = await sim.clickBoth(undefined, false);
 
     // Schedule points
     data = Buffer.from('0000017a396883d90000000005f5e1000000017a396883d90000000005f5e1000000017a396883d90000000005f5e1000000017a396883d90000000005f5e1000000017a396883d90000000005f5e100', 'hex');
@@ -62,7 +64,7 @@ async function transferWithScheduleWithMemo(
         await sim.waitUntilScreenIsNot(snapshot);
         await sim.clickRight();
         snapshot = await sim.clickRight();
-        await sim.clickBoth();
+        await sim.clickBoth(undefined, false);
     }
 
     await sim.waitUntilScreenIsNot(snapshot);
@@ -75,14 +77,16 @@ async function transferWithScheduleWithMemo(
 
 test('[NANO S] Transfer with schedule and memo', setupZemu('nanos', async (sim, transport) => {
     await transferWithScheduleWithMemo(sim, transport, async () => {
-        await sim.navigateAndCompareSnapshots('.', 'nanos_transfer_with_schedule_and_memo', [11, 0]);
+        await sim.navigateAndCompareSnapshots('.', 'nanos_transfer_with_schedule_and_memo', [11]);
+        await sim.clickBoth(undefined, false);
         return sim.snapshot();
     });
 }));
 
 test('[NANO X] Transfer with schedule and memo', setupZemu('nanox', async (sim, transport) => {
     await transferWithScheduleWithMemo(sim, transport, async () => {
-        await sim.navigateAndCompareSnapshots('.', 'nanox_transfer_with_schedule_and_memo', [5, 0]);
+        await sim.navigateAndCompareSnapshots('.', 'nanox_transfer_with_schedule_and_memo', [5]);
+        await sim.clickBoth(undefined, false);
         return sim.snapshot();
     });
 }));
