@@ -7,8 +7,7 @@ Consists of two types of transactions for updating level 2 keys, i.e. the keys t
 
 Key update types: 
 
-* Key update type 2 is using lvl1 keys, 3 is using root keys
-(Note that this is different than V0, where 1 where lvl1 and 2 where root)
+* Key update type 2 is using level 1 keys and 3 is using root keys. Note that this is different from `V0` where 1 was level 1 keys and 2 was root keys.
 
 P2 should be 1, 0 is reserved for V0 of the transaction, which is no longer supported.
 
