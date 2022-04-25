@@ -1,6 +1,6 @@
 # Changelog
  
-## 2.1.0 - TBD
+## 3.0.0
 
 ### Added
 
@@ -9,7 +9,7 @@
 * Support for the configure delegation transaction.
 * Support for the configure baker transaction.
 * Support for version 1 of the "Authorizations" update.
-* Support for version 1 of the "Mint distribtion" update.
+* Support for version 1 of the "Mint distribution" update.
 * Support for the "Time parameter" update.
 * Support for the "Pool parameter" update.
 * Support for the "Cooldown parameter" update.
@@ -17,6 +17,11 @@
 ### Changed
 
 * References to GTU in exchange rate update and authorization update changed to CCD.
+
+### Removed
+
+* Support for version 0 of the "Authorizations" update.
+* Support for version 0 of the "Mint distribution" update.
 
 ## 2.0.3 - 2021-11-29
 
