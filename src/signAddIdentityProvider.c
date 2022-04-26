@@ -66,8 +66,7 @@ void handleSignAddIdentityProvider(
     }
 
     if (p1 == P1_INITIAL && ctx->state == TX_ADD_IDENTITY_PROVIDER_INITIAL) {
-        int bytesRead = parseKeyDerivationPath(cdata);
-        cdata += bytesRead;
+        cdata += parseKeyDerivationPath(cdata);
 
         cx_sha256_init(&tx_state->hash);
         cx_sha256_init(&ctx->hash);
