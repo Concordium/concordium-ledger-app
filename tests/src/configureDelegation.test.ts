@@ -46,27 +46,27 @@ test('[NANO X] Configure delegation (restake)', setupZemu('nanox', async (sim, t
     });
 }));
 
-test('[NANO S] Configure delegation (pool)', setupZemu('nanos', async (sim, transport) => {
+test('[NANO S] Configure delegation (target)', setupZemu('nanos', async (sim, transport) => {
     await configureDelegation('08000004510000000000000000000000000000000000000002000000000000000020a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7000000000000000a0000000000000064000000290000000063de5da71a00040100000000abcdefff', 'fd86e63cf6c991d2cdda0a376d4f5879dcfa518b3009eb492bca171752070afb7161c12d1e7e6b5fc71f26a4b61cbd9b9edd9d21b9ec2d6ad93241b13d8f9f069000', sim, transport, async () => {
-        await sim.navigateAndCompareSnapshots('.', 'nanos_configure_delegation/nanos_configure_delegation_pool', [7, 0]);
+        await sim.navigateAndCompareSnapshots('.', 'nanos_configure_delegation/nanos_configure_delegation_target', [7, 0]);
     });
 }));
 
-test('[NANO X] Configure delegation (pool)', setupZemu('nanox', async (sim, transport) => {
+test('[NANO X] Configure delegation (target)', setupZemu('nanox', async (sim, transport) => {
     await configureDelegation('08000004510000000000000000000000000000000000000002000000000000000020a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7000000000000000a0000000000000064000000290000000063de5da71a00040100000000abcdefff', 'fd86e63cf6c991d2cdda0a376d4f5879dcfa518b3009eb492bca171752070afb7161c12d1e7e6b5fc71f26a4b61cbd9b9edd9d21b9ec2d6ad93241b13d8f9f069000', sim, transport, async () => {
-        await sim.navigateAndCompareSnapshots('.', 'nanox_configure_delegation/nanox_configure_delegation_pool', [4, 0]);
+        await sim.navigateAndCompareSnapshots('.', 'nanox_configure_delegation/nanox_configure_delegation_target', [4, 0]);
     });
 }));
 
-test('[NANO S] Configure delegation (capital, pool)', setupZemu('nanos', async (sim, transport) => {
+test('[NANO S] Configure delegation (capital, target)', setupZemu('nanos', async (sim, transport) => {
     await configureDelegation('08000004510000000000000000000000000000000000000002000000000000000020a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7000000000000000a0000000000000064000000290000000063de5da71a00050000ffffffffffff0100000000abcdefff', '4bd97df489f0a80d286ecc46a1706f8dd01011007c6c6daa1fbeca6b19e44948cc8ec2555a64ab74bd6647243af1a3e9b636b44f50ba01277fc3c88bd7266a019000', sim, transport, async () => {
-        await sim.navigateAndCompareSnapshots('.', 'nanos_configure_delegation/nanos_configure_delegation_capital_pool', [8, 0]);
+        await sim.navigateAndCompareSnapshots('.', 'nanos_configure_delegation/nanos_configure_delegation_capital_target', [8, 0]);
     });
 }));
 
-test('[NANO X] Configure delegation (capital, pool)', setupZemu('nanox', async (sim, transport) => {
+test('[NANO X] Configure delegation (capital, target)', setupZemu('nanox', async (sim, transport) => {
     await configureDelegation('08000004510000000000000000000000000000000000000002000000000000000020a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7000000000000000a0000000000000064000000290000000063de5da71a00050000ffffffffffff0100000000abcdefff', '4bd97df489f0a80d286ecc46a1706f8dd01011007c6c6daa1fbeca6b19e44948cc8ec2555a64ab74bd6647243af1a3e9b636b44f50ba01277fc3c88bd7266a019000', sim, transport, async () => {
-        await sim.navigateAndCompareSnapshots('.', 'nanox_configure_delegation/nanox_configure_delegation_capital_pool', [5, 0]);
+        await sim.navigateAndCompareSnapshots('.', 'nanox_configure_delegation/nanox_configure_delegation_capital_target', [5, 0]);
     });
 }));
 
@@ -82,27 +82,39 @@ test('[NANO X] Configure delegation (capital, restake)', setupZemu('nanox', asyn
     });
 }));
 
-test('[NANO S] Configure delegation (restake, pool)', setupZemu('nanos', async (sim, transport) => {
+test('[NANO S] Configure delegation (restake, target)', setupZemu('nanos', async (sim, transport) => {
     await configureDelegation('08000004510000000000000000000000000000000000000002000000000000000020a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7000000000000000a0000000000000064000000290000000063de5da71a0006010100000000abcdefff', 'a2359b8c0c2cad87ed690db75d5f6292892a01f7086fced4b2c937b48f83b123cb7d160f7ad9061f494458ab32ee092b424962843d90453e12a3b8e8397521039000', sim, transport, async () => {
-        await sim.navigateAndCompareSnapshots('.', 'nanos_configure_delegation/nanos_configure_delegation_restake_pool', [8, 0]);
+        await sim.navigateAndCompareSnapshots('.', 'nanos_configure_delegation/nanos_configure_delegation_restake_target', [8, 0]);
     });
 }));
 
-test('[NANO X] Configure delegation (restake, pool)', setupZemu('nanox', async (sim, transport) => {
+test('[NANO X] Configure delegation (restake, target)', setupZemu('nanox', async (sim, transport) => {
     await configureDelegation('08000004510000000000000000000000000000000000000002000000000000000020a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7000000000000000a0000000000000064000000290000000063de5da71a0006010100000000abcdefff', 'a2359b8c0c2cad87ed690db75d5f6292892a01f7086fced4b2c937b48f83b123cb7d160f7ad9061f494458ab32ee092b424962843d90453e12a3b8e8397521039000', sim, transport, async () => {
-        await sim.navigateAndCompareSnapshots('.', 'nanox_configure_delegation/nanox_configure_delegation_restake_pool', [5, 0]);
+        await sim.navigateAndCompareSnapshots('.', 'nanox_configure_delegation/nanox_configure_delegation_restake_target', [5, 0]);
     });
 }));
 
-test('[NANO S] Configure delegation (capital, restake, pool)', setupZemu('nanos', async (sim, transport) => {
+test('[NANO S] Configure delegation (capital, restake, target)', setupZemu('nanos', async (sim, transport) => {
     await configureDelegation('08000004510000000000000000000000000000000000000002000000000000000020a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7000000000000000a0000000000000064000000290000000063de5da71a00070000ffffffffffff010100000000abcdefff', '8e9212e857a48c2cc3f991341ec63aefee293435679c11b091820436453cd56e37e96daed41216ad344d4f1b8ad5a3d65de4b25d0d6bb085db9a58208e4a52049000', sim, transport, async () => {
-        await sim.navigateAndCompareSnapshots('.', 'nanos_configure_delegation/nanos_configure_delegation_capital_restake_pool', [9, 0]);
+        await sim.navigateAndCompareSnapshots('.', 'nanos_configure_delegation/nanos_configure_delegation_capital_restake_target', [9, 0]);
     });
 }));
 
-test('[NANO X] Configure delegation (capital, restake, pool)', setupZemu('nanox', async (sim, transport) => {
+test('[NANO X] Configure delegation (capital, restake, target)', setupZemu('nanox', async (sim, transport) => {
     await configureDelegation('08000004510000000000000000000000000000000000000002000000000000000020a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7000000000000000a0000000000000064000000290000000063de5da71a00070000ffffffffffff010100000000abcdefff', '8e9212e857a48c2cc3f991341ec63aefee293435679c11b091820436453cd56e37e96daed41216ad344d4f1b8ad5a3d65de4b25d0d6bb085db9a58208e4a52049000', sim, transport, async () => {
-        await sim.navigateAndCompareSnapshots('.', 'nanox_configure_delegation/nanox_configure_delegation_capital_restake_pool', [6, 0]);
+        await sim.navigateAndCompareSnapshots('.', 'nanox_configure_delegation/nanox_configure_delegation_capital_restake_target', [6, 0]);
+    });
+}));
+
+test('[NANO S] Configure delegation (passive delegation)', setupZemu('nanos', async (sim, transport) => {
+    await configureDelegation('08000004510000000000000000000000000000000000000002000000000000000020a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7000000000000000a0000000000000064000000290000000063de5da71a000400', 'b8a1c21533e2af7d6d6c9966ca4d9770588198663ef2d29e0c94babbf6a3652f89238a784cc2a022e06e37c0d257ceade210ea050f515b79a7cad65b6c6da9059000', sim, transport, async () => {
+        await sim.navigateAndCompareSnapshots('.', 'nanos_configure_delegation/nanos_configure_delegation_passive', [7, 0]);
+    });
+}));
+
+test('[NANO X] Configure delegation (passive delegation)', setupZemu('nanox', async (sim, transport) => {
+    await configureDelegation('08000004510000000000000000000000000000000000000002000000000000000020a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7000000000000000a0000000000000064000000290000000063de5da71a000400', 'b8a1c21533e2af7d6d6c9966ca4d9770588198663ef2d29e0c94babbf6a3652f89238a784cc2a022e06e37c0d257ceade210ea050f515b79a7cad65b6c6da9059000', sim, transport, async () => {
+        await sim.navigateAndCompareSnapshots('.', 'nanox_configure_delegation/nanox_configure_delegation_passive', [4, 0]);
     });
 }));
 
