@@ -24,7 +24,7 @@ UX_STEP_NOCB(
 UX_STEP_NOCB(
     ux_sign_configure_delegation_pool_step,
     bnnn_paging,
-    {.title = "Delegation pool", .text = (char *) global.signConfigureDelegation.displayDelegationTarget});
+    {.title = "Delegation target", .text = (char *) global.signConfigureDelegation.displayDelegationTarget});
 
 void startDisplay() {
     uint8_t index = 0;
@@ -104,7 +104,7 @@ void handleSignConfigureDelegation(uint8_t *cdata, uint8_t dataLength, volatile 
         cdata += 1;
 
         if (delegationType == 0) {
-            memmove(ctx->displayDelegationTarget, "L-pool", 7);
+            memmove(ctx->displayDelegationTarget, "Passive Delegation", 18);
         } else if (delegationType == 1) {
             uint64_t bakerId = U8BE(cdata, 0);
             expectedDataLength += 8;
