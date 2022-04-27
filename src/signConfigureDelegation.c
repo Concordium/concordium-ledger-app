@@ -104,7 +104,7 @@ void handleSignConfigureDelegation(uint8_t *cdata, uint8_t dataLength, volatile 
         cdata += 1;
 
         if (delegationType == 0) {
-            memmove(ctx->displayDelegationTarget, "Passive Delegation", 18);
+            memmove(ctx->displayDelegationTarget, "Passive Delegation", 19);
         } else if (delegationType == 1) {
             uint64_t bakerId = U8BE(cdata, 0);
             expectedDataLength += 8;
