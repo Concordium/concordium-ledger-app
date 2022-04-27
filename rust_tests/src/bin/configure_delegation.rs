@@ -8,7 +8,7 @@ fn main() {
     let transaction_kind = "1A";
     let mut transaction_payload = hex::decode(transaction_kind).unwrap();
 
-    let mut bitmap = hex::decode("0003").unwrap();
+    let mut bitmap = hex::decode("0007").unwrap();
     transaction_payload.append(&mut bitmap);
 
     let mut capital = hex::decode("0000FFFFFFFFFFFF").unwrap();
@@ -34,7 +34,7 @@ fn main() {
         ins: 0x17,
         p1: 0,
         p2: 0,
-        length: 0,
+        length: command_data.len() as u8,
         data: command_data
     };
 
