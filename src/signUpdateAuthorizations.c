@@ -85,7 +85,11 @@ const char *getAuthorizationName(authorizationType_e type) {
             return "Add anonymity revoker";
         case AUTHORIZATION_ADD_IDENTITY_PROVIDER:
             return "Add identity provider";
-        case AUTHORIZATION_END:
+        case AUTHORIZATION_COOLDOWN_PARAMETERS:
+            return "Cooldown parameters";
+        case AUTHORIZATION_TIME_PARAMETERS:
+            return "Time parameters";
+        default:
             THROW(ERROR_INVALID_STATE);
     }
 }
@@ -143,13 +147,20 @@ void processKeyIndices(void) {
 #define P1_ACCESS_STRUCTURE           0x03  // Contains the public-key indices for the current access structure.
 #define P1_ACCESS_STRUCTURE_THRESHOLD 0x04  // Contains the threshold for the current access structure.
 
+#define P2_V1 0x01
+
 void handleSignUpdateAuthorizations(
     uint8_t *cdata,
     uint8_t p1,
+    uint8_t p2,
     uint8_t updateType,
     uint8_t dataLength,
     volatile unsigned int *flags,
     bool isInitialCall) {
+    if (p2 != P2_V1) {
+        THROW(ERROR_INVALID_PARAM);
+    }
+
     if (isInitialCall) {
         ctx->state = TX_UPDATE_AUTHORIZATIONS_INITIAL;
     }
@@ -161,13 +172,15 @@ void handleSignUpdateAuthorizations(
         ctx->authorizationType = 0;
 
         uint8_t keyUpdateType = cdata[0];
-        if (keyUpdateType == ROOT_UPDATE_LEVEL_2) {
+
+        if (keyUpdateType == ROOT_UPDATE_LEVEL_2_V1) {
             memmove(ctx->type, "Level 2 w. root keys", 21);
-        } else if (keyUpdateType == LEVEL1_UPDATE_LEVEL_2) {
+        } else if (keyUpdateType == LEVEL1_UPDATE_LEVEL_2_V1) {
             memmove(ctx->type, "Level 2 w. level 1 keys", 24);
         } else {
             THROW(ERROR_INVALID_TRANSACTION);
         }
+
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 1, NULL, 0);
         cdata += 1;
 

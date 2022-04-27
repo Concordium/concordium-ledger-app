@@ -20,8 +20,7 @@ UX_FLOW(
     &ux_sign_flow_shared_decline);
 
 void handleSignUpdateFoundationAccount(uint8_t *cdata, volatile unsigned int *flags) {
-    int bytesRead = parseKeyDerivationPath(cdata);
-    cdata += bytesRead;
+    cdata += parseKeyDerivationPath(cdata);
 
     cx_sha256_init(&tx_state->hash);
     cdata += hashUpdateHeaderAndType(cdata, UPDATE_TYPE_FOUNDATION_ACCOUNT);

@@ -63,8 +63,7 @@ void handleSignUpdateProtocol(
     }
 
     if (p1 == P1_INITIAL && ctx->state == TX_UPDATE_PROTOCOL_INITIAL) {
-        int bytesRead = parseKeyDerivationPath(cdata);
-        cdata += bytesRead;
+        cdata += parseKeyDerivationPath(cdata);
 
         cx_sha256_init(&tx_state->hash);
         cdata += hashUpdateHeaderAndType(cdata, UPDATE_TYPE_PROTOCOL);

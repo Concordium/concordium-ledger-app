@@ -26,8 +26,7 @@ UX_FLOW(
 //  - UpdateEuroPerEnergy
 //  - UpdateMicroGTUPerEuro
 void handleSignUpdateExchangeRate(uint8_t *cdata, volatile unsigned int *flags) {
-    int bytesRead = parseKeyDerivationPath(cdata);
-    cdata += bytesRead;
+    cdata += parseKeyDerivationPath(cdata);
 
     cx_sha256_init(&tx_state->hash);
     // Note that this method cannot easily use hashUpdateHeaderAndType from util.h, as

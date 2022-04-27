@@ -183,8 +183,7 @@ void handleSignUpdateCredential(
     }
 
     if (p2 == P2_CREDENTIAL_INITIAL && ctx->updateCredentialState == TX_UPDATE_CREDENTIAL_INITIAL) {
-        int bytesRead = parseKeyDerivationPath(dataBuffer);
-        dataBuffer += bytesRead;
+        dataBuffer += parseKeyDerivationPath(dataBuffer);
 
         cx_sha256_init(&tx_state->hash);
         dataBuffer += hashAccountTransactionHeaderAndKind(dataBuffer, UPDATE_CREDENTIALS);

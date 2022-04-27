@@ -25,7 +25,7 @@ UX_FLOW(
 
 void handleSignUpdateElectionDifficulty(uint8_t *cdata, volatile unsigned int *flags) {
     cdata += parseKeyDerivationPath(cdata);
-    ;
+
     cx_sha256_init(&tx_state->hash);
     cdata += hashUpdateHeaderAndType(cdata, UPDATE_TYPE_ELECTION_DIFFICULTY);
 
