@@ -1,5 +1,5 @@
 import { resolve } from 'path';
-import type { StartOptions } from '@zondax/zemu';
+import { DEFAULT_START_OPTIONS, StartOptions } from '@zondax/zemu';
 import Zemu from '@zondax/zemu';
 import Transport from '@ledgerhq/hw-transport';
 
@@ -7,20 +7,26 @@ const SEED_PHRASE = 'vendor sphere crew wise puppy wise stand wait tissue boy fo
 
 export const optionsNanoS: StartOptions = {
     model: 'nanos',
+    sdk: '',
+    caseSensitive: true,
     X11: false,
     logging: true,
     startDelay: 3000,
+    startTimeout: DEFAULT_START_OPTIONS.startTimeout,
     custom: `-s "${SEED_PHRASE}" `,
-    startText: 'ready',
+    startText: 'is ready',
 };
 
 export const optionsNanoX: StartOptions = {
     model: 'nanox',
+    sdk: '',
+    caseSensitive: true,
     X11: false,
     logging: true,
     startDelay: 3000,
+    startTimeout: DEFAULT_START_OPTIONS.startTimeout,
     custom: `-s "${SEED_PHRASE}" `,
-    startText: 'ready',
+    startText: 'is ready',
 };
 
 export const NANOS_ELF_PATH = resolve('bin/nanos/concordium_nanos.elf');

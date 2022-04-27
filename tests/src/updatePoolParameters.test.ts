@@ -7,12 +7,12 @@ async function poolParameters(sim: Zemu, transport: Transport, images: string, e
     transport.send(0xe0, 0x41, 0x00, 0x00, data);
     await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
     await sim.navigateAndCompareSnapshots('.', images + "/initial", [3]);
-    let snapshot = await sim.clickBoth();
+    let snapshot = await sim.clickBoth(undefined, false);
     data = Buffer.from('00001001' + '0000EA64' + '0000EA63' + '0000EA65' + '00001000' + '0000EA62', 'hex');
     transport.send(0xe0, 0x41, 0x01, 0x00, data);
     await sim.waitUntilScreenIsNot(snapshot);
     await sim.navigateAndCompareSnapshots('.', images + "/ranges", [5]);
-    snapshot = await sim.clickBoth();
+    snapshot = await sim.clickBoth(undefined, false);
 
     data = Buffer.from('00000A00C60D5000' + 'C60D5000' + '00000A00C60D5000' + '0000EA600000EA60', 'hex');
     const tx = transport.send(0xe0, 0x41, 0x02, 0x00, data);
