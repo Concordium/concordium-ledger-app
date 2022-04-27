@@ -200,25 +200,17 @@ test('[NANO S] Configure-baker: big URL only', setupZemu('nanos', async (sim, tr
     const bigUrl = url.repeat(chunkCount);
     await configureBakerStep0(bitmap, transport);
     await expect(configureBakerUrlStep(bigUrl, sim, transport, async (i: number) => {
-        console.log('Start wait');
         await sim.waitScreenChange();
-        console.log('End')
         if (i == 0) {
-            console.log('Init');
             await sim.navigateAndCompareSnapshots('.', 'nanos_configure_baker/big_url_init', [19]);
-            console.log('Init stuff');
             await sim.clickBoth(undefined, false);
-            console.log('Clicked both');
         } else if (i == chunkCount - 1)  {
             await sim.navigateAndCompareSnapshots('.', 'nanos_configure_baker/big_url', [12]);
             await sim.navigateAndCompareSnapshots('.', 'nanos_configure_baker/big_url_finish', [2]);
             await sim.clickBoth(undefined, false);
         } else {
-            console.log('Navigate URL');
             await sim.navigateAndCompareSnapshots('.', 'nanos_configure_baker/big_url', [13]);
-            console.log('End navigate URL');
             await sim.clickBoth(undefined, false);
-            console.log('Clicked');
         }
     })).resolves.toEqual(Buffer.from("1a79847b753b9f0e1d64feca4b43f5a3ae99f3a3e142822fad8858d0969eb8d3381885dc697a90fd37b9275f1ab4d85e3f0cd7122b574213ec532e222c15df0f9000", "hex"));
 }));
