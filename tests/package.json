@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "description": "End-to-end test suite for Concordium Ledger application",
   "dependencies": {
-    "@ledgerhq/hw-transport": "^6.7.0",
-    "@zondax/zemu": "^0.21.1",
+    "@ledgerhq/hw-transport": "^6.27.1",
+    "@zondax/zemu": "^0.29.0",
     "jest": "^27.1.1",
     "prettier": "^2.3.2",
     "ts-jest": "^27.0.5"

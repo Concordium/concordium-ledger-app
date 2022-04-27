@@ -42,7 +42,6 @@ async function configureBakerStep1(transaction: string, aggregationKey: string |
 async function configureBakerUrlStep(url: string, sim: Zemu, transport: Transport, handleUi: (index: number) => Promise<void>) {
     const serializedUrl = Buffer.from(url, 'utf-8');
     const serializedUrlLength = encodeWord16(serializedUrl.length);
-    let previousSnapshot = await sim.snapshot();
     await transport.send(0xe0, 0x18, 0x03, 0x00, serializedUrlLength);
 
     // Batch the URL into at most 255 byte batches.
@@ -92,7 +91,8 @@ async function configureBakerCommissionStep(transactionFee: boolean, bakingRewar
 
     let tx = transport.send(0xe0, 0x18, 0x05, 0x00, serializedCommissionRates);
     await sim.waitScreenChange();
-    await sim.navigateAndCompareSnapshots('.', device + '_configure_baker/' + navigationDir, [navigationSteps, 0]);
+    await sim.navigateAndCompareSnapshots('.', device + '_configure_baker/' + navigationDir, [navigationSteps]);
+    await sim.clickBoth(undefined, false);
 
     await expect(tx).resolves.toEqual(
         Buffer.from(signature, "hex")
@@ -123,7 +123,8 @@ test('[NANO S] Configure-baker: Capital, restake, open status and keys', setupZe
     const bitmap = '000f';
     await configureBakerStep0(bitmap, transport);
     await expect(configureBakerStep1(fullP1, aggregationVerifyKey + aggregationVerifyKeyProof, sim, transport, async () => {
-        await sim.navigateAndCompareSnapshots('.', 'nanos_configure_baker/capital_restake_openstatus_keys', [10, 0]);
+        await sim.navigateAndCompareSnapshots('.', 'nanos_configure_baker/capital_restake_openstatus_keys', [10]);
+        await sim.clickBoth(undefined, false);
     })).resolves.toEqual(Buffer.from("60aba821cb44103d68aab00be87990a886a8caab5fe10f403b77cde7b24fa527a92bc43fd061138b044c787d673d4f92851f0cb989286d65011ca3b5c5f908089000", "hex"));
 }));
 
@@ -131,7 +132,8 @@ test('[NANO X] Configure-baker: Capital, restake, open status and keys', setupZe
     const bitmap = '000f';
     await configureBakerStep0(bitmap, transport);
     await expect(configureBakerStep1(fullP1, aggregationVerifyKey + aggregationVerifyKeyProof, sim, transport, async () => {
-        await sim.navigateAndCompareSnapshots('.', 'nanox_configure_baker/capital_restake_openstatus_keys', [7, 0]);
+        await sim.navigateAndCompareSnapshots('.', 'nanox_configure_baker/capital_restake_openstatus_keys', [7]);
+        await sim.clickBoth(undefined, false);
     })).resolves.toEqual(Buffer.from("60aba821cb44103d68aab00be87990a886a8caab5fe10f403b77cde7b24fa527a92bc43fd061138b044c787d673d4f92851f0cb989286d65011ca3b5c5f908089000", "hex"));
 }));
 
@@ -140,7 +142,8 @@ test('[NANO S] Configure-baker: Capital, restake, open status, without keys', se
     const bitmap = '0007';
     await configureBakerStep0(bitmap, transport);
     await expect(configureBakerStep1(capital + "01" + "02", undefined, sim, transport, async () => {
-        await sim.navigateAndCompareSnapshots('.', 'nanos_configure_baker/capital_restake_openstatus', [9, 0]);
+        await sim.navigateAndCompareSnapshots('.', 'nanos_configure_baker/capital_restake_openstatus', [9]);
+        await sim.clickBoth(undefined, false);
     })).resolves.toEqual(Buffer.from("15102d4e6361a26fc03ae7866987f6253f20f3763602aa009b0f8318c0029c323b26c2f7c9a7fdd08c67719565cb680986e64d40faffdbae4ea876f4c6576d049000", "hex"));
 }));
 
@@ -148,7 +151,8 @@ test('[NANO X] Configure-baker: Capital, restake, open status, without keys', se
     const bitmap = '0007';
     await configureBakerStep0(bitmap, transport);
     await expect(configureBakerStep1(capital + "01" + "02", undefined, sim, transport, async () => {
-        await sim.navigateAndCompareSnapshots('.', 'nanox_configure_baker/capital_restake_openstatus', [6, 0]);
+        await sim.navigateAndCompareSnapshots('.', 'nanox_configure_baker/capital_restake_openstatus', [6]);
+        await sim.clickBoth(undefined, false);
     })).resolves.toEqual(Buffer.from("15102d4e6361a26fc03ae7866987f6253f20f3763602aa009b0f8318c0029c323b26c2f7c9a7fdd08c67719565cb680986e64d40faffdbae4ea876f4c6576d049000", "hex"));
 }));
 
@@ -156,7 +160,8 @@ test('[NANO S] Configure-baker: only keys', setupZemu('nanos', async (sim, trans
     const bitmap = '0008';
     await configureBakerStep0(bitmap, transport);
     await expect(configureBakerStep1(signVerifyKey + signVerifyKeyProof + electionVerifyKey + electionVerifyKeyProof, aggregationVerifyKey + aggregationVerifyKeyProof, sim, transport, async () => {
-        await sim.navigateAndCompareSnapshots('.', 'nanos_configure_baker/keys_only', [7, 0]);
+        await sim.navigateAndCompareSnapshots('.', 'nanos_configure_baker/keys_only', [7]);
+        await sim.clickBoth(undefined, false);
     })).resolves.toEqual(Buffer.from("fc41c691fea3e94dcfcf129d0ab29156111face70a70ed55c297cdb492ab5ddc6dfe0403b5b8fcbfff2d39f175ed35c434277422909bf6abe7427c23a11d6d0c9000", "hex"));
 }));
 
@@ -164,7 +169,8 @@ test('[NANO X] Configure-baker: only keys', setupZemu('nanox', async (sim, trans
     const bitmap = '0008';
     await configureBakerStep0(bitmap, transport);
     await expect(configureBakerStep1(signVerifyKey + signVerifyKeyProof + electionVerifyKey + electionVerifyKeyProof, aggregationVerifyKey + aggregationVerifyKeyProof, sim, transport, async () => {
-        await sim.navigateAndCompareSnapshots('.', 'nanox_configure_baker/keys_only', [4, 0]);
+        await sim.navigateAndCompareSnapshots('.', 'nanox_configure_baker/keys_only', [4]);
+        await sim.clickBoth(undefined, false);
     })).resolves.toEqual(Buffer.from("fc41c691fea3e94dcfcf129d0ab29156111face70a70ed55c297cdb492ab5ddc6dfe0403b5b8fcbfff2d39f175ed35c434277422909bf6abe7427c23a11d6d0c9000", "hex"));
 }));
 
@@ -173,7 +179,8 @@ test('[NANO S] Configure-baker: URL only', setupZemu('nanos', async (sim, transp
     await configureBakerStep0(bitmap, transport);
     await expect(configureBakerUrlStep(url, sim, transport, async (i: number) => {
         await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
-        await sim.navigateAndCompareSnapshots('.', 'nanos_configure_baker/url', [20, 0]);
+        await sim.navigateAndCompareSnapshots('.', 'nanos_configure_baker/url', [20]);
+        await sim.clickBoth(undefined, false);
     })).resolves.toEqual(Buffer.from("83221ba7a2b53559ae2dd419915be2946b193aaff16ed7fe2ca98d55ed882643dc9505b0501799fff8253c75263a56aeb3c0f16b228a4ca33fe1c74845f3aa049000", "hex"));
 }));
 
@@ -182,7 +189,8 @@ test('[NANO X] Configure-baker: URL only', setupZemu('nanox', async (sim, transp
     await configureBakerStep0(bitmap, transport);
     await expect(configureBakerUrlStep(url, sim, transport, async (i: number) => {
         await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
-        await sim.navigateAndCompareSnapshots('.', 'nanox_configure_baker/url', [8, 0]);
+        await sim.navigateAndCompareSnapshots('.', 'nanox_configure_baker/url', [8]);
+        await sim.clickBoth(undefined, false);
     })).resolves.toEqual(Buffer.from("83221ba7a2b53559ae2dd419915be2946b193aaff16ed7fe2ca98d55ed882643dc9505b0501799fff8253c75263a56aeb3c0f16b228a4ca33fe1c74845f3aa049000", "hex"));
 }));
 
@@ -194,12 +202,15 @@ test('[NANO S] Configure-baker: big URL only', setupZemu('nanos', async (sim, tr
     await expect(configureBakerUrlStep(bigUrl, sim, transport, async (i: number) => {
         await sim.waitScreenChange();
         if (i == 0) {
-            await sim.navigateAndCompareSnapshots('.', 'nanos_configure_baker/big_url_init', [20, 0]);
+            await sim.navigateAndCompareSnapshots('.', 'nanos_configure_baker/big_url_init', [19]);
+            await sim.clickBoth(undefined, false);
         } else if (i == chunkCount - 1)  {
             await sim.navigateAndCompareSnapshots('.', 'nanos_configure_baker/big_url', [12]);
-            await sim.navigateAndCompareSnapshots('.', 'nanos_configure_baker/big_url_finish', [2, 0]);
+            await sim.navigateAndCompareSnapshots('.', 'nanos_configure_baker/big_url_finish', [2]);
+            await sim.clickBoth(undefined, false);
         } else {
-            await sim.navigateAndCompareSnapshots('.', 'nanos_configure_baker/big_url', [14, 0]);
+            await sim.navigateAndCompareSnapshots('.', 'nanos_configure_baker/big_url', [13]);
+            await sim.clickBoth(undefined, false);
         }
     })).resolves.toEqual(Buffer.from("1a79847b753b9f0e1d64feca4b43f5a3ae99f3a3e142822fad8858d0969eb8d3381885dc697a90fd37b9275f1ab4d85e3f0cd7122b574213ec532e222c15df0f9000", "hex"));
 }));
@@ -232,11 +243,13 @@ test('[NANO S] Configure-baker: All parameters', setupZemu('nanos', async (sim, 
     const bitmap = '00ff';
     await configureBakerStep0(bitmap, transport);
     await configureBakerStep1(fullP1, aggregationVerifyKey + aggregationVerifyKeyProof, sim, transport, async () => {
-        await sim.navigateAndCompareSnapshots('.', 'nanos_configure_baker/all_parameters_1', [10, 0]);
+        await sim.navigateAndCompareSnapshots('.', 'nanos_configure_baker/all_parameters_1', [10]);
+        await sim.clickBoth(undefined, false);
     });
     await configureBakerUrlStep(url, sim, transport, async () => {
         await sim.waitScreenChange();
-        await sim.navigateAndCompareSnapshots('.', 'nanos_configure_baker/all_parameters_url', [14, 0]);
+        await sim.navigateAndCompareSnapshots('.', 'nanos_configure_baker/all_parameters_url', [14]);
+        await sim.clickBoth(undefined, false);
     });
     await configureBakerCommissionStep(true, true, true, false, 'nanos', "all_parameters_commission","e4eb1b6720897387b24056dbf5c441087887460a9af1c44f4390c53acab349dedde36e21018a0328556215e82156f1a8c3096d29bd36828250eda5faf44fe20d9000", sim, transport);
 }));
@@ -245,11 +258,13 @@ test('[NANO X] Configure-baker: All parameters', setupZemu('nanox', async (sim, 
     const bitmap = '00ff';
     await configureBakerStep0(bitmap, transport);
     await configureBakerStep1(fullP1, aggregationVerifyKey + aggregationVerifyKeyProof, sim, transport, async () => {
-        await sim.navigateAndCompareSnapshots('.', 'nanox_configure_baker/all_parameters_1', [7, 0]);
+        await sim.navigateAndCompareSnapshots('.', 'nanox_configure_baker/all_parameters_1', [7]);
+        await sim.clickBoth(undefined, false);
     });
     await configureBakerUrlStep(url, sim, transport, async () => {
         await sim.waitScreenChange();
-        await sim.navigateAndCompareSnapshots('.', 'nanox_configure_baker/all_parameters_url', [5, 0]);
+        await sim.navigateAndCompareSnapshots('.', 'nanox_configure_baker/all_parameters_url', [5]);
+        await sim.clickBoth(undefined, false);
     });
     await configureBakerCommissionStep(true, true, true, false, 'nanox', "all_parameters_commission","e4eb1b6720897387b24056dbf5c441087887460a9af1c44f4390c53acab349dedde36e21018a0328556215e82156f1a8c3096d29bd36828250eda5faf44fe20d9000", sim, transport);
 }));

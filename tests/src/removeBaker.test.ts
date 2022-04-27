@@ -9,7 +9,8 @@ async function removeBakerShared(transport: Transport) {
 test('[NANO S] Remove baker', setupZemu('nanos', async (sim, transport) => {
     const tx = removeBakerShared(transport);
     await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
-    await sim.navigateAndCompareSnapshots('.', 'nanos_remove_baker', [7, 0]);
+    await sim.navigateAndCompareSnapshots('.', 'nanos_remove_baker', [7]);
+    await sim.clickBoth(undefined, false);
 
     await expect(tx).resolves.toEqual(
         Buffer.from('4dcdbe47a5b2e55022d1206b1e4f2c3cce527529f954d2d17a3162e68834d9b54a4f0542b4d4b1b44894fd890c282c7282fe66cd0b7aae29c8383bb2ecd8a80f9000', 'hex'),
@@ -19,7 +20,8 @@ test('[NANO S] Remove baker', setupZemu('nanos', async (sim, transport) => {
 test('[NANO X] Remove baker', setupZemu('nanox', async (sim, transport) => {
     const tx = removeBakerShared(transport);
     await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
-    await sim.navigateAndCompareSnapshots('.', 'nanox_remove_baker', [4, 0]);
+    await sim.navigateAndCompareSnapshots('.', 'nanox_remove_baker', [4]);
+    await sim.clickBoth(undefined, false);
 
     await expect(tx).resolves.toEqual(
         Buffer.from('4dcdbe47a5b2e55022d1206b1e4f2c3cce527529f954d2d17a3162e68834d9b54a4f0542b4d4b1b44894fd890c282c7282fe66cd0b7aae29c8383bb2ecd8a80f9000', 'hex'),

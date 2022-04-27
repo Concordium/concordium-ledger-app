@@ -4,6 +4,7 @@ test('[NANO S] Sign a valid simple transfer with memo', setupZemu('nanos', async
     let data = Buffer.from('08000004510000000000000000000000000000000000000002000000000000000020a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7000000000000000a0000000000000064000000290000000063de5da71620a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d70005', 'hex');
     transport.send(0xe0, 0x32, 0x01, 0x00, data);
 
+    console.log('Go for it');
     await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
     await sim.clickRight();
     await sim.clickRight();
@@ -15,12 +16,12 @@ test('[NANO S] Sign a valid simple transfer with memo', setupZemu('nanos', async
     await sim.clickRight();
     await sim.clickRight();
     await sim.clickRight();
-    const snapshot1 = await sim.clickBoth();
+    const snapshot1 = await sim.clickBoth(undefined, false);
 
     data = Buffer.from('6474657374', 'hex');
     transport.send(0xe0, 0x32, 0x02, 0x00, data);
     await sim.waitUntilScreenIsNot(snapshot1);
-    const snapshot2 = await sim.clickBoth();
+    const snapshot2 = await sim.clickBoth(undefined, false);
 
     data = Buffer.from('ffffffffffffffff', 'hex');
     const tx = transport.send(0xe0, 0x32, 0x03, 0x00, data);
@@ -43,12 +44,12 @@ test('[NANO X] Sign a valid simple transfer with memo', setupZemu('nanox', async
     await sim.clickRight();
     await sim.clickRight();
     await sim.clickRight();
-    const snapshot1 = await sim.clickBoth();
+    const snapshot1 = await sim.clickBoth(undefined, false);
 
     data = Buffer.from('6474657374', 'hex');
     transport.send(0xe0, 0x32, 0x02, 0x00, data);
     await sim.waitUntilScreenIsNot(snapshot1);
-    const snapshot2 = await sim.clickBoth();
+    const snapshot2 = await sim.clickBoth(undefined, false);
 
     data = Buffer.from('ffffffffffffffff', 'hex');
     const tx = transport.send(0xe0, 0x32, 0x03, 0x00, data);
