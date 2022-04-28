@@ -121,6 +121,7 @@ jobs:
                 cd tests && yarn test
 
             - name: Upload snapshots
+              if: always()
               uses: actions/upload-artifact@v2
               with:
                 name: snapshots
