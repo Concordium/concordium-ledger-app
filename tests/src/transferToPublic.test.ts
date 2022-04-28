@@ -15,8 +15,9 @@ async function transferToPublic(sim: Zemu, transport: Transport, handleUi: () =>
     for (let i = 0; i < chunkedProofs.length; i += 1) {
         const chunk = chunkedProofs[i];
         if (i === chunkedProofs.length - 1) {
+            const snapshot = await sim.snapshot();
             const tx = transport.send(0xe0, 0x12, 0x02, 0x00, chunk);
-            await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
+            await sim.waitUntilScreenIsNot(snapshot);
             await handleUi();
             await expect(tx).resolves.toEqual(
                 Buffer.from('34684b08152db106679403c65c3e655d87867d03450ef8cdd242a3d8f09ab6d37147b1af1d0f48c52cc5327dbf015c80ee3e6e664578cb39c1b3fbab3921650f9000', 'hex'),
