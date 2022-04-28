@@ -22,7 +22,8 @@ async function updateAuthorizations(
     transport.send(0xe0, ins, 0x00, p2, data);
     await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
     await sim.clickRight();
-    let snapshot = await sim.clickBoth(undefined, false);
+    let snapshot = await sim.snapshot();
+    await sim.clickBoth(undefined, false);
 
     const key1 = Buffer.from('00b6bc751f1abfb6440ff5cce27d7cdd1e7b0b8ec174f54de426890635b27e7daf', 'hex');
     const key2 = Buffer.from('0046a3e38ddf8b493be6e979034510b91db5448da9cba48c106139c288d658a004', 'hex');
@@ -47,16 +48,17 @@ async function updateAuthorizations(
         const accessStructureData = Buffer.concat([keyIndex1, keyIndex2, keyIndex3]);
         transport.send(0xe0, ins, 0x03, p2, accessStructureData);
         await sim.waitUntilScreenIsNot(snapshot);
-        await sim.navigateAndCompareSnapshots('.', device + '_update_authorizations/' + i, [0]);
+        await sim.navigateAndCompareSnapshots('.', device + '_update_authorizations/' + i, [0, 0]);
+        // We cannot check the last image, as navigateAndCompareSnapshots assumes a screen change,
+        // but that is not the case for our implementation here.
         await sim.clickBoth(undefined, false);
-        await sim.clickBoth(undefined, false);
-        await sim.clickBoth(undefined, false);
-        snapshot = await sim.clickBoth(undefined, false);
+        snapshot = await sim.snapshot();
 
         const threshold = Buffer.from('0002', 'hex');
         const tx = transport.send(0xe0, ins, 0x04, p2, threshold);
         await sim.waitUntilScreenIsNot(snapshot);
-        snapshot = await sim.clickBoth(undefined, false);
+        snapshot = await sim.snapshot();
+        await sim.clickBoth(undefined, false);
         if (i === structureCount - 1) {
             await sim.clickBoth();
             await expect(tx).resolves.toEqual(
@@ -78,8 +80,9 @@ test('[NANO S] Update level 2 keys with root keys', setupZemu('nanos', async (si
             await sim.clickRight();
             await sim.clickRight();
             await sim.clickRight();
-            await sim.clickRight(undefined, false);
-            return sim.clickBoth(undefined, false);
+            let snapshot = await sim.snapshot();
+            await sim.clickBoth(undefined, false);
+            return snapshot;
         },
         'nanos'
     );
