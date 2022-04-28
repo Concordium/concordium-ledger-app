@@ -120,6 +120,12 @@ jobs:
               run: |
                 cd tests && yarn test
 
+            - name: Upload snapshots
+              uses: actions/upload-artifact@v2
+              with:
+                name: snapshots
+                path: ./tests/snapshots-tmp
+
     run_unit_test:
       name: Unit test
       runs-on: ubuntu-latest
