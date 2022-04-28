@@ -9,7 +9,8 @@ async function updateAuthorizations(
     prefix: string,
     expectedSignature: string,
     handleKeyUi: () => Promise<any>,
-    device: 'nanos' | 'nanox'
+    device: 'nanos' | 'nanox',
+    testname: string
 ) {
     const p2 = 0x01;
     const data = Buffer.concat([
@@ -48,7 +49,7 @@ async function updateAuthorizations(
         const accessStructureData = Buffer.concat([keyIndex1, keyIndex2, keyIndex3]);
         transport.send(0xe0, ins, 0x03, p2, accessStructureData);
         await sim.waitUntilScreenIsNot(snapshot);
-        await sim.navigateAndCompareSnapshots('.', device + '_update_authorizations/' + i, [0, 0]);
+        await sim.navigateAndCompareSnapshots('.', device + '_update_authorizations/' + testname + '/' + i, [0, 0]);
         // We cannot check the last image, as navigateAndCompareSnapshots assumes a screen change,
         // but that is not the case for our implementation here.
         await sim.clickBoth(undefined, false);
@@ -84,7 +85,8 @@ test('[NANO S] Update level 2 keys with root keys', setupZemu('nanos', async (si
             await sim.clickBoth(undefined, false);
             return snapshot;
         },
-        'nanos'
+        'nanos',
+        'update_level2_with_root'
     );
 }));
 
@@ -102,7 +104,8 @@ test('[NANO X] Update level 2 keys with root keys', setupZemu('nanox', async (si
             await sim.clickBoth(undefined, false);
             return snapshot;
         },
-        'nanox'
+        'nanox',
+        'update_level2_with_root'
     );
 }));
 
@@ -122,7 +125,8 @@ test('[NANO S] Update level 2 keys with level 1 keys', setupZemu('nanos', async 
             await sim.clickBoth(undefined, false);
             return snapshot;        
         },
-        'nanos'
+        'nanos',
+        'update_level2_with_level1'
     );
 }));
 
@@ -140,6 +144,7 @@ test('[NANO X] Update level 2 keys with level 1 keys', setupZemu('nanox', async 
             await sim.clickBoth(undefined, false);
             return snapshot;
         },
-        'nanox'
+        'nanox',
+        'update_level2_with_level1'
     );
 }));
