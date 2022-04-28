@@ -98,7 +98,9 @@ test('[NANO X] Update level 2 keys with root keys', setupZemu('nanox', async (si
         '02f76c94c76d552364e8b054001f86c2cd4417de90343920558ac00529e2bc429f6db1a37c7f75fea69ec663bfadcc847ad568996545de93adfa1674b12d41079000',
         async () => {
             await sim.clickRight();
-            return sim.clickBoth(undefined, false);
+            let snapshot = await sim.snapshot();
+            await sim.clickBoth(undefined, false);
+            return snapshot;
         },
         'nanox'
     );
@@ -116,8 +118,9 @@ test('[NANO S] Update level 2 keys with level 1 keys', setupZemu('nanos', async 
             await sim.clickRight();
             await sim.clickRight();
             await sim.clickRight();
-            await sim.clickRight(undefined, false);
-            return sim.clickBoth(undefined, false);
+            let snapshot = await sim.snapshot();
+            await sim.clickBoth(undefined, false);
+            return snapshot;        
         },
         'nanos'
     );
@@ -133,7 +136,9 @@ test('[NANO X] Update level 2 keys with level 1 keys', setupZemu('nanox', async 
         'ab92d78f158730042a1a4c2f738600f064ad5100551afad3760053f8f9e28e12d47a4e0484417f879e065332612e3cc4c5315e4f610f3fd4e3d7469c058556019000',
         async () => {
             await sim.clickRight();
-            return sim.clickBoth(undefined, false);
+            let snapshot = await sim.snapshot();
+            await sim.clickBoth(undefined, false);
+            return snapshot;
         },
         'nanox'
     );
