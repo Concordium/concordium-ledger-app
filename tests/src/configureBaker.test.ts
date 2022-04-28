@@ -39,7 +39,7 @@ async function configureBakerStep1(transaction: string, aggregationKey: string |
     return tx;
 }
 
-async function configureBakerUrlStep(url: string, sim: Zemu, transport: Transport, handleUi: (index: number) => Promise<void>) {
+async function configureBakerUrlStep(url: string, sim: Zemu, transport: Transport, handleUi: (index: number, snapshot: any) => Promise<void>) {
     const serializedUrl = Buffer.from(url, 'utf-8');
     const serializedUrlLength = encodeWord16(serializedUrl.length);
     await transport.send(0xe0, 0x18, 0x03, 0x00, serializedUrlLength);
@@ -49,8 +49,9 @@ async function configureBakerUrlStep(url: string, sim: Zemu, transport: Transpor
     let tx;
     let i = 0;
     for (const serializedUrlChunk of chunkedUrl) {
+        const snapshot = await sim.snapshot();
         tx = transport.send(0xe0, 0x18, 0x04, 0x00, serializedUrlChunk);
-        await handleUi(i);
+        await handleUi(i, snapshot);
         i += 1;
     }
     if (!tx) {
@@ -89,8 +90,9 @@ async function configureBakerCommissionStep(transactionFee: boolean, bakingRewar
         navigationSteps += 1;
     }
 
+    const snapshot = await sim.snapshot();
     let tx = transport.send(0xe0, 0x18, 0x05, 0x00, serializedCommissionRates);
-    await sim.waitScreenChange();
+    await sim.waitUntilScreenIsNot(snapshot);
     await sim.navigateAndCompareSnapshots('.', device + '_configure_baker/' + navigationDir, [navigationSteps]);
     await sim.clickBoth(undefined, false);
 
@@ -199,8 +201,8 @@ test('[NANO S] Configure-baker: big URL only', setupZemu('nanos', async (sim, tr
     const chunkCount = 3;
     const bigUrl = url.repeat(chunkCount);
     await configureBakerStep0(bitmap, transport);
-    await expect(configureBakerUrlStep(bigUrl, sim, transport, async (i: number) => {
-        await sim.waitScreenChange();
+    await expect(configureBakerUrlStep(bigUrl, sim, transport, async (i: number, snapshot: any) => {
+        await sim.waitUntilScreenIsNot(snapshot);
         if (i == 0) {
             await sim.navigateAndCompareSnapshots('.', 'nanos_configure_baker/big_url_init', [19]);
             await sim.clickBoth(undefined, false);
@@ -246,8 +248,8 @@ test('[NANO S] Configure-baker: All parameters', setupZemu('nanos', async (sim, 
         await sim.navigateAndCompareSnapshots('.', 'nanos_configure_baker/all_parameters_1', [10]);
         await sim.clickBoth(undefined, false);
     });
-    await configureBakerUrlStep(url, sim, transport, async () => {
-        await sim.waitScreenChange();
+    await configureBakerUrlStep(url, sim, transport, async (_i: number, snapshot: any) => {
+        await sim.waitUntilScreenIsNot(snapshot);
         await sim.navigateAndCompareSnapshots('.', 'nanos_configure_baker/all_parameters_url', [14]);
         await sim.clickBoth(undefined, false);
     });
@@ -261,8 +263,8 @@ test('[NANO X] Configure-baker: All parameters', setupZemu('nanox', async (sim, 
         await sim.navigateAndCompareSnapshots('.', 'nanox_configure_baker/all_parameters_1', [7]);
         await sim.clickBoth(undefined, false);
     });
-    await configureBakerUrlStep(url, sim, transport, async () => {
-        await sim.waitScreenChange();
+    await configureBakerUrlStep(url, sim, transport, async (_i: number, snapshot: any) => {
+        await sim.waitUntilScreenIsNot(snapshot);
         await sim.navigateAndCompareSnapshots('.', 'nanox_configure_baker/all_parameters_url', [5]);
         await sim.clickBoth(undefined, false);
     });
