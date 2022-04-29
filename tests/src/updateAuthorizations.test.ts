@@ -49,6 +49,7 @@ async function updateAuthorizations(
         const accessStructureData = Buffer.concat([keyIndex1, keyIndex2, keyIndex3]);
         transport.send(0xe0, ins, 0x03, p2, accessStructureData);
         await sim.waitUntilScreenIsNot(snapshot);
+        await new Promise(r => setTimeout(r, 1000));
         await sim.navigateAndCompareSnapshots('.', device + '_update_authorizations/' + testname + '/' + i, [0, 0]);
         // We cannot check the last image, as navigateAndCompareSnapshots assumes a screen change,
         // but that is not the case for our implementation here.
