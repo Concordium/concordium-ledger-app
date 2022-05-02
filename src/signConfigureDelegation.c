@@ -14,7 +14,7 @@ const ux_flow_step_t *ux_sign_configure_delegation[8];
 UX_STEP_NOCB(
     ux_sign_configure_delegation_capital_step,
     bnnn_paging,
-    {.title = "Capital", .text = (char *) global.signConfigureDelegation.displayCapital});
+    {.title = "Amount to delegate", .text = (char *) global.signConfigureDelegation.displayCapital});
 
 UX_STEP_NOCB(
     ux_sign_configure_delegation_restake_step,
