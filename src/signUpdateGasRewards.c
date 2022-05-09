@@ -40,25 +40,25 @@ void handleSignUpdateGasRewards(uint8_t *cdata, volatile unsigned int *flags) {
 
     // Baker GAS bytes
     uint32_t gasBaker = U4BE(cdata, 0);
-    fractionToText(gasBaker, ctx->gasBaker, sizeof(ctx->gasBaker));
+    fractionToPercentageDisplay(ctx->gasBaker, sizeof(ctx->gasBaker), gasBaker);
     cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 4, NULL, 0);
     cdata += 4;
 
     // Finalization proof GAS bytes
     uint32_t gasFinalizationProof = U4BE(cdata, 0);
-    fractionToText(gasFinalizationProof, ctx->gasFinalization, sizeof(ctx->gasFinalization));
+    fractionToPercentageDisplay(ctx->gasFinalization, sizeof(ctx->gasFinalization), gasFinalizationProof);
     cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 4, NULL, 0);
     cdata += 4;
 
     // Account creation GAS bytes
     uint32_t gasAccountCreation = U4BE(cdata, 0);
-    fractionToText(gasAccountCreation, ctx->gasAccountCreation, sizeof(ctx->gasAccountCreation));
+    fractionToPercentageDisplay(ctx->gasAccountCreation, sizeof(ctx->gasAccountCreation), gasAccountCreation);
     cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 4, NULL, 0);
     cdata += 4;
 
     // Chain update GAS bytes
     uint32_t gasChainUpdate = U4BE(cdata, 0);
-    fractionToText(gasChainUpdate, ctx->gasChainUpdate, sizeof(ctx->gasChainUpdate));
+    fractionToPercentageDisplay(ctx->gasChainUpdate, sizeof(ctx->gasChainUpdate), gasChainUpdate);
     cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 4, NULL, 0);
 
     ux_flow_init(0, ux_sign_gas_rewards, NULL);

@@ -36,9 +36,9 @@ typedef struct {
 } configureBakerUrl_t;
 
 typedef struct {
-    uint8_t transactionFeeCommissionRate[43];
-    uint8_t bakingRewardCommissionRate[43];
-    uint8_t finalizationRewardCommissionRate[43];
+    uint8_t transactionFeeCommissionRate[8];
+    uint8_t bakingRewardCommissionRate[8];
+    uint8_t finalizationRewardCommissionRate[8];
 } configureBakerCommisionRates_t;
 
 typedef struct {

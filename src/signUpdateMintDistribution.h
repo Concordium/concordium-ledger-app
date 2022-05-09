@@ -10,8 +10,8 @@
 void handleSignUpdateMintDistribution(uint8_t *cdata, uint8_t p2, volatile unsigned int *flags);
 
 typedef struct {
-    uint8_t bakerReward[17];
-    uint8_t finalizationReward[17];
+    uint8_t bakerReward[8];
+    uint8_t finalizationReward[8];
 } signUpdateMintDistribution_t;
 
 #endif

@@ -36,14 +36,14 @@ size_t numberToText(uint8_t *dst, size_t dstLength, uint64_t number);
 size_t bin2dec(uint8_t *dst, size_t dstLength, uint64_t number);
 
 /**
- * Writes a fraction of the form "numerator/100000" to the destination. The numerator
- * has to be the next 4 bytes in the input.
- * @param numerator the numerator of the fraction
+ * Writes a fraction of the form "numerator/100000" to the destination formatted
+ * as a percentage.
  * @param dst where to write the text representation of the fraction
- * @param sizeOfDst the number of bytes that may be written to 'dst'
+ * @param dstLength the number of bytes that may be written to 'dst'
+ * @param numerator the numerator of the fraction
  * @return number of bytes written to 'dst'.
  */
-uint8_t fractionToText(uint32_t numerator, uint8_t *dst, uint8_t sizeOfDst);
+size_t fractionToPercentageDisplay(uint8_t *dst, size_t dstLength, uint32_t number);
 
 /**
  * Helper method for converting a byte array into a character array, where the bytes

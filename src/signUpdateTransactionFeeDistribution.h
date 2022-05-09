@@ -9,8 +9,8 @@
 void handleSignUpdateTransactionFeeDistribution(uint8_t *cdata, volatile unsigned int *flags);
 
 typedef struct {
-    uint8_t baker[17];
-    uint8_t gasAccount[17];
+    uint8_t baker[8];
+    uint8_t gasAccount[8];
 } signTransactionDistributionFeeContext_t;
 
 #endif

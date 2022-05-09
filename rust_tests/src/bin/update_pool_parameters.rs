@@ -19,7 +19,7 @@ fn main() {
     let mut transaction_fee_max = hex::decode("0000EA62").unwrap();
 
     let mut min_capital = hex::decode("00000A00C60D5000").unwrap();
-    let mut capital_bound = hex::decode("C60D5000").unwrap();
+    let mut capital_bound = hex::decode("0000D000").unwrap();
     let mut leverage_bound = hex::decode("00000A00C60D50000000EA600000EA60").unwrap();
 
     let mut command_data = Vec::new();
