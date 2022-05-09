@@ -72,6 +72,10 @@ async function configureBakerCommissionStep(transactionFee: boolean, bakingRewar
         }
     }
 
+    if (transactionFee || bakingReward || finalizationReward) {
+        navigationSteps += 1;
+    }
+
     if (transactionFee) {
         serializedCommissionRates = Buffer.from("0000B0C1", "hex")
         navigationSteps += 1;
@@ -137,6 +141,25 @@ test('[NANO X] Configure-baker: Capital, restake, open status and keys', setupZe
     })).resolves.toEqual(Buffer.from("60aba821cb44103d68aab00be87990a886a8caab5fe10f403b77cde7b24fa527a92bc43fd061138b044c787d673d4f92851f0cb989286d65011ca3b5c5f908089000", "hex"));
 }));
 
+test('[NANO S] Stop baking', setupZemu('nanos', async (sim, transport) => {
+    const bitmap = '0001';
+    const stopBakingCapital = "0000000000000000";
+    await configureBakerStep0(bitmap, transport);
+    await expect(configureBakerStep1(stopBakingCapital, undefined, sim, transport, async () => {
+        await sim.navigateAndCompareSnapshots('.', 'nanos_configure_baker/stop_baking', [7]);
+        await sim.clickBoth(undefined, false);
+    })).resolves.toEqual(Buffer.from("1cc1097d4f20792cb64304bb34cd5b98eb9c4fc916516a06f7b99808b9c0ce562843474fd005ce7444b0eb6362d45a52c4bbedb28ace8bbe21332603f149f3019000", "hex"));
+}));
+
+test('[NANO X] Stop baking', setupZemu('nanox', async (sim, transport) => {
+    const bitmap = '0001';
+    const stopBakingCapital = "0000000000000000";
+    await configureBakerStep0(bitmap, transport);
+    await expect(configureBakerStep1(stopBakingCapital, undefined, sim, transport, async () => {
+        await sim.navigateAndCompareSnapshots('.', 'nanox_configure_baker/stop_baking', [4]);
+        await sim.clickBoth(undefined, false);
+    })).resolves.toEqual(Buffer.from("1cc1097d4f20792cb64304bb34cd5b98eb9c4fc916516a06f7b99808b9c0ce562843474fd005ce7444b0eb6362d45a52c4bbedb28ace8bbe21332603f149f3019000", "hex"));
+}));
 
 test('[NANO S] Configure-baker: Capital, restake, open status, without keys', setupZemu('nanos', async (sim, transport) => {
     const bitmap = '0007';

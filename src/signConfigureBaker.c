@@ -11,7 +11,9 @@ static tx_state_t *tx_state = &global_tx_state;
 // the transaction elements are optional, so the UI has to be dynamically set.
 const ux_flow_step_t *ux_sign_configure_baker_first[8];
 const ux_flow_step_t *ux_sign_configure_baker_url[6];
-const ux_flow_step_t *ux_sign_configure_baker_commission[8];
+const ux_flow_step_t *ux_sign_configure_baker_commission[9];
+
+UX_STEP_NOCB(ux_sign_configure_baker_stop_baking_step, nn, {"Stop", "baking"});
 
 UX_STEP_NOCB(
     ux_sign_configure_baker_capital_step,
@@ -44,6 +46,8 @@ UX_STEP_NOCB(
 UX_STEP_CB(ux_sign_configure_baker_continue, nn, sendSuccessNoIdle(), {"Continue", "with transaction"});
 
 UX_STEP_NOCB(ux_sign_configure_baker_empty_url_step, bn, {"Empty URL", ""});
+
+UX_STEP_NOCB(ux_sign_configure_baker_commission_rates_step, nn, {"Commission", "rates"});
 
 UX_STEP_NOCB(
     ux_sign_configure_baker_commission_transaction_fee_step,
@@ -81,7 +85,11 @@ void startConfigureBakerDisplay() {
     ctx->firstDisplay = false;
 
     if (ctx->hasCapital) {
-        ux_sign_configure_baker_first[index++] = &ux_sign_configure_baker_capital_step;
+        if (ctx->capitalRestakeDelegation.stopBaking) {
+            ux_sign_configure_baker_first[index++] = &ux_sign_configure_baker_stop_baking_step;
+        } else {
+            ux_sign_configure_baker_first[index++] = &ux_sign_configure_baker_capital_step;
+        }
     }
 
     if (ctx->hasRestakeEarnings) {
@@ -167,6 +175,10 @@ void startConfigureBakerCommissionDisplay() {
         ux_sign_configure_baker_commission[index++] = &ux_sign_flow_shared_review;
         ux_sign_configure_baker_commission[index++] = &ux_sign_flow_account_sender_view;
         ctx->firstDisplay = false;
+    }
+
+    if (ctx->hasTransactionFeeCommission || ctx->hasBakingRewardCommission || ctx->hasFinalizationRewardCommission) {
+        ux_sign_configure_baker_commission[index++] = &ux_sign_configure_baker_commission_rates_step;
     }
 
     if (ctx->hasTransactionFeeCommission) {
@@ -281,10 +293,15 @@ void handleSignConfigureBaker(
 
         if (ctx->hasCapital) {
             uint64_t capitalAmount = U8BE(cdata, 0);
-            amountToGtuDisplay(
-                ctx->capitalRestakeDelegation.displayCapital,
-                sizeof(ctx->capitalRestakeDelegation.displayCapital),
-                capitalAmount);
+            if (capitalAmount == 0) {
+                ctx->capitalRestakeDelegation.stopBaking = true;
+            } else {
+                ctx->capitalRestakeDelegation.stopBaking = false;
+                amountToGtuDisplay(
+                    ctx->capitalRestakeDelegation.displayCapital,
+                    sizeof(ctx->capitalRestakeDelegation.displayCapital),
+                    capitalAmount);
+            }
             cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 8, NULL, 0);
             cdata += 8;
             lengthCheck -= 8;
