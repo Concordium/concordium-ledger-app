@@ -47,7 +47,7 @@ UX_STEP_CB(ux_sign_configure_baker_continue, nn, sendSuccessNoIdle(), {"Continue
 
 UX_STEP_NOCB(ux_sign_configure_baker_empty_url_step, bn, {"Empty URL", ""});
 
-UX_STEP_NOCB(ux_sign_configure_baker_commission_rates_step, nn, {"Commission", "Rates"});
+UX_STEP_NOCB(ux_sign_configure_baker_commission_rates_step, nn, {"Commission", "rates"});
 
 UX_STEP_NOCB(
     ux_sign_configure_baker_commission_transaction_fee_step,
@@ -296,6 +296,7 @@ void handleSignConfigureBaker(
             if (capitalAmount == 0) {
                 ctx->capitalRestakeDelegation.stopBaking = true;
             } else {
+                ctx->capitalRestakeDelegation.stopBaking = false;
                 amountToGtuDisplay(
                     ctx->capitalRestakeDelegation.displayCapital,
                     sizeof(ctx->capitalRestakeDelegation.displayCapital),
