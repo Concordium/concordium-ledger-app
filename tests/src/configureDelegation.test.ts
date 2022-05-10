@@ -36,6 +36,20 @@ test('[NANO X] Configure delegation (capital)', setupZemu('nanox', async (sim, t
     });
 }));
 
+test('[NANO S] Configure delegation (stop delegation)', setupZemu('nanos', async (sim, transport) => {
+    await configureDelegation('08000004510000000000000000000000000000000000000002000000000000000020a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7000000000000000a0000000000000064000000290000000063de5da71a00010000000000000000', 'ec7c4f56cb26c512c69d37e0e5211c1c9908e5e739f4b43f7702e9d4fd460f270aa28eff4b5beec18b377ce21cadaf1181013fc0b9740fba70cf8f1f1608b6059000', sim, transport, async () => {
+        await sim.navigateAndCompareSnapshots('.', 'nanos_configure_delegation/stop_delegation', [7]);
+        await sim.clickBoth(undefined, false);
+    });
+}));
+
+test('[NANO X] Configure delegation (stop delegation)', setupZemu('nanox', async (sim, transport) => {
+    await configureDelegation('08000004510000000000000000000000000000000000000002000000000000000020a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7000000000000000a0000000000000064000000290000000063de5da71a00010000000000000000', 'ec7c4f56cb26c512c69d37e0e5211c1c9908e5e739f4b43f7702e9d4fd460f270aa28eff4b5beec18b377ce21cadaf1181013fc0b9740fba70cf8f1f1608b6059000', sim, transport, async () => {
+        await sim.navigateAndCompareSnapshots('.', 'nanox_configure_delegation/stop_delegation', [4]);
+        await sim.clickBoth(undefined, false);
+    });
+}));
+
 test('[NANO S] Configure delegation (restake)', setupZemu('nanos', async (sim, transport) => {
     await configureDelegation('08000004510000000000000000000000000000000000000002000000000000000020a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7000000000000000a0000000000000064000000290000000063de5da71a000201', 'bae27a390f059e24239d2d0fbbf084cf35735aca08998c0cfa9123bc597fa2cf170ba447d071430b440fda9dcb4f591cc65d0c4b86c3fba83cbc5ba66d6dd90d9000', sim, transport, async () => {
         await sim.navigateAndCompareSnapshots('.', 'nanos_configure_delegation/nanos_configure_delegation_restake', [7]);

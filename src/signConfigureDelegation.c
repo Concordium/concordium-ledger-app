@@ -26,6 +26,8 @@ UX_STEP_NOCB(
     bnnn_paging,
     {.title = "Delegation target", .text = (char *) global.signConfigureDelegation.displayDelegationTarget});
 
+UX_STEP_NOCB(ux_sign_configure_delegation_stop_delegation_step, nn, {"Stop", "delegation"});
+
 void startDisplay() {
     uint8_t index = 0;
 
@@ -33,7 +35,11 @@ void startDisplay() {
     ux_sign_configure_delegation[index++] = &ux_sign_flow_account_sender_view;
 
     if (ctx->hasCapital) {
-        ux_sign_configure_delegation[index++] = &ux_sign_configure_delegation_capital_step;
+        if (ctx->stopDelegation) {
+            ux_sign_configure_delegation[index++] = &ux_sign_configure_delegation_stop_delegation_step;
+        } else {
+            ux_sign_configure_delegation[index++] = &ux_sign_configure_delegation_capital_step;
+        }
     }
 
     if (ctx->hasRestakeEarnings) {
@@ -77,7 +83,12 @@ void handleSignConfigureDelegation(uint8_t *cdata, uint8_t dataLength, volatile 
 
     if (ctx->hasCapital) {
         uint64_t capitalAmount = U8BE(cdata, 0);
-        amountToGtuDisplay(ctx->displayCapital, sizeof(ctx->displayCapital), capitalAmount);
+        if (capitalAmount == 0) {
+            ctx->stopDelegation = true;
+        } else {
+            ctx->stopDelegation = false;
+            amountToGtuDisplay(ctx->displayCapital, sizeof(ctx->displayCapital), capitalAmount);
+        }
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 8, NULL, 0);
         expectedDataLength += 8;
         cdata += 8;
