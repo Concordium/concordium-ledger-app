@@ -11,7 +11,7 @@
 void handleSignUpdateExchangeRate(uint8_t *cdata, volatile unsigned int *flags);
 
 typedef struct {
-    uint8_t ratio[43];
+    uint8_t ratio[44];
     uint8_t type[16];
 } signExchangeRateContext_t;
 

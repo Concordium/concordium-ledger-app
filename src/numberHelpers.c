@@ -39,22 +39,11 @@ size_t bin2dec(uint8_t *dst, size_t dstLength, uint64_t number) {
     return characterLength + 1;
 }
 
-uint8_t fractionToText(uint32_t numerator, uint8_t *dst, uint8_t sizeOfDst) {
-    uint8_t fraction[8] = "/100000";
-    int rateLength = numberToText(dst, sizeOfDst, numerator);
-    memmove(dst + rateLength, fraction, 8);
-    return rateLength + 8;
-}
-
-/**
- * Write the display version of the decimal part of a GTU amount,
- * i.e. the numbers on the right-side of the decimal point.
- */
-size_t decimalAmountToGtuDisplay(uint8_t *dst, size_t dstLength, uint64_t microGtuAmount) {
-    // Fill with zeroes if the number is less than 6 digits,
+size_t decimalDigitsDisplay(uint8_t *dst, size_t dstLength, uint64_t decimalPart, uint8_t decimalDigitsLength) {
+    // Fill with zeroes if the number is less than decimalDigits,
     // so that input like 5304 become 005304 in their display version.
-    size_t length = lengthOfNumber(microGtuAmount);
-    int zeroFillLength = 6 - length;
+    size_t length = lengthOfNumber(decimalPart);
+    int zeroFillLength = decimalDigitsLength - length;
 
     if (dstLength - zeroFillLength < 0) {
         THROW(ERROR_BUFFER_OVERFLOW);
@@ -68,60 +57,58 @@ size_t decimalAmountToGtuDisplay(uint8_t *dst, size_t dstLength, uint64_t microG
     // This avoids displaying numbers like 5300, as it will
     // instead become 53.
     for (int i = length - 1; i >= 0; i--) {
-        uint64_t currentNumber = (microGtuAmount % 10);
+        uint64_t currentNumber = (decimalPart % 10);
         if (currentNumber != 0) {
             break;
         } else {
-            microGtuAmount /= 10;
+            decimalPart /= 10;
         }
     }
 
-    return numberToText(dst + zeroFillLength, dstLength - zeroFillLength, microGtuAmount) + zeroFillLength;
+    return numberToText(dst + zeroFillLength, dstLength - zeroFillLength, decimalPart) + zeroFillLength;
 }
 
-/**
- * Constructs a display text version of a micro GTU amount, so that it
- * can displayed as GTU, i.e. not as the micro version, as it is easier
- * to relate to in the GUI.
- */
-size_t amountToGtuDisplay(uint8_t *dst, size_t dstLength, uint64_t microGtuAmount) {
+size_t decimalNumberToDisplay(
+    uint8_t *dst,
+    size_t dstLength,
+    uint64_t amount,
+    uint32_t resolution,
+    uint8_t decimalDigitsLength) {
     // In every case we need to write atleast 2 characters
     if (dstLength < 2) {
         THROW(ERROR_BUFFER_OVERFLOW);
     }
 
     // A zero amount should be displayed as a plain '0'.
-    if (microGtuAmount == 0) {
+    if (amount == 0) {
         dst[0] = '0';
-        dst[1] = '\0';
-        return 2;
+        return 1;
     }
 
-    int length = lengthOfNumber(microGtuAmount);
+    int length = lengthOfNumber(amount);
 
-    // If the amount is less than than the resolution (micro), then the
-    // GTU amount has to be prefixed by '0.' as it will purely consist
+    // If the amount is less than than the resolution, then the
+    // amount has to be prefixed by '0.' as it will purely consist
     // of the decimals.
-    if (microGtuAmount < 1000000) {
+    if (amount < resolution) {
         dst[0] = '0';
         dst[1] = '.';
         // We decrement the length an extra time, to make sure there is space for the termination.
-        size_t length = decimalAmountToGtuDisplay(dst + 2, dstLength - 3, microGtuAmount) + 2;
-        dst[length] = '\0';
-        return length + 1;
+        size_t length = decimalDigitsDisplay(dst + 2, dstLength - 3, amount, decimalDigitsLength) + 2;
+        return length;
     }
 
     size_t offset = 0;
 
-    // If we reach this case, then the number is greater than 1.000.000 and we will
+    // If we reach this case, then the number is greater than the resolution and we will
     // need to consider thousand separators for the whole number part.
-    size_t wholeNumberLength = length - 6;
+    size_t wholeNumberLength = length - decimalDigitsLength;
     int current = 0;
     size_t separatorCount = wholeNumberLength / 3;
     if (wholeNumberLength % 3 == 0) {
         separatorCount -= 1;
     }
-    uint64_t wholePart = microGtuAmount / 1000000;
+    uint64_t wholePart = amount / resolution;
 
     // We check that the entire number and termination fits,
     // under the assumption that there is no decimalPart
@@ -148,11 +135,11 @@ size_t amountToGtuDisplay(uint8_t *dst, size_t dstLength, uint64_t microGtuAmoun
     // The first 6 digits should be without thousand separators,
     // as they are part of the decimal part of the number. Write those
     // characters first to the destination output and separate with '.'
-    uint64_t decimalPart = microGtuAmount % 1000000;
+    uint64_t decimalPart = amount % resolution;
     if (decimalPart != 0) {
         dst[offset] = '.';
         offset += 1;
-        offset += decimalAmountToGtuDisplay(dst + offset, dstLength - offset, decimalPart);
+        offset += decimalDigitsDisplay(dst + offset, dstLength - offset, decimalPart, decimalDigitsLength);
     }
 
     // We check that we can fit the termination character
@@ -160,6 +147,27 @@ size_t amountToGtuDisplay(uint8_t *dst, size_t dstLength, uint64_t microGtuAmoun
         THROW(ERROR_BUFFER_OVERFLOW);
     }
 
+    return offset;
+}
+
+size_t fractionToPercentageDisplay(uint8_t *dst, size_t dstLength, uint32_t number) {
+    if (number > 100000) {
+        THROW(ERROR_INVALID_TRANSACTION);
+    }
+
+    size_t offset = decimalNumberToDisplay(dst, dstLength, number, 1000, 3);
+    dst[offset] = '%';
+    dst[offset + 1] = '\0';
+    return offset + 2;
+}
+
+/**
+ * Constructs a display text version of a micro GTU amount, so that it
+ * can displayed as GTU, i.e. not as the micro version, as it is easier
+ * to relate to in the GUI.
+ */
+size_t amountToGtuDisplay(uint8_t *dst, size_t dstLength, uint64_t microGtuAmount) {
+    size_t offset = decimalNumberToDisplay(dst, dstLength, microGtuAmount, 1000000, 6);
     dst[offset] = '\0';
     return offset + 1;
 }

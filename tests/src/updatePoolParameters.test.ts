@@ -14,12 +14,12 @@ async function poolParameters(sim: Zemu, transport: Transport, images: string, e
     await sim.navigateAndCompareSnapshots('.', images + "/ranges", [5]);
     snapshot = await sim.clickBoth(undefined, false);
 
-    data = Buffer.from('00000A00C60D5000' + 'C60D5000' + '00000A00C60D5000' + '0000EA600000EA60', 'hex');
+    data = Buffer.from('00000A00C60D5000' + '00005000' + '00000A00C60D5000' + '0000EA600000EA60', 'hex');
     const tx = transport.send(0xe0, 0x41, 0x02, 0x00, data);
     await sim.waitUntilScreenIsNot(snapshot);
     await sim.navigateAndCompareSnapshots('.', images + "/equity", [equity_steps, 0]);
     await expect(tx).resolves.toEqual(
-        Buffer.from('f3ff3598d29e66836fe4b2712295f57e37f82a47b9772fe0a6c33128eb478e2dc5e0f199691bd1f62dc6c24d459e70bb835360795de84f09be6ae38a5dc76b0a9000', 'hex'),
+        Buffer.from('1349789ad4cf49bda28d2e1178bcbf71831163b3a00b627b379d9aeb3096a35dd43a60a77a3a7a9eb922ba749686bdf1fbc1756357db65f127a732326614eb0d9000', 'hex'),
     );
 }
 

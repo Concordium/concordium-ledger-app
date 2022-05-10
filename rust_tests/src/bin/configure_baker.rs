@@ -92,7 +92,7 @@ fn main() {
 
     let mut transaction_fee = hex::decode("00000001").unwrap();
     let mut baking_reward = hex::decode("000000F1").unwrap();
-    let mut finalization_reward = hex::decode("000D0001").unwrap();
+    let mut finalization_reward = hex::decode("0000D001").unwrap();
 
     let mut commission_data = Vec::new();
     commission_data.append(&mut transaction_fee);

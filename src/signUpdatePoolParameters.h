@@ -16,23 +16,23 @@ typedef enum {
 
 typedef struct {
     union {
-        uint8_t passiveFinalizationRewardCommissionRate[43];
-        uint8_t finalizationRewardCommissionRateMax[43];
+        uint8_t passiveFinalizationRewardCommissionRate[8];
+        uint8_t finalizationRewardCommissionRateMax[8];
     };
     union {
-        uint8_t passiveBakingRewardCommissionRate[43];
-        uint8_t bakingRewardCommissionRateMax[43];
+        uint8_t passiveBakingRewardCommissionRate[8];
+        uint8_t bakingRewardCommissionRateMax[8];
     };
     union {
-        uint8_t passiveTransactionFeeCommissionRate[43];
-        uint8_t transactionFeeCommissionRateMax[43];
+        uint8_t passiveTransactionFeeCommissionRate[8];
+        uint8_t transactionFeeCommissionRateMax[8];
     };
-    uint8_t finalizationRewardCommissionRateMin[43];
-    uint8_t bakingRewardCommissionRateMin[43];
-    uint8_t transactionFeeCommissionRateMin[43];
+    uint8_t finalizationRewardCommissionRateMin[8];
+    uint8_t bakingRewardCommissionRateMin[8];
+    uint8_t transactionFeeCommissionRateMin[8];
     uint8_t minimumEquityCapital[26];
-    uint8_t capitalBound[43];
-    uint8_t leverageBound[43];
+    uint8_t capitalBound[8];
+    uint8_t leverageBound[44];
     updatePoolParametersState_t state;
 } signUpdatePoolParametersContext_t;
 

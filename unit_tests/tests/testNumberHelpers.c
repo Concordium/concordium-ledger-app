@@ -116,15 +116,15 @@ static void test_bin2dec_longer_number() {
     assert_int_equal(result, ERROR_BUFFER_OVERFLOW);
 }
 
-static void test_decimalAmountToGtuDisplay() {
+static void test_decimalAmountDisplay() {
     uint8_t text[6];
-    decimalAmountToGtuDisplay(text, sizeof(text), 2100112);
+    decimalDigitsDisplay(text, sizeof(text), 2100112, 6);
     assert_string_equal(text, "100112");
-    decimalAmountToGtuDisplay(text, sizeof(text), 4041);
+    decimalDigitsDisplay(text, sizeof(text), 4041, 6);
     assert_string_equal(text, "004041");
-    decimalAmountToGtuDisplay(text, sizeof(text), 1);
+    decimalDigitsDisplay(text, sizeof(text), 1, 6);
     assert_string_equal(text, "000001");
-    decimalAmountToGtuDisplay(text, sizeof(text), 0);
+    decimalDigitsDisplay(text, sizeof(text), 0, 6);
     assert_string_equal(text, "000000");
 }
 
@@ -181,6 +181,36 @@ static void test_amountToGtuDisplay_max() {
     assert_string_equal(text, "18,446,744,073,709.551615");
 }
 
+static void test_fractionToPercentageDisplay_only_decimals() {
+    uint8_t text[8];
+    fractionToPercentageDisplay(text, sizeof(text), 543);
+    assert_string_equal(text, "0.543%");
+    fractionToPercentageDisplay(text, sizeof(text), 1);
+    assert_string_equal(text, "0.001%");
+    fractionToPercentageDisplay(text, sizeof(text), 40);
+    assert_string_equal(text, "0.04%");
+    fractionToPercentageDisplay(text, sizeof(text), 100);
+    assert_string_equal(text, "0.1%");
+}
+
+static void test_fractionToPercentageDisplay_no_decimals() {
+    uint8_t text[8];
+    fractionToPercentageDisplay(text, sizeof(text), 1000);
+    assert_string_equal(text, "1%");
+    fractionToPercentageDisplay(text, sizeof(text), 95000);
+    assert_string_equal(text, "95%");
+    fractionToPercentageDisplay(text, sizeof(text), 100000);
+    assert_string_equal(text, "100%");
+}
+
+static void test_fractionToPercentageDisplay_mixed() {
+    uint8_t text[8];
+    fractionToPercentageDisplay(text, sizeof(text), 97135);
+    assert_string_equal(text, "97.135%");
+    fractionToPercentageDisplay(text, sizeof(text), 5001);
+    assert_string_equal(text, "5.001%");
+}
+
 static void test_toPaginatedHex() {
     char text[70];
     uint8_t bytes[] = {171, 34, 31, 72, 83, 171, 34, 29, 72, 83, 34, 29, 31, 72, 34, 29, 31, 72, 34, 29, 31, 72};
@@ -215,29 +245,30 @@ static void test_toPaginatedHex_inserts_white_space() {
 }
 
 int main() {
-    const struct CMUnitTest tests[] = {
-        cmocka_unit_test(test_lengthOfNumbers),
-        cmocka_unit_test(test_numberToText),
-        cmocka_unit_test(test_numberToText_zero),
-        cmocka_unit_test(test_numberToText_max),
-        cmocka_unit_test(test_numberToText_shorter_number),
-        cmocka_unit_test(test_numberToText_longer_number),
-        cmocka_unit_test(test_bin2dec),
-        cmocka_unit_test(test_bin2dec_max),
-        cmocka_unit_test(test_bin2dec_shorter_number),
-        cmocka_unit_test(test_bin2dec_longer_number),
-        cmocka_unit_test(test_decimalAmountToGtuDisplay),
-        cmocka_unit_test(test_amountToGtuDisplay_only_microGtu),
-        cmocka_unit_test(test_amountToGtuDisplay_no_microGtu),
-        cmocka_unit_test(test_amountToGtuDisplay_with_thousand_separator),
-        cmocka_unit_test(test_amountToGtuDisplay_mixed),
-        cmocka_unit_test(test_amountToGtuDisplay_zero),
-        cmocka_unit_test(test_amountToGtuDisplay_max),
-        cmocka_unit_test(test_toPaginatedHex),
-        cmocka_unit_test(test_toPaginatedHex_stops_after_given_length),
-        cmocka_unit_test(test_toPaginatedHex_does_not_have_trailing_space),
-        cmocka_unit_test(test_toPaginatedHex_inserts_white_space),
-    };
+    const struct CMUnitTest tests[] = {cmocka_unit_test(test_lengthOfNumbers),
+                                       cmocka_unit_test(test_numberToText),
+                                       cmocka_unit_test(test_numberToText_zero),
+                                       cmocka_unit_test(test_numberToText_max),
+                                       cmocka_unit_test(test_numberToText_shorter_number),
+                                       cmocka_unit_test(test_numberToText_longer_number),
+                                       cmocka_unit_test(test_bin2dec),
+                                       cmocka_unit_test(test_bin2dec_max),
+                                       cmocka_unit_test(test_bin2dec_shorter_number),
+                                       cmocka_unit_test(test_bin2dec_longer_number),
+                                       cmocka_unit_test(test_decimalAmountDisplay),
+                                       cmocka_unit_test(test_amountToGtuDisplay_only_microGtu),
+                                       cmocka_unit_test(test_amountToGtuDisplay_no_microGtu),
+                                       cmocka_unit_test(test_amountToGtuDisplay_with_thousand_separator),
+                                       cmocka_unit_test(test_amountToGtuDisplay_mixed),
+                                       cmocka_unit_test(test_amountToGtuDisplay_zero),
+                                       cmocka_unit_test(test_amountToGtuDisplay_max),
+                                       cmocka_unit_test(test_toPaginatedHex),
+                                       cmocka_unit_test(test_toPaginatedHex_stops_after_given_length),
+                                       cmocka_unit_test(test_toPaginatedHex_does_not_have_trailing_space),
+                                       cmocka_unit_test(test_toPaginatedHex_inserts_white_space),
+                                       cmocka_unit_test(test_fractionToPercentageDisplay_only_decimals),
+                                       cmocka_unit_test(test_fractionToPercentageDisplay_no_decimals),
+                                       cmocka_unit_test(test_fractionToPercentageDisplay_mixed)};
 
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

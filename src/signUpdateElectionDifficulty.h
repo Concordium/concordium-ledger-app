@@ -9,7 +9,7 @@
 void handleSignUpdateElectionDifficulty(uint8_t *cdata, volatile unsigned int *flags);
 
 typedef struct {
-    uint8_t electionDifficulty[17];
+    uint8_t electionDifficulty[8];
 } signElectionDifficultyContext_t;
 
 #endif

@@ -9,55 +9,55 @@ static tx_state_t *tx_state = &global_tx_state;
 
 UX_STEP_NOCB(
     ux_sign_pool_parameters_finalization_reward_step,
-    bn,
+    nn,
     {"P.D. finalize reward", (char *) global.signPoolParameters.passiveFinalizationRewardCommissionRate});
 UX_STEP_NOCB(
     ux_sign_pool_parameters_baking_reward_step,
-    bn,
+    nn,
     {"P.D. baking reward", (char *) global.signPoolParameters.passiveBakingRewardCommissionRate});
 UX_STEP_CB(
     ux_sign_pool_parameters_transaction_fee_step,
-    bn,
+    nn,
     sendSuccessNoIdle(),
     {"P.D. transaction fee", (char *) global.signPoolParameters.passiveTransactionFeeCommissionRate});
 
 UX_STEP_NOCB(
     ux_sign_pool_parameters_finalization_reward_max_step,
-    bn,
+    nn,
     {"Max finalize reward", (char *) global.signPoolParameters.finalizationRewardCommissionRateMax});
 UX_STEP_NOCB(
     ux_sign_pool_parameters_baking_reward_max_step,
-    bn,
+    nn,
     {"Max baking reward", (char *) global.signPoolParameters.bakingRewardCommissionRateMax});
 UX_STEP_CB(
     ux_sign_pool_parameters_transaction_fee_max_step,
-    bn,
+    nn,
     sendSuccessNoIdle(),
     {"Max transaction fee", (char *) global.signPoolParameters.transactionFeeCommissionRateMax});
 UX_STEP_NOCB(
     ux_sign_pool_parameters_finalization_reward_min_step,
-    bn,
+    nn,
     {"Min finalize reward", (char *) global.signPoolParameters.finalizationRewardCommissionRateMin});
 UX_STEP_NOCB(
     ux_sign_pool_parameters_baking_reward_min_step,
-    bn,
+    nn,
     {"Min baking reward", (char *) global.signPoolParameters.bakingRewardCommissionRateMin});
 UX_STEP_NOCB(
     ux_sign_pool_parameters_transaction_fee_min_step,
-    bn,
+    nn,
     {"Min transaction fee", (char *) global.signPoolParameters.transactionFeeCommissionRateMin});
 
 UX_STEP_NOCB(
     ux_sign_pool_parameters_minimum_capital_step,
-    bnnn_paging,
+    nn_paging,
     {.title = "Min equity capital", .text = (char *) global.signPoolParameters.minimumEquityCapital});
 UX_STEP_NOCB(
     ux_sign_pool_parameters_capital_bound_step,
-    bn,
+    nn,
     {"Capital bound", (char *) global.signPoolParameters.capitalBound});
 UX_STEP_NOCB(
     ux_sign_pool_parameters_leverage_bound_step,
-    bnnn_paging,
+    nn_paging,
     {.title = "Leverage bound", .text = (char *) global.signPoolParameters.leverageBound});
 
 UX_FLOW(
@@ -91,7 +91,7 @@ UX_FLOW(
  */
 uint8_t parseCommissionRate(uint8_t *cdata, uint8_t *commissionRateDisplay, uint8_t sizeOfCommissionRateDisplay) {
     uint32_t rate = U4BE(cdata, 0);
-    fractionToText(rate, commissionRateDisplay, sizeOfCommissionRateDisplay);
+    fractionToPercentageDisplay(commissionRateDisplay, sizeOfCommissionRateDisplay, rate);
     cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 4, NULL, 0);
     return 4;
 }
@@ -165,10 +165,10 @@ void handleSignUpdatePoolParameters(uint8_t *cdata, uint8_t p1, volatile unsigne
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 8, NULL, 0);
 
         int numLength = numberToText(ctx->leverageBound, sizeof(ctx->leverageBound), leverageBoundNumerator);
-        memmove(ctx->leverageBound + numLength, "/", 1);
+        memmove(ctx->leverageBound + numLength, " / ", 3);
         numberToText(
-            ctx->leverageBound + numLength + 1,
-            sizeof(ctx->leverageBound) - (numLength + 1),
+            ctx->leverageBound + numLength + 3,
+            sizeof(ctx->leverageBound) - (numLength + 3),
             leverageBoundDenominator);
 
         ux_flow_init(0, ux_sign_pool_parameters_commission_final, NULL);
