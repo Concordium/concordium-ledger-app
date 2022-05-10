@@ -39,11 +39,11 @@ size_t bin2dec(uint8_t *dst, size_t dstLength, uint64_t number) {
     return characterLength + 1;
 }
 
-size_t decimalDigitsDisplay(uint8_t *dst, size_t dstLength, uint64_t microGtuAmount, uint8_t decimalDigits) {
+size_t decimalDigitsDisplay(uint8_t *dst, size_t dstLength, uint64_t decimalPart, uint8_t decimalDigitsLength) {
     // Fill with zeroes if the number is less than decimalDigits,
     // so that input like 5304 become 005304 in their display version.
-    size_t length = lengthOfNumber(microGtuAmount);
-    int zeroFillLength = decimalDigits - length;
+    size_t length = lengthOfNumber(decimalPart);
+    int zeroFillLength = decimalDigitsLength - length;
 
     if (dstLength - zeroFillLength < 0) {
         THROW(ERROR_BUFFER_OVERFLOW);
@@ -57,44 +57,44 @@ size_t decimalDigitsDisplay(uint8_t *dst, size_t dstLength, uint64_t microGtuAmo
     // This avoids displaying numbers like 5300, as it will
     // instead become 53.
     for (int i = length - 1; i >= 0; i--) {
-        uint64_t currentNumber = (microGtuAmount % 10);
+        uint64_t currentNumber = (decimalPart % 10);
         if (currentNumber != 0) {
             break;
         } else {
-            microGtuAmount /= 10;
+            decimalPart /= 10;
         }
     }
 
-    return numberToText(dst + zeroFillLength, dstLength - zeroFillLength, microGtuAmount) + zeroFillLength;
+    return numberToText(dst + zeroFillLength, dstLength - zeroFillLength, decimalPart) + zeroFillLength;
 }
 
 size_t decimalNumberToDisplay(
     uint8_t *dst,
     size_t dstLength,
-    uint64_t microGtuAmount,
+    uint64_t amount,
     uint32_t resolution,
-    uint8_t decimalDigits) {
+    uint8_t decimalDigitsLength) {
     // In every case we need to write atleast 2 characters
     if (dstLength < 2) {
         THROW(ERROR_BUFFER_OVERFLOW);
     }
 
     // A zero amount should be displayed as a plain '0'.
-    if (microGtuAmount == 0) {
+    if (amount == 0) {
         dst[0] = '0';
         return 1;
     }
 
-    int length = lengthOfNumber(microGtuAmount);
+    int length = lengthOfNumber(amount);
 
     // If the amount is less than than the resolution, then the
     // amount has to be prefixed by '0.' as it will purely consist
     // of the decimals.
-    if (microGtuAmount < resolution) {
+    if (amount < resolution) {
         dst[0] = '0';
         dst[1] = '.';
         // We decrement the length an extra time, to make sure there is space for the termination.
-        size_t length = decimalDigitsDisplay(dst + 2, dstLength - 3, microGtuAmount, decimalDigits) + 2;
+        size_t length = decimalDigitsDisplay(dst + 2, dstLength - 3, amount, decimalDigitsLength) + 2;
         return length;
     }
 
@@ -102,13 +102,13 @@ size_t decimalNumberToDisplay(
 
     // If we reach this case, then the number is greater than the resolution and we will
     // need to consider thousand separators for the whole number part.
-    size_t wholeNumberLength = length - decimalDigits;
+    size_t wholeNumberLength = length - decimalDigitsLength;
     int current = 0;
     size_t separatorCount = wholeNumberLength / 3;
     if (wholeNumberLength % 3 == 0) {
         separatorCount -= 1;
     }
-    uint64_t wholePart = microGtuAmount / resolution;
+    uint64_t wholePart = amount / resolution;
 
     // We check that the entire number and termination fits,
     // under the assumption that there is no decimalPart
@@ -135,11 +135,11 @@ size_t decimalNumberToDisplay(
     // The first 6 digits should be without thousand separators,
     // as they are part of the decimal part of the number. Write those
     // characters first to the destination output and separate with '.'
-    uint64_t decimalPart = microGtuAmount % resolution;
+    uint64_t decimalPart = amount % resolution;
     if (decimalPart != 0) {
         dst[offset] = '.';
         offset += 1;
-        offset += decimalDigitsDisplay(dst + offset, dstLength - offset, decimalPart, decimalDigits);
+        offset += decimalDigitsDisplay(dst + offset, dstLength - offset, decimalPart, decimalDigitsLength);
     }
 
     // We check that we can fit the termination character

@@ -204,7 +204,7 @@ static void test_fractionToPercentageDisplay_no_decimals() {
 }
 
 static void test_fractionToPercentageDisplay_mixed() {
-    uint8_t text[20];
+    uint8_t text[8];
     fractionToPercentageDisplay(text, sizeof(text), 97135);
     assert_string_equal(text, "97.135%");
     fractionToPercentageDisplay(text, sizeof(text), 5001);
