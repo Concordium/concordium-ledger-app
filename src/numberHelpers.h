@@ -40,7 +40,7 @@ size_t bin2dec(uint8_t *dst, size_t dstLength, uint64_t number);
  * as a percentage.
  * @param dst where to write the text representation of the fraction
  * @param dstLength the number of bytes that may be written to 'dst'
- * @param numerator the numerator of the fraction
+ * @param number the numerator of the fraction
  * @return number of bytes written to 'dst'.
  */
 size_t fractionToPercentageDisplay(uint8_t *dst, size_t dstLength, uint32_t number);
