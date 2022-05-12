@@ -1,5 +1,14 @@
 # Changelog
- 
+
+## 3.0.1
+
+### Changed
+
+* The commission rates UI is now prefixed with a screen that says 'Commission rates'.
+* When setting stake amount to 0 the UI now shows 'Stop baking' instead of the 0 value.
+* When setting delegation amount to 0 the UI now shows 'Stop delegation' instead of the 0 value.
+* Static fractions (numerator/100000), e.g. commission rates for bakers, are now shown as a percentage.
+
 ## 3.0.0
 
 ### Added
