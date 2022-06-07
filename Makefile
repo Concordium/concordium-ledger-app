@@ -25,7 +25,12 @@ include $(BOLOS_SDK)/Makefile.defines
 
 # Main app configuration
 APPNAME = "Concordium"
-ICONNAME = nanos-concordium-icon.gif
+
+ifeq ($(TARGET_NAME),TARGET_NANOS)
+    ICONNAME=icons/nanos-concordium-icon.gif
+else
+    ICONNAME=icons/nanosplus-concordium-icon.gif
+endif
 
 # Version must be no greater than 99.99.999, otherwise
 # extra memory must be allocated in menu.c.
@@ -46,7 +51,9 @@ APP_LOAD_PARAMS +=--curve ed25519
 APP_SOURCE_PATH += src
 SDK_SOURCE_PATH += lib_stusb lib_stusb_impl
 
-ifeq ($(TARGET_NAME),TARGET_NANOX)
+ifeq ($(TARGET_NAME),TARGET_NANOS)
+	DEFINES += IO_SEPROXYHAL_BUFFER_SIZE_B=128
+else
 	SDK_SOURCE_PATH += lib_ux
 	DEFINES += IO_SEPROXYHAL_BUFFER_SIZE_B=300
 	DEFINES += HAVE_GLO096
@@ -55,8 +62,6 @@ ifeq ($(TARGET_NAME),TARGET_NANOX)
 	DEFINES += HAVE_BAGL_FONT_OPEN_SANS_REGULAR_11PX
 	DEFINES += HAVE_BAGL_FONT_OPEN_SANS_EXTRABOLD_11PX
 	DEFINES += HAVE_BAGL_FONT_OPEN_SANS_LIGHT_16PX
-else
-	DEFINES += IO_SEPROXYHAL_BUFFER_SIZE_B=128
 endif
 
 DEFINES += OS_IO_SEPROXYHAL
@@ -116,6 +121,13 @@ APP_LOAD_PARAMS_EVAL=$(shell printf '\\"%s\\" ' $(APP_LOAD_PARAMS))
 # Extract the target device (NANOS/NANOX)
 TARGET_DEVICE = $(subst TARGET_,,$(TARGET_NAME))
 
+# Set release filename depending on device being built for
+ifeq ($(TARGET_NAME),TARGET_NANOS)
+	TARGET_DEVICE=nanos
+else
+	TARGET_DEVICE=nanos-plus
+endif
+
 # Main rules
 all: default
 
@@ -157,7 +169,7 @@ endif
 	@echo "python3 -m ledgerblue.deleteApp $(COMMON_DELETE_PARAMS)" >> uninstall.sh
 	@chmod +x uninstall.sh
 	@chmod +x bin/app.hex
-	@zip -r concordium-ledger-app-$(APPVERSION)-target-$(TARGET_VERSION).zip \
+	@zip -r concordium-ledger-app-$(APPVERSION)-$(TARGET_DEVICE)-$(TARGET_VERSION).zip \
 		licenses \
 		install.bat \
 		loadcertificate.bat \
@@ -172,7 +184,7 @@ endif
 	@rm -f uninstall.sh
 	@rm -f signed_app.apdu
 	@echo
-	@echo "Application was successfully signed and packaged to concordium-ledger-app-$(APPVERSION)-target-$(TARGET_VERSION).zip"
+	@echo "Application was successfully signed and packaged to concordium-ledger-app-$(APPVERSION)-$(TARGET_DEVICE)-$(TARGET_VERSION).zip"
 
 fail_release_no_public_key:
 	$(error A public key must set as LEDGER_PUBLIC_KEY)
@@ -184,7 +196,7 @@ fail_nanox_release:
 	$(error The release can only be built for Nano S, as Nano X does not support sideloading.)
 
 emulator: all
-	@echo 
+	@echo
 	@echo "CONCORDIUM LEDGER APP EMULATOR TESTING BUILD"
 	@echo $(APPNAME)
 	@echo "Version $(APPVERSION)"

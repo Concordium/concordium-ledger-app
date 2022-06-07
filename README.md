@@ -1,63 +1,71 @@
 # Concordium Ledger application
 
-An application for the Ledger Nano S and Ledger Nano X devices for retrieving keys and signing transactions.
+An application for the Ledger Nano S, Ledger Nano S Plus and Ledger Nano X devices for retrieving keys and signing transactions.
 
-## Secure SDK dependency
+## Secure SDK dependencies
 
-We depend on the [Nano S Secure SDK](https://github.com/LedgerHQ/nanos-secure-sdk/) and the 
-[Nano X Secure SDK](https://github.com/LedgerHQ/nanox-secure-sdk), which 
+We depend on [Nano S Secure SDK](https://github.com/LedgerHQ/nanos-secure-sdk/), [Nano S Plus Secure SDK](https://github.com/LedgerHQ/nanos-secure-sdk/) and the [Nano X Secure SDK](https://github.com/LedgerHQ/nanosplus-secure-sdk), which 
 have been added as git submodules. Make sure to initialize submodules when checking out this repository:
 ```
 git submodule update --init
 ```
 
-## Building and deploying application to Ledger Nano S
-Ledger has documentation on [how to build an application](https://developers.ledger.com/docs/nano-app/build/) and [load it onto a Nano S](https://developers.ledger.com/docs/nano-app/load/), using a docker image. 
-If you try to setup your local environment to build, note that it is important to use the correct version of `clang` for the build to work (currently 9.0.0).
-If your version is incompatible, then it is quite likely that you will see an error stating that
-`ld.lld doesn't exist`.
+## Building and deploying
 
-The Makefile is responsible for loading the application onto the device. This is done with the load
-target, while the device is connected via USB.
+### The Docker way
+We provide a small Dockerfile that wraps [ledger-app-builder](https://github.com/LedgerHQ/ledger-app-builder) which can be used for building, loading and deleting an application for the Ledger Nano S and Ledger Nano S Plus devices. Our Dockerfile ensures that we can control the secure SDK dependencies, as they are hardcoded in Ledger's image, and provides the dependency required for zipping a release for sideloading.
 
-```
-cd ledger-app/
-make load
-```
-
-To delete the application from the device the same Makefile is used, but by using the delete target.
-
-```
-cd ledger-app/
-make delete
-```
-
-Both scripts require you to respond to the installation UI on the device for the installation or deletion
-to complete.
-
-### Building using the provided Dockerfile
-
-First, build the docker image
-
+To build the Docker image run:
 ```bash
 docker build -t concordium/ledger-app-builder .
 ```
-Then, run the docker container
-
+You can now run the Docker container with
 ```bash
-docker run --rm -ti -v "$(realpath .):/app" --privileged concordium/ledger-app-builder
+docker run --rm -ti -v "/dev/bus/usb:/dev/bus/usb" -v "$(realpath .):/app" --privileged concordium/ledger-app-builder:latest
+```
+You now have access to the commands provided by the Makefile:
+```
+// Load the application onto the connected device
+root@410e7ab19bea:/app# make load
+
+// Delete the application from the connected device
+root@410e7ab19bea:/app# make delete
+
+// Switch BOLOS_SDK to build for Nano S Plus
+// Note that 'make clean' is a requirement when switching BOLOS_SDK.
+root@f382ee774923:/app# export BOLOS_SDK=nanosplus-secure-sdk
+root@f382ee774923:/app# make clean
+root@f382ee774923:/app# make load
 ```
 
-This launches bash inside ubuntu. The app can now be built using the commands from the Makefile. 
-It still seems like it's only possible to load the application onto the ledger with `make load` on an Ubuntu machine, due to docker not having access to usb.
+### Without Docker
+It is possible to setup a local Ubuntu environment to build and deploy Ledger applications without the user of Docker. The best place to check the required tools for building is in the [ledger-app-builder Dockerfile](https://github.com/LedgerHQ/ledger-app-builder/blob/master/Dockerfile). We do not provide a full guide to install these as the Docker image can be used as an alternative. Note that there is some maintenance required as the dependencies used may change over time, so on updates to SDK's your setup may break.
 
-### Switching the SDK
-
-Please note that it is necessary to run
+When your dependencies are setup you can load the application with
+```bash
+make load
 ```
+and delete the application from the device with
+```bash
+make delete
+```
+Switching `BOLOS_SDK` to build for a different device:
+```bash
+export BOLOS_SDK=nanosplus-secure-sdk
 make clean
+make load
 ```
-when switching the SDK used to build the application.
+
+### For the Speculos emulator
+
+As the Ledger Nano X does not support sideloading, the only way to test updates on a Nano X is 
+to use the [Speculos emulator](https://github.com/LedgerHQ/speculos). Please follow their documentation
+for how to setup the emulator. To build the `.elf` file required by the emulator run:
+```
+export BOLOS_SDK=nanox-secure-sdk (or nanos-secure-sdk/nanosplus-secure-sdk)
+make emulator
+```
+The file will be available at `bin/app.elf`.
 
 ## Developing for the Ledger
 
@@ -67,17 +75,6 @@ device, make sure to deploy a custom certificate to the device. See the "PIN Byp
 
 For documentation of the exposed functionality and how to integrate with the Concordium specific 
 applications, please take a look [here](doc/api.md).
-
-## Building for the Speculos emulator
-
-As the Ledger Nano X does not support sideloading, the only way to test updates on a Nano X is 
-to use the [Speculos emulator](https://github.com/LedgerHQ/speculos). Please follow their documentation
-for how to setup the emulator. To build the `.elf` file required by the emulator run:
-```
-export BOLOS_SDK=nanox-secure-sdk (or nanos-secure-sdk for a Nano S device)
-make emulator
-```
-The file will be available at `bin/app.elf`.
 
 ## Linting
 A make target is available for linting:
@@ -123,11 +120,11 @@ yarn test
 ```
 
 ## Building a release
-
-Note that it is only possible to build a release for the Nano S.
+Note that it is only possible to build a release for the Ledger Nano S and the Ledger Nano S plus. This is because only those devices allow for sideloading of an application.
 
 To make a new release of the Concordium Ledger application you must have set up the build
-environment like described in the [official guide](https://developers.ledger.com/docs/nano-app/build/).
+environment like described above (either the Docker setup or a local setup).
+
 Additionally you must set the following environment variables
 ```
 LEDGER_SIGNING_KEY=private_key_used_for_signing_releases
@@ -135,7 +132,12 @@ LEDGER_PUBLIC_KEY=public_key_matching_the_signing_key
 ```
 To build a new release make sure that `APPVERSION` has been bumped correctly, and then run
 ```
+make clean
 export BOLOS_SDK=nanos-secure-sdk
 make release
+
+make clean
+export BOLOS_SDK=nanosplus-secure-sdk
+make release
 ```
-The release will be packaged into a `.zip` archive with the required binary and the corresponding install scripts.
+The release will be packaged into two `.zip` archives, each with the required binary and the corresponding install scripts.
