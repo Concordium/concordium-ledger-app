@@ -1,5 +1,6 @@
 import Transport from '@ledgerhq/hw-transport';
 import Zemu from '@zondax/zemu';
+import { Model } from './helpers';
 import { setupZemu } from './options';
 
 async function updateBakerStake(sim: Zemu, transport: Transport, handleUi: () => Promise<void>) {
@@ -18,8 +19,16 @@ test('[NANO S] Update baker stake', setupZemu('nanos', async (sim, transport) =>
     });
 }));
 
-test('[NANO X] Update baker stake', setupZemu('nanox', async (sim, transport) => {
+async function updateBakerStakeXAndSP(sim: Zemu, transport: Transport, device: Model) {
     await updateBakerStake(sim, transport, async () => {
-        await sim.navigateAndCompareSnapshots('.', 'nanox_baker_update_stake', [4, 0]);
+        await sim.navigateAndCompareSnapshots('.', device + '_baker_update_stake', [4, 0]);
     });
+}
+
+test('[NANO SP] Update baker stake', setupZemu('nanosp', async (sim, transport) => {
+    await updateBakerStakeXAndSP(sim, transport, 'nanosp');
+}));
+
+test('[NANO X] Update baker stake', setupZemu('nanox', async (sim, transport) => {
+    await updateBakerStakeXAndSP(sim, transport, 'nanox');
 }));

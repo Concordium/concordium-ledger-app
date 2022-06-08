@@ -1,6 +1,6 @@
 mkdir -p bin/nanos
 mkdir -p bin/nanox
-mdkir -p bin/nanosplus
+mkdir -p bin/nanosplus
 
 cd ..
 

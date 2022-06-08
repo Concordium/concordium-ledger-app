@@ -1,6 +1,6 @@
 import Transport from '@ledgerhq/hw-transport';
 import Zemu from '@zondax/zemu';
-import chunkBuffer from './helpers';
+import chunkBuffer, { Model } from './helpers';
 import { setupZemu } from './options';
 
 async function transferToPublic(sim: Zemu, transport: Transport, handleUi: () => Promise<void>) {
@@ -33,8 +33,17 @@ test('[NANO S] Transfer to public', setupZemu('nanos', async (sim, transport) =>
     });
 }));
 
-test('[NANO X] Transfer to public', setupZemu('nanox', async (sim, transport) => {
+async function transferToPublicXAndSP(sim: Zemu, transport: Transport, device: Model) {
     await transferToPublic(sim, transport, async () => {
-        await sim.navigateAndCompareSnapshots('.', 'nanox_transfer_to_public', [4, 0]);
+        await sim.navigateAndCompareSnapshots('.', device + '_transfer_to_public', [4, 0]);
     });
+}
+
+test('[NANO SP] Transfer to public', setupZemu('nanosp', async (sim, transport) => {
+    await transferToPublicXAndSP(sim, transport, 'nanosp');
+}));
+
+
+test('[NANO X] Transfer to public', setupZemu('nanox', async (sim, transport) => {
+    await transferToPublicXAndSP(sim, transport, 'nanox');
 }));

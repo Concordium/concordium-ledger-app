@@ -71,7 +71,7 @@ test('[NANO S] Add identity provider', setupZemu('nanos', async (sim, transport)
     );
 }));
 
-test('[NANO X] Add identity provider', setupZemu('nanox', async (sim, transport) => {
+async function addIdentityProviderXAndSP(sim: Zemu, transport: Transport) {
     const snapshot4 = await addIdentityProviderShared(sim, transport);
 
     // Verify key
@@ -92,4 +92,12 @@ test('[NANO X] Add identity provider', setupZemu('nanox', async (sim, transport)
     await expect(tx).resolves.toEqual(
         Buffer.from('8acfbd91b0726ccfd1830ae8df58a3e6bff8c9c079f6bf3c773ebb84b37a6df3c5fe3e1f0189d3f7aa60ffaa3bbac076962fb5204eabde3c9ca44a7c8354010c9000', 'hex'),
     );
+}
+
+test('[NANO SP] Add identity provider', setupZemu('nanosp', async (sim, transport) => {
+    await addIdentityProviderXAndSP(sim, transport);
+}));
+
+test('[NANO X] Add identity provider', setupZemu('nanox', async (sim, transport) => {
+    await addIdentityProviderXAndSP(sim, transport);
 }));

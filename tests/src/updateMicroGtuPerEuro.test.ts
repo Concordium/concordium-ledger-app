@@ -1,5 +1,6 @@
 import Transport from '@ledgerhq/hw-transport';
 import Zemu from '@zondax/zemu';
+import { Model } from './helpers';
 import { setupZemu } from './options';
 
 async function updateMicroGtuPerEuro(sim: Zemu, transport: Transport, handleUi: () => Promise<void>) {
@@ -18,8 +19,16 @@ test('[NANO S] Update micro GTU per euro', setupZemu('nanos', async (sim, transp
     });
 }));
 
-test('[NANO X] Update micro GTU per euro', setupZemu('nanox', async (sim, transport) => {
+async function updateMicroGtuPerEuroXAndSP(sim: Zemu, transport: Transport, device: Model) {
     await updateMicroGtuPerEuro(sim, transport, async () => {
-        await sim.navigateAndCompareSnapshots('.', 'nanox_update_micro_ccd_per_euro', [2, 0]);
+        await sim.navigateAndCompareSnapshots('.', device + '_update_micro_ccd_per_euro', [2, 0]);
     });
+}
+
+test('[NANO SP] Update micro GTU per euro', setupZemu('nanosp', async (sim, transport) => {
+    await updateMicroGtuPerEuroXAndSP(sim, transport, 'nanosp');
+}));
+
+test('[NANO X] Update micro GTU per euro', setupZemu('nanox', async (sim, transport) => {
+    await updateMicroGtuPerEuroXAndSP(sim, transport, 'nanox');
 }));

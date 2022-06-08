@@ -1,5 +1,6 @@
 import Transport from '@ledgerhq/hw-transport';
 import Zemu from '@zondax/zemu';
+import { Model } from './helpers';
 import { setupZemu } from './options';
 
 async function transferToEncrypted(sim: Zemu, transport: Transport, handleUi: () => Promise<void>) {
@@ -19,8 +20,16 @@ test('[NANO S] Transfer to encrypted', setupZemu('nanos', async (sim, transport)
     });
 }));
 
-test('[NANO X] Transfer to encrypted', setupZemu('nanox', async (sim, transport) => {
+async function transferToEncryptedXAndSP(sim: Zemu, transport: Transport, device: Model) {
     await transferToEncrypted(sim, transport, async () => {
-        await sim.navigateAndCompareSnapshots('.', 'nanox_transfer_to_encrypted', [4, 0]);
+        await sim.navigateAndCompareSnapshots('.', device + '_transfer_to_encrypted', [4, 0]);
     });
+}
+
+test('[NANO SP] Transfer to encrypted', setupZemu('nanosp', async (sim, transport) => {
+    await transferToEncryptedXAndSP(sim, transport, 'nanosp');
+}));
+
+test('[NANO X] Transfer to encrypted', setupZemu('nanox', async (sim, transport) => {
+    await transferToEncryptedXAndSP(sim, transport, 'nanox');
 }));

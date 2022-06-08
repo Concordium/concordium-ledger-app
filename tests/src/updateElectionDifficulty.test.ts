@@ -18,6 +18,10 @@ test('[NANO S] Update election difficulty', setupZemu('nanos', async (sim, trans
     await updateElectionDifficulty(sim, transport);
 }));
 
+test('[NANO SP] Update election difficulty', setupZemu('nanosp', async (sim, transport) => {
+    await updateElectionDifficulty(sim, transport);
+}));
+
 test('[NANO X] Update election difficulty', setupZemu('nanox', async (sim, transport) => {
     await updateElectionDifficulty(sim, transport);
 }));

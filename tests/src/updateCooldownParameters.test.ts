@@ -17,6 +17,10 @@ test('[NANO S] Cooldown parameters', setupZemu('nanos', async (sim, transport) =
     await cooldownParameters(sim, transport, 'nanos_cooldown_parameters');
 }));
 
+test('[NANO SP] Cooldown parameters', setupZemu('nanosp', async (sim, transport) => {
+    await cooldownParameters(sim, transport, 'nanosp_cooldown_parameters');
+}));
+
 test('[NANO X] Cooldown parameters', setupZemu('nanox', async (sim, transport) => {
     await cooldownParameters(sim, transport, 'nanox_cooldown_parameters');
 }));

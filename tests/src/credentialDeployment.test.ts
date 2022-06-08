@@ -164,7 +164,7 @@ test('[NANO S] Update credentials', setupZemu('nanos', async (sim, transport) =>
     );
 }));
 
-test('[NANO X] Update credentials', setupZemu('nanox', async (sim, transport) => {
+async function updateCredentialsXAndSP(sim: Zemu, transport: Transport) {
     await updateCredentials(
         sim,
         transport,
@@ -184,6 +184,14 @@ test('[NANO X] Update credentials', setupZemu('nanox', async (sim, transport) =>
             return sim.clickBoth(undefined, false);
         },
     );
+}
+
+test('[NANO SP] Update credentials', setupZemu('nanosp', async (sim, transport) => {
+    await updateCredentialsXAndSP(sim, transport);
+}));
+
+test('[NANO X] Update credentials', setupZemu('nanox', async (sim, transport) => {
+    await updateCredentialsXAndSP(sim, transport);
 }));
 
 test('[NANO S] Credential deployment for new account', setupZemu('nanos', async (sim, transport) => {
@@ -228,7 +236,7 @@ test('[NANO S] Credential deployment for an existing account', setupZemu('nanos'
     );
 }));
 
-test('[NANO X] Credential deployment for new account', setupZemu('nanox', async (sim, transport) => {
+async function credentialDeploymentNewAccountXAndSP(sim: Zemu, transport: Transport) {
     await credentialDeployment(
         sim,
         transport,
@@ -242,9 +250,17 @@ test('[NANO X] Credential deployment for new account', setupZemu('nanox', async 
             // Not used for new account
         },
     );
+}
+
+test('[NANO SP] Credential deployment for new account', setupZemu('nanosp', async (sim, transport) => {
+    await credentialDeploymentNewAccountXAndSP(sim, transport);
 }));
 
-test('[NANO X] Credential deployment for an existing account', setupZemu('nanox', async (sim, transport) => {
+test('[NANO X] Credential deployment for new account', setupZemu('nanox', async (sim, transport) => {
+    await credentialDeploymentNewAccountXAndSP(sim, transport);
+}));
+
+async function credentialDeploymentExistingAccountXAndSP(sim: Zemu, transport: Transport) {
     await credentialDeployment(
         sim,
         transport,
@@ -260,4 +276,12 @@ test('[NANO X] Credential deployment for an existing account', setupZemu('nanox'
             await sim.clickBoth(undefined, false);
         },
     );
+}
+
+test('[NANO SP] Credential deployment for an existing account', setupZemu('nanosp', async (sim, transport) => {
+    await credentialDeploymentExistingAccountXAndSP(sim, transport);
+}));
+
+test('[NANO X] Credential deployment for an existing account', setupZemu('nanox', async (sim, transport) => {
+    await credentialDeploymentExistingAccountXAndSP(sim, transport);
 }));

@@ -20,6 +20,7 @@ const registerDataTest = (picture: string, steps: number) => (async (sim: Zemu, 
 });
 
 test('[NANO S] Sign a register data transaction', setupZemu('nanos', registerDataTest('nanos_register_data', 6)));
+test('[NANO SP] Sign a register data transaction', setupZemu('nanosp', registerDataTest('nanosp_register_data', 3)));
 test('[NANO X] Sign a register data transaction', setupZemu('nanox', registerDataTest('nanox_register_data', 3)));
 
 const registerDataTestTooLargeDataLength = (async (sim: Zemu, transport: Transport) => {
@@ -42,6 +43,8 @@ const registerDataTestTooMuchData = (steps: number) => (async (sim: Zemu, transp
 });
 
 test('[NANO S] Attempt to sign a register data transaction with dataLength larger than is allowed', setupZemu('nanos', registerDataTestTooLargeDataLength));
+test('[NANO SP] Attempt to sign a register data transaction with dataLength larger than is allowed', setupZemu('nanosp', registerDataTestTooLargeDataLength));
 test('[NANO X] Attempt to sign a register data transaction with dataLength larger than is allowed', setupZemu('nanox', registerDataTestTooLargeDataLength));
 test('[NANO S] Attempt to sign a register data transaction with more data than dataLength specifies', setupZemu('nanos', registerDataTestTooMuchData(6)));
+test('[NANO SP] Attempt to sign a register data transaction with more data than dataLength specifies', setupZemu('nanosp', registerDataTestTooMuchData(3)));
 test('[NANO X] Attempt to sign a register data transaction with more data than dataLength specifies', setupZemu('nanox', registerDataTestTooMuchData(3)));

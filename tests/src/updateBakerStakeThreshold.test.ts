@@ -18,6 +18,10 @@ test('[NANO S] Update baker stake threshold', setupZemu('nanos', async (sim, tra
     await updateBakerStakeThreshold(sim, transport);
 }));
 
+test('[NANO SP] Update baker stake threshold', setupZemu('nanosp', async (sim, transport) => {
+    await updateBakerStakeThreshold(sim, transport);
+}));
+
 test('[NANO X] Update baker stake threshold', setupZemu('nanox', async (sim, transport) => {
     await updateBakerStakeThreshold(sim, transport);
 }));

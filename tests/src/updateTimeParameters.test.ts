@@ -17,6 +17,10 @@ test('[NANO S] Time parameters', setupZemu('nanos', async (sim, transport) => {
     await timeParameters(sim, transport, 'nanos_time_parameters');
 }));
 
+test('[NANO SP] Time parameters', setupZemu('nanosp', async (sim, transport) => {
+    await timeParameters(sim, transport, 'nanosp_time_parameters');
+}));
+
 test('[NANO X] Time parameters', setupZemu('nanox', async (sim, transport) => {
     await timeParameters(sim, transport, 'nanox_time_parameters');
 }));

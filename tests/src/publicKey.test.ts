@@ -15,6 +15,8 @@ async function getPublicKey(sim: Zemu, transport: Transport) {
 
 test('[NANO S] Extract an account public key', setupZemu('nanos', getPublicKey));
 
+test('[NANO SP] Extract an account public key', setupZemu('nanosp', getPublicKey));
+
 test('[NANO X] Extract an account public key', setupZemu('nanox', getPublicKey));
 
 async function keyWithNoPrompt(_sim: Zemu, transport: Transport) {
@@ -26,6 +28,8 @@ async function keyWithNoPrompt(_sim: Zemu, transport: Transport) {
 }
 
 test('[NANO S] Extract a public key with no prompt', setupZemu('nanos', keyWithNoPrompt));
+
+test('[NANO SP] Extract a public key with no prompt', setupZemu('nanosp', keyWithNoPrompt));
 
 test('[NANO X] Extract a public key with no prompt', setupZemu('nanox', keyWithNoPrompt));
 
@@ -42,6 +46,8 @@ async function signedKey(sim: Zemu, transport: Transport) {
 
 test('[NANO S] Extract a signed key', setupZemu('nanos', signedKey));
 
+test('[NANO SP] Extract a signed key', setupZemu('nanosp', signedKey));
+
 test('[NANO X] Extract a signed key', setupZemu('nanox', signedKey));
 
 async function rootGovernance(sim: Zemu, transport: Transport) {
@@ -56,6 +62,8 @@ async function rootGovernance(sim: Zemu, transport: Transport) {
 }
 
 test('[NANO S] Extract a root governance public key', setupZemu('nanos', rootGovernance));
+
+test('[NANO SP] Extract a root governance public key', setupZemu('nanosp', rootGovernance));
 
 test('[NANO X] Extract a root governance public key', setupZemu('nanox', rootGovernance));
 
@@ -72,6 +80,8 @@ async function level1Governance(sim: Zemu, transport: Transport) {
 
 test('[NANO S] Extract a level 1 governance public key', setupZemu('nanos', level1Governance));
 
+test('[NANO SP] Extract a level 1 governance public key', setupZemu('nanosp', level1Governance));
+
 test('[NANO X] Extract a level 1 governance public key', setupZemu('nanox', level1Governance));
 
 async function level2Governance(sim: Zemu, transport: Transport) {
@@ -86,5 +96,7 @@ async function level2Governance(sim: Zemu, transport: Transport) {
 }
 
 test('[NANO S] Extract a level 2 governance public key', setupZemu('nanos', level2Governance));
+
+test('[NANO SP] Extract a level 2 governance public key', setupZemu('nanosp', level2Governance));
 
 test('[NANO X] Extract a level 2 governance public key', setupZemu('nanox', level2Governance));

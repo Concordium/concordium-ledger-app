@@ -21,6 +21,10 @@ test('[NANO S] Update GAS rewards', setupZemu('nanos', async (sim, transport) =>
     await updateGasRewards(sim, transport);
 }));
 
+test('[NANO SP] Update GAS rewards', setupZemu('nanosp', async (sim, transport) => {
+    await updateGasRewards(sim, transport);
+}));
+
 test('[NANO X] Update GAS rewards', setupZemu('nanox', async (sim, transport) => {
     await updateGasRewards(sim, transport);
 }));

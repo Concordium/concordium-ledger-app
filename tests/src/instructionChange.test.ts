@@ -18,6 +18,10 @@ test('[NANO S] Changing instruction fails', setupZemu('nanos', async (sim, trans
     await changeInstructionTest(transport);
 }));
 
+test('[NANO SP] Changing instruction fails', setupZemu('nanosp', async (sim, transport) => {
+    await changeInstructionTest(transport);
+}));
+
 test('[NANO X] Changing instruction fails', setupZemu('nanox', async (sim, transport) => {
     await changeInstructionTest(transport);
 }));

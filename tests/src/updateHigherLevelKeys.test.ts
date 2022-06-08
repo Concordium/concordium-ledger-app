@@ -56,7 +56,7 @@ test('[NANO S] Update root keys', setupZemu('nanos', async (sim, transport) => {
     );
 }));
 
-test('[NANO X] Update root keys', setupZemu('nanox', async (sim, transport) => {
+async function updateRootKeysXAndSP(sim: Zemu, transport: Transport) {
     await updateHigherLevelKeys(
         sim,
         transport,
@@ -70,6 +70,14 @@ test('[NANO X] Update root keys', setupZemu('nanox', async (sim, transport) => {
             return sim.clickBoth(undefined, false);
         },
     );
+}
+
+test('[NANO SP] Update root keys', setupZemu('nanosp', async (sim, transport) => {
+    await updateRootKeysXAndSP(sim, transport);
+}));
+
+test('[NANO X] Update root keys', setupZemu('nanox', async (sim, transport) => {
+    await updateRootKeysXAndSP(sim, transport);
 }));
 
 test('[NANO S] Update level 1 with root keys', setupZemu('nanos', async (sim, transport) => {
@@ -90,7 +98,7 @@ test('[NANO S] Update level 1 with root keys', setupZemu('nanos', async (sim, tr
     );
 }));
 
-test('[NANO X] Update level 1 keys with root keys', setupZemu('nanox', async (sim, transport) => {
+async function updateLevel1KeysWithRootKeysXAndSP(sim: Zemu, transport: Transport) {
     await updateHigherLevelKeys(
         sim,
         transport,
@@ -104,6 +112,14 @@ test('[NANO X] Update level 1 keys with root keys', setupZemu('nanox', async (si
             return sim.clickBoth(undefined, false);
         },
     );
+}
+
+test('[NANO SP] Update level 1 keys with root keys', setupZemu('nanosp', async (sim, transport) => {
+    await updateLevel1KeysWithRootKeysXAndSP(sim, transport);
+}));
+
+test('[NANO X] Update level 1 keys with root keys', setupZemu('nanox', async (sim, transport) => {
+    await updateLevel1KeysWithRootKeysXAndSP(sim, transport);
 }));
 
 test('[NANO S] Update level 1 with level 1 keys', setupZemu('nanos', async (sim, transport) => {
@@ -124,7 +140,7 @@ test('[NANO S] Update level 1 with level 1 keys', setupZemu('nanos', async (sim,
     );
 }));
 
-test('[NANO X] Update level 1 keys with level 1 keys', setupZemu('nanox', async (sim, transport) => {
+async function updateLevel1KeysWithLevel1KeysXAndSP(sim: Zemu, transport: Transport) {
     await updateHigherLevelKeys(
         sim,
         transport,
@@ -138,4 +154,13 @@ test('[NANO X] Update level 1 keys with level 1 keys', setupZemu('nanox', async 
             return sim.clickBoth(undefined, false);
         },
     );
+}
+
+test('[NANO SP] Update level 1 keys with level 1 keys', setupZemu('nanosp', async (sim, transport) => {
+    await updateLevel1KeysWithLevel1KeysXAndSP(sim, transport);
+}));
+
+
+test('[NANO X] Update level 1 keys with level 1 keys', setupZemu('nanox', async (sim, transport) => {
+    await updateLevel1KeysWithLevel1KeysXAndSP(sim, transport);
 }));
