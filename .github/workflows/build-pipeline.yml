@@ -14,7 +14,7 @@ jobs:
         name: Compile for Nano S
         runs-on: ubuntu-latest
 
-        container: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
+        container: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:sha-229b03c
 
         steps:
             - uses: actions/checkout@v2
@@ -33,11 +33,34 @@ jobs:
                 name: nanos
                 path: ./concordium_nanos.elf
 
+    compile-nano-s-plus:
+        name: Compile for Nano S Plus
+        runs-on: ubuntu-latest
+
+        container: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:sha-229b03c
+
+        steps:
+            - uses: actions/checkout@v2
+              with:
+                  submodules: 'recursive'
+
+            - name: Build
+              run: |
+                  make clean
+                  make BOLOS_SDK=nanosplus-secure-sdk
+                  mv bin/app.elf concordium_nanosplus.elf
+
+            - name: Upload binary
+              uses: actions/upload-artifact@v2
+              with:
+                name: nanos-plus
+                path: ./concordium_nanosplus.elf
+
     compile-nano-x:
         name: Compile for Nano X
         runs-on: ubuntu-latest
 
-        container: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
+        container: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:sha-229b03c
 
         steps:
             - uses: actions/checkout@v2
@@ -60,7 +83,7 @@ jobs:
         name: Run Clang Static Analyzer
         runs-on: ubuntu-latest
 
-        container: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
+        container: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:sha-229b03c
 
         steps:
             - uses: actions/checkout@v2
@@ -90,7 +113,7 @@ jobs:
 
     e2e-tests:
         name: End to end tests
-        needs: [compile-nano-s, compile-nano-x]
+        needs: [compile-nano-s, compile-nano-s-plus, compile-nano-x]
         runs-on: ubuntu-latest
 
         steps:
