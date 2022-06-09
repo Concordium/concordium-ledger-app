@@ -53,7 +53,7 @@ jobs:
             - name: Upload binary
               uses: actions/upload-artifact@v2
               with:
-                name: nanos-plus
+                name: nanosplus
                 path: ./concordium_nanosplus.elf
 
     compile-nano-x:
