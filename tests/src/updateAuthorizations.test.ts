@@ -1,7 +1,6 @@
 import Transport from '@ledgerhq/hw-transport';
 import Zemu from '@zondax/zemu';
-import { Model } from './helpers';
-import { setupZemu } from './options';
+import { LedgerModel, setupZemu } from './options';
 
 async function updateAuthorizations(
     sim: Zemu, transport: Transport,
@@ -10,7 +9,7 @@ async function updateAuthorizations(
     prefix: string,
     expectedSignature: string,
     handleKeyUi: () => Promise<any>,
-    device: 'nanos' | 'nanox' | 'nanosp'
+    device: 'nanos' | 'nanox' | 'nanosp',
 ) {
     const p2 = 0x01;
     const data = Buffer.concat([
@@ -48,7 +47,7 @@ async function updateAuthorizations(
         const accessStructureData = Buffer.concat([keyIndex1, keyIndex2, keyIndex3]);
         transport.send(0xe0, ins, 0x03, p2, accessStructureData);
         await sim.waitUntilScreenIsNot(snapshot);
-        await sim.navigateAndCompareSnapshots('.', device + '_update_authorizations/' + i, [0]);
+        await sim.navigateAndCompareSnapshots('.', `${device}_update_authorizations/${i}`, [0]);
         await sim.clickBoth(undefined, false);
         await sim.clickBoth(undefined, false);
         await sim.clickBoth(undefined, false);
@@ -82,11 +81,11 @@ test('[NANO S] Update level 2 keys with root keys', setupZemu('nanos', async (si
             await sim.clickRight(undefined, false);
             return sim.clickBoth(undefined, false);
         },
-        'nanos'
+        'nanos',
     );
 }));
 
-async function updateLevel2KeysWithRootKeysXAndSP(sim: Zemu, transport: Transport, device: Model) {
+async function updateLevel2KeysWithRootKeysXAndSP(sim: Zemu, transport: Transport, device: LedgerModel) {
     await updateAuthorizations(
         sim,
         transport,
@@ -98,17 +97,13 @@ async function updateLevel2KeysWithRootKeysXAndSP(sim: Zemu, transport: Transpor
             await sim.clickRight();
             return sim.clickBoth(undefined, false);
         },
-        device
+        device,
     );
 }
 
-test('[NANO SP] Update level 2 keys with root keys', setupZemu('nanosp', async (sim, transport) => {
-    await updateLevel2KeysWithRootKeysXAndSP(sim, transport, 'nanosp');
-}));
+test('[NANO SP] Update level 2 keys with root keys', setupZemu('nanosp', updateLevel2KeysWithRootKeysXAndSP));
 
-test('[NANO X] Update level 2 keys with root keys', setupZemu('nanox', async (sim, transport) => {
-    await updateLevel2KeysWithRootKeysXAndSP(sim, transport, 'nanox');
-}));
+test('[NANO X] Update level 2 keys with root keys', setupZemu('nanox', updateLevel2KeysWithRootKeysXAndSP));
 
 test('[NANO S] Update level 2 keys with level 1 keys', setupZemu('nanos', async (sim, transport) => {
     await updateAuthorizations(
@@ -125,11 +120,11 @@ test('[NANO S] Update level 2 keys with level 1 keys', setupZemu('nanos', async 
             await sim.clickRight(undefined, false);
             return sim.clickBoth(undefined, false);
         },
-        'nanos'
+        'nanos',
     );
 }));
 
-async function updateLevel2KeysWithLevel1KeysXAndSP(sim: Zemu, transport: Transport, device: Model) {
+async function updateLevel2KeysWithLevel1KeysXAndSP(sim: Zemu, transport: Transport, device: LedgerModel) {
     await updateAuthorizations(
         sim,
         transport,
@@ -141,14 +136,10 @@ async function updateLevel2KeysWithLevel1KeysXAndSP(sim: Zemu, transport: Transp
             await sim.clickRight();
             return sim.clickBoth(undefined, false);
         },
-        device
+        device,
     );
 }
 
-test('[NANO SP] Update level 2 keys with level 1 keys', setupZemu('nanosp', async (sim, transport) => {
-    await updateLevel2KeysWithLevel1KeysXAndSP(sim, transport, 'nanosp');
-}));
+test('[NANO SP] Update level 2 keys with level 1 keys', setupZemu('nanosp', updateLevel2KeysWithLevel1KeysXAndSP));
 
-test('[NANO X] Update level 2 keys with level 1 keys', setupZemu('nanox', async (sim, transport) => {
-    await updateLevel2KeysWithLevel1KeysXAndSP(sim, transport, 'nanox');
-}));
+test('[NANO X] Update level 2 keys with level 1 keys', setupZemu('nanox', updateLevel2KeysWithLevel1KeysXAndSP));

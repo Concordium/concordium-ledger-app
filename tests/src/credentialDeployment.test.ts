@@ -186,13 +186,9 @@ async function updateCredentialsXAndSP(sim: Zemu, transport: Transport) {
     );
 }
 
-test('[NANO SP] Update credentials', setupZemu('nanosp', async (sim, transport) => {
-    await updateCredentialsXAndSP(sim, transport);
-}));
+test('[NANO SP] Update credentials', setupZemu('nanosp', updateCredentialsXAndSP));
 
-test('[NANO X] Update credentials', setupZemu('nanox', async (sim, transport) => {
-    await updateCredentialsXAndSP(sim, transport);
-}));
+test('[NANO X] Update credentials', setupZemu('nanox', updateCredentialsXAndSP));
 
 test('[NANO S] Credential deployment for new account', setupZemu('nanos', async (sim, transport) => {
     await credentialDeployment(
@@ -252,13 +248,9 @@ async function credentialDeploymentNewAccountXAndSP(sim: Zemu, transport: Transp
     );
 }
 
-test('[NANO SP] Credential deployment for new account', setupZemu('nanosp', async (sim, transport) => {
-    await credentialDeploymentNewAccountXAndSP(sim, transport);
-}));
+test('[NANO SP] Credential deployment for new account', setupZemu('nanosp', credentialDeploymentNewAccountXAndSP));
 
-test('[NANO X] Credential deployment for new account', setupZemu('nanox', async (sim, transport) => {
-    await credentialDeploymentNewAccountXAndSP(sim, transport);
-}));
+test('[NANO X] Credential deployment for new account', setupZemu('nanox', credentialDeploymentNewAccountXAndSP));
 
 async function credentialDeploymentExistingAccountXAndSP(sim: Zemu, transport: Transport) {
     await credentialDeployment(
@@ -278,10 +270,6 @@ async function credentialDeploymentExistingAccountXAndSP(sim: Zemu, transport: T
     );
 }
 
-test('[NANO SP] Credential deployment for an existing account', setupZemu('nanosp', async (sim, transport) => {
-    await credentialDeploymentExistingAccountXAndSP(sim, transport);
-}));
+test('[NANO SP] Credential deployment for an existing account', setupZemu('nanosp', credentialDeploymentExistingAccountXAndSP));
 
-test('[NANO X] Credential deployment for an existing account', setupZemu('nanox', async (sim, transport) => {
-    await credentialDeploymentExistingAccountXAndSP(sim, transport);
-}));
+test('[NANO X] Credential deployment for an existing account', setupZemu('nanox', credentialDeploymentExistingAccountXAndSP));

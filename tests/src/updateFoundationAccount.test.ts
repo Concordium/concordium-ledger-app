@@ -1,7 +1,6 @@
 import Transport from '@ledgerhq/hw-transport';
 import Zemu from '@zondax/zemu';
-import { Model } from './helpers';
-import { setupZemu } from './options';
+import { LedgerModel, setupZemu } from './options';
 
 async function updateFoundationAccount(
     sim: Zemu, transport: Transport, handleUi: () => Promise<void>,
@@ -22,17 +21,13 @@ test('[NANO S] Update foundation account', setupZemu('nanos', async (sim, transp
     });
 }));
 
-async function updateFoundationAccountXAndSP(sim: Zemu, transport: Transport, device: Model) {
+async function updateFoundationAccountXAndSP(sim: Zemu, transport: Transport, device: LedgerModel) {
     await updateFoundationAccount(sim, transport, async () => {
-        await sim.navigateAndCompareSnapshots('.', device + '_update_foundation_account', [3]);
+        await sim.navigateAndCompareSnapshots('.', `${device}_update_foundation_account`, [3]);
         await sim.clickBoth(undefined, false);
     });
 }
 
-test('[NANO SP] Update foundation account', setupZemu('nanosp', async (sim, transport) => {
-    await updateFoundationAccountXAndSP(sim, transport, 'nanosp');
-}));
+test('[NANO SP] Update foundation account', setupZemu('nanosp', updateFoundationAccountXAndSP));
 
-test('[NANO X] Update foundation account', setupZemu('nanox', async (sim, transport) => {
-    await updateFoundationAccountXAndSP(sim, transport, 'nanox');
-}));
+test('[NANO X] Update foundation account', setupZemu('nanox', updateFoundationAccountXAndSP));

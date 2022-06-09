@@ -1,7 +1,6 @@
 import Transport from '@ledgerhq/hw-transport';
 import Zemu from '@zondax/zemu';
-import { Model } from './helpers';
-import { setupZemu } from './options';
+import { LedgerModel, setupZemu } from './options';
 
 async function removeBakerShared(transport: Transport) {
     const data = Buffer.from('08000004510000000000000000000000000000000000000002000000000000000020a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7000000000000000a0000000000000064000000290000000063de5da705', 'hex');
@@ -19,10 +18,10 @@ test('[NANO S] Remove baker', setupZemu('nanos', async (sim, transport) => {
     );
 }));
 
-async function removeBakerXAndSP(sim: Zemu, transport: Transport, device: Model) {
+async function removeBakerXAndSP(sim: Zemu, transport: Transport, device: LedgerModel) {
     const tx = removeBakerShared(transport);
     await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
-    await sim.navigateAndCompareSnapshots('.', device + '_remove_baker', [4]);
+    await sim.navigateAndCompareSnapshots('.', `${device}_remove_baker`, [4]);
     await sim.clickBoth(undefined, false);
 
     await expect(tx).resolves.toEqual(
@@ -30,10 +29,6 @@ async function removeBakerXAndSP(sim: Zemu, transport: Transport, device: Model)
     );
 }
 
-test('[NANO SP] Remove baker', setupZemu('nanosp', async (sim, transport) => {
-    await removeBakerXAndSP(sim, transport, 'nanosp');
-}));
+test('[NANO SP] Remove baker', setupZemu('nanosp', removeBakerXAndSP));
 
-test('[NANO X] Remove baker', setupZemu('nanox', async (sim, transport) => {
-    await removeBakerXAndSP(sim, transport, 'nanox');
-}));
+test('[NANO X] Remove baker', setupZemu('nanox', removeBakerXAndSP));

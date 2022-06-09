@@ -1,6 +1,5 @@
 import { resolve } from 'path';
-import { DEFAULT_START_OPTIONS, StartOptions } from '@zondax/zemu';
-import Zemu from '@zondax/zemu';
+import Zemu, { DEFAULT_START_OPTIONS, StartOptions } from '@zondax/zemu';
 import Transport from '@ledgerhq/hw-transport';
 
 const SEED_PHRASE = 'vendor sphere crew wise puppy wise stand wait tissue boy fortune myself hamster intact window garment negative dynamic permit genre limb work dial guess';
@@ -14,18 +13,18 @@ const sharedOptions: Omit<StartOptions, 'model'> = {
     startTimeout: DEFAULT_START_OPTIONS.startTimeout,
     custom: `-s "${SEED_PHRASE}" `,
     startText: 'is ready',
-}
+};
 
-export type Model = 'nanos' | 'nanosp' | 'nanox';
+export type LedgerModel = 'nanos' | 'nanosp' | 'nanox';
 
 export const optionsNanoS: StartOptions = {
     ...sharedOptions,
-    model: 'nanos'
+    model: 'nanos',
 };
 
 export const optionsNanoSPlus: StartOptions = {
     ...sharedOptions,
-    model: 'nanosp'
+    model: 'nanosp',
 };
 
 export const optionsNanoX: StartOptions = {
@@ -60,9 +59,3 @@ export function setupZemu(device: 'nanos' | 'nanosp' | 'nanox', func: (sim: Zemu
         }
     };
 }
-
-setupZemu('nanos', async (sim: Zemu, transport: Transport, device) => {
-    if (device === 'nanox') {
-
-    }
-});

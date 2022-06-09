@@ -94,10 +94,6 @@ async function addIdentityProviderXAndSP(sim: Zemu, transport: Transport) {
     );
 }
 
-test('[NANO SP] Add identity provider', setupZemu('nanosp', async (sim, transport) => {
-    await addIdentityProviderXAndSP(sim, transport);
-}));
+test('[NANO SP] Add identity provider', setupZemu('nanosp', addIdentityProviderXAndSP));
 
-test('[NANO X] Add identity provider', setupZemu('nanox', async (sim, transport) => {
-    await addIdentityProviderXAndSP(sim, transport);
-}));
+test('[NANO X] Add identity provider', setupZemu('nanox', addIdentityProviderXAndSP));

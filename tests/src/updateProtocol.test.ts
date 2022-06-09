@@ -88,10 +88,6 @@ async function updateProtocolXAndSP(sim: Zemu, transport: Transport) {
     });
 }
 
-test('[NANO SP] Update protocol', setupZemu('nanosp', async (sim, transport) => {
-    await updateProtocolXAndSP(sim, transport);
-}));
+test('[NANO SP] Update protocol', setupZemu('nanosp', updateProtocolXAndSP));
 
-test('[NANO X] Update protocol', setupZemu('nanox', async (sim, transport) => {
-    await updateProtocolXAndSP(sim, transport);
-}));
+test('[NANO X] Update protocol', setupZemu('nanox', updateProtocolXAndSP));

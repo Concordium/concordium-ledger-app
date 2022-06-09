@@ -88,10 +88,6 @@ async function addAnonomityRevokerXAndSP(sim: Zemu, transport: Transport) {
     );
 }
 
-test('[NANO SP] Add anonymity revoker', setupZemu('nanosp', async (sim, transport) => {
-    await addAnonomityRevokerXAndSP(sim, transport);
-}));
+test('[NANO SP] Add anonymity revoker', setupZemu('nanosp', addAnonomityRevokerXAndSP));
 
-test('[NANO X] Add anonymity revoker', setupZemu('nanox', async (sim, transport) => {
-    await addAnonomityRevokerXAndSP(sim, transport);
-}));
+test('[NANO X] Add anonymity revoker', setupZemu('nanox', addAnonomityRevokerXAndSP));

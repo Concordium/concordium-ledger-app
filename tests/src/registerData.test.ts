@@ -34,7 +34,7 @@ const registerDataTestTooMuchData = (steps: number) => (async (sim: Zemu, transp
     let data = Buffer.from('08000004510000000000000000000000000000000000000002000000000000000020a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7000000000000000a0000000000000064000000290000000063de5da7150005', 'hex');
     transport.send(0xe0, 0x35, 0x00, 0x00, data);
     await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
-    for (let i = 0; i < steps; i++) {
+    for (let i = 0; i < steps; i += 1) {
         await sim.clickRight();
     }
     await sim.clickBoth(undefined, false);

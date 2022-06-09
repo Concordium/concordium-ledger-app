@@ -1,6 +1,6 @@
 import Transport from '@ledgerhq/hw-transport';
 import Zemu from '@zondax/zemu';
-import { Model, setupZemu } from './options';
+import { LedgerModel, setupZemu } from './options';
 
 async function addBakerShared(transport: Transport) {
     let data = Buffer.from('08000004510000000000000000000000000000000000000002000000000000000020a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7000000000000000a0000000000000064000000290000000063de5da704', 'hex');
@@ -24,10 +24,10 @@ test('[NANO S] Add baker', setupZemu('nanos', async (sim, transport) => {
     );
 }));
 
-async function addBakerXAndSP(sim: Zemu, transport: Transport, device: Model) {
+async function addBakerXAndSP(sim: Zemu, transport: Transport, device: LedgerModel) {
     const tx = addBakerShared(transport);
     await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
-    await sim.navigateAndCompareSnapshots('.', device + '_add_baker', [5]);
+    await sim.navigateAndCompareSnapshots('.', `${device}_add_baker`, [5]);
     await sim.clickBoth(undefined, false);
 
     await expect(tx).resolves.toEqual(
@@ -35,13 +35,9 @@ async function addBakerXAndSP(sim: Zemu, transport: Transport, device: Model) {
     );
 }
 
-test('[NANO SP] Add baker', setupZemu('nanosp', async (sim, transport, device) => {
-    await addBakerXAndSP(sim, transport, device);
-}));
+test('[NANO SP] Add baker', setupZemu('nanosp', addBakerXAndSP));
 
-test('[NANO X] Add baker', setupZemu('nanox', async (sim, transport, device) => {
-    await addBakerXAndSP(sim, transport, device);
-}));
+test('[NANO X] Add baker', setupZemu('nanox', addBakerXAndSP));
 
 async function updateBakerKeysShared(transport: Transport) {
     let data = Buffer.from('08000004510000000000000000000000000000000000000002000000000000000020a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7000000000000000a0000000000000064000000290000000063de5da708', 'hex');
@@ -65,10 +61,10 @@ test('[NANO S] Update baker keys', setupZemu('nanos', async (sim, transport) => 
     );
 }));
 
-async function updateBakerKeysXAndSP(sim: Zemu, transport: Transport, device: Model) {
+async function updateBakerKeysXAndSP(sim: Zemu, transport: Transport, device: LedgerModel) {
     const tx = updateBakerKeysShared(transport);
     await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
-    await sim.navigateAndCompareSnapshots('.', device + '_update_baker_keys', [4]);
+    await sim.navigateAndCompareSnapshots('.', `${device}_update_baker_keys`, [4]);
     await sim.clickBoth(undefined, false);
 
     await expect(tx).resolves.toEqual(
@@ -76,10 +72,6 @@ async function updateBakerKeysXAndSP(sim: Zemu, transport: Transport, device: Mo
     );
 }
 
-test('[NANO X] Update baker keys', setupZemu('nanox', async (sim, transport, device) => {
-    await updateBakerKeysXAndSP(sim, transport, device);
-}));
+test('[NANO X] Update baker keys', setupZemu('nanox', updateBakerKeysXAndSP));
 
-test('[NANO SP] Update baker keys', setupZemu('nanosp', async (sim, transport, device) => {
-    await updateBakerKeysXAndSP(sim, transport, device);
-}));
+test('[NANO SP] Update baker keys', setupZemu('nanosp', updateBakerKeysXAndSP));

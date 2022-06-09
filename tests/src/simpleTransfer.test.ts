@@ -63,13 +63,9 @@ async function signSimpleTransferWithMemoXAndSP(sim: Zemu, transport: Transport)
     );
 }
 
-test('[NANO SP] Sign a valid simple transfer with memo', setupZemu('nanosp', async (sim, transport) => {
-    await signSimpleTransferWithMemoXAndSP(sim, transport);
-}));
+test('[NANO SP] Sign a valid simple transfer with memo', setupZemu('nanosp', signSimpleTransferWithMemoXAndSP));
 
-test('[NANO X] Sign a valid simple transfer with memo', setupZemu('nanox', async (sim, transport) => {
-    await signSimpleTransferWithMemoXAndSP(sim, transport);
-}));
+test('[NANO X] Sign a valid simple transfer with memo', setupZemu('nanox', signSimpleTransferWithMemoXAndSP));
 
 test('[NANO S] Sign a valid simple transfer', setupZemu('nanos', async (sim, transport) => {
     const data = Buffer.from('08000004510000000000000000000000000000000000000002000000000000000020a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7000000000000000a0000000000000064000000290000000063de5da70320a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7ffffffffffffffff', 'hex');
@@ -112,13 +108,9 @@ async function signSimpleTransferXAndSP(sim: Zemu, transport: Transport) {
     );
 }
 
-test('[NANO SP] Sign a valid simple transfer', setupZemu('nanosp', async (sim, transport) => {
-    await signSimpleTransferXAndSP(sim, transport);
-}));
+test('[NANO SP] Sign a valid simple transfer', setupZemu('nanosp', signSimpleTransferXAndSP));
 
-test('[NANO X] Sign a valid simple transfer', setupZemu('nanox', async (sim, transport) => {
-    await signSimpleTransferXAndSP(sim, transport);
-}));
+test('[NANO X] Sign a valid simple transfer', setupZemu('nanox', signSimpleTransferXAndSP));
 
 test('[NANO S] Decline to sign a valid simple transfer', setupZemu('nanos', async (sim, transport) => {
     expect.assertions(1);
@@ -157,10 +149,6 @@ async function declineToSignValidSimpleTransferXAndSP(sim: Zemu, transport: Tran
     await sim.clickBoth();
 }
 
-test('[NANO SP] Decline to sign a valid simple transfer', setupZemu('nanosp', async (sim, transport) => {
-    await declineToSignValidSimpleTransferXAndSP(sim, transport);
-}));
+test('[NANO SP] Decline to sign a valid simple transfer', setupZemu('nanosp', declineToSignValidSimpleTransferXAndSP));
 
-test('[NANO X] Decline to sign a valid simple transfer', setupZemu('nanox', async (sim, transport) => {
-    await declineToSignValidSimpleTransferXAndSP(sim, transport);
-}));
+test('[NANO X] Decline to sign a valid simple transfer', setupZemu('nanox', declineToSignValidSimpleTransferXAndSP));
