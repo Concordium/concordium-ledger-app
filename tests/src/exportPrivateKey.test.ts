@@ -11,7 +11,7 @@ const exportPrivateKeyTest = (p1: number, p2: number, picture: string, seed: str
     const data = Buffer.from(path, 'hex');
     const tx = transport.send(0xe0, 0x05, p1, p2, data);
     await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
-    await sim.navigateAndCompareSnapshots('.', device + '_' + picture, [1, 0]);
+    await sim.navigateAndCompareSnapshots('.', `${device}_${picture}`, [1, 0]);
     await expect(tx).resolves.toEqual(
         Buffer.from(seed + end, 'hex'),
     );
@@ -54,7 +54,7 @@ const negativePrivateKeyExportTest = (p1: number, p2: number, picture: string) =
     const data = Buffer.from(path, 'hex');
     const tx = transport.send(0xe0, 0x05, p1, p2, data).catch((e) => expect(e.statusCode).toEqual(27013));
     await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
-    await sim.navigateAndCompareSnapshots('.', device + '_' + picture, [2, 0]);
+    await sim.navigateAndCompareSnapshots('.', `${device}_${picture}`, [2, 0]);
 });
 
 const declineDecrypt = 'decline_decrypt';

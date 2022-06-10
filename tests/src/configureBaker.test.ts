@@ -268,37 +268,29 @@ test('[NANO S] Configure-baker: big URL only', setupZemu('nanos', async (sim, tr
     })).resolves.toEqual(Buffer.from('1a79847b753b9f0e1d64feca4b43f5a3ae99f3a3e142822fad8858d0969eb8d3381885dc697a90fd37b9275f1ab4d85e3f0cd7122b574213ec532e222c15df0f9000', 'hex'));
 }));
 
-test('[NANO S] Configure-baker: Commission rates only', setupZemu('nanos', async (sim, transport) => {
-    const bitmap = '00E0';
-    await configureBakerStep0(bitmap, transport);
-    await configureBakerCommissionStep(true, true, true, true, 'nanos', 'commission_rates', 'a571324d2d1e11a346a58d8cf77912836fbda0c33bc651b7579375ed5f34825cb39bdf49ab8377741fc7c6e6f2cead5acd0b66adaf89e7171609f708a7f756049000', sim, transport);
-}));
-
-async function configureBakerCommissionRatesOnlyXAndSP(sim: Zemu, transport: Transport, device: LedgerModel) {
+async function configureBakerCommissionRatesOnly(sim: Zemu, transport: Transport, device: LedgerModel) {
     const bitmap = '00E0';
     await configureBakerStep0(bitmap, transport);
     await configureBakerCommissionStep(true, true, true, true, device, 'commission_rates', 'a571324d2d1e11a346a58d8cf77912836fbda0c33bc651b7579375ed5f34825cb39bdf49ab8377741fc7c6e6f2cead5acd0b66adaf89e7171609f708a7f756049000', sim, transport);
 }
 
-test('[NANO SP] Configure-baker: Commission rates only', setupZemu('nanosp', configureBakerCommissionRatesOnlyXAndSP));
+test('[NANO S] Configure-baker: Commission rates only', setupZemu('nanos', configureBakerCommissionRatesOnly));
 
-test('[NANO X] Configure-baker: Commission rates only', setupZemu('nanox', configureBakerCommissionRatesOnlyXAndSP));
+test('[NANO SP] Configure-baker: Commission rates only', setupZemu('nanosp', configureBakerCommissionRatesOnly));
 
-test('[NANO S] Configure-baker: Single commission rate', setupZemu('nanos', async (sim, transport) => {
-    const bitmap = '0040';
-    await configureBakerStep0(bitmap, transport);
-    await configureBakerCommissionStep(false, true, false, true, 'nanos', 'single_commission_rate', '9b5f30ce60f17c137de0ff1135ebd899b9ee00418928ee2f4f986c651508637c8bad35487518e6e2284a1b17b28358a38c33a9c015f78e33c66e79dcf471160b9000', sim, transport);
-}));
+test('[NANO X] Configure-baker: Commission rates only', setupZemu('nanox', configureBakerCommissionRatesOnly));
 
-async function configureBakerSingleCommissionRateXAndSP(sim: Zemu, transport: Transport, device: LedgerModel) {
+async function configureBakerSingleCommissionRate(sim: Zemu, transport: Transport, device: LedgerModel) {
     const bitmap = '0040';
     await configureBakerStep0(bitmap, transport);
     await configureBakerCommissionStep(false, true, false, true, device, 'single_commission_rate', '9b5f30ce60f17c137de0ff1135ebd899b9ee00418928ee2f4f986c651508637c8bad35487518e6e2284a1b17b28358a38c33a9c015f78e33c66e79dcf471160b9000', sim, transport);
 }
 
-test('[NANO SP] Configure-baker: Single commission rate', setupZemu('nanosp', configureBakerSingleCommissionRateXAndSP));
+test('[NANO S] Configure-baker: Single commission rate', setupZemu('nanos', configureBakerSingleCommissionRate));
 
-test('[NANO X] Configure-baker: Single commission rate', setupZemu('nanox', configureBakerSingleCommissionRateXAndSP));
+test('[NANO SP] Configure-baker: Single commission rate', setupZemu('nanosp', configureBakerSingleCommissionRate));
+
+test('[NANO X] Configure-baker: Single commission rate', setupZemu('nanox', configureBakerSingleCommissionRate));
 
 test('[NANO S] Configure-baker: All parameters', setupZemu('nanos', async (sim, transport) => {
     const bitmap = '00ff';
