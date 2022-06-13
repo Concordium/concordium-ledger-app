@@ -1,7 +1,7 @@
 import Transport from '@ledgerhq/hw-transport';
 import Zemu from '@zondax/zemu';
 import chunkBuffer from './helpers';
-import { setupZemu } from './options';
+import { LedgerModel, setupZemu } from './options';
 
 async function transferToPublic(sim: Zemu, transport: Transport, handleUi: () => Promise<void>) {
     let data = Buffer.from('08000004510000000000000000000000000000000000000002000000000000000020a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7000000000000000a0000000000000064000000290000000063de5da712', 'hex');
@@ -33,8 +33,12 @@ test('[NANO S] Transfer to public', setupZemu('nanos', async (sim, transport) =>
     });
 }));
 
-test('[NANO X] Transfer to public', setupZemu('nanox', async (sim, transport) => {
+async function transferToPublicXAndSP(sim: Zemu, transport: Transport, device: LedgerModel) {
     await transferToPublic(sim, transport, async () => {
-        await sim.navigateAndCompareSnapshots('.', 'nanox_transfer_to_public', [4, 0]);
+        await sim.navigateAndCompareSnapshots('.', `${device}_transfer_to_public`, [4, 0]);
     });
-}));
+}
+
+test('[NANO SP] Transfer to public', setupZemu('nanosp', transferToPublicXAndSP));
+
+test('[NANO X] Transfer to public', setupZemu('nanox', transferToPublicXAndSP));

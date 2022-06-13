@@ -1,8 +1,8 @@
 import Transport from '@ledgerhq/hw-transport';
 import Zemu from '@zondax/zemu';
-import { setupZemu } from './options';
+import { LedgerModel, setupZemu } from './options';
 
-async function identityProvider(device: 'nanos' | 'nanox', sim: Zemu, transport: Transport, handleKeyUi: (key: string) => Promise<void>) {
+async function identityProvider(device: 'nanos' | 'nanox' | 'nanosp', sim: Zemu, transport: Transport, handleKeyUi: (key: string) => Promise<void>) {
     let data = Buffer.from('0800000451000000000000000000000000000000000000000200000000000000008196e718f392ec8d07216b22b555cbb71bcee88037566d3f758b9786b945e3b614660f4bf954dbe57bc2304e5a863d2e89a1f69196a1d0423f4936aa664da95de16f40a639dba085073c5a7c8e710c2a402136cc89a39c12ed044e1035649c0f03', 'hex');
     transport.send(0xe0, 0x20, 0x00, 0x00, data);
     await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
@@ -44,10 +44,14 @@ test('[NANO S] Public information for identity provider', setupZemu('nanos', asy
     });
 }));
 
-test('[NANO X] Public information for identity provider', setupZemu('nanox', async (sim, transport) => {
-    await identityProvider('nanox', sim, transport, async (key: string) => {
-        await sim.navigateAndCompareSnapshots('.', `nanox_public_info_for_ip/${key}`, [1]);
+async function identityProviderXAndSP(sim: Zemu, transport: Transport, device: LedgerModel) {
+    await identityProvider(device, sim, transport, async (key: string) => {
+        await sim.navigateAndCompareSnapshots('.', `${device}_public_info_for_ip/${key}`, [1]);
         await sim.clickBoth(undefined, false);
         return sim.snapshot();
     });
-}));
+}
+
+test('[NANO SP] Public information for identity provider', setupZemu('nanosp', identityProviderXAndSP));
+
+test('[NANO X] Public information for identity provider', setupZemu('nanox', identityProviderXAndSP));

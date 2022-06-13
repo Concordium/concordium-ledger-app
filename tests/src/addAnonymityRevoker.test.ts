@@ -69,7 +69,7 @@ test('[NANO S] Add anonymity revoker', setupZemu('nanos', async (sim, transport)
     );
 }));
 
-test('[NANO X] Add anonymity revoker', setupZemu('nanox', async (sim, transport) => {
+async function addAnonomityRevokerXAndSP(sim: Zemu, transport: Transport) {
     const snapshot = await addAnonymityRevokerShared(sim, transport);
 
     // The AR public key
@@ -86,4 +86,8 @@ test('[NANO X] Add anonymity revoker', setupZemu('nanox', async (sim, transport)
     await expect(tx).resolves.toEqual(
         Buffer.from('82f58dd72bb0ead83139282032da854b1077a341646db5bacd227554ab985b7814fb9aae9ae2cd6a5557b6e6174c1524a9cf81acae3bf1422cd43e63f5189c099000', 'hex'),
     );
-}));
+}
+
+test('[NANO SP] Add anonymity revoker', setupZemu('nanosp', addAnonomityRevokerXAndSP));
+
+test('[NANO X] Add anonymity revoker', setupZemu('nanox', addAnonomityRevokerXAndSP));

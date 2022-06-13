@@ -1,6 +1,6 @@
 import Transport from '@ledgerhq/hw-transport';
 import Zemu from '@zondax/zemu';
-import { setupZemu } from './options';
+import { LedgerModel, setupZemu } from './options';
 
 async function transferWithSchedule(
     sim: Zemu, transport: Transport, handleUi: () => Promise<void>,
@@ -36,13 +36,17 @@ test('[NANO S] Transfer with schedule', setupZemu('nanos', async (sim, transport
     });
 }));
 
-test('[NANO X] Transfer with schedule', setupZemu('nanox', async (sim, transport) => {
+async function transferWithScheduleXAndSP(sim: Zemu, transport: Transport, device: LedgerModel) {
     await transferWithSchedule(sim, transport, async () => {
-        await sim.navigateAndCompareSnapshots('.', 'nanox_transfer_with_schedule', [5]);
+        await sim.navigateAndCompareSnapshots('.', `${device}_transfer_with_schedule`, [5]);
         await sim.clickBoth(undefined, false);
         return sim.snapshot();
     });
-}));
+}
+
+test('[NANO SP] Transfer with schedule', setupZemu('nanosp', transferWithScheduleXAndSP));
+
+test('[NANO X] Transfer with schedule', setupZemu('nanox', transferWithScheduleXAndSP));
 
 async function transferWithScheduleWithMemo(
     sim: Zemu, transport: Transport, handleUi: () => Promise<void>,
@@ -83,10 +87,14 @@ test('[NANO S] Transfer with schedule and memo', setupZemu('nanos', async (sim, 
     });
 }));
 
-test('[NANO X] Transfer with schedule and memo', setupZemu('nanox', async (sim, transport) => {
+async function transferWithScheduleWithMemoXAndSP(sim: Zemu, transport: Transport, device: LedgerModel) {
     await transferWithScheduleWithMemo(sim, transport, async () => {
-        await sim.navigateAndCompareSnapshots('.', 'nanox_transfer_with_schedule_and_memo', [5]);
+        await sim.navigateAndCompareSnapshots('.', `${device}_transfer_with_schedule_and_memo`, [5]);
         await sim.clickBoth(undefined, false);
         return sim.snapshot();
     });
-}));
+}
+
+test('[NANO SP] Transfer with schedule and memo', setupZemu('nanosp', transferWithScheduleWithMemoXAndSP));
+
+test('[NANO X] Transfer with schedule and memo', setupZemu('nanox', transferWithScheduleWithMemoXAndSP));

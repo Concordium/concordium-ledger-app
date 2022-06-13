@@ -1,7 +1,8 @@
 import Transport from '@ledgerhq/hw-transport';
+import Zemu from '@zondax/zemu';
 import { setupZemu } from './options';
 
-async function changeInstructionTest(transport: Transport) {
+async function changeInstructionTest(_sim: Zemu, transport: Transport) {
     let data = Buffer.from('08000004510000000000000000000000000000000000000002000000000000000020a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7000000000000000a0000000000000064000000290000000063de5da712', 'hex');
     await transport.send(0xe0, 0x12, 0x00, 0x00, data);
 
@@ -14,10 +15,8 @@ async function changeInstructionTest(transport: Transport) {
     await expect(tx).rejects.toThrow();
 }
 
-test('[NANO S] Changing instruction fails', setupZemu('nanos', async (sim, transport) => {
-    await changeInstructionTest(transport);
-}));
+test('[NANO S] Changing instruction fails', setupZemu('nanos', changeInstructionTest));
 
-test('[NANO X] Changing instruction fails', setupZemu('nanox', async (sim, transport) => {
-    await changeInstructionTest(transport);
-}));
+test('[NANO SP] Changing instruction fails', setupZemu('nanosp', changeInstructionTest));
+
+test('[NANO X] Changing instruction fails', setupZemu('nanox', changeInstructionTest));

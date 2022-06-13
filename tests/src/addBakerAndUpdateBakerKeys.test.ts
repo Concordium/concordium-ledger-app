@@ -1,5 +1,6 @@
 import Transport from '@ledgerhq/hw-transport';
-import { setupZemu } from './options';
+import Zemu from '@zondax/zemu';
+import { LedgerModel, setupZemu } from './options';
 
 async function addBakerShared(transport: Transport) {
     let data = Buffer.from('08000004510000000000000000000000000000000000000002000000000000000020a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7000000000000000a0000000000000064000000290000000063de5da704', 'hex');
@@ -23,16 +24,20 @@ test('[NANO S] Add baker', setupZemu('nanos', async (sim, transport) => {
     );
 }));
 
-test('[NANO X] Add baker', setupZemu('nanox', async (sim, transport) => {
+async function addBakerXAndSP(sim: Zemu, transport: Transport, device: LedgerModel) {
     const tx = addBakerShared(transport);
     await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
-    await sim.navigateAndCompareSnapshots('.', 'nanox_add_baker', [5]);
+    await sim.navigateAndCompareSnapshots('.', `${device}_add_baker`, [5]);
     await sim.clickBoth(undefined, false);
 
     await expect(tx).resolves.toEqual(
         Buffer.from('8bde384ab620b1ba6714c1b78521ebfdcae8159cb86e2a6c94964dfd000e21e085c98f2bdef55292bdaf1d8e6dd3e5277c5dc83a8089fca634ffb3713ba9150b9000', 'hex'),
     );
-}));
+}
+
+test('[NANO SP] Add baker', setupZemu('nanosp', addBakerXAndSP));
+
+test('[NANO X] Add baker', setupZemu('nanox', addBakerXAndSP));
 
 async function updateBakerKeysShared(transport: Transport) {
     let data = Buffer.from('08000004510000000000000000000000000000000000000002000000000000000020a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7000000000000000a0000000000000064000000290000000063de5da708', 'hex');
@@ -56,13 +61,17 @@ test('[NANO S] Update baker keys', setupZemu('nanos', async (sim, transport) => 
     );
 }));
 
-test('[NANO X] Update baker keys', setupZemu('nanox', async (sim, transport) => {
+async function updateBakerKeysXAndSP(sim: Zemu, transport: Transport, device: LedgerModel) {
     const tx = updateBakerKeysShared(transport);
     await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
-    await sim.navigateAndCompareSnapshots('.', 'nanox_update_baker_keys', [4]);
+    await sim.navigateAndCompareSnapshots('.', `${device}_update_baker_keys`, [4]);
     await sim.clickBoth(undefined, false);
 
     await expect(tx).resolves.toEqual(
         Buffer.from('c1347c15432f5277533d999e2b8a847b21b3c55a1ec0f2415273ae4d90cca9e9ac5950ef47483ee5423739cb1d90989bb50472544e65495b5cd8c3ddc85fa2019000', 'hex'),
     );
-}));
+}
+
+test('[NANO X] Update baker keys', setupZemu('nanox', updateBakerKeysXAndSP));
+
+test('[NANO SP] Update baker keys', setupZemu('nanosp', updateBakerKeysXAndSP));

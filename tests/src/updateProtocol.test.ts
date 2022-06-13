@@ -72,7 +72,7 @@ test('[NANO S] Update protocol', setupZemu('nanos', async (sim, transport) => {
     });
 }));
 
-test('[NANO X] Update protocol', setupZemu('nanox', async (sim, transport) => {
+async function updateProtocolXAndSP(sim: Zemu, transport: Transport) {
     await updateProtocol(sim, transport, async () => {
         await sim.clickRight(undefined, false);
         return sim.clickBoth(undefined, false);
@@ -86,4 +86,8 @@ test('[NANO X] Update protocol', setupZemu('nanox', async (sim, transport) => {
         await sim.clickRight(undefined, false);
         return sim.clickBoth(undefined, false);
     });
-}));
+}
+
+test('[NANO SP] Update protocol', setupZemu('nanosp', updateProtocolXAndSP));
+
+test('[NANO X] Update protocol', setupZemu('nanox', updateProtocolXAndSP));

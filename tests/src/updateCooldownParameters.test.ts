@@ -1,8 +1,9 @@
 import Transport from '@ledgerhq/hw-transport';
 import Zemu from '@zondax/zemu';
-import { setupZemu } from './options';
+import { LedgerModel, setupZemu } from './options';
 
-async function cooldownParameters(sim: Zemu, transport: Transport, images: string) {
+async function cooldownParameters(sim: Zemu, transport: Transport, device: LedgerModel) {
+    const images = `${device}_cooldown_parameters`;
     const data = Buffer.from('080000045100000000000000000000000000000000000000020000000000000000000000000000000a00000000000000640000000063de5da700000029' + '0E' + '000075300000EA60' + '0000000000001000', 'hex');
     const tx = transport.send(0xe0, 0x40, 0x00, 0x00, data);
     await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
@@ -13,10 +14,8 @@ async function cooldownParameters(sim: Zemu, transport: Transport, images: strin
     );
 }
 
-test('[NANO S] Cooldown parameters', setupZemu('nanos', async (sim, transport) => {
-    await cooldownParameters(sim, transport, 'nanos_cooldown_parameters');
-}));
+test('[NANO S] Cooldown parameters', setupZemu('nanos', cooldownParameters));
 
-test('[NANO X] Cooldown parameters', setupZemu('nanox', async (sim, transport) => {
-    await cooldownParameters(sim, transport, 'nanox_cooldown_parameters');
-}));
+test('[NANO SP] Cooldown parameters', setupZemu('nanosp', cooldownParameters));
+
+test('[NANO X] Cooldown parameters', setupZemu('nanox', cooldownParameters));

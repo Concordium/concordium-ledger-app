@@ -14,10 +14,8 @@ async function updateElectionDifficulty(sim: Zemu, transport: Transport) {
     );
 }
 
-test('[NANO S] Update election difficulty', setupZemu('nanos', async (sim, transport) => {
-    await updateElectionDifficulty(sim, transport);
-}));
+test('[NANO S] Update election difficulty', setupZemu('nanos', updateElectionDifficulty));
 
-test('[NANO X] Update election difficulty', setupZemu('nanox', async (sim, transport) => {
-    await updateElectionDifficulty(sim, transport);
-}));
+test('[NANO SP] Update election difficulty', setupZemu('nanosp', updateElectionDifficulty));
+
+test('[NANO X] Update election difficulty', setupZemu('nanox', updateElectionDifficulty));

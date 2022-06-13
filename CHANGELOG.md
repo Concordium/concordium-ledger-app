@@ -2,6 +2,10 @@
 
 ## 3.0.1
 
+### Added
+
+* Support for Ledger Nano S Plus.
+
 ### Changed
 
 * The commission rates UI is now prefixed with a screen that says 'Commission rates'.
