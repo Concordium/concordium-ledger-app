@@ -11,6 +11,8 @@ static tx_state_t *tx_state = &global_tx_state;
 
 void sendPublicKey(bool compare);
 
+UX_STEP_VALID(ux_decline_step, pb, sendUserRejection(), {&C_icon_crossmark, "Decline"});
+
 // UI definitions for the approval of the generation of a public-key. This prompts the user to accept that
 // a public-key will be generated and returned to the computer.
 UX_STEP_VALID(
@@ -18,17 +20,21 @@ UX_STEP_VALID(
     pnn,
     sendPublicKey(true),
     {&C_icon_validate_14, "Public key", (char *) global.exportPublicKeyContext.display});
-UX_STEP_VALID(ux_generate_public_flow_1_step, pb, sendUserRejection(), {&C_icon_crossmark, "Decline"});
-UX_FLOW(ux_generate_public_flow, &ux_generate_public_flow_0_step, &ux_generate_public_flow_1_step, FLOW_LOOP);
+UX_FLOW(ux_generate_public_flow, &ux_generate_public_flow_0_step, &ux_decline_step, FLOW_LOOP);
 
 // UI definitions for comparison of public-key on the device
 // with the public-key that the caller received.
-UX_STEP_VALID(
+UX_STEP_NOCB(
     ux_sign_compare_public_key_0_step,
     bnnn_paging,
-    ui_idle(),
     {.title = "Compare", .text = (char *) global.exportPublicKeyContext.publicKey});
-UX_FLOW(ux_sign_compare_public_key, &ux_sign_compare_public_key_0_step);
+UX_STEP_CB(ux_compare_accept_step, pb,  ui_idle(), {&C_icon_validate_14, "Accept"});
+UX_FLOW(
+    ux_sign_compare_public_key,
+    &ux_sign_compare_public_key_0_step,
+    &ux_compare_accept_step,
+    &ux_decline_step
+    );
 
 /**
  * Derive the public-key for the given path, and then write it to
