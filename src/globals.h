@@ -5,40 +5,22 @@
 
 #include "os.h"
 #include "cx.h"
-#include "descriptionView.h"
 #include "exportPrivateKey.h"
 #include "verifyAddress.h"
 
 #include "getPublicKey.h"
 #include "displayCbor.h"
-#include "signAddAnonymityRevoker.h"
-#include "signAddBakerOrUpdateBakerKeys.h"
-#include "signAddIdentityProvider.h"
 #include "signConfigureBaker.h"
 #include "signConfigureDelegation.h"
 #include "signCredentialDeployment.h"
 #include "signEncryptedAmountTransfer.h"
-#include "signHigherLevelKeyUpdate.h"
 #include "signPublicInformationForIp.h"
 #include "signTransfer.h"
 #include "signTransferToEncrypted.h"
 #include "signTransferToPublic.h"
 #include "signTransferWithSchedule.h"
-#include "signUpdateAuthorizations.h"
-#include "signUpdateBakerRestakeEarnings.h"
 #include "signRegisterData.h"
 
-#include "signUpdateBakerStakeThreshold.h"
-#include "signUpdateElectionDifficulty.h"
-#include "signUpdateExchangeRate.h"
-#include "signUpdateFoundationAccount.h"
-#include "signUpdateGasRewards.h"
-#include "signUpdateMintDistribution.h"
-#include "signUpdateProtocol.h"
-#include "signUpdateTransactionFeeDistribution.h"
-#include "signUpdateTimeParameters.h"
-#include "signUpdateCooldownParameters.h"
-#include "signUpdatePoolParameters.h"
 #include "ux.h"
 
 #define CONCORDIUM_PURPOSE   1105
@@ -54,11 +36,6 @@ typedef enum {
     INIT_CONTRACT = 1,
     UPDATE = 2,
     TRANSFER = 3,
-    ADD_BAKER = 4,
-    REMOVE_BAKER = 5,
-    UPDATE_BAKER_STAKE = 6,
-    UPDATE_BAKER_RESTAKE_EARNINGS = 7,
-    UPDATE_BAKER_KEYS = 8,
     UPDATE_CREDENTIAL_KEYS = 13,
     ENCRYPTED_AMOUNT_TRANSFER = 16,
     TRANSFER_TO_ENCRYPTED = 17,
@@ -72,33 +49,6 @@ typedef enum {
     CONFIGURE_BAKER = 25,
     CONFIGURE_DELEGATION = 26
 } transactionKind_e;
-
-/**
- * Enumeration of all available update types. The exact numbering has
- * to correspond with the on-chain values as it is used as part of the
- * transaction serialization, and it is used to validate that a received
- * transaction has a valid type.
- */
-typedef enum {
-    UPDATE_TYPE_AUTHORIZATION = 0,
-    UPDATE_TYPE_PROTOCOL = 1,
-    UPDATE_TYPE_ELECTION_DIFFICULTY = 2,
-    UPDATE_TYPE_EURO_PER_ENERGY = 3,
-    UPDATE_TYPE_MICRO_GTU_PER_EURO = 4,
-    UPDATE_TYPE_FOUNDATION_ACCOUNT = 5,
-    UPDATE_TYPE_MINT_DISTRIBUTION_V0 = 6,
-    UPDATE_TYPE_TRANSACTION_FEE_DISTRIBUTION = 7,
-    UPDATE_TYPE_GAS_REWARDS = 8,
-    UPDATE_TYPE_BAKER_STAKE_THRESHOLD = 9,
-    UPDATE_TYPE_UPDATE_ROOT_KEYS = 10,
-    UPDATE_TYPE_UPDATE_LEVEL1_KEYS = 11,
-    UPDATE_TYPE_ADD_ANONYMITY_REVOKER = 12,
-    UPDATE_TYPE_ADD_IDENTITY_PROVIDER = 13,
-    UPDATE_TYPE_COOLDOWN_PARAMETERS = 14,
-    UPDATE_TYPE_POOL_PARAMETERS = 15,
-    UPDATE_TYPE_TIME_PARAMETERS = 16,
-    UPDATE_TYPE_MINT_DISTRIBUTION_V1 = 17
-} updateType_e;
 
 typedef struct {
     uint8_t identity;
@@ -130,15 +80,6 @@ extern accountSender_t global_account_sender;
 
 typedef struct {
     union {
-        signAddAnonymityRevokerContext_t signAddAnonymityRevokerContext;
-        signAddIdentityProviderContext_t signAddIdentityProviderContext;
-    };
-    descriptionContext_t descriptionContext;
-
-} updateWithDescription_t;
-
-typedef struct {
-    union {
         signTransferContext_t signTransferContext;
         signEncryptedAmountToTransfer_t signEncryptedAmountToTransfer;
         signTransferWithScheduleContext_t signTransferWithScheduleContext;
@@ -163,26 +104,9 @@ typedef union {
 
     signTransferToEncrypted_t signTransferToEncrypted;
     signTransferToPublic_t signTransferToPublic;
-    signAddBakerContext_t signAddBaker;
-    signUpdateBakerStakeContext_t signUpdateBakerStake;
-    signUpdateBakerRestakeEarningsContext_t signUpdateBakerRestakeEarnings;
     signConfigureBaker_t signConfigureBaker;
     signConfigureDelegationContext_t signConfigureDelegation;
 
-    signExchangeRateContext_t signExchangeRateContext;
-    signUpdateAuthorizations_t signUpdateAuthorizations;
-    signUpdateProtocolContext_t signUpdateProtocolContext;
-    signTransactionDistributionFeeContext_t signTransactionDistributionFeeContext;
-    signUpdateGasRewardsContext_t signUpdateGasRewardsContext;
-    signUpdateFoundationAccountContext_t signUpdateFoundationAccountContext;
-    signUpdateMintDistribution_t signUpdateMintDistribution;
-    signElectionDifficultyContext_t signElectionDifficulty;
-    signUpdateBakerStakeThresholdContext_t signUpdateBakerStakeThreshold;
-    signUpdateTimeParametersContext_t signTimeParameters;
-    signUpdateCooldownParametersContext_t signCooldownParameters;
-    signUpdatePoolParametersContext_t signPoolParameters;
-    signUpdateKeysWithRootKeysContext_t signUpdateKeysWithRootKeysContext;
-    updateWithDescription_t withDescription;
     transactionWithDataBlob_t withDataBlob;
 } instructionContext;
 extern instructionContext global;

@@ -15,10 +15,7 @@ UX_STEP_CB(
 UX_FLOW(ux_sign_public_info_for_i_public_key, &ux_sign_public_info_for_i_public_key_0_step);
 
 UX_STEP_CB(ux_sign_public_info_review, nn, sendSuccessNoIdle(), {"Review identity", "provider info"});
-UX_FLOW(
-    ux_review_public_info_for_ip,
-    &ux_sign_public_info_review,
-    &ux_sign_public_info_for_i_public_key_0_step);
+UX_FLOW(ux_review_public_info_for_ip, &ux_sign_public_info_review, &ux_sign_public_info_for_i_public_key_0_step);
 
 UX_STEP_CB(
     ux_sign_public_info_for_ip_sign,
