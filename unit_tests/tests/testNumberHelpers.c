@@ -28,11 +28,11 @@ static void test_lengthOfNumbers() {
 }
 
 static void test_numberToText() {
-    uint8_t text[4];
+    uint8_t text[4] = {0};
     numberToText(text, sizeof(text), 2001);
-    assert_string_equal(text, "2001");
+    assert_memory_equal(text, "2001", 4);
     numberToText(text, sizeof(text), 4041);
-    assert_string_equal(text, "4041");
+    assert_memory_equal(text, "4041", 4);
 }
 
 static void test_numberToText_max() {
@@ -44,9 +44,9 @@ static void test_numberToText_max() {
 }
 
 static void test_numberToText_zero() {
-    uint8_t text[1];
+    uint8_t text[1] = {0};
     numberToText(text, sizeof(text), 0);
-    assert_string_equal(text, "0");
+    assert_memory_equal(text, "0", 1);
 }
 
 static void test_numberToText_shorter_number() {
@@ -117,15 +117,15 @@ static void test_bin2dec_longer_number() {
 }
 
 static void test_decimalAmountDisplay() {
-    uint8_t text[6];
+    uint8_t text[6] = {0};
     decimalDigitsDisplay(text, sizeof(text), 2100112, 6);
-    assert_string_equal(text, "100112");
+    assert_memory_equal(text, "100112", 6);
     decimalDigitsDisplay(text, sizeof(text), 4041, 6);
-    assert_string_equal(text, "004041");
+    assert_memory_equal(text, "004041", 6);
     decimalDigitsDisplay(text, sizeof(text), 1, 6);
-    assert_string_equal(text, "000001");
+    assert_memory_equal(text, "000001", 6);
     decimalDigitsDisplay(text, sizeof(text), 0, 6);
-    assert_string_equal(text, "000000");
+    assert_memory_equal(text, "000000", 6);
 }
 
 static void test_amountToGtuDisplay_zero() {
