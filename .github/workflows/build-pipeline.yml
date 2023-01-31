@@ -167,6 +167,8 @@ jobs:
               cmake -Bbuild -H. && make -C build
 
           - name: Run unit tests
+            env:
+              CTEST_OUTPUT_ON_FAILURE: 1
             run: |
               cd unit_tests/
               make -C build test

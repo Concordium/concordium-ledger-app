@@ -9,7 +9,7 @@ typedef struct cx_ecfp_private_key_t {
     uint8_t d[32];
 } cx_ecfp_private_key_t, cx_ecfp_public_key_t;
 
-int G_io_apdu_buffer[100];
+extern int G_io_apdu_buffer[100];
 
 // defining throw to just return the error code, which means throwing in nested functions won't work correctly during
 // testing
