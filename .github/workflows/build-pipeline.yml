@@ -103,11 +103,11 @@ jobs:
             - uses: actions/checkout@v2
 
             - name: Lint
-              uses: DoozyX/clang-format-lint-action@v0.12
+              uses: DoozyX/clang-format-lint-action@v0.15
               with:
                 source: './src ./unit_tests'
                 extensions: 'c,h'
-                clangFormatVersion: 9
+                clangFormatVersion: 15
                 style: file
                 inplace: false
 
