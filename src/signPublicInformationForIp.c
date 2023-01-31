@@ -117,7 +117,7 @@ void handleSignPublicInformationForIp(uint8_t *cdata, uint8_t p1, volatile unsig
             ux_flow_init(0, ux_sign_public_info_for_ip_final, NULL);
         } else {
             ux_flow_init(0, ux_sign_public_info_for_ip_complete, NULL);
-       }
+        }
         *flags |= IO_ASYNCH_REPLY;
     } else {
         THROW(ERROR_INVALID_STATE);

@@ -21,7 +21,7 @@ int parseKeyDerivationPath(uint8_t *cdata) {
 
     // Concordium does not use key paths with a length greater than 8,
     // so if that was received, then throw an error.
-    if (keyPath->pathLength > 9) {
+    if (keyPath->pathLength > 8) {
         THROW(ERROR_INVALID_PATH);
     }
 

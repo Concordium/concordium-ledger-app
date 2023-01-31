@@ -30,7 +30,11 @@ UX_STEP_NOCB(
     {.title = "Compare", .text = (char *) global.exportPublicKeyContext.publicKey});
 UX_STEP_CB(ux_compare_accept_step, pb, ui_idle(), {&C_icon_validate_14, "Accept"});
 UX_STEP_CB(ux_compare_decline_step, pb, ui_idle(), {&C_icon_crossmark, "Decline"});
-UX_FLOW(ux_sign_compare_public_key, &ux_sign_compare_public_key_0_step, &ux_compare_accept_step, &ux_compare_decline_step);
+UX_FLOW(
+    ux_sign_compare_public_key,
+    &ux_sign_compare_public_key_0_step,
+    &ux_compare_accept_step,
+    &ux_compare_decline_step);
 
 /**
  * Derive the public-key for the given path, and then write it to
