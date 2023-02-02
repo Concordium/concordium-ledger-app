@@ -8,13 +8,13 @@ async function identityProvider(_device: 'nanos' | 'nanox' | 'nanosp', sim: Zemu
     data = Buffer.from('0000b6bc751f1abfb6440ff5cce27d7cdd1e7b0b8ec174f54de426890635b27e7daf', 'hex');
     transport.send(0xe0, 0x20, 0x01, 0x00, data);
     await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
-    const snapshot1 = await handleKeyUi('key1', 1);
+    const snapshot1 = await handleKeyUi('key1', 2);
 
     data = Buffer.from('000146a3e38ddf8b493be6e979034510b91db5448da9cba48c106139c288d658a004', 'hex');
     transport.send(0xe0, 0x20, 0x01, 0x00, data);
     await Zemu.sleep(1000);
     await sim.waitUntilScreenIsNot(snapshot1);
-    const snapshot2 = await handleKeyUi('key2', 0);
+    const snapshot2 = await handleKeyUi('key2', 1);
 
     data = Buffer.from('000271d5f16bc3be249043dc0f9e20b4872f5c3477bf2f285336609c5b0873ab3c9c', 'hex');
     transport.send(0xe0, 0x20, 0x01, 0x00, data);
