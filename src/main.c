@@ -28,32 +28,15 @@
 #include "os_io_seproxyhal.h"
 #include "responseCodes.h"
 #include "seproxyhal_protocol.h"
-#include "signAddBakerOrUpdateBakerKeys.h"
 #include "signConfigureBaker.h"
 #include "signConfigureDelegation.h"
 #include "signCredentialDeployment.h"
 #include "signEncryptedAmountTransfer.h"
-#include "signHigherLevelKeyUpdate.h"
 #include "signPublicInformationForIp.h"
-#include "signRemoveBaker.h"
 #include "signTransfer.h"
 #include "signTransferToEncrypted.h"
 #include "signTransferToPublic.h"
 #include "signTransferWithSchedule.h"
-#include "signUpdateAuthorizations.h"
-#include "signUpdateBakerRestakeEarnings.h"
-#include "signUpdateBakerStake.h"
-#include "signUpdateBakerStakeThreshold.h"
-#include "signUpdateElectionDifficulty.h"
-#include "signUpdateExchangeRate.h"
-#include "signUpdateFoundationAccount.h"
-#include "signUpdateGasRewards.h"
-#include "signUpdateMintDistribution.h"
-#include "signUpdateProtocol.h"
-#include "signUpdateTransactionFeeDistribution.h"
-#include "signUpdateTimeParameters.h"
-#include "signUpdateCooldownParameters.h"
-#include "signUpdatePoolParameters.h"
 #include "ux.h"
 #include "verifyAddress.h"
 
@@ -89,35 +72,16 @@ accountSender_t global_account_sender;
 // An INS instruction containing 0x04 means that we should start the credential deployment signing flow.
 #define INS_CREDENTIAL_DEPLOYMENT 0x04
 
-#define INS_EXPORT_PRIVATE_KEY   0x05
-#define INS_UPDATE_EXCHANGE_RATE 0x06
+#define INS_EXPORT_PRIVATE_KEY 0x05
 
 #define INS_ENCRYPTED_AMOUNT_TRANSFER 0x10
 #define INS_TRANSFER_TO_ENCRYPTED     0x11
 #define INS_TRANSFER_TO_PUBLIC        0x12
 
-#define INS_ADD_BAKER_OR_UPDATE_KEYS      0x13
-#define INS_REMOVE_BAKER                  0x14
-#define INS_UPDATE_BAKER_STAKE            0x15
-#define INS_UPDATE_BAKER_RESTAKE_EARNINGS 0x16
-#define INS_CONFIGURE_DELEGATION          0x17
-#define INS_CONFIGURE_BAKER               0x18
+#define INS_CONFIGURE_DELEGATION 0x17
+#define INS_CONFIGURE_BAKER      0x18
 
-#define INS_PUBLIC_INFO_FOR_IP           0x20
-#define INS_UPDATE_PROTOCOL              0x21
-#define INS_UPDATE_TRANSACTION_FEE_DIST  0x22
-#define INS_UPDATE_GAS_REWARDS           0x23
-#define INS_UPDATE_FOUNDATION_ACCOUNT    0x24
-#define INS_UPDATE_MINT_DISTRIBUTION     0x25
-#define INS_UPDATE_ELECTION_DIFFICULTY   0x26
-#define INS_UPDATE_BAKER_STAKE_THRESHOLD 0x27
-
-#define INS_UPDATE_ROOT_KEYS          0x28
-#define INS_UPDATE_LEVEL1_KEYS        0x29
-#define INS_UPDATE_LEVEL2_KEYS_ROOT   0x2A
-#define INS_UPDATE_LEVEL2_KEYS_LEVEL1 0x2B
-#define INS_ADD_ANONYMITY_REVOKER     0x2C
-#define INS_ADD_IDENTITY_PROVIDER     0x2D
+#define INS_PUBLIC_INFO_FOR_IP 0x20
 
 #define INS_SIGN_UPDATE_CREDENTIAL 0x31
 
@@ -125,10 +89,6 @@ accountSender_t global_account_sender;
 #define INS_ENCRYPTED_AMOUNT_TRANSFER_WITH_MEMO  0x33
 #define INS_SIGN_TRANSFER_WITH_SCHEDULE_AND_MEMO 0x34
 #define INS_REGISTER_DATA                        0x35
-
-#define INS_UPDATE_COOLDOWN_PARAMETERS 0x40
-#define INS_UPDATE_POOL_PARAMETERS     0x41
-#define INS_UPDATE_TIME_PARAMETERS     0x42
 
 // Main entry of application that listens for APDU commands that will be received from the
 // computer. The APDU commands control what flow is activated, i.e. which control flow is initiated.
@@ -202,9 +162,6 @@ static void concordium_main(void) {
                     case INS_EXPORT_PRIVATE_KEY:
                         handleExportPrivateKey(cdata, p1, p2, &flags);
                         break;
-                    case INS_UPDATE_EXCHANGE_RATE:
-                        handleSignUpdateExchangeRate(cdata, &flags);
-                        break;
                     case INS_TRANSFER_TO_ENCRYPTED:
                         handleSignTransferToEncrypted(cdata, &flags);
                         break;
@@ -223,36 +180,6 @@ static void concordium_main(void) {
                     case INS_PUBLIC_INFO_FOR_IP:
                         handleSignPublicInformationForIp(cdata, p1, &flags, isInitialCall);
                         break;
-                    case INS_UPDATE_PROTOCOL:
-                        handleSignUpdateProtocol(cdata, p1, lc, &flags, isInitialCall);
-                        break;
-                    case INS_UPDATE_TRANSACTION_FEE_DIST:
-                        handleSignUpdateTransactionFeeDistribution(cdata, &flags);
-                        break;
-                    case INS_UPDATE_GAS_REWARDS:
-                        handleSignUpdateGasRewards(cdata, &flags);
-                        break;
-                    case INS_UPDATE_FOUNDATION_ACCOUNT:
-                        handleSignUpdateFoundationAccount(cdata, &flags);
-                        break;
-                    case INS_UPDATE_MINT_DISTRIBUTION:
-                        handleSignUpdateMintDistribution(cdata, p2, &flags);
-                        break;
-                    case INS_UPDATE_ELECTION_DIFFICULTY:
-                        handleSignUpdateElectionDifficulty(cdata, &flags);
-                        break;
-                    case INS_ADD_BAKER_OR_UPDATE_KEYS:
-                        handleSignAddBakerOrUpdateBakerKeys(cdata, p1, p2, &flags, isInitialCall);
-                        break;
-                    case INS_REMOVE_BAKER:
-                        handleSignRemoveBaker(cdata, &flags);
-                        break;
-                    case INS_UPDATE_BAKER_STAKE:
-                        handleSignUpdateBakerStake(cdata, &flags);
-                        break;
-                    case INS_UPDATE_BAKER_RESTAKE_EARNINGS:
-                        handleSignUpdateBakerRestakeEarnings(cdata, &flags);
-                        break;
                     case INS_CONFIGURE_BAKER:
                         handleSignConfigureBaker(cdata, p1, lc, &flags, isInitialCall);
                         break;
@@ -261,50 +188,6 @@ static void concordium_main(void) {
                         break;
                     case INS_SIGN_UPDATE_CREDENTIAL:
                         handleSignUpdateCredential(cdata, p1, p2, &flags, isInitialCall);
-                        break;
-                    case INS_UPDATE_BAKER_STAKE_THRESHOLD:
-                        handleSignUpdateBakerStakeThreshold(cdata, &flags);
-                        break;
-                    case INS_UPDATE_ROOT_KEYS:
-                        handleSignHigherLevelKeys(cdata, p1, UPDATE_TYPE_UPDATE_ROOT_KEYS, &flags, isInitialCall);
-                        break;
-                    case INS_UPDATE_LEVEL1_KEYS:
-                        handleSignHigherLevelKeys(cdata, p1, UPDATE_TYPE_UPDATE_LEVEL1_KEYS, &flags, isInitialCall);
-                        break;
-                    case INS_UPDATE_LEVEL2_KEYS_ROOT:
-                        handleSignUpdateAuthorizations(
-                            cdata,
-                            p1,
-                            p2,
-                            UPDATE_TYPE_UPDATE_ROOT_KEYS,
-                            lc,
-                            &flags,
-                            isInitialCall);
-                        break;
-                    case INS_UPDATE_LEVEL2_KEYS_LEVEL1:
-                        handleSignUpdateAuthorizations(
-                            cdata,
-                            p1,
-                            p2,
-                            UPDATE_TYPE_UPDATE_LEVEL1_KEYS,
-                            lc,
-                            &flags,
-                            isInitialCall);
-                        break;
-                    case INS_ADD_IDENTITY_PROVIDER:
-                        handleSignAddIdentityProvider(cdata, p1, lc, &flags, isInitialCall);
-                        break;
-                    case INS_ADD_ANONYMITY_REVOKER:
-                        handleSignAddAnonymityRevoker(cdata, p1, lc, &flags, isInitialCall);
-                        break;
-                    case INS_UPDATE_TIME_PARAMETERS:
-                        handleSignUpdateTimeParameters(cdata, &flags);
-                        break;
-                    case INS_UPDATE_COOLDOWN_PARAMETERS:
-                        handleSignUpdateCooldownParameters(cdata, &flags);
-                        break;
-                    case INS_UPDATE_POOL_PARAMETERS:
-                        handleSignUpdatePoolParameters(cdata, p1, &flags, isInitialCall);
                         break;
                     default:
                         THROW(ERROR_INVALID_INSTRUCTION);

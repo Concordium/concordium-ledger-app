@@ -46,7 +46,7 @@ add_executable(test_util tests/testUtil.c)
 add_library(numberHelpers ../src/numberHelpers.c)
 add_library(time  ../src/numberHelpers.c ../src/time.c)
 add_library(base58Check ../src/base58check.c mocks/shaMock.c mocks/sha256.c mocks/sha256.h)
-add_library(util mocks/mocks.c mocks/globals.c ../src/util.c)
+add_library(util mocks/os.c mocks/mocks.c mocks/globals.c ../src/util.c)
 
 target_link_libraries(test_numberHelpers PUBLIC cmocka numberHelpers)
 target_link_libraries(test_time PUBLIC cmocka  time)

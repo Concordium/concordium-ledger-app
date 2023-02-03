@@ -31,8 +31,9 @@ static void test_base58_encode_fails_on_too_short_output_length() {
 }
 
 int main() {
-    const struct CMUnitTest tests[] = {cmocka_unit_test(test_base58_encode),
-                                       cmocka_unit_test(test_base58_encode_fails_on_too_short_output_length)};
+    const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_base58_encode),
+        cmocka_unit_test(test_base58_encode_fails_on_too_short_output_length)};
 
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

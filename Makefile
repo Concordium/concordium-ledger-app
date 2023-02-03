@@ -34,16 +34,15 @@ endif
 
 # Version must be no greater than 99.99.999, otherwise
 # extra memory must be allocated in menu.c.
-APPVERSION_MAJOR=3
+APPVERSION_MAJOR=4
 APPVERSION_MINOR=0
-APPVERSION_PATCH=1
+APPVERSION_PATCH=0
 APPVERSION=$(APPVERSION_MAJOR).$(APPVERSION_MINOR).$(APPVERSION_PATCH)
 
 APP_LOAD_PARAMS = --appFlags 0x00 $(COMMON_LOAD_PARAMS)
 
 # Restrict derivation paths to the Concordium specific path.
 APP_LOAD_PARAMS += --path "1105'/0'"
-
 # Restrict derivation to only be able to use ed25519
 APP_LOAD_PARAMS +=--curve ed25519
 

@@ -1,5 +1,18 @@
 # Changelog
 
+## 4.0.0
+
+### Changed
+
+* Transfer amounts now show (CCD) in upper line.
+* Compare now has accept/reject screens.
+* signIpInfo initial screen be part of the 1st public key flow.
+
+### Removed
+
+* Support for chain updates
+* Support for old baker transactions
+
 ## 3.0.1
 
 ### Added
