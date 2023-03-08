@@ -117,8 +117,8 @@ void handleExportPrivateKey(uint8_t *dataBuffer, uint8_t p1, uint8_t p2, volatil
 
     uint32_t identity = U4BE(dataBuffer, 0);
     uint32_t keyDerivationPath[5] = {
-        CONCORDIUM_PURPOSE | HARDENED_OFFSET,
-        CONCORDIUM_COIN_TYPE | HARDENED_OFFSET,
+        CONCORDIUM_PURPOSE_LEGACY | HARDENED_OFFSET,
+        CONCORDIUM_COIN_TYPE_LEGACY | HARDENED_OFFSET,
         ACCOUNT_SUBTREE | HARDENED_OFFSET,
         NORMAL_ACCOUNTS | HARDENED_OFFSET,
         identity | HARDENED_OFFSET};

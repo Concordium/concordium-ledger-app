@@ -21,6 +21,7 @@
 #include "os.h"
 #include "cx.h"
 #include "exportPrivateKey.h"
+#include "exportData.h"
 #include "getPublicKey.h"
 #include "globals.h"
 #include "glyphs.h"
@@ -73,6 +74,7 @@ accountSender_t global_account_sender;
 #define INS_CREDENTIAL_DEPLOYMENT 0x04
 
 #define INS_EXPORT_PRIVATE_KEY 0x05
+#define INS_EXPORT_DATA 0x07
 
 #define INS_ENCRYPTED_AMOUNT_TRANSFER 0x10
 #define INS_TRANSFER_TO_ENCRYPTED     0x11
@@ -162,7 +164,10 @@ static void concordium_main(void) {
                     case INS_EXPORT_PRIVATE_KEY:
                         handleExportPrivateKey(cdata, p1, p2, &flags);
                         break;
-                    case INS_TRANSFER_TO_ENCRYPTED:
+                    case INS_EXPORT_DATA:
+                        handleExportData(cdata, p1, p2, &flags, isInitialCall);
+                        break;
+                   case INS_TRANSFER_TO_ENCRYPTED:
                         handleSignTransferToEncrypted(cdata, &flags);
                         break;
                     case INS_ENCRYPTED_AMOUNT_TRANSFER:

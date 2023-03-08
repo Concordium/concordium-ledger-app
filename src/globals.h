@@ -6,6 +6,7 @@
 #include "os.h"
 #include "cx.h"
 #include "exportPrivateKey.h"
+#include "exportData.h"
 #include "verifyAddress.h"
 
 #include "getPublicKey.h"
@@ -23,8 +24,13 @@
 
 #include "ux.h"
 
-#define CONCORDIUM_PURPOSE   1105
-#define CONCORDIUM_COIN_TYPE 0
+#define CONCORDIUM_PURPOSE_LEGACY   1105
+#define CONCORDIUM_COIN_TYPE_LEGACY 0
+
+#define CONCORDIUM_PURPOSE 44
+#define CONCORDIUM_COIN_TYPE_MAINNET 919
+#define CONCORDIUM_COIN_TYPE_TESTNET 1
+
 
 #define MAX_CDATA_LENGTH 255
 
@@ -96,6 +102,7 @@ typedef struct {
  */
 typedef union {
     exportPrivateKeyContext_t exportPrivateKeyContext;
+    exportDataContext_t exportDataContext;
     exportPublicKeyContext_t exportPublicKeyContext;
     verifyAddressContext_t verifyAddressContext;
 

@@ -42,7 +42,9 @@ APPVERSION=$(APPVERSION_MAJOR).$(APPVERSION_MINOR).$(APPVERSION_PATCH)
 APP_LOAD_PARAMS = --appFlags 0x00 $(COMMON_LOAD_PARAMS)
 
 # Restrict derivation paths to the Concordium specific path.
-APP_LOAD_PARAMS += --path "1105'/0'"
+APP_LOAD_PARAMS += --path "1105'/0'" # Desktop wallet path (legacy)
+APP_LOAD_PARAMS += --path "44'/919'" # Browser wallet mainnet
+APP_LOAD_PARAMS += --path "44'/1'"     # Browser wallet testnet
 # Restrict derivation to only be able to use ed25519
 APP_LOAD_PARAMS +=--curve ed25519
 
