@@ -16,7 +16,7 @@ typedef struct {
     uint8_t display[15];
     bool acceptedAll;
     uint8_t p1;
-    uint32_t path[6];
+    uint32_t path[7];
     uint8_t pathLength;
 } exportDataContext_t;
 

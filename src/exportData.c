@@ -99,9 +99,9 @@ void handleExportData(uint8_t *dataBuffer, uint8_t p1, uint8_t p2, volatile unsi
 
     ctx->p1 = p1;
 
-    uint32_t identity = U4BE(dataBuffer, 0);
-    dataBuffer += 4;
     uint32_t identityProvider = U4BE(dataBuffer, 0);
+    dataBuffer += 4;
+    uint32_t identity = U4BE(dataBuffer, 0);
     dataBuffer += 4;
     uint32_t keyDerivationPath[4] = {
             CONCORDIUM_PURPOSE | HARDENED_OFFSET,
