@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "End-to-end test suite for Concordium Ledger application",
   "dependencies": {
+    "@concordium/node-sdk": "^6.2.0",
     "@ledgerhq/hw-transport": "^6.27.1",
     "@zondax/zemu": "^0.32.0",
     "jest": "^27.1.1",

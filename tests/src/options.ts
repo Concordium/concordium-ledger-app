@@ -2,7 +2,7 @@ import { resolve } from 'path';
 import Zemu, { DEFAULT_START_OPTIONS, StartOptions } from '@zondax/zemu';
 import Transport from '@ledgerhq/hw-transport';
 
-const SEED_PHRASE = 'vendor sphere crew wise puppy wise stand wait tissue boy fortune myself hamster intact window garment negative dynamic permit genre limb work dial guess';
+export const SEED_PHRASE = 'vendor sphere crew wise puppy wise stand wait tissue boy fortune myself hamster intact window garment negative dynamic permit genre limb work dial guess';
 
 const sharedOptions: Omit<StartOptions, 'model'> = {
     sdk: '',
