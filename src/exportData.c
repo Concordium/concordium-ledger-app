@@ -103,6 +103,12 @@ void handleExportData(uint8_t *dataBuffer, uint8_t p1, uint8_t p2, volatile unsi
     dataBuffer += 4;
     uint32_t identity = U4BE(dataBuffer, 0);
     dataBuffer += 4;
+
+    // If we are accepted all, we need to confirm that the coinType/identityProvider/identity has not been changed
+    if (ctx->acceptedAll && (ctx->path[1] != (coinType | HARDENED_OFFSET) || ctx->path[2] != (identityProvider | HARDENED_OFFSET) || ctx->path[3] != (identity | HARDENED_OFFSET) )) {
+        THROW(ERROR_INVALID_PARAM);
+    }
+
     uint32_t keyDerivationPath[4] = {
             CONCORDIUM_PURPOSE | HARDENED_OFFSET,
             coinType | HARDENED_OFFSET,

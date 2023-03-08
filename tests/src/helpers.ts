@@ -8,3 +8,5 @@ export default function chunkBuffer(buffer: Buffer, chunkSize: number): Buffer[]
     }
     return chunks;
 }
+
+export const ERROR_INVALID_PARAM = "0x6b03";

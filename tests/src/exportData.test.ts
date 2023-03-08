@@ -1,6 +1,7 @@
 import { ConcordiumHdWallet } from '@concordium/node-sdk';
 import Transport from '@ledgerhq/hw-transport';
 import Zemu from '@zondax/zemu';
+import { ERROR_INVALID_PARAM } from './helpers';
 import { SEED_PHRASE, setupZemu } from './options';
 
 const end = '9000';
@@ -15,7 +16,7 @@ const exportDataTest = (p1: number, p2: number, data: Buffer, expectedResult: st
     );
 });
 
-const testEach = test.each<'nanos' | 'nanosp' | 'nanox'>(['nanos']);
+const testEach = test.each<'nanos' | 'nanosp' | 'nanox'>(['nanos', 'nanosp', 'nanox']);
 
 function createDataBuffer(...data: number[]) {
     const result = Buffer.alloc(data.length * 4);
@@ -53,16 +54,19 @@ const alreadyAcceptedFlow = async (p1: number, p2: number, data: Buffer, expecte
     );
 };
 
-// With P1 we can then export all other values without prompting the user. This tests this is the case.
-testEach('[%s] Export all data Mainnet', (device) => setupZemu(device, async (sim: Zemu, transport: Transport) => {
-    const idp = 13;
-    const id = 16;
-    const tx = transport.send(0xe0, 0x07, P1_ALL, P2_MAINNET, createDataBuffer(idp,id));
+const getAccessFlow = async (p2: number, data: Buffer, sim: Zemu, transport: Transport) => {
+    const tx = transport.send(0xe0, 0x07, P1_ALL, p2, data);
     await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
     await sim.clickRight();
     await sim.clickBoth(undefined, false);
     await expect(tx).resolves.toEqual(Buffer.from(end, 'hex'));
+}
 
+// With P1 we can then export all other values without prompting the user. This tests this is the case.
+testEach('[%s] Export all data Mainnet', (device) => setupZemu(device, async (sim: Zemu, transport: Transport) => {
+    const idp = 13;
+    const id = 16;
+    await getAccessFlow(P2_MAINNET, createDataBuffer(idp,id), sim, transport);
 
     const hdWallet = ConcordiumHdWallet.fromSeedPhrase(SEED_PHRASE, 'Mainnet');
 
@@ -74,8 +78,35 @@ testEach('[%s] Export all data Mainnet', (device) => setupZemu(device, async (si
     for (const indices of attributeIndices) {
         await alreadyAcceptedFlow(P1_ATTRIBUTE_RANDOMNESS, P2_MAINNET, createDataBuffer(idp, id, ...indices), Buffer.from(hdWallet.getAttributeCommitmentRandomness(idp, id, ...indices)), transport);
     }
-
     // Close the access:
-    const txEnd = transport.send(0xe0, 0x07, P1_ALL, P2_MAINNET, createDataBuffer(idp,id));
-    await expect(txEnd).resolves.toEqual(Buffer.from(end, 'hex'));
+    await alreadyAcceptedFlow(P1_ALL, P2_MAINNET, createDataBuffer(idp, id), Buffer.alloc(0), transport);
+})());
+
+testEach('[%s] Export all is unable to export on a different identity', (device) => setupZemu(device, async (sim: Zemu, transport: Transport) => {
+    const idp = 13;
+    const id = 16;
+    const notId = 5;
+    await getAccessFlow(P2_MAINNET, createDataBuffer(idp,id), sim, transport);
+
+    const txEnd = transport.send(0xe0, 0x07, P1_ID_CRED_SEC, P2_MAINNET, createDataBuffer(idp, notId));
+    await expect(txEnd).rejects.toThrow(ERROR_INVALID_PARAM);
+})());
+
+testEach('[%s] Export all is unable to export on a different identityProvider', (device) => setupZemu(device, async (sim: Zemu, transport: Transport) => {
+    const idp = 13;
+    const id = 16;
+    const notIdp = 5;
+    await getAccessFlow(P2_MAINNET, createDataBuffer(idp,id), sim, transport);
+
+    const txEnd = transport.send(0xe0, 0x07, P1_ID_CRED_SEC, P2_MAINNET, createDataBuffer(idp, notIdp));
+    await expect(txEnd).rejects.toThrow(ERROR_INVALID_PARAM);
+})());
+
+testEach('[%s] Export all is unable to export on a different network', (device) => setupZemu(device, async (sim: Zemu, transport: Transport) => {
+    const idp = 13;
+    const id = 16;
+    await getAccessFlow(P2_MAINNET, createDataBuffer(idp,id), sim, transport);
+
+    const txEnd = transport.send(0xe0, 0x07, P1_ID_CRED_SEC, P2_TESTNET, createDataBuffer(idp, id));
+    await expect(txEnd).rejects.toThrow(ERROR_INVALID_PARAM);
 })());
