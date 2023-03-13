@@ -20,6 +20,7 @@
 #include "signTransferToPublic.h"
 #include "signTransferWithSchedule.h"
 #include "signRegisterData.h"
+#include "signUpdateContract.h"
 
 #include "ux.h"
 
@@ -106,6 +107,8 @@ typedef union {
     signTransferToPublic_t signTransferToPublic;
     signConfigureBaker_t signConfigureBaker;
     signConfigureDelegationContext_t signConfigureDelegation;
+
+    updateContractContext_t signUpdateContract;
 
     transactionWithDataBlob_t withDataBlob;
 } instructionContext;
