@@ -23,9 +23,6 @@ fn main() {
     transaction_payload.append(&mut u16::try_from(name.len()).unwrap().to_be_bytes().to_vec());
     transaction_payload.append(&mut u16::try_from(param.len()).unwrap().to_be_bytes().to_vec());
 
-    println!("n len 1: {}", u16::try_from(name.len()).unwrap());
-    println!("p len 1: {}", u16::try_from(param.len()).unwrap());
-
     let mut command_data = path::generate_key_derivation_path();
     command_data.append(&mut account_transaction_header::generate_account_transaction_header());
     command_data.append(&mut transaction_payload);
@@ -43,7 +40,6 @@ fn main() {
     ledger.exchange(command1).expect("update contract, initial packet failed.");
 
     for name_part in name.chunks(255) {
-        println!("n len 2: {}", name_part.len());
             let name_command = ApduCommand {
                 cla: 224, // Has to be this value for all commands.
                 ins,
@@ -57,7 +53,6 @@ fn main() {
 
 
     for param_part in param.chunks(255) {
-        println!("p len 2: {}", param_part.len());
         let param_command = ApduCommand {
             cla: 224, // Has to be this value for all commands.
             ins,

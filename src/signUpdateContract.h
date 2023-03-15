@@ -20,10 +20,10 @@ typedef struct {
     uint8_t displayAmount[26];
     uint8_t displayIndex[26];
     uint8_t displaySubindex[26];
-    unsigned char displaySender[57];
     uint16_t nameLength;
     uint8_t rawParameterLength[2];
     uint8_t paramLength;
+    bool displayStart;
     updateContractState_t state;
 } updateContractContext_t;
 

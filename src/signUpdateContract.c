@@ -1,11 +1,66 @@
 #include <os.h>
 
+#include "accountSenderView.h"
 #include "responseCodes.h"
 #include "sign.h"
 #include "util.h"
 
 static updateContractContext_t *ctx = &global.signUpdateContract;
 static tx_state_t *tx_state = &global_tx_state;
+
+UX_STEP_NOCB(
+    ux_sign_update_contract_display_amount,
+    bnnn_paging,
+    {.title = "Amount (CCD)", .text = (char *) global.signUpdateContract.displayAmount});
+
+UX_STEP_NOCB(
+    ux_sign_update_contract_display_index,
+    bnnn_paging,
+    {.title = "Contract index", .text = (char *) global.signUpdateContract.displayIndex});
+
+UX_STEP_NOCB(
+    ux_sign_update_contract_display_subindex,
+    bnnn_paging,
+    {.title = "Contract subindex", .text = (char *) global.signUpdateContract.displaySubindex});
+
+UX_STEP_NOCB(
+    ux_sign_update_contract_display_receive_name,
+    bnnn_paging,
+    {.title = "Receive name", .text = (char *) global.signUpdateContract.display});
+
+UX_STEP_NOCB(
+    ux_sign_update_contract_display_parameter,
+    bnnn_paging,
+    {.title = "Parameter", .text = (char *) global.signUpdateContract.display});
+
+UX_STEP_VALID(ux_sign_update_contract_continue, nn, sendSuccessNoIdle(), {"Continue", "with transaction"});
+
+// Display initial part
+UX_FLOW(
+    ux_sign_update_contract_start,
+    &ux_sign_flow_shared_review,
+    &ux_sign_flow_account_sender_view,
+    &ux_sign_update_contract_display_amount,
+    &ux_sign_update_contract_display_index,
+    &ux_sign_update_contract_display_subindex,
+    &ux_sign_update_contract_display_receive_name,
+    &ux_sign_update_contract_continue);
+// Display receiveName with continue
+UX_FLOW(
+    ux_sign_update_contract_receive_name,
+    &ux_sign_update_contract_display_receive_name,
+    &ux_sign_update_contract_continue);
+// Display parameter with continue
+UX_FLOW(
+    ux_sign_update_contract_parameter,
+    &ux_sign_update_contract_display_parameter,
+    &ux_sign_update_contract_continue);
+// Display parameter with finish
+UX_FLOW(
+    ux_sign_update_contract_finish,
+    &ux_sign_update_contract_display_parameter,
+    &ux_sign_flow_shared_sign,
+    &ux_sign_flow_shared_decline);
 
 #define P1_INITIAL          0x00
 #define P1_RECEIVE_NAME 0x01
@@ -52,12 +107,16 @@ void handleSignUpdateContract(uint8_t *cdata, uint8_t p1, uint8_t dataLength, vo
             THROW(ERROR_INVALID_PARAM);
         }
 
-        // ctx->displayStart = true;
+        ctx->displayStart = true;
         ctx->state = TX_UPDATE_CONTRACT_RECEIVE_NAME;
         sendSuccessNoIdle();
     } else if (p1 == P1_RECEIVE_NAME && ctx->state == TX_UPDATE_CONTRACT_RECEIVE_NAME) {
         ctx->nameLength -= dataLength;
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, dataLength, NULL, 0);
+        memmove(ctx->display, cdata, dataLength);
+        if (dataLength < 255) {
+            memmove(ctx->display + dataLength, "\0", 1);
+        }
 
         if (ctx->nameLength < 0) {
             THROW(ERROR_INVALID_STATE);
@@ -67,23 +126,34 @@ void handleSignUpdateContract(uint8_t *cdata, uint8_t p1, uint8_t dataLength, vo
             ctx->state = TX_UPDATE_CONTRACT_PARAMETER;
         }
 
-        // TODO Display start / receiveName
-        sendSuccessNoIdle();
+        if (ctx->displayStart) {
+            ctx->displayStart = false;
+            ux_flow_init(0, ux_sign_update_contract_start, NULL);
+        } else {
+            ux_flow_init(0, ux_sign_update_contract_receive_name, NULL);
+        }
+        *flags |= IO_ASYNCH_REPLY;
     } else if (p1 == P1_PARAMETER && ctx->state == TX_UPDATE_CONTRACT_PARAMETER) {
         ctx->paramLength -= dataLength;
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, dataLength, NULL, 0);
+        memmove(ctx->display, cdata, dataLength);
+        if (dataLength < 255) {
+            memmove(ctx->display + dataLength, "\0", 1);
+        }
 
         if (ctx->paramLength < 0) {
             THROW(ERROR_INVALID_PARAM);
         } else if (ctx->paramLength == 0) {
             ctx->state = TX_UPDATE_CONTRACT_RECEIVE_NAME;
 
-            ux_flow_init(0, ux_sign_flow_shared, NULL);
-            *flags |= IO_ASYNCH_REPLY;
+            ux_flow_init(0, ux_sign_update_contract_finish, NULL);
         } else {
-            sendSuccessNoIdle();
+            ux_flow_init(0, ux_sign_update_contract_parameter, NULL);
+           sendSuccessNoIdle();
         }
+        *flags |= IO_ASYNCH_REPLY;
     } else {
         THROW(ERROR_INVALID_STATE);
     }
 }
+
