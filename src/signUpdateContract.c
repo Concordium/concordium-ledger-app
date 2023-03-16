@@ -33,23 +33,13 @@ UX_STEP_NOCB(
     bnnn_paging,
     {.title = "Parameter", .text = (char *) global.signUpdateContract.display});
 
+UX_STEP_NOCB(
+    ux_sign_update_contract_display_no_parameter,
+    bn,
+    {"No Parameter", ""});
+
 UX_STEP_VALID(ux_sign_update_contract_continue, nn, sendSuccessNoIdle(), {"Continue", "with transaction"});
 
-// Display initial part
-UX_FLOW(
-    ux_sign_update_contract_start,
-    &ux_sign_flow_shared_review,
-    &ux_sign_flow_account_sender_view,
-    &ux_sign_update_contract_display_amount,
-    &ux_sign_update_contract_display_index,
-    &ux_sign_update_contract_display_subindex,
-    &ux_sign_update_contract_display_receive_name,
-    &ux_sign_update_contract_continue);
-// Display receiveName with continue
-UX_FLOW(
-    ux_sign_update_contract_receive_name,
-    &ux_sign_update_contract_display_receive_name,
-    &ux_sign_update_contract_continue);
 // Display parameter with continue
 UX_FLOW(
     ux_sign_update_contract_parameter,
@@ -61,6 +51,32 @@ UX_FLOW(
     &ux_sign_update_contract_display_parameter,
     &ux_sign_flow_shared_sign,
     &ux_sign_flow_shared_decline);
+
+const ux_flow_step_t *ux_sign_update_contract_flow[12];
+
+void startUpdateContractDisplayReceiveName(bool displayStart, bool finalReceiveName, bool emptyParameter) {
+    uint8_t index = 0;
+    if (displayStart) {
+        ux_sign_update_contract_flow[index++] = &ux_sign_flow_shared_review;
+        ux_sign_update_contract_flow[index++] = &ux_sign_flow_account_sender_view;
+        ux_sign_update_contract_flow[index++] = &ux_sign_update_contract_display_amount;
+        ux_sign_update_contract_flow[index++] = &ux_sign_update_contract_display_index;
+        ux_sign_update_contract_flow[index++] = &ux_sign_update_contract_display_subindex;
+    }
+
+    ux_sign_update_contract_flow[index++] = &ux_sign_update_contract_display_receive_name;
+
+    if (finalReceiveName && emptyParameter) {
+        ux_sign_update_contract_flow[index++] = &ux_sign_update_contract_display_no_parameter;
+        ux_sign_update_contract_flow[index++] = &ux_sign_flow_shared_sign;
+        ux_sign_update_contract_flow[index++] = &ux_sign_flow_shared_decline;
+    } else {
+        ux_sign_update_contract_flow[index++] = &ux_sign_update_contract_continue;
+    }
+    ux_sign_update_contract_flow[index++] = FLOW_END_STEP;
+    ux_flow_init(0, ux_sign_update_contract_flow, NULL);
+}
+
 
 #define P1_INITIAL          0x00
 #define P1_RECEIVE_NAME 0x01
@@ -126,11 +142,10 @@ void handleSignUpdateContract(uint8_t *cdata, uint8_t p1, uint8_t dataLength, vo
             ctx->state = TX_UPDATE_CONTRACT_PARAMETER;
         }
 
+        startUpdateContractDisplayReceiveName(ctx->displayStart, ctx->nameLength == 0, ctx->paramLength == 0);
+
         if (ctx->displayStart) {
             ctx->displayStart = false;
-            ux_flow_init(0, ux_sign_update_contract_start, NULL);
-        } else {
-            ux_flow_init(0, ux_sign_update_contract_receive_name, NULL);
         }
         *flags |= IO_ASYNCH_REPLY;
     } else if (p1 == P1_PARAMETER && ctx->state == TX_UPDATE_CONTRACT_PARAMETER) {
