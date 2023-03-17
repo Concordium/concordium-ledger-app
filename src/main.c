@@ -37,6 +37,7 @@
 #include "signTransferToEncrypted.h"
 #include "signTransferToPublic.h"
 #include "signTransferWithSchedule.h"
+#include "signInitContract.h"
 #include "ux.h"
 #include "verifyAddress.h"
 
@@ -90,6 +91,7 @@ accountSender_t global_account_sender;
 #define INS_SIGN_TRANSFER_WITH_SCHEDULE_AND_MEMO 0x34
 #define INS_REGISTER_DATA                        0x35
 
+#define INS_INIT_CONTRACT                        0x37
 // Main entry of application that listens for APDU commands that will be received from the
 // computer. The APDU commands control what flow is activated, i.e. which control flow is initiated.
 static void concordium_main(void) {
@@ -188,6 +190,9 @@ static void concordium_main(void) {
                         break;
                     case INS_SIGN_UPDATE_CREDENTIAL:
                         handleSignUpdateCredential(cdata, p1, p2, &flags, isInitialCall);
+                        break;
+                    case INS_INIT_CONTRACT:
+                        handleSignInitContract(cdata, p1, lc, &flags, isInitialCall);
                         break;
                     default:
                         THROW(ERROR_INVALID_INSTRUCTION);

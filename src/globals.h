@@ -20,6 +20,7 @@
 #include "signTransferToPublic.h"
 #include "signTransferWithSchedule.h"
 #include "signRegisterData.h"
+#include "signInitContract.h"
 
 #include "ux.h"
 
@@ -107,6 +108,7 @@ typedef union {
     signConfigureBaker_t signConfigureBaker;
     signConfigureDelegationContext_t signConfigureDelegation;
 
+    initContractContext_t signInitContract;
     transactionWithDataBlob_t withDataBlob;
 } instructionContext;
 extern instructionContext global;
