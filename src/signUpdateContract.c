@@ -54,6 +54,10 @@ UX_FLOW(
 
 const ux_flow_step_t *ux_sign_update_contract_flow[12];
 
+/**
+ * Builds and inits the ux flow for the receiveName.
+ * prepends the initial batch of info and appends continue/sign pages based on the given parameters.
+ */
 void startUpdateContractDisplayReceiveName(bool displayStart, bool finalReceiveName, bool emptyParameter) {
     uint8_t index = 0;
     if (displayStart) {
@@ -129,6 +133,8 @@ void handleSignUpdateContract(uint8_t *cdata, uint8_t p1, uint8_t dataLength, vo
     } else if (p1 == P1_RECEIVE_NAME && ctx->state == TX_UPDATE_CONTRACT_RECEIVE_NAME) {
         ctx->nameLength -= dataLength;
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, dataLength, NULL, 0);
+
+        // Build display of receive name chunk
         memmove(ctx->display, cdata, dataLength);
         if (dataLength < 255) {
             memmove(ctx->display + dataLength, "\0", 1);
@@ -151,6 +157,8 @@ void handleSignUpdateContract(uint8_t *cdata, uint8_t p1, uint8_t dataLength, vo
     } else if (p1 == P1_PARAMETER && ctx->state == TX_UPDATE_CONTRACT_PARAMETER) {
         ctx->paramLength -= dataLength;
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, dataLength, NULL, 0);
+
+        // Build display of parameter chunk
         memmove(ctx->display, cdata, dataLength);
         if (dataLength < 255) {
             memmove(ctx->display + dataLength, "\0", 1);
