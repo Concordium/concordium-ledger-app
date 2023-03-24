@@ -1,7 +1,12 @@
 /obj
+/obj_nano*
 /debug
+/debug_nano*
 /bin
 /dep
+/dep_nano*
+/build
+/gen_src_nano*
 /src/glyphs.c
 /src/glyphs.h
 /output-scan-build
