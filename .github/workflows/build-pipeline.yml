@@ -122,7 +122,7 @@ jobs:
                 submodules: 'recursive'
             - run: sudo apt-get update -y && sudo apt-get install -y libusb-1.0.0 libudev-dev
 
-            - uses: actions/setup-node@v2
+            - uses: actions/setup-node@v3
               with:
                 node-version: "14.16.0"
 
@@ -135,7 +135,7 @@ jobs:
                 mkdir tests/bin
 
             - name: Download binaries
-              uses: actions/download-artifact@v2
+              uses: actions/download-artifact@v3
               with:
                 path: tests/bin
 
