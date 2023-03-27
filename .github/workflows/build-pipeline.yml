@@ -17,7 +17,7 @@ jobs:
         container: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:sha-229b03c
 
         steps:
-            - uses: actions/checkout@v2
+            - uses: actions/checkout@v3
               with:
                   submodules: 'recursive'
 
@@ -28,7 +28,7 @@ jobs:
                   mv bin/app.elf concordium_nanos.elf
 
             - name: Upload binary
-              uses: actions/upload-artifact@v2
+              uses: actions/upload-artifact@v3
               with:
                 name: nanos
                 path: ./concordium_nanos.elf
@@ -40,7 +40,7 @@ jobs:
         container: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:sha-229b03c
 
         steps:
-            - uses: actions/checkout@v2
+            - uses: actions/checkout@v3
               with:
                   submodules: 'recursive'
 
@@ -51,7 +51,7 @@ jobs:
                   mv bin/app.elf concordium_nanosplus.elf
 
             - name: Upload binary
-              uses: actions/upload-artifact@v2
+              uses: actions/upload-artifact@v3
               with:
                 name: nanosplus
                 path: ./concordium_nanosplus.elf
@@ -63,7 +63,7 @@ jobs:
         container: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:sha-229b03c
 
         steps:
-            - uses: actions/checkout@v2
+            - uses: actions/checkout@v3
               with:
                   submodules: 'recursive'
 
@@ -74,7 +74,7 @@ jobs:
                   mv bin/app.elf concordium_nanox.elf
 
             - name: Upload binary
-              uses: actions/upload-artifact@v2
+              uses: actions/upload-artifact@v3
               with:
                 name: nanox
                 path: ./concordium_nanox.elf
@@ -86,7 +86,7 @@ jobs:
         container: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:sha-229b03c
 
         steps:
-            - uses: actions/checkout@v2
+            - uses: actions/checkout@v3
               with:
                   submodules: 'recursive'
 
@@ -100,7 +100,7 @@ jobs:
         runs-on: ubuntu-latest
 
         steps:
-            - uses: actions/checkout@v2
+            - uses: actions/checkout@v3
 
             - name: Lint
               uses: DoozyX/clang-format-lint-action@v0.15
@@ -117,7 +117,7 @@ jobs:
         runs-on: ubuntu-latest
 
         steps:
-            - uses: actions/checkout@v2
+            - uses: actions/checkout@v3
               with:
                 submodules: 'recursive'
             - run: sudo apt-get update -y && sudo apt-get install -y libusb-1.0.0 libudev-dev
@@ -145,7 +145,7 @@ jobs:
 
             - name: Upload snapshots
               if: always()
-              uses: actions/upload-artifact@v2
+              uses: actions/upload-artifact@v3
               with:
                 name: snapshots
                 path: ./tests/snapshots-tmp
@@ -159,7 +159,7 @@ jobs:
 
       steps:
           - name: Clone
-            uses: actions/checkout@v2
+            uses: actions/checkout@v3
 
           - name: Build unit tests
             run: |
