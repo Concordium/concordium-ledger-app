@@ -25,7 +25,7 @@ typedef enum {
 
 typedef struct {
     bool stopBaking;
-    uint8_t displayCapital[26];
+    uint8_t displayCapital[30];
     uint8_t displayRestake[4];
     uint8_t displayOpenForDelegation[15];
 } configureBakerCapitalRestakeOpenForDelegationBlob_t;

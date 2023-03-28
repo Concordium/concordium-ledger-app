@@ -137,7 +137,7 @@ test('[NANO S] Configure-baker: Capital, restake, open status and keys', setupZe
     const bitmap = '000f';
     await configureBakerStep0(bitmap, transport);
     await expect(configureBakerStep1(fullP1, aggregationVerifyKey + aggregationVerifyKeyProof, sim, transport, async () => {
-        await sim.navigateAndCompareSnapshots('.', 'nanos_configure_baker/capital_restake_openstatus_keys', [10]);
+        await sim.navigateAndCompareSnapshots('.', 'nanos_configure_baker/capital_restake_openstatus_keys', [11]);
         await sim.clickBoth(undefined, false);
     })).resolves.toEqual(Buffer.from('60aba821cb44103d68aab00be87990a886a8caab5fe10f403b77cde7b24fa527a92bc43fd061138b044c787d673d4f92851f0cb989286d65011ca3b5c5f908089000', 'hex'));
 }));
@@ -183,7 +183,7 @@ test('[NANO S] Configure-baker: Capital, restake, open status, without keys', se
     const bitmap = '0007';
     await configureBakerStep0(bitmap, transport);
     await expect(configureBakerStep1(`${capital}01` + '02', undefined, sim, transport, async () => {
-        await sim.navigateAndCompareSnapshots('.', 'nanos_configure_baker/capital_restake_openstatus', [9]);
+        await sim.navigateAndCompareSnapshots('.', 'nanos_configure_baker/capital_restake_openstatus', [10]);
         await sim.clickBoth(undefined, false);
     })).resolves.toEqual(Buffer.from('15102d4e6361a26fc03ae7866987f6253f20f3763602aa009b0f8318c0029c323b26c2f7c9a7fdd08c67719565cb680986e64d40faffdbae4ea876f4c6576d049000', 'hex'));
 }));
@@ -296,7 +296,7 @@ test('[NANO S] Configure-baker: All parameters', setupZemu('nanos', async (sim, 
     const bitmap = '00ff';
     await configureBakerStep0(bitmap, transport);
     await configureBakerStep1(fullP1, aggregationVerifyKey + aggregationVerifyKeyProof, sim, transport, async () => {
-        await sim.navigateAndCompareSnapshots('.', 'nanos_configure_baker/all_parameters_1', [10]);
+        await sim.navigateAndCompareSnapshots('.', 'nanos_configure_baker/all_parameters_1', [11]);
         await sim.clickBoth(undefined, false);
     });
     await configureBakerUrlStep(url, sim, transport, async () => {

@@ -103,7 +103,7 @@ CTEST_OUTPUT_ON_FAILURE=1 make -C build test
 
 ### Running end to end tests
 An end to end test is available for each instruction implemented in the application. The end
-to end tests depends on having built the application for Nano S and Nano X, and having placed
+to end tests depend on having built the application for Nano S and Nano X, and having placed
 their `.elf` files correctly. This can achieved by running:
 ```bash
 cd tests
