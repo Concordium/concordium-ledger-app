@@ -1,13 +1,13 @@
 import { resolve } from 'path';
-import Zemu, { DEFAULT_START_OPTIONS, StartOptions } from '@zondax/zemu';
+import Zemu, { DEFAULT_START_OPTIONS, IStartOptions } from '@zondax/zemu';
 import Transport from '@ledgerhq/hw-transport';
 
 const SEED_PHRASE = 'vendor sphere crew wise puppy wise stand wait tissue boy fortune myself hamster intact window garment negative dynamic permit genre limb work dial guess';
 
-const sharedOptions: Omit<StartOptions, 'model'> = {
+const sharedOptions: Omit<IStartOptions, 'model'> = {
+    ...DEFAULT_START_OPTIONS,
     sdk: '',
     caseSensitive: true,
-    X11: false,
     logging: true,
     startDelay: 3000,
     startTimeout: DEFAULT_START_OPTIONS.startTimeout,
@@ -17,17 +17,17 @@ const sharedOptions: Omit<StartOptions, 'model'> = {
 
 export type LedgerModel = 'nanos' | 'nanosp' | 'nanox';
 
-export const optionsNanoS: StartOptions = {
+export const optionsNanoS: IStartOptions = {
     ...sharedOptions,
     model: 'nanos',
 };
 
-export const optionsNanoSPlus: StartOptions = {
+export const optionsNanoSPlus: IStartOptions = {
     ...sharedOptions,
     model: 'nanosp',
 };
 
-export const optionsNanoX: StartOptions = {
+export const optionsNanoX: IStartOptions = {
     ...sharedOptions,
     model: 'nanox',
 };
