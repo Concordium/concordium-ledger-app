@@ -6,7 +6,12 @@
  * account transaction.
  * @param cdata please see /doc/ins_update_contract.md for details
  */
-void handleSignUpdateContract(uint8_t *cdata, uint8_t p1, uint8_t dataLength, volatile unsigned int *flags, bool isInitialCall);
+void handleSignUpdateContract(
+    uint8_t *cdata,
+    uint8_t p1,
+    uint8_t dataLength,
+    volatile unsigned int *flags,
+    bool isInitialCall);
 
 typedef enum {
     TX_UPDATE_CONTRACT_INITIAL = 100,

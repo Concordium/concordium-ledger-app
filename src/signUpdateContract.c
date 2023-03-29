@@ -33,10 +33,7 @@ UX_STEP_NOCB(
     bnnn_paging,
     {.title = "Parameter", .text = (char *) global.signUpdateContract.display});
 
-UX_STEP_NOCB(
-    ux_sign_update_contract_display_no_parameter,
-    bn,
-    {"No Parameter", ""});
+UX_STEP_NOCB(ux_sign_update_contract_display_no_parameter, bn, {"No Parameter", ""});
 
 UX_STEP_VALID(ux_sign_update_contract_continue, nn, sendSuccessNoIdle(), {"Continue", "with transaction"});
 
@@ -81,12 +78,16 @@ void startUpdateContractDisplayReceiveName(bool displayStart, bool finalReceiveN
     ux_flow_init(0, ux_sign_update_contract_flow, NULL);
 }
 
-
-#define P1_INITIAL          0x00
+#define P1_INITIAL      0x00
 #define P1_RECEIVE_NAME 0x01
-#define P1_PARAMETER     0x02
+#define P1_PARAMETER    0x02
 
-void handleSignUpdateContract(uint8_t *cdata, uint8_t p1, uint8_t dataLength, volatile unsigned int *flags, bool isInitialCall) {
+void handleSignUpdateContract(
+    uint8_t *cdata,
+    uint8_t p1,
+    uint8_t dataLength,
+    volatile unsigned int *flags,
+    bool isInitialCall) {
     if (isInitialCall) {
         ctx->state = TX_UPDATE_CONTRACT_INITIAL;
     }
@@ -172,11 +173,10 @@ void handleSignUpdateContract(uint8_t *cdata, uint8_t p1, uint8_t dataLength, vo
             ux_flow_init(0, ux_sign_update_contract_finish, NULL);
         } else {
             ux_flow_init(0, ux_sign_update_contract_parameter, NULL);
-           sendSuccessNoIdle();
+            sendSuccessNoIdle();
         }
         *flags |= IO_ASYNCH_REPLY;
     } else {
         THROW(ERROR_INVALID_STATE);
     }
 }
-
