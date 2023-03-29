@@ -23,17 +23,13 @@ UX_STEP_NOCB(
     {(char *) global.exportDataContext.displayHeader, (char *) global.exportDataContext.display});
 UX_STEP_CB(ux_export_data_accept_step, pb, exportData(), {&C_icon_validate_14, "Accept"});
 UX_STEP_CB(ux_export_data_decline_step, pb, sendUserRejection(), {&C_icon_crossmark, "Decline"});
-UX_FLOW(
-    ux_export_data,
-    &ux_export_data_0_step,
-    &ux_export_data_accept_step,
-    &ux_export_data_decline_step);
+UX_FLOW(ux_export_data, &ux_export_data_0_step, &ux_export_data_accept_step, &ux_export_data_decline_step);
 
-#define P1_ALLOW_ALL                0x00
-#define P1_ID_CRED_SEC            0x02
-#define P1_PRF_KEY                    0x03
-#define P1_BLINDING_RND        0x04
-#define P1_ATTRIBUTE_RND     0x05
+#define P1_ALLOW_ALL     0x00
+#define P1_ID_CRED_SEC   0x02
+#define P1_PRF_KEY       0x03
+#define P1_BLINDING_RND  0x04
+#define P1_ATTRIBUTE_RND 0x05
 
 // Export the BLS keys (For mainnet)
 #define P2_KEY_MAINNET 0x00
@@ -105,15 +101,17 @@ void handleExportData(uint8_t *dataBuffer, uint8_t p1, uint8_t p2, volatile unsi
     dataBuffer += 4;
 
     // If we are accepted all, we need to confirm that the coinType/identityProvider/identity has not been changed
-    if (ctx->acceptedAll && (ctx->path[1] != (coinType | HARDENED_OFFSET) || ctx->path[2] != (identityProvider | HARDENED_OFFSET) || ctx->path[3] != (identity | HARDENED_OFFSET) )) {
+    if (ctx->acceptedAll &&
+        (ctx->path[1] != (coinType | HARDENED_OFFSET) || ctx->path[2] != (identityProvider | HARDENED_OFFSET) ||
+         ctx->path[3] != (identity | HARDENED_OFFSET))) {
         THROW(ERROR_INVALID_PARAM);
     }
 
     uint32_t keyDerivationPath[4] = {
-            CONCORDIUM_PURPOSE | HARDENED_OFFSET,
-            coinType | HARDENED_OFFSET,
-            identityProvider | HARDENED_OFFSET,
-            identity | HARDENED_OFFSET,
+        CONCORDIUM_PURPOSE | HARDENED_OFFSET,
+        coinType | HARDENED_OFFSET,
+        identityProvider | HARDENED_OFFSET,
+        identity | HARDENED_OFFSET,
     };
     memmove(ctx->path, keyDerivationPath, sizeof(keyDerivationPath));
 
