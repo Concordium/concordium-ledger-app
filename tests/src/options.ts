@@ -6,7 +6,6 @@ const SEED_PHRASE = 'vendor sphere crew wise puppy wise stand wait tissue boy fo
 
 const sharedOptions: Omit<IStartOptions, 'model'> = {
     ...DEFAULT_START_OPTIONS,
-    sdk: '',
     caseSensitive: true,
     logging: true,
     startDelay: 3000,
@@ -25,11 +24,13 @@ export const optionsNanoS: IStartOptions = {
 export const optionsNanoSPlus: IStartOptions = {
     ...sharedOptions,
     model: 'nanosp',
+    custom: sharedOptions.custom + `-a 1`,
 };
 
 export const optionsNanoX: IStartOptions = {
     ...sharedOptions,
     model: 'nanox',
+    custom: sharedOptions.custom + `-a 1`,
 };
 
 export const NANOS_ELF_PATH = resolve('bin/nanos/concordium_nanos.elf');
