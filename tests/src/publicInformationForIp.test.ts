@@ -2,7 +2,7 @@ import Transport from '@ledgerhq/hw-transport';
 import Zemu from '@zondax/zemu';
 import { LedgerModel, setupZemu } from './options';
 
-async function identityProvider(_device: 'nanos' | 'nanox' | 'nanosp', sim: Zemu, transport: Transport, handleKeyUi: (key: string, extraStep: number) => Promise<void>) {
+async function identityProvider(_device: 'nanos' | 'nanox' | 'nanosp', sim: Zemu, transport: Transport, handleKeyUi: (key: string, extraStep: number) => Promise<any>) {
     let data = Buffer.from('0800000451000000000000000000000000000000000000000200000000000000008196e718f392ec8d07216b22b555cbb71bcee88037566d3f758b9786b945e3b614660f4bf954dbe57bc2304e5a863d2e89a1f69196a1d0423f4936aa664da95de16f40a639dba085073c5a7c8e710c2a402136cc89a39c12ed044e1035649c0f03', 'hex');
     await transport.send(0xe0, 0x20, 0x00, 0x00, data);
     data = Buffer.from('0000b6bc751f1abfb6440ff5cce27d7cdd1e7b0b8ec174f54de426890635b27e7daf', 'hex');
