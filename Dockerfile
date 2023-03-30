@@ -7,6 +7,8 @@
 
 FROM ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:eb27b9eb2917620b95f5df03a16ea61d62ef2032
 
+RUN apk add --update zip
+
 ENV WORK_DIR=/app
 ENV TARGET=nanos
 
