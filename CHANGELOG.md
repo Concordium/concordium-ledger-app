@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.1.0
+
+### Added
+
+* Support for the Nano S Plus 1.1.0 firmware.
+
 ## 3.0.1
 
 ### Added
