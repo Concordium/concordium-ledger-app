@@ -5,13 +5,13 @@
   "dependencies": {
     "@concordium/node-sdk": "^6.2.0",
     "@ledgerhq/hw-transport": "^6.27.1",
-    "@zondax/zemu": "^0.32.0",
-    "jest": "^27.1.1",
+    "@zondax/zemu": "^0.36.0",
+    "jest": "^29.4.3",
     "prettier": "^2.3.2",
-    "ts-jest": "^27.0.5"
+    "ts-jest": "^29.0.5"
   },
   "devDependencies": {
-    "@types/jest": "^27.0.1",
+    "@types/jest": "^29.4.0",
     "@typescript-eslint/eslint-plugin": "^4.31.0",
     "@typescript-eslint/parser": "^4.31.0",
     "eslint": "^7.32.0",

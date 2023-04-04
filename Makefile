@@ -17,20 +17,23 @@
 #  limitations under the License.
 #*******************************************************************************
 
-# BOLOS_SDK has to point to nanos-secure-sdk or nanox-secure-sdk
-ifndef BOLOS_SDK
-$(error Environment variable BOLOS_SDK is not set.)
+ifndef TARGET
+$(error Environment variable TARGET is not set.)
 endif
-include $(BOLOS_SDK)/Makefile.defines
+
 
 # Main app configuration
 APPNAME = "Concordium"
 
-ifeq ($(TARGET_NAME),TARGET_NANOS)
+ifeq ($(TARGET),nanos)
     ICONNAME=icons/nanos-concordium-icon.gif
+    BOLOS_SDK=$(WORK_DIR/)nanos-secure-sdk
 else
     ICONNAME=icons/nanosplus-concordium-icon.gif
+    BOLOS_SDK=$(WORK_DIR/)ledger-secure-sdk
 endif
+
+include $(BOLOS_SDK)/Makefile.defines
 
 # Version must be no greater than 99.99.999, otherwise
 # extra memory must be allocated in menu.c.

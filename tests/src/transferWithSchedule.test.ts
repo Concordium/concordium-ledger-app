@@ -1,9 +1,10 @@
 import Transport from '@ledgerhq/hw-transport';
 import Zemu from '@zondax/zemu';
+import { ISnapshot } from '@zondax/zemu/dist/types';
 import { LedgerModel, setupZemu } from './options';
 
 async function transferWithSchedule(
-    sim: Zemu, transport: Transport, handleUi: () => Promise<void>,
+    sim: Zemu, transport: Transport, handleUi: () => Promise<ISnapshot>,
 ) {
     let data = Buffer.from('08000004510000000000000000000000000000000000000002000000000000000020a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7000000000000000a0000000000000064000000290000000063de5da71320a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d705', 'hex');
     transport.send(0xe0, 0x03, 0x00, 0x00, data);
@@ -49,7 +50,7 @@ test('[NANO SP] Transfer with schedule', setupZemu('nanosp', transferWithSchedul
 test('[NANO X] Transfer with schedule', setupZemu('nanox', transferWithScheduleXAndSP));
 
 async function transferWithScheduleWithMemo(
-    sim: Zemu, transport: Transport, handleUi: () => Promise<void>,
+    sim: Zemu, transport: Transport, handleUi: () => Promise<ISnapshot>,
 ) {
     let data = Buffer.from('08000004510000000000000000000000000000000000000002000000000000000020a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7000000000000000a0000000000000064000000290000000063de5da71820a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7050005', 'hex');
     transport.send(0xe0, 0x34, 0x02, 0x00, data);

@@ -4,8 +4,7 @@ An application for the Ledger Nano S, Ledger Nano S Plus and Ledger Nano X devic
 
 ## Secure SDK dependencies
 
-We depend on [Nano S Secure SDK](https://github.com/LedgerHQ/nanos-secure-sdk/), [Nano S Plus Secure SDK](https://github.com/LedgerHQ/nanos-secure-sdk/) and the [Nano X Secure SDK](https://github.com/LedgerHQ/nanosplus-secure-sdk), which 
-have been added as git submodules. Make sure to initialize submodules when checking out this repository:
+We depend on [Nano S Secure SDK](https://github.com/LedgerHQ/nanos-secure-sdk/) and [Ledger Secure SDK](https://github.com/LedgerHQ/ledger-secure-sdk/), which have been added as git submodules. Make sure to initialize submodules when checking out this repository:
 ```
 git submodule update --init
 ```
@@ -32,8 +31,8 @@ root@410e7ab19bea:/app# make load
 root@410e7ab19bea:/app# make delete
 
 // Switch BOLOS_SDK to build for Nano S Plus
-// Note that 'make clean' is a requirement when switching BOLOS_SDK.
-root@f382ee774923:/app# export BOLOS_SDK=nanosplus-secure-sdk
+// Note that 'make clean' is a requirement when switching TARGET.
+root@f382ee774923:/app# export TARGET=nanos2
 root@f382ee774923:/app# make clean
 root@f382ee774923:/app# make load
 ```
@@ -49,9 +48,9 @@ and delete the application from the device with
 ```bash
 make delete
 ```
-Switching `BOLOS_SDK` to build for a different device:
+Switching `TARGET` to build for a different device:
 ```bash
-export BOLOS_SDK=nanosplus-secure-sdk
+export TARGET=nanos2
 make clean
 make load
 ```
@@ -62,7 +61,7 @@ As the Ledger Nano X does not support sideloading, the only way to test updates 
 to use the [Speculos emulator](https://github.com/LedgerHQ/speculos). Please follow their documentation
 for how to setup the emulator. To build the `.elf` file required by the emulator run:
 ```
-export BOLOS_SDK=nanox-secure-sdk (or nanos-secure-sdk/nanosplus-secure-sdk)
+export TARGET=nanox (or nanos/nanos2)
 make emulator
 ```
 The file will be available at `bin/app.elf`.
@@ -133,11 +132,11 @@ LEDGER_PUBLIC_KEY=public_key_matching_the_signing_key
 To build a new release make sure that `APPVERSION` has been bumped correctly, and then run
 ```
 make clean
-export BOLOS_SDK=nanos-secure-sdk
+export TARGET=nanos
 make release
 
 make clean
-export BOLOS_SDK=nanosplus-secure-sdk
+export TARGET=nanos2
 make release
 ```
 The release will be packaged into two `.zip` archives, each with the required binary and the corresponding install scripts.
