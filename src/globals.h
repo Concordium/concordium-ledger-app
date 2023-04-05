@@ -21,6 +21,7 @@
 #include "signTransferToPublic.h"
 #include "signTransferWithSchedule.h"
 #include "signRegisterData.h"
+#include "signMessage.h"
 
 #include "ux.h"
 
@@ -104,6 +105,7 @@ typedef union {
     exportDataContext_t exportDataContext;
     exportPublicKeyContext_t exportPublicKeyContext;
     verifyAddressContext_t verifyAddressContext;
+    signMessageContext_t signMessageContext;
 
     signPublicInformationForIp_t signPublicInformationForIp;
     signCredentialDeploymentContext_t signCredentialDeploymentContext;
