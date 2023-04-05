@@ -8,6 +8,7 @@
 void handleSignMessage(
     uint8_t *cdata,
     uint8_t p1,
+    uint8_t p2,
     uint8_t dataLength,
     volatile unsigned int *flags,
     bool isInitialCall);
@@ -18,11 +19,13 @@ typedef enum {
 } signMessageState_t;
 
 typedef struct {
-    uint8_t display[255];
-    uint32_t messageLength;
-    unsigned char displaySigner[57];
+    uint8_t initialP2;
     bool displayStart;
+    uint32_t messageLength;
     signMessageState_t state;
+    char displayHeader[14];
+    char display[255];
+    unsigned char displaySigner[57];
 } signMessageContext_t;
 
 #endif

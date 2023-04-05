@@ -199,7 +199,7 @@ static void concordium_main(void) {
                         handleSignUpdateCredential(cdata, p1, p2, &flags, isInitialCall);
                         break;
                     case INS_SIGN_MESSAGE:
-                        handleSignMessage(cdata, p1, lc, &flags, isInitialCall);
+                        handleSignMessage(cdata, p1, p2, lc, &flags, isInitialCall);
                         break;
                     default:
                         THROW(ERROR_INVALID_INSTRUCTION);

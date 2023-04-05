@@ -19,7 +19,7 @@ UX_STEP_NOCB(
 UX_STEP_NOCB(
     ux_sign_message_display_message,
     bnnn_paging,
-    {"Message", (char *) global.signMessageContext.display});
+    {global.signMessageContext.displayHeader, (char *) global.signMessageContext.display});
 
 UX_STEP_CB(
     ux_sign_message_accept,
@@ -32,6 +32,8 @@ UX_STEP_CB(
     pnn,
     sendUserRejection(),
     {&C_icon_crossmark, "Decline to", "sign message"});
+
+UX_STEP_CB(ux_sign_message_continue, nn, sendSuccessNoIdle(), {"Continue", "reviewing message"});
 
 // There will at most be 6 UI steps when the entire message fits in one batch.
 const ux_flow_step_t *ux_sign_message[6];
@@ -49,6 +51,8 @@ void startSignMessageDisplay(bool displayStart, bool finalChunk) {
     if (finalChunk) {
         ux_sign_message[index++] = &ux_sign_message_accept;
         ux_sign_message[index++] = &ux_sign_message_decline;
+    } else {
+        ux_sign_message[index++] = &ux_sign_message_continue;
     }
 
     ux_sign_message[index++] = FLOW_END_STEP;
@@ -60,12 +64,20 @@ void startSignMessageDisplay(bool displayStart, bool finalChunk) {
 #define P1_SIGN_MESSAGE_INITIAL           0x00
 #define P1_SIGN_MESSAGE_MESSAGE      0x01
 
+#define P2_UTF8 0x00
+#define P2_HEX 0x01
+
 void handleSignMessage(
     uint8_t *cdata,
     uint8_t p1,
+    uint8_t p2,
     uint8_t dataLength,
     volatile unsigned int *flags,
     bool isInitialCall) {
+
+    if (p2 != P2_UTF8 && p2 != P2_HEX) {
+        THROW(ERROR_INVALID_PARAM);
+    }
 
     if (isInitialCall) {
         ctx->state = SIGN_MESSAGE_INITIAL;
@@ -87,6 +99,8 @@ void handleSignMessage(
         ctx->messageLength = U2BE(cdata, 0);
         ctx->displayStart = true;
 
+        ctx->initialP2 = p2;
+
         // We hash 8 zero bytes
         uint8_t zeroes[8];
         memset(zeroes, 0, 8);
@@ -96,10 +110,21 @@ void handleSignMessage(
         sendSuccessNoIdle();
     } else if (p1 == P1_SIGN_MESSAGE_MESSAGE && ctx->state == SIGN_MESSAGE_CONTINUED) {
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, dataLength, NULL, 0);
+
+        if (ctx->messageLength < dataLength) {
+            THROW(ERROR_INVALID_TRANSACTION);
+        }
+
         ctx->messageLength -= dataLength;
-        memmove(ctx->display, cdata, dataLength);
-        if (dataLength < 255) {
-            memmove(ctx->display + dataLength, "\0", 1);
+        if (ctx->initialP2 == P2_UTF8) {
+            memmove(ctx->display, cdata, dataLength);
+            if (dataLength < 255) {
+                memmove(ctx->display + dataLength, "\0", 1);
+            }
+            memmove(ctx->displayHeader, "Message", 8);
+        } else {
+            toPaginatedHex(cdata, dataLength, ctx->display, sizeof(ctx->display));
+            memmove(ctx->displayHeader, "Message (hex)", 14);
         }
         startSignMessageDisplay(ctx->displayStart, ctx->messageLength == 0);
         ctx->displayStart = false;
