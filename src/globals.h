@@ -5,23 +5,25 @@
 
 #include "os.h"
 #include "cx.h"
-#include "exportPrivateKey.h"
-#include "verifyAddress.h"
+// #include "exportPrivateKey.h"
+// #include "verifyAddress.h"
 
-#include "getPublicKey.h"
-#include "displayCbor.h"
-#include "signConfigureBaker.h"
-#include "signConfigureDelegation.h"
-#include "signCredentialDeployment.h"
-#include "signEncryptedAmountTransfer.h"
-#include "signPublicInformationForIp.h"
-#include "signTransfer.h"
-#include "signTransferToEncrypted.h"
-#include "signTransferToPublic.h"
-#include "signTransferWithSchedule.h"
-#include "signRegisterData.h"
+// #include "getPublicKey.h"
+// #include "displayCbor.h"
+// #include "signConfigureBaker.h"
+// #include "signConfigureDelegation.h"
+// #include "signCredentialDeployment.h"
+// #include "signEncryptedAmountTransfer.h"
+// #include "signPublicInformationForIp.h"
+// #include "signTransfer.h"
+// #include "signTransferToEncrypted.h"
+// #include "signTransferToPublic.h"
+// #include "signTransferWithSchedule.h"
+// #include "signRegisterData.h"
 
+#ifdef HAVE_BAGL
 #include "ux.h"
+#endif
 
 #define CONCORDIUM_PURPOSE   1105
 #define CONCORDIUM_COIN_TYPE 0
@@ -79,13 +81,13 @@ typedef struct {
 extern accountSender_t global_account_sender;
 
 typedef struct {
-    union {
-        signTransferContext_t signTransferContext;
-        signEncryptedAmountToTransfer_t signEncryptedAmountToTransfer;
-        signTransferWithScheduleContext_t signTransferWithScheduleContext;
-        signRegisterData_t signRegisterData;
-    };
-    cborContext_t cborContext;
+    // union {
+    //     signTransferContext_t signTransferContext;
+    //     signEncryptedAmountToTransfer_t signEncryptedAmountToTransfer;
+    //     signTransferWithScheduleContext_t signTransferWithScheduleContext;
+    //     signRegisterData_t signRegisterData;
+    // };
+    // cborContext_t cborContext;
 
 } transactionWithDataBlob_t;
 
@@ -95,17 +97,17 @@ typedef struct {
  * consuming instruction context.
  */
 typedef union {
-    exportPrivateKeyContext_t exportPrivateKeyContext;
-    exportPublicKeyContext_t exportPublicKeyContext;
-    verifyAddressContext_t verifyAddressContext;
+    // exportPrivateKeyContext_t exportPrivateKeyContext;
+    // exportPublicKeyContext_t exportPublicKeyContext;
+    // verifyAddressContext_t verifyAddressContext;
 
-    signPublicInformationForIp_t signPublicInformationForIp;
-    signCredentialDeploymentContext_t signCredentialDeploymentContext;
+    // signPublicInformationForIp_t signPublicInformationForIp;
+    // signCredentialDeploymentContext_t signCredentialDeploymentContext;
 
-    signTransferToEncrypted_t signTransferToEncrypted;
-    signTransferToPublic_t signTransferToPublic;
-    signConfigureBaker_t signConfigureBaker;
-    signConfigureDelegationContext_t signConfigureDelegation;
+    // signTransferToEncrypted_t signTransferToEncrypted;
+    // signTransferToPublic_t signTransferToPublic;
+    // signConfigureBaker_t signConfigureBaker;
+    // signConfigureDelegationContext_t signConfigureDelegation;
 
     transactionWithDataBlob_t withDataBlob;
 } instructionContext;

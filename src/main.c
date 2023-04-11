@@ -20,31 +20,31 @@
 
 #include "os.h"
 #include "cx.h"
-#include "exportPrivateKey.h"
-#include "getPublicKey.h"
-#include "globals.h"
+// #include "exportPrivateKey.h"
+// #include "getPublicKey.h"
+// #include "globals.h"
 #include "glyphs.h"
 #include "menu.h"
 #include "os_io_seproxyhal.h"
 #include "responseCodes.h"
 #include "seproxyhal_protocol.h"
-#include "signConfigureBaker.h"
-#include "signConfigureDelegation.h"
-#include "signCredentialDeployment.h"
-#include "signEncryptedAmountTransfer.h"
-#include "signPublicInformationForIp.h"
-#include "signTransfer.h"
-#include "signTransferToEncrypted.h"
-#include "signTransferToPublic.h"
-#include "signTransferWithSchedule.h"
+// #include "signConfigureBaker.h"
+// #include "signConfigureDelegation.h"
+// #include "signCredentialDeployment.h"
+// #include "signEncryptedAmountTransfer.h"
+// #include "signPublicInformationForIp.h"
+// #include "signTransfer.h"
+// #include "signTransferToEncrypted.h"
+// #include "signTransferToPublic.h"
+// #include "signTransferWithSchedule.h"
 #include "ux.h"
-#include "verifyAddress.h"
+// #include "verifyAddress.h"
 
 // Global variable definitions
-instructionContext global;
-keyDerivationPath_t path;
-tx_state_t global_tx_state;
-accountSender_t global_account_sender;
+// instructionContext global;
+// keyDerivationPath_t path;
+// tx_state_t global_tx_state;
+// accountSender_t global_account_sender;
 
 // The expected CLA byte
 #define CLA 0xE0
@@ -125,70 +125,70 @@ static void concordium_main(void) {
                 uint8_t *cdata = G_io_apdu_buffer + OFFSET_CDATA;
 
                 bool isInitialCall = false;
-                if (global_tx_state.currentInstruction == -1) {
-                    memset(&global, 0, sizeof(global));
-                    global_tx_state.currentInstruction = INS;
-                    isInitialCall = true;
-                } else if (global_tx_state.currentInstruction != INS) {
-                    // Caller attempted to switch instruction in the middle
-                    // of a multi command flow. This is not allowed, as in the
-                    // worst case, an attacker could trick a user to sign a mixed
-                    // transaction.
-                    THROW(ERROR_INVALID_STATE);
-                }
+                // if (global_tx_state.currentInstruction == -1) {
+                //     memset(&global, 0, sizeof(global));
+                //     global_tx_state.currentInstruction = INS;
+                //     isInitialCall = true;
+                // } else if (global_tx_state.currentInstruction != INS) {
+                //     // Caller attempted to switch instruction in the middle
+                //     // of a multi command flow. This is not allowed, as in the
+                //     // worst case, an attacker could trick a user to sign a mixed
+                //     // transaction.
+                //     THROW(ERROR_INVALID_STATE);
+                // }
 
                 switch (INS) {
-                    case INS_GET_PUBLIC_KEY:
-                        handleGetPublicKey(cdata, p1, p2, &flags);
-                        break;
-                    case INS_VERIFY_ADDRESS:
-                        handleVerifyAddress(cdata, &flags);
-                        break;
-                    case INS_SIGN_TRANSFER:
-                        handleSignTransfer(cdata, &flags);
-                        break;
-                    case INS_SIGN_TRANSFER_WITH_MEMO:
-                        handleSignTransferWithMemo(cdata, p1, lc, &flags, isInitialCall);
-                        break;
-                    case INS_SIGN_TRANSFER_WITH_SCHEDULE:
-                        handleSignTransferWithSchedule(cdata, p1, &flags, isInitialCall);
-                        break;
-                    case INS_SIGN_TRANSFER_WITH_SCHEDULE_AND_MEMO:
-                        handleSignTransferWithScheduleAndMemo(cdata, p1, lc, &flags, isInitialCall);
-                        break;
-                    case INS_CREDENTIAL_DEPLOYMENT:
-                        handleSignCredentialDeployment(cdata, p1, p2, &flags, isInitialCall);
-                        break;
-                    case INS_EXPORT_PRIVATE_KEY:
-                        handleExportPrivateKey(cdata, p1, p2, &flags);
-                        break;
-                    case INS_TRANSFER_TO_ENCRYPTED:
-                        handleSignTransferToEncrypted(cdata, &flags);
-                        break;
-                    case INS_ENCRYPTED_AMOUNT_TRANSFER:
-                        handleSignEncryptedAmountTransfer(cdata, p1, lc, &flags, isInitialCall);
-                        break;
-                    case INS_ENCRYPTED_AMOUNT_TRANSFER_WITH_MEMO:
-                        handleSignEncryptedAmountTransferWithMemo(cdata, p1, lc, &flags, isInitialCall);
-                        break;
-                    case INS_TRANSFER_TO_PUBLIC:
-                        handleSignTransferToPublic(cdata, p1, lc, &flags, isInitialCall);
-                        break;
-                    case INS_REGISTER_DATA:
-                        handleSignRegisterData(cdata, p1, lc, &flags, isInitialCall);
-                        break;
-                    case INS_PUBLIC_INFO_FOR_IP:
-                        handleSignPublicInformationForIp(cdata, p1, &flags, isInitialCall);
-                        break;
-                    case INS_CONFIGURE_BAKER:
-                        handleSignConfigureBaker(cdata, p1, lc, &flags, isInitialCall);
-                        break;
-                    case INS_CONFIGURE_DELEGATION:
-                        handleSignConfigureDelegation(cdata, lc, &flags);
-                        break;
-                    case INS_SIGN_UPDATE_CREDENTIAL:
-                        handleSignUpdateCredential(cdata, p1, p2, &flags, isInitialCall);
-                        break;
+                    // case INS_GET_PUBLIC_KEY:
+                    //     handleGetPublicKey(cdata, p1, p2, &flags);
+                    //     break;
+                    // case INS_VERIFY_ADDRESS:
+                    //     handleVerifyAddress(cdata, &flags);
+                    //     break;
+                    // case INS_SIGN_TRANSFER:
+                    //     handleSignTransfer(cdata, &flags);
+                    //     break;
+                    // case INS_SIGN_TRANSFER_WITH_MEMO:
+                    //     handleSignTransferWithMemo(cdata, p1, lc, &flags, isInitialCall);
+                    //     break;
+                    // case INS_SIGN_TRANSFER_WITH_SCHEDULE:
+                    //     handleSignTransferWithSchedule(cdata, p1, &flags, isInitialCall);
+                    //     break;
+                    // case INS_SIGN_TRANSFER_WITH_SCHEDULE_AND_MEMO:
+                    //     handleSignTransferWithScheduleAndMemo(cdata, p1, lc, &flags, isInitialCall);
+                    //     break;
+                    // case INS_CREDENTIAL_DEPLOYMENT:
+                    //     handleSignCredentialDeployment(cdata, p1, p2, &flags, isInitialCall);
+                    //     break;
+                    // case INS_EXPORT_PRIVATE_KEY:
+                    //     handleExportPrivateKey(cdata, p1, p2, &flags);
+                    //     break;
+                    // case INS_TRANSFER_TO_ENCRYPTED:
+                    //     handleSignTransferToEncrypted(cdata, &flags);
+                    //     break;
+                    // case INS_ENCRYPTED_AMOUNT_TRANSFER:
+                    //     handleSignEncryptedAmountTransfer(cdata, p1, lc, &flags, isInitialCall);
+                    //     break;
+                    // case INS_ENCRYPTED_AMOUNT_TRANSFER_WITH_MEMO:
+                    //     handleSignEncryptedAmountTransferWithMemo(cdata, p1, lc, &flags, isInitialCall);
+                    //     break;
+                    // case INS_TRANSFER_TO_PUBLIC:
+                    //     handleSignTransferToPublic(cdata, p1, lc, &flags, isInitialCall);
+                    //     break;
+                    // case INS_REGISTER_DATA:
+                    //     handleSignRegisterData(cdata, p1, lc, &flags, isInitialCall);
+                    //     break;
+                    // case INS_PUBLIC_INFO_FOR_IP:
+                    //     handleSignPublicInformationForIp(cdata, p1, &flags, isInitialCall);
+                    //     break;
+                    // case INS_CONFIGURE_BAKER:
+                    //     handleSignConfigureBaker(cdata, p1, lc, &flags, isInitialCall);
+                    //     break;
+                    // case INS_CONFIGURE_DELEGATION:
+                    //     handleSignConfigureDelegation(cdata, lc, &flags);
+                    //     break;
+                    // case INS_SIGN_UPDATE_CREDENTIAL:
+                    //     handleSignUpdateCredential(cdata, p1, p2, &flags, isInitialCall);
+                    //     break;
                     default:
                         THROW(ERROR_INVALID_INSTRUCTION);
                         break;
@@ -206,7 +206,7 @@ static void concordium_main(void) {
                     case ERROR_INVALID_INSTRUCTION:
                     case ERROR_INVALID_CLA:
                     case ERROR_DEVICE_LOCKED:
-                        global_tx_state.currentInstruction = -1;
+                        // global_tx_state.currentInstruction = -1;
                         sw = e;
                         G_io_apdu_buffer[tx] = sw >> 8;
                         G_io_apdu_buffer[tx + 1] = sw;
@@ -232,9 +232,11 @@ static void concordium_main(void) {
 // provided by Ledger at: https://github.com/LedgerHQ/ledger-sample-apps/blob/master/blue-app-helloworld/src/main.c.
 unsigned char G_io_seproxyhal_spi_buffer[IO_SEPROXYHAL_BUFFER_SIZE_B];
 
+#ifdef HAVE_BAGL
 void io_seproxyhal_display(const bagl_element_t *element) {
     io_seproxyhal_display_default((bagl_element_t *) element);
 }
+#endif
 
 unsigned char io_event(__attribute__((unused)) unsigned char channel) {
     // can't have more than one tag in the reply, not supported yet.
@@ -244,7 +246,9 @@ unsigned char io_event(__attribute__((unused)) unsigned char channel) {
             break;
 
         case SEPROXYHAL_TAG_BUTTON_PUSH_EVENT:
+#ifdef HAVE_BAGL
             UX_BUTTON_PUSH_EVENT(G_io_seproxyhal_spi_buffer);
+#endif
             break;
 
         case SEPROXYHAL_TAG_STATUS_EVENT:
@@ -256,7 +260,12 @@ unsigned char io_event(__attribute__((unused)) unsigned char channel) {
             break;
 
         case SEPROXYHAL_TAG_DISPLAY_PROCESSED_EVENT:
+#ifdef HAVE_BAGL
             UX_DISPLAYED_EVENT({});
+#endif
+#ifdef HAVE_NBGL
+            UX_DEFAULT_EVENT();
+#endif
             break;
 
         case SEPROXYHAL_TAG_TICKER_EVENT:

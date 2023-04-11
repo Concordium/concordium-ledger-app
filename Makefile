@@ -2,7 +2,7 @@
 #   Ledger Blue
 #   (c) 2016 Ledger
 #
-#	Modifications (c) 2021 Concordium Software ApS
+#	Modifications (c) 2023 Concordium Software ApS
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -21,13 +21,15 @@ ifndef TARGET
 $(error Environment variable TARGET is not set.)
 endif
 
-
 # Main app configuration
 APPNAME = "Concordium"
 
 ifeq ($(TARGET),nanos)
     ICONNAME=icons/nanos-concordium-icon.gif
     BOLOS_SDK=$(WORK_DIR/)nanos-secure-sdk
+else ifeq ($(TARGET),stax)
+    ICONNAME=icons/stax_app_boilerplate_32px.gif
+	BOLOS_SDK=$(WORK_DIR/)ledger-secure-sdk
 else
     ICONNAME=icons/nanosplus-concordium-icon.gif
     BOLOS_SDK=$(WORK_DIR/)ledger-secure-sdk
@@ -53,11 +55,20 @@ APP_LOAD_PARAMS +=--curve ed25519
 APP_SOURCE_PATH += src
 SDK_SOURCE_PATH += lib_stusb lib_stusb_impl
 
-ifeq ($(TARGET_NAME),TARGET_NANOS)
-	DEFINES += IO_SEPROXYHAL_BUFFER_SIZE_B=128
-else
+ifneq ($(TARGET_NAME),TARGET_STAX)
 	SDK_SOURCE_PATH += lib_ux
-	DEFINES += IO_SEPROXYHAL_BUFFER_SIZE_B=300
+endif
+
+ifeq ($(TARGET_NAME),TARGET_NANOS)
+    DEFINES += IO_SEPROXYHAL_BUFFER_SIZE_B=128
+else
+    DEFINES += IO_SEPROXYHAL_BUFFER_SIZE_B=300
+endif
+
+ifeq ($(TARGET_NAME),TARGET_STAX)
+    DEFINES += NBGL_QRCODE
+else
+	DEFINES += HAVE_BAGL HAVE_UX_FLOW
 	DEFINES += HAVE_GLO096
 	DEFINES += HAVE_BAGL BAGL_WIDTH=128 BAGL_HEIGHT=64
 	DEFINES += HAVE_BAGL_ELLIPSIS # long label truncation feature
@@ -67,13 +78,11 @@ else
 endif
 
 DEFINES += OS_IO_SEPROXYHAL
-DEFINES += HAVE_BAGL HAVE_SPRINTF
+DEFINES += HAVE_SPRINTF
 DEFINES += PRINTF\(...\)=
+DEFINES += UNUSED\(x\)=\(void\)x
 
 DEFINES += HAVE_IO_USB HAVE_L4_USBLIB IO_USB_MAX_ENDPOINTS=7 IO_HID_EP_LENGTH=64 HAVE_USB_APDU
-
-# Both nano S and X benefit from the flow.
-DEFINES += HAVE_UX_FLOW
 
 DEFINES += APPVERSION=\"$(APPVERSION)\"
 # Make the version parameters accessible from the app.
