@@ -17,6 +17,9 @@
 #  limitations under the License.
 #*******************************************************************************
 
+## NB
+## Remember to clean up glyphs.c and glyphs.h when swapping between BAGL and NBGL.
+
 ifndef TARGET
 $(error Environment variable TARGET is not set.)
 endif
@@ -29,7 +32,7 @@ ifeq ($(TARGET),nanos)
     BOLOS_SDK=$(WORK_DIR/)nanos-secure-sdk
 else ifeq ($(TARGET),stax)
     ICONNAME=icons/stax_app_boilerplate_32px.gif
-	BOLOS_SDK=$(WORK_DIR/)ledger-secure-sdk
+	BOLOS_SDK=$(WORK_DIR/)/opt/stax-secure-sdk
 else
     ICONNAME=icons/nanosplus-concordium-icon.gif
     BOLOS_SDK=$(WORK_DIR/)ledger-secure-sdk
@@ -51,11 +54,14 @@ APP_LOAD_PARAMS += --path "1105'/0'"
 # Restrict derivation to only be able to use ed25519
 APP_LOAD_PARAMS +=--curve ed25519
 
+# Import rules to compile the glyphs supplied in the glyphs/ directory
+include $(BOLOS_SDK)/Makefile.glyphs
+
 # Build configuration
 APP_SOURCE_PATH += src
 SDK_SOURCE_PATH += lib_stusb lib_stusb_impl
 
-ifneq ($(TARGET_NAME),TARGET_STAX)
+ifneq ($(TARGET),stax)
 	SDK_SOURCE_PATH += lib_ux
 endif
 
@@ -65,25 +71,29 @@ else
     DEFINES += IO_SEPROXYHAL_BUFFER_SIZE_B=300
 endif
 
-ifeq ($(TARGET_NAME),TARGET_STAX)
+ifeq ($(TARGET),stax)
     DEFINES += NBGL_QRCODE
 else
 	DEFINES += HAVE_BAGL HAVE_UX_FLOW
-	DEFINES += HAVE_GLO096
-	DEFINES += HAVE_BAGL BAGL_WIDTH=128 BAGL_HEIGHT=64
-	DEFINES += HAVE_BAGL_ELLIPSIS # long label truncation feature
-	DEFINES += HAVE_BAGL_FONT_OPEN_SANS_REGULAR_11PX
-	DEFINES += HAVE_BAGL_FONT_OPEN_SANS_EXTRABOLD_11PX
-	DEFINES += HAVE_BAGL_FONT_OPEN_SANS_LIGHT_16PX
+	ifneq ($(TARGET_NAME),TARGET_NANOS)
+		DEFINES += HAVE_GLO096
+		DEFINES += HAVE_BAGL BAGL_WIDTH=128 BAGL_HEIGHT=64
+		DEFINES += HAVE_BAGL_ELLIPSIS # long label truncation feature
+		DEFINES += HAVE_BAGL_FONT_OPEN_SANS_REGULAR_11PX
+		DEFINES += HAVE_BAGL_FONT_OPEN_SANS_EXTRABOLD_11PX
+		DEFINES += HAVE_BAGL_FONT_OPEN_SANS_LIGHT_16PX
+	endif
 endif
 
 DEFINES += OS_IO_SEPROXYHAL
-DEFINES += HAVE_SPRINTF
-DEFINES += PRINTF\(...\)=
+DEFINES += HAVE_SPRINTF HAVE_SNPRINTF_FORMAT_U
+DEFINES += HAVE_IO_USB HAVE_L4_USBLIB IO_USB_MAX_ENDPOINTS=6 IO_HID_EP_LENGTH=64 HAVE_USB_APDU
+DEFINES += USB_SEGMENT_SIZE=64
+DEFINES += BLE_SEGMENT_SIZE=32
+DEFINES += HAVE_WEBUSB WEBUSB_URL_SIZE_B=0 WEBUSB_URL=""
 DEFINES += UNUSED\(x\)=\(void\)x
 
-DEFINES += HAVE_IO_USB HAVE_L4_USBLIB IO_USB_MAX_ENDPOINTS=7 IO_HID_EP_LENGTH=64 HAVE_USB_APDU
-
+DEFINES += APPNAME=\"$(APPNAME)\"
 DEFINES += APPVERSION=\"$(APPVERSION)\"
 # Make the version parameters accessible from the app.
 DEFINES += APPVERSION_MAJOR=$(APPVERSION_MAJOR)
@@ -225,8 +235,7 @@ delete:
 lint:
 	find . -regex './src/.*\.\(c\|h\)\|./unit_tests/.*\.\(c\|h\)' -exec clang-format -style=file -i {} \;
 
-# Import rules to compile the glyphs supplied in the glyphs/ directory
-include $(BOLOS_SDK)/Makefile.glyphs
+
 
 # Import generic rules from the SDK
 include $(BOLOS_SDK)/Makefile.rules
