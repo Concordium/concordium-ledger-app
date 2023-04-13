@@ -7,6 +7,7 @@
 * Transfer amounts now show (CCD) in upper line.
 * Compare now has accept/reject screens.
 * signIpInfo initial screen be part of the 1st public key flow.
+* Improved the UI flow for transactions that can contain a memo to make it more seamless, i.e. require fewer "both button clicks".
 
 ### Removed
 
