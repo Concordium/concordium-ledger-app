@@ -7,15 +7,14 @@
 static signPublicInformationForIp_t *ctx = &global.signPublicInformationForIp;
 static tx_state_t *tx_state = &global_tx_state;
 
-UX_STEP_CB(ux_sign_public_info_review, nn, sendSuccessNoIdle(), {"Review identity", "provider info"});
-UX_FLOW(ux_review_public_info_for_ip, &ux_sign_public_info_review);
-
-UX_STEP_CB(
-    ux_sign_public_info_for_i_public_key_0_step,
+UX_STEP_NOCB(
+    ux_sign_public_info_for_ip_display_public_key,
     bnnn_paging,
-    sendSuccessNoIdle(),
     {.title = "Public key", .text = (char *) global.signPublicInformationForIp.publicKey});
-UX_FLOW(ux_sign_public_info_for_i_public_key, &ux_sign_public_info_for_i_public_key_0_step);
+
+UX_STEP_CB(ux_sign_public_info_for_ip_continue, nn, sendSuccessNoIdle(), {"Continue", "reviewing info"});
+
+UX_STEP_CB(ux_sign_public_info_review, nn, sendSuccessNoIdle(), {"Review identity", "provider info"});
 
 UX_STEP_CB(
     ux_sign_public_info_for_ip_sign,
@@ -30,12 +29,34 @@ UX_STEP_CB(
     {&C_icon_crossmark, "Decline to", "sign info"});
 
 UX_STEP_NOCB(
-    ux_sign_public_info_for_ip_threshold_0_step,
+    ux_sign_public_info_for_ip_display_threshold,
     bn,
     {"Signature threshold", (char *) global.signPublicInformationForIp.threshold});
+
+// Display a public key with continue
 UX_FLOW(
-    ux_sign_public_info_for_ip_threshold,
-    &ux_sign_public_info_for_ip_threshold_0_step,
+    ux_sign_public_info_for_ip_public_key,
+    &ux_sign_public_info_for_ip_display_public_key,
+    &ux_sign_public_info_for_ip_continue);
+// Display intro view and a public key with continue
+UX_FLOW(
+    ux_review_public_info_for_ip,
+    &ux_sign_public_info_review,
+    &ux_sign_public_info_for_ip_display_public_key,
+    &ux_sign_public_info_for_ip_continue);
+// Display last public key and threshold and respond with signature / rejection
+UX_FLOW(
+    ux_sign_public_info_for_ip_final,
+    &ux_sign_public_info_for_ip_display_public_key,
+    &ux_sign_public_info_for_ip_display_threshold,
+    &ux_sign_public_info_for_ip_sign,
+    &ux_sign_public_info_for_ip_decline);
+// Display entire flow and respond with signature / rejection
+UX_FLOW(
+    ux_sign_public_info_for_ip_complete,
+    &ux_sign_public_info_review,
+    &ux_sign_public_info_for_ip_display_public_key,
+    &ux_sign_public_info_for_ip_display_threshold,
     &ux_sign_public_info_for_ip_sign,
     &ux_sign_public_info_for_ip_decline);
 
@@ -66,9 +87,9 @@ void handleSignPublicInformationForIp(uint8_t *cdata, uint8_t p1, volatile unsig
         ctx->publicKeysLength = cdata[0];
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 1, NULL, 0);
 
+        ctx->showIntro = true;
         ctx->state = TX_PUBLIC_INFO_FOR_IP_VERIFICATION_KEY;
-        ux_flow_init(0, ux_review_public_info_for_ip, NULL);
-        *flags |= IO_ASYNCH_REPLY;
+        sendSuccessNoIdle();
     } else if (p1 == P1_VERIFICATION_KEY && ctx->state == TX_PUBLIC_INFO_FOR_IP_VERIFICATION_KEY) {
         if (ctx->publicKeysLength <= 0) {
             THROW(ERROR_INVALID_STATE);
@@ -88,17 +109,31 @@ void handleSignPublicInformationForIp(uint8_t *cdata, uint8_t p1, volatile unsig
         toPaginatedHex(publicKey, 32, ctx->publicKey, sizeof(ctx->publicKey));
 
         ctx->publicKeysLength -= 1;
-        if (ctx->publicKeysLength == 0) {
+        if (ctx->publicKeysLength > 0) {
+            if (ctx->showIntro) {
+                // For the first key, we also display the initial view
+                ctx->showIntro = false;
+                ux_flow_init(0, ux_review_public_info_for_ip, NULL);
+            } else {
+                ux_flow_init(0, ux_sign_public_info_for_ip_public_key, NULL);
+            }
+            *flags |= IO_ASYNCH_REPLY;
+        } else {
             ctx->state = TX_PUBLIC_INFO_FOR_IP_THRESHOLD;
+            // We don't display the last public key here. It is displayed in the final flow.
+            sendSuccessNoIdle();
         }
-        ux_flow_init(0, ux_sign_public_info_for_i_public_key, NULL);
-        *flags |= IO_ASYNCH_REPLY;
     } else if (p1 == P1_THRESHOLD && ctx->state == TX_PUBLIC_INFO_FOR_IP_THRESHOLD) {
         // Read the threshold byte and parse it to display it.
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 1, NULL, 0);
         bin2dec(ctx->threshold, sizeof(ctx->threshold), cdata[0]);
 
-        ux_flow_init(0, ux_sign_public_info_for_ip_threshold, NULL);
+        if (ctx->showIntro) {
+            // If the initial view has not been displayed yet, we display the entire flow
+            ux_flow_init(0, ux_sign_public_info_for_ip_complete, NULL);
+        } else {
+            ux_flow_init(0, ux_sign_public_info_for_ip_final, NULL);
+        }
         *flags |= IO_ASYNCH_REPLY;
     } else {
         THROW(ERROR_INVALID_STATE);

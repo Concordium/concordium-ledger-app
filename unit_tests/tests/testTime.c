@@ -17,7 +17,8 @@ static void test_prefixWithZero_does_prefix_1() {
 }
 
 static void test_prefixWithZero_does_not_prefix_2001() {
-    uint8_t text[1] = {'1'};
+    uint8_t text[2];
+    memmove(text, "1", 2);
     int didPrefix = prefixWithZero(text, 2001);
     assert_int_equal(didPrefix, 0);
     assert_string_equal(text, "1");

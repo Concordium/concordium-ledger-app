@@ -28,11 +28,11 @@ static void test_lengthOfNumbers() {
 }
 
 static void test_numberToText() {
-    uint8_t text[4];
+    uint8_t text[4] = {0};
     numberToText(text, sizeof(text), 2001);
-    assert_string_equal(text, "2001");
+    assert_memory_equal(text, "2001", 4);
     numberToText(text, sizeof(text), 4041);
-    assert_string_equal(text, "4041");
+    assert_memory_equal(text, "4041", 4);
 }
 
 static void test_numberToText_max() {
@@ -44,9 +44,9 @@ static void test_numberToText_max() {
 }
 
 static void test_numberToText_zero() {
-    uint8_t text[1];
+    uint8_t text[1] = {0};
     numberToText(text, sizeof(text), 0);
-    assert_string_equal(text, "0");
+    assert_memory_equal(text, "0", 1);
 }
 
 static void test_numberToText_shorter_number() {
@@ -117,15 +117,15 @@ static void test_bin2dec_longer_number() {
 }
 
 static void test_decimalAmountDisplay() {
-    uint8_t text[6];
+    uint8_t text[6] = {0};
     decimalDigitsDisplay(text, sizeof(text), 2100112, 6);
-    assert_string_equal(text, "100112");
+    assert_memory_equal(text, "100112", 6);
     decimalDigitsDisplay(text, sizeof(text), 4041, 6);
-    assert_string_equal(text, "004041");
+    assert_memory_equal(text, "004041", 6);
     decimalDigitsDisplay(text, sizeof(text), 1, 6);
-    assert_string_equal(text, "000001");
+    assert_memory_equal(text, "000001", 6);
     decimalDigitsDisplay(text, sizeof(text), 0, 6);
-    assert_string_equal(text, "000000");
+    assert_memory_equal(text, "000000", 6);
 }
 
 static void test_amountToGtuDisplay_zero() {
@@ -245,30 +245,31 @@ static void test_toPaginatedHex_inserts_white_space() {
 }
 
 int main() {
-    const struct CMUnitTest tests[] = {cmocka_unit_test(test_lengthOfNumbers),
-                                       cmocka_unit_test(test_numberToText),
-                                       cmocka_unit_test(test_numberToText_zero),
-                                       cmocka_unit_test(test_numberToText_max),
-                                       cmocka_unit_test(test_numberToText_shorter_number),
-                                       cmocka_unit_test(test_numberToText_longer_number),
-                                       cmocka_unit_test(test_bin2dec),
-                                       cmocka_unit_test(test_bin2dec_max),
-                                       cmocka_unit_test(test_bin2dec_shorter_number),
-                                       cmocka_unit_test(test_bin2dec_longer_number),
-                                       cmocka_unit_test(test_decimalAmountDisplay),
-                                       cmocka_unit_test(test_amountToGtuDisplay_only_microGtu),
-                                       cmocka_unit_test(test_amountToGtuDisplay_no_microGtu),
-                                       cmocka_unit_test(test_amountToGtuDisplay_with_thousand_separator),
-                                       cmocka_unit_test(test_amountToGtuDisplay_mixed),
-                                       cmocka_unit_test(test_amountToGtuDisplay_zero),
-                                       cmocka_unit_test(test_amountToGtuDisplay_max),
-                                       cmocka_unit_test(test_toPaginatedHex),
-                                       cmocka_unit_test(test_toPaginatedHex_stops_after_given_length),
-                                       cmocka_unit_test(test_toPaginatedHex_does_not_have_trailing_space),
-                                       cmocka_unit_test(test_toPaginatedHex_inserts_white_space),
-                                       cmocka_unit_test(test_fractionToPercentageDisplay_only_decimals),
-                                       cmocka_unit_test(test_fractionToPercentageDisplay_no_decimals),
-                                       cmocka_unit_test(test_fractionToPercentageDisplay_mixed)};
+    const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_lengthOfNumbers),
+        cmocka_unit_test(test_numberToText),
+        cmocka_unit_test(test_numberToText_zero),
+        cmocka_unit_test(test_numberToText_max),
+        cmocka_unit_test(test_numberToText_shorter_number),
+        cmocka_unit_test(test_numberToText_longer_number),
+        cmocka_unit_test(test_bin2dec),
+        cmocka_unit_test(test_bin2dec_max),
+        cmocka_unit_test(test_bin2dec_shorter_number),
+        cmocka_unit_test(test_bin2dec_longer_number),
+        cmocka_unit_test(test_decimalAmountDisplay),
+        cmocka_unit_test(test_amountToGtuDisplay_only_microGtu),
+        cmocka_unit_test(test_amountToGtuDisplay_no_microGtu),
+        cmocka_unit_test(test_amountToGtuDisplay_with_thousand_separator),
+        cmocka_unit_test(test_amountToGtuDisplay_mixed),
+        cmocka_unit_test(test_amountToGtuDisplay_zero),
+        cmocka_unit_test(test_amountToGtuDisplay_max),
+        cmocka_unit_test(test_toPaginatedHex),
+        cmocka_unit_test(test_toPaginatedHex_stops_after_given_length),
+        cmocka_unit_test(test_toPaginatedHex_does_not_have_trailing_space),
+        cmocka_unit_test(test_toPaginatedHex_inserts_white_space),
+        cmocka_unit_test(test_fractionToPercentageDisplay_only_decimals),
+        cmocka_unit_test(test_fractionToPercentageDisplay_no_decimals),
+        cmocka_unit_test(test_fractionToPercentageDisplay_mixed)};
 
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

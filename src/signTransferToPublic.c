@@ -11,7 +11,7 @@ static tx_state_t *tx_state = &global_tx_state;
 UX_STEP_NOCB(
     ux_sign_transfer_to_public_1_step,
     bnnn_paging,
-    {.title = "Unshield amount", .text = (char *) global.signTransferToPublic.amount});
+    {.title = "Unshield CCD amount", .text = (char *) global.signTransferToPublic.amount});
 UX_FLOW(
     ux_sign_transfer_to_public,
     &ux_sign_flow_shared_review,

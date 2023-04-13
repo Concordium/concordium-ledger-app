@@ -35,7 +35,7 @@ UX_STEP_NOCB(
 UX_STEP_NOCB(
     ux_sign_scheduled_transfer_pair_flow_1_step,
     bnnn_paging,
-    {"Amount", (char *) global.withDataBlob.signTransferWithScheduleContext.displayAmount});
+    {"Amount (CCD)", (char *) global.withDataBlob.signTransferWithScheduleContext.displayAmount});
 UX_STEP_CB(
     ux_sign_scheduled_transfer_pair_flow_2_step,
     nn,
