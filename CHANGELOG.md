@@ -1,5 +1,11 @@
 # Changelog
 
+## 4.0.1
+
+### Changed
+
+* Transfer amounts are now prefixed with CCD inline with the amount, instead of (CCD) in the upper line.
+
 ## 4.0.0
 
 ### Changed

@@ -13,7 +13,7 @@ static tx_state_t *tx_state = &global_tx_state;
 UX_STEP_NOCB(
     ux_sign_flow_1_step,
     bnnn_paging,
-    {"Amount (CCD)", (char *) global.withDataBlob.signTransferContext.displayAmount});
+    {"Amount", (char *) global.withDataBlob.signTransferContext.displayAmount});
 
 UX_STEP_NOCB(
     ux_sign_flow_2_step,
