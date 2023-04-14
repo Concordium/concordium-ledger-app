@@ -10,7 +10,7 @@ static tx_state_t *tx_state = &global_tx_state;
 UX_STEP_NOCB(
     ux_sign_transfer_to_encrypted_1_step,
     bnnn_paging,
-    {.title = "Shield CCD amount", .text = (char *) global.signTransferToEncrypted.amount});
+    {.title = "Shield amount", .text = (char *) global.signTransferToEncrypted.amount});
 UX_FLOW(
     ux_sign_transfer_to_encrypted,
     &ux_sign_flow_shared_review,

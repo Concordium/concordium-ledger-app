@@ -167,7 +167,8 @@ size_t fractionToPercentageDisplay(uint8_t *dst, size_t dstLength, uint32_t numb
  * to relate to in the GUI.
  */
 size_t amountToGtuDisplay(uint8_t *dst, size_t dstLength, uint64_t microGtuAmount) {
-    size_t offset = decimalNumberToDisplay(dst, dstLength, microGtuAmount, 1000000, 6);
+    memmove(dst, "CCD ", 4);
+    size_t offset = decimalNumberToDisplay(dst + 4, dstLength, microGtuAmount, 1000000, 6) + 4;
     dst[offset] = '\0';
     return offset + 1;
 }

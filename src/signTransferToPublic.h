@@ -20,7 +20,7 @@ typedef enum {
 } transferToPublicState_t;
 
 typedef struct {
-    uint8_t amount[26];
+    uint8_t amount[30];
     uint16_t proofSize;
     transferToPublicState_t state;
 } signTransferToPublic_t;

@@ -10,7 +10,7 @@ void handleSignConfigureDelegation(uint8_t *cdata, uint8_t dataLength, volatile 
 
 typedef struct {
     bool stopDelegation;
-    uint8_t displayCapital[26];
+    uint8_t displayCapital[30];
     uint8_t displayRestake[4];
     uint8_t displayDelegationTarget[30];
     bool hasCapital;

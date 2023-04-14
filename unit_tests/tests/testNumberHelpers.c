@@ -129,56 +129,56 @@ static void test_decimalAmountDisplay() {
 }
 
 static void test_amountToGtuDisplay_zero() {
-    uint8_t text[20];
+    uint8_t text[24];
     amountToGtuDisplay(text, sizeof(text), 0);
-    assert_string_equal(text, "0");
+    assert_string_equal(text, "CCD 0");
 }
 
 static void test_amountToGtuDisplay_no_microGtu() {
-    uint8_t text[20];
+    uint8_t text[24];
     amountToGtuDisplay(text, sizeof(text), 105000000);
-    assert_string_equal(text, "105");
+    assert_string_equal(text, "CCD 105");
     amountToGtuDisplay(text, sizeof(text), 27000000);
-    assert_string_equal(text, "27");
+    assert_string_equal(text, "CCD 27");
     amountToGtuDisplay(text, sizeof(text), 1000000);
-    assert_string_equal(text, "1");
+    assert_string_equal(text, "CCD 1");
 }
 
 static void test_amountToGtuDisplay_only_microGtu() {
-    uint8_t text[20];
+    uint8_t text[24];
     amountToGtuDisplay(text, sizeof(text), 5400);
-    assert_string_equal(text, "0.0054");
+    assert_string_equal(text, "CCD 0.0054");
     amountToGtuDisplay(text, sizeof(text), 1);
-    assert_string_equal(text, "0.000001");
+    assert_string_equal(text, "CCD 0.000001");
     amountToGtuDisplay(text, sizeof(text), 4041);
-    assert_string_equal(text, "0.004041");
+    assert_string_equal(text, "CCD 0.004041");
     amountToGtuDisplay(text, sizeof(text), 112428);
-    assert_string_equal(text, "0.112428");
+    assert_string_equal(text, "CCD 0.112428");
 }
 
 static void test_amountToGtuDisplay_mixed() {
-    uint8_t text[20];
+    uint8_t text[24];
     amountToGtuDisplay(text, sizeof(text), 2100112);
-    assert_string_equal(text, "2.100112");
+    assert_string_equal(text, "CCD 2.100112");
     amountToGtuDisplay(text, sizeof(text), 5001000);
-    assert_string_equal(text, "5.001");
+    assert_string_equal(text, "CCD 5.001");
 }
 
 static void test_amountToGtuDisplay_with_thousand_separator() {
-    uint8_t text[21];
+    uint8_t text[25];
     amountToGtuDisplay(text, sizeof(text), 1200000000);
-    assert_string_equal(text, "1,200");
+    assert_string_equal(text, "CCD 1,200");
     amountToGtuDisplay(text, sizeof(text), 720005200122);
-    assert_string_equal(text, "720,005.200122");
+    assert_string_equal(text, "CCD 720,005.200122");
     amountToGtuDisplay(text, sizeof(text), 1111111111111111);
-    assert_string_equal(text, "1,111,111,111.111111");
+    assert_string_equal(text, "CCD 1,111,111,111.111111");
 }
 
 static void test_amountToGtuDisplay_max() {
-    uint8_t text[26];
+    uint8_t text[30];
     int result = amountToGtuDisplay(text, sizeof(text), 18446744073709551615ULL);
     assert_int_not_equal(result, -1);
-    assert_string_equal(text, "18,446,744,073,709.551615");
+    assert_string_equal(text, "CCD 18,446,744,073,709.551615");
 }
 
 static void test_fractionToPercentageDisplay_only_decimals() {
