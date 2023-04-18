@@ -10,30 +10,34 @@
 static signEncryptedAmountToTransfer_t *ctx = &global.withDataBlob.signEncryptedAmountToTransfer;
 static cborContext_t *memo_ctx = &global.withDataBlob.cborContext;
 static tx_state_t *tx_state = &global_tx_state;
+const ux_flow_step_t *ux_sign_encrypted_amount_transfer[8];
 
 // UI for displaying encrypted transfer transaction. It only shows the user the recipient address
 // as the amounts are encrypted and can't be validated by the user.
 UX_STEP_NOCB(ux_sign_encrypted_amount_transfer_1_step, nn, {"Shielded", "transfer"});
-UX_STEP_CB(
+UX_STEP_NOCB(
     ux_sign_encrypted_amount_transfer_2_step,
     bnnn_paging,
-    sendSuccessNoIdle(),
     {.title = "Recipient", .text = (char *) global.withDataBlob.signEncryptedAmountToTransfer.to});
-UX_FLOW(
-    ux_sign_encrypted_amount_transfer,
-    &ux_sign_flow_shared_review,
-    &ux_sign_encrypted_amount_transfer_1_step,
-    &ux_sign_flow_account_sender_view,
-    &ux_sign_encrypted_amount_transfer_2_step,
-    &ux_sign_flow_shared_sign,
-    &ux_sign_flow_shared_decline);
 
-UX_FLOW(
-    ux_sign_encrypted_amount_transfer_initial,
-    &ux_sign_flow_shared_review,
-    &ux_sign_encrypted_amount_transfer_1_step,
-    &ux_sign_flow_account_sender_view,
-    &ux_sign_encrypted_amount_transfer_2_step);
+void startEncryptedTransferDisplay(bool displayMemo) {
+    uint8_t index = 0;
+
+    ux_sign_encrypted_amount_transfer[index++] = &ux_sign_flow_shared_review;
+    ux_sign_encrypted_amount_transfer[index++] = &ux_sign_encrypted_amount_transfer_1_step;
+    ux_sign_encrypted_amount_transfer[index++] = &ux_sign_flow_account_sender_view;
+    ux_sign_encrypted_amount_transfer[index++] = &ux_sign_encrypted_amount_transfer_2_step;
+
+    if (displayMemo) {
+        ux_sign_encrypted_amount_transfer[index++] = &ux_display_memo_step_nocb;
+    }
+
+    ux_sign_encrypted_amount_transfer[index++] = &ux_sign_flow_shared_sign;
+    ux_sign_encrypted_amount_transfer[index++] = &ux_sign_flow_shared_decline;
+
+    ux_sign_encrypted_amount_transfer[index++] = FLOW_END_STEP;
+    ux_flow_init(0, ux_sign_encrypted_amount_transfer, NULL);
+}
 
 #define P1_INITIAL                              0x00
 #define P1_REMAINING_AMOUNT                     0x01
@@ -62,17 +66,13 @@ void handleTransferAmountAggIndexProofSize(uint8_t *cdata) {
     sendSuccessNoIdle();
 }
 
-void handleProofs(
-    uint8_t *cdata,
-    uint8_t dataLength,
-    volatile unsigned int *flags,
-    const ux_flow_step_t *const *finishedFlow) {
+void handleProofs(uint8_t *cdata, uint8_t dataLength, volatile unsigned int *flags, bool displayMemo) {
     cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, dataLength, NULL, 0);
     ctx->proofSize -= dataLength;
 
     if (ctx->proofSize == 0) {
         // We have received all proof bytes, continue to signing flow.
-        ux_flow_init(0, finishedFlow, NULL);
+        startEncryptedTransferDisplay(displayMemo);
         *flags |= IO_ASYNCH_REPLY;
     } else if (ctx->proofSize < 0) {
         // We received more proof bytes than expected.
@@ -83,10 +83,9 @@ void handleProofs(
     }
 }
 
-void finishMemoEncrypted(volatile unsigned int *flags) {
+void finishMemoEncrypted() {
     ctx->state = TX_ENCRYPTED_AMOUNT_TRANSFER_REMAINING_AMOUNT;
-    ux_flow_init(0, ux_display_memo, NULL);
-    *flags |= IO_ASYNCH_REPLY;
+    sendSuccessNoIdle();
 }
 
 void handleSignEncryptedAmountTransferWithMemo(
@@ -111,8 +110,7 @@ void handleSignEncryptedAmountTransferWithMemo(
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 2, NULL, 0);
 
         ctx->state = TX_ENCRYPTED_AMOUNT_TRANSFER_MEMO_START;
-        ux_flow_init(0, ux_sign_encrypted_amount_transfer_initial, NULL);
-        *flags |= IO_ASYNCH_REPLY;
+        sendSuccessNoIdle();
     } else if (p1 == P1_MEMO && ctx->state == TX_ENCRYPTED_AMOUNT_TRANSFER_MEMO_START) {
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, dataLength, NULL, 0);
 
@@ -120,7 +118,7 @@ void handleSignEncryptedAmountTransferWithMemo(
         readCborInitial(cdata, dataLength);
 
         if (memo_ctx->cborLength == 0) {
-            finishMemoEncrypted(flags);
+            finishMemoEncrypted();
         } else {
             ctx->state = TX_ENCRYPTED_AMOUNT_TRANSFER_MEMO;
             sendSuccessNoIdle();
@@ -136,14 +134,14 @@ void handleSignEncryptedAmountTransferWithMemo(
             THROW(ERROR_INVALID_STATE);
         }
 
-        finishMemoEncrypted(flags);
+        finishMemoEncrypted();
     } else if (p1 == P1_REMAINING_AMOUNT && ctx->state == TX_ENCRYPTED_AMOUNT_TRANSFER_REMAINING_AMOUNT) {
         handleRemainingAmount(cdata);
     } else if (
         p1 == P1_TRANSFER_AMOUNT_AGG_INDEX_PROOF_SIZE && ctx->state == TX_ENCRYPTED_AMOUNT_TRANSFER_TRANSFER_AMOUNT) {
         handleTransferAmountAggIndexProofSize(cdata);
     } else if (p1 == P1_PROOF && ctx->state == TX_ENCRYPTED_AMOUNT_TRANSFER_PROOFS) {
-        handleProofs(cdata, dataLength, flags, ux_sign_flow_shared);
+        handleProofs(cdata, dataLength, flags, true);
     } else {
         THROW(ERROR_INVALID_STATE);
     }
@@ -168,7 +166,7 @@ void handleSignEncryptedAmountTransfer(
         p1 == P1_TRANSFER_AMOUNT_AGG_INDEX_PROOF_SIZE && ctx->state == TX_ENCRYPTED_AMOUNT_TRANSFER_TRANSFER_AMOUNT) {
         handleTransferAmountAggIndexProofSize(cdata);
     } else if (p1 == P1_PROOF && ctx->state == TX_ENCRYPTED_AMOUNT_TRANSFER_PROOFS) {
-        handleProofs(cdata, dataLength, flags, ux_sign_encrypted_amount_transfer);
+        handleProofs(cdata, dataLength, flags, false);
     } else {
         THROW(ERROR_INVALID_STATE);
     }

@@ -8,6 +8,8 @@ static cborContext_t *ctx = &global.withDataBlob.cborContext;
 
 void handleCborStep(void);
 
+UX_STEP_NOCB(ux_display_memo_step_nocb, bnnn_paging, {"Memo", (char *) global.withDataBlob.cborContext.display});
+
 UX_STEP_CB(
     ux_display_memo_step,
     bnnn_paging,

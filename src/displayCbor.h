@@ -14,6 +14,7 @@ void readCborInitial(uint8_t *cdata, uint8_t dataLength);
  */
 void readCborContent(uint8_t *cdata, uint8_t dataLength);
 extern const ux_flow_step_t *const ux_display_memo[];
+extern const ux_flow_step_t ux_display_memo_step_nocb;
 
 typedef struct {
     uint32_t cborLength;

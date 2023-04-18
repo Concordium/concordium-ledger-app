@@ -10,6 +10,7 @@
 static signTransferWithScheduleContext_t *ctx = &global.withDataBlob.signTransferWithScheduleContext;
 static cborContext_t *memo_ctx = &global.withDataBlob.cborContext;
 static tx_state_t *tx_state = &global_tx_state;
+const ux_flow_step_t *ux_sign_scheduled_amount_transfer[8];
 
 void processNextScheduledAmount(uint8_t *buffer);
 
@@ -20,12 +21,6 @@ UX_STEP_NOCB(
     bnnn_paging,
     {.title = "Recipient", .text = (char *) global.withDataBlob.signTransferWithScheduleContext.displayStr});
 UX_STEP_VALID(ux_scheduled_transfer_initial_flow_2_step, nn, sendSuccessNoIdle(), {"Continue", "with transaction"});
-UX_FLOW(
-    ux_scheduled_transfer_initial_flow,
-    &ux_sign_flow_shared_review,
-    &ux_sign_flow_account_sender_view,
-    &ux_scheduled_transfer_initial_flow_1_step,
-    &ux_scheduled_transfer_initial_flow_2_step);
 
 // UI definitions for displaying a timestamp and an amount of a scheduled transfer.
 UX_STEP_NOCB(
@@ -40,18 +35,39 @@ UX_STEP_CB(
     ux_sign_scheduled_transfer_pair_flow_2_step,
     nn,
     processNextScheduledAmount(ctx->buffer),
-    {"Continue", "with transaction"});
+    {"Show", "next release"});
 UX_FLOW(
     ux_sign_scheduled_transfer_pair_flow,
     &ux_sign_scheduled_transfer_pair_flow_0_step,
     &ux_sign_scheduled_transfer_pair_flow_1_step,
     &ux_sign_scheduled_transfer_pair_flow_2_step);
 
+UX_FLOW(
+    ux_sign_scheduled_transfer_pair_flow_sign,
+    &ux_sign_scheduled_transfer_pair_flow_0_step,
+    &ux_sign_scheduled_transfer_pair_flow_1_step,
+    &ux_sign_flow_shared_sign,
+    &ux_sign_flow_shared_decline);
+
+void startInitialScheduledTransferDisplay(bool displayMemo) {
+    uint8_t index = 0;
+
+    ux_sign_scheduled_amount_transfer[index++] = &ux_sign_flow_shared_review;
+    ux_sign_scheduled_amount_transfer[index++] = &ux_sign_flow_account_sender_view;
+    ux_sign_scheduled_amount_transfer[index++] = &ux_scheduled_transfer_initial_flow_1_step;
+
+    if (displayMemo) {
+        ux_sign_scheduled_amount_transfer[index++] = &ux_display_memo_step_nocb;
+    }
+
+    ux_sign_scheduled_amount_transfer[index++] = &ux_scheduled_transfer_initial_flow_2_step;
+
+    ux_sign_scheduled_amount_transfer[index++] = FLOW_END_STEP;
+    ux_flow_init(0, ux_sign_scheduled_amount_transfer, NULL);
+}
+
 void processNextScheduledAmount(uint8_t *buffer) {
-    // The full transaction has been added to the hash, so we can continue to the signing process.
-    if (ctx->remainingNumberOfScheduledAmounts == 0 && ctx->scheduledAmountsInCurrentPacket == 0) {
-        ux_flow_init(0, ux_sign_flow_shared, NULL);
-    } else if (ctx->scheduledAmountsInCurrentPacket == 0) {
+    if (ctx->scheduledAmountsInCurrentPacket == 0) {
         // Current packet has been successfully read, but there are still more data to receive. Ask the caller
         // for more data.
         sendSuccessNoIdle();
@@ -81,8 +97,13 @@ void processNextScheduledAmount(uint8_t *buffer) {
         // We read one more scheduled amount, so count down to keep track of remaining to process.
         ctx->scheduledAmountsInCurrentPacket -= 1;
 
-        // Display the timestamp and amount for the user to validate it.
-        ux_flow_init(0, ux_sign_scheduled_transfer_pair_flow, NULL);
+        // If it is the final schedule pair, then also allow the user to sign or decline the transaction.
+        if (ctx->remainingNumberOfScheduledAmounts == 0 && ctx->scheduledAmountsInCurrentPacket == 0) {
+            ux_flow_init(0, ux_sign_scheduled_transfer_pair_flow_sign, NULL);
+        } else {
+            // Display the timestamp and amount for the user to validate it.
+            ux_flow_init(0, ux_sign_scheduled_transfer_pair_flow, NULL);
+        }
     }
 }
 
@@ -118,7 +139,7 @@ void handleTransferPairs(uint8_t *cdata, volatile unsigned int *flags) {
 void finishMemoScheduled(volatile unsigned int *flags) {
     cx_hash((cx_hash_t *) &tx_state->hash, 0, &ctx->remainingNumberOfScheduledAmounts, 1, NULL, 0);
     ctx->state = TX_TRANSFER_WITH_SCHEDULE_TRANSFER_PAIRS;
-    ux_flow_init(0, ux_display_memo, NULL);
+    startInitialScheduledTransferDisplay(true);
     *flags |= IO_ASYNCH_REPLY;
 }
 
@@ -150,10 +171,7 @@ void handleSignTransferWithScheduleAndMemo(
 
         // Update the state to expect the next message to contain the first bytes of the memo.
         ctx->state = TX_TRANSFER_WITH_SCHEDULE_MEMO_START;
-        // Display the transaction information to the user (recipient address and amount to be sent).
-        ux_flow_init(0, ux_scheduled_transfer_initial_flow, NULL);
-
-        *flags |= IO_ASYNCH_REPLY;
+        sendSuccessNoIdle();
     } else if (p1 == P1_MEMO && ctx->state == TX_TRANSFER_WITH_SCHEDULE_MEMO_START) {
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, dataLength, NULL, 0);
 
@@ -166,7 +184,6 @@ void handleSignTransferWithScheduleAndMemo(
             ctx->state = TX_TRANSFER_WITH_SCHEDULE_MEMO;
             sendSuccessNoIdle();
         }
-
     } else if (p1 == P1_MEMO && ctx->state == TX_TRANSFER_WITH_SCHEDULE_MEMO) {
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, dataLength, NULL, 0);
 
@@ -202,8 +219,7 @@ void handleSignTransferWithSchedule(uint8_t *cdata, uint8_t p1, volatile unsigne
         // Update the state to expect the next message to contain transfer pairs.
         ctx->state = TX_TRANSFER_WITH_SCHEDULE_TRANSFER_PAIRS;
         // Display the transaction information to the user (recipient address and amount to be sent).
-        ux_flow_init(0, ux_scheduled_transfer_initial_flow, NULL);
-
+        startInitialScheduledTransferDisplay(false);
         *flags |= IO_ASYNCH_REPLY;
     } else if (p1 == P1_SCHEDULED_TRANSFER_PAIRS && ctx->state == TX_TRANSFER_WITH_SCHEDULE_TRANSFER_PAIRS) {
         handleTransferPairs(cdata, flags);
