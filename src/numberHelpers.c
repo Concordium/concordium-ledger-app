@@ -175,7 +175,7 @@ size_t amountToGtuDisplay(uint8_t *dst, size_t dstLength, uint64_t microGtuAmoun
 void toPaginatedHex(uint8_t *byteArray, const uint64_t len, char *asHex, const size_t asHexSize) {
     static uint8_t const hex[] = "0123456789abcdef";
 
-    if (asHexSize < len * 2 + len / 16 + 1) {
+    if (asHexSize < len * 2 + len / 8) {
         THROW(ERROR_BUFFER_OVERFLOW);
     }
 

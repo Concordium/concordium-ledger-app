@@ -24,7 +24,7 @@ typedef struct {
     uint32_t messageLength;
     signMessageState_t state;
     char displayHeader[14];
-    char display[255];
+    char display[542];
     unsigned char displaySigner[57];
 } signMessageContext_t;
 
