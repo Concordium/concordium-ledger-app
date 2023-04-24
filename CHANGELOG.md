@@ -4,6 +4,7 @@
 
 ### Added
 
+* Added Support for signing messages.
 * Allow export of prfKey, IdCredSec, blinding randomness and attribute commitment randomness using the new paths.
 
 ## 4.0.0
