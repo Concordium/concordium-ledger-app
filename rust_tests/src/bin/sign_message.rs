@@ -10,9 +10,10 @@ pub fn sign_message(message: Vec<u8>, p2: u8) {
     println!("{}", message.len());
 
     // Build transaction payload bytes.
-    let mut initial_payload = path::generate_key_derivation_path();
+    let mut initial_payload = path::generate_testnet_key_derivation_path();
     initial_payload.append(&mut signer_address);
     initial_payload.append(&mut (message.len() as u16).to_be_bytes().to_vec());
+    println!("{:?}", initial_payload);
 
     let command = ApduCommand {
         cla: 224, // Has to be this value for all commands.
@@ -42,7 +43,7 @@ pub fn sign_message(message: Vec<u8>, p2: u8) {
 
 #[allow(dead_code)]
 fn main() {
-    let message = "057366ddef5d7edefe03fef5743012b995b5e3bcdae130b4e01b396853b65bb9b687bde11540c7dc5ed6e237de5a604b8f75b72a58d5f69f66abb5e52efd8c5d8381eaea64650ac1ecae6cca898e9677a061f8cb7e0501787ac6c659719f80d3d22d38d8f5aab812bd8013490230c8ce3781a14f8be3371111fkrmrkfkdmn12".as_bytes().to_vec();
+    let message = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam turpis magna, ultricies elementum suscipit sed, accumsan ut ex. Phasellus non tempus erat. Praesent fermentum turpis vel arcu tempus placerat. Aenean sed elit et erat vulputate aliquet. Nunc eu ultrices tortor, ut dignissim nisl. Nunc congue urna non efficitur laoreet. Aenean sit amet augue id purus consequat molestie. Quisque aliquet purus id enim auctor, non aliquet justo cursus. Donec consequat, nibh rutrum varius porta, urna mi.".as_bytes().to_vec();
     let p2 = 0;
     sign_message(message, p2)
 }
