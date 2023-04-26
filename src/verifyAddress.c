@@ -115,26 +115,16 @@ end:
     return error;
 }
 
-void handleVerifyAddress(uint8_t *cdata, volatile unsigned int *flags) {
-    uint32_t identity = U4BE(cdata, 0);
-    uint32_t credCounter = U4BE(cdata, 4);
-    getIdentityAccountDisplay(ctx->display, sizeof(ctx->display), identity, credCounter);
+#define P2_LEGACY                      0x00
+#define P2_MAINNET                     0x01
+#define P2_TESTNET                     0x02
 
-    // TODO use P1 to support new version
-    uint32_t prfKeyPath[6] = {
-        CONCORDIUM_PURPOSE_LEGACY | HARDENED_OFFSET,
-        CONCORDIUM_COIN_TYPE_LEGACY | HARDENED_OFFSET,
-        ACCOUNT_SUBTREE | HARDENED_OFFSET,
-        NORMAL_ACCOUNTS | HARDENED_OFFSET,
-        identity | HARDENED_OFFSET,
-        1 | HARDENED_OFFSET  // prf key
-    };
-
+void handleCommon(uint32_t *path, uint32_t pathLength, uint32_t credCounter, volatile unsigned int *flags) {
     uint8_t credId[48];
     uint8_t prf[32];
     BEGIN_TRY {
         TRY {
-            getBlsPrivateKey(prfKeyPath, 6, prf, sizeof(prf));
+            getBlsPrivateKey(path, pathLength, prf, sizeof(prf));
             cx_err_t error = getCredId(prf, sizeof(prf), credCounter, credId, sizeof(credId));
             if (error != 0) {
                 THROW(ERROR_INVALID_STATE);
@@ -156,4 +146,53 @@ void handleVerifyAddress(uint8_t *cdata, volatile unsigned int *flags) {
 
     ux_flow_init(0, ux_verify_address, NULL);
     *flags |= IO_ASYNCH_REPLY;
+}
+void handleVerifyAddressLegacy(uint8_t *cdata, volatile unsigned int *flags) {
+    uint32_t identity = U4BE(cdata, 0);
+    uint32_t credCounter = U4BE(cdata, 4);
+    getIdentityAccountDisplay(ctx->display, sizeof(ctx->display), identity, credCounter);
+
+    uint32_t prfKeyPath[6] = {
+        CONCORDIUM_PURPOSE_LEGACY | HARDENED_OFFSET,
+        CONCORDIUM_COIN_TYPE_LEGACY | HARDENED_OFFSET,
+        ACCOUNT_SUBTREE | HARDENED_OFFSET,
+        NORMAL_ACCOUNTS | HARDENED_OFFSET,
+        identity | HARDENED_OFFSET,
+        1 | HARDENED_OFFSET  // prf key
+    };
+
+    handleCommon(prfKeyPath, 6, credCounter, flags);
+}
+
+void handleVerifyAddressCoinType(uint32_t coinType,  uint8_t *cdata, volatile unsigned int *flags) {
+    uint32_t identityProvider = U4BE(cdata, 0);
+    uint32_t identity = U4BE(cdata, 4);
+    uint32_t credCounter = U4BE(cdata, 8);
+    getIdentityAccountDisplay(ctx->display, sizeof(ctx->display), identity, credCounter);
+
+    uint32_t prfKeyPath[5] = {
+        CONCORDIUM_PURPOSE | HARDENED_OFFSET,
+        coinType | HARDENED_OFFSET,
+        identityProvider | HARDENED_OFFSET,
+        identity | HARDENED_OFFSET,
+        3 | HARDENED_OFFSET  // prf key
+    };
+
+    handleCommon(prfKeyPath, 5, credCounter, flags);
+}
+
+void handleVerifyAddress(uint8_t *cdata, uint8_t p2, volatile unsigned int *flags) {
+    switch (p2) {
+        case P2_LEGACY:
+            handleVerifyAddressLegacy(cdata, flags);
+            break;
+        case P2_MAINNET:
+            handleVerifyAddressCoinType(CONCORDIUM_COIN_TYPE_MAINNET, cdata, flags);
+            break;
+        case P2_TESTNET:
+            handleVerifyAddressCoinType(CONCORDIUM_COIN_TYPE_TESTNET, cdata, flags);
+            break;
+        default:
+            THROW(ERROR_INVALID_PARAM);
+    }
 }

@@ -144,7 +144,7 @@ static void concordium_main(void) {
                         handleGetPublicKey(cdata, p1, p2, &flags);
                         break;
                     case INS_VERIFY_ADDRESS:
-                        handleVerifyAddress(cdata, &flags);
+                        handleVerifyAddress(cdata, p2, &flags);
                         break;
                     case INS_SIGN_TRANSFER:
                         handleSignTransfer(cdata, &flags);

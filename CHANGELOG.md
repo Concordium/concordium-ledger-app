@@ -5,6 +5,7 @@
 ### Added
 
 * Allow export of prfKey, IdCredSec, blinding randomness and attribute commitment randomness using the new paths.
+* Allow verifying an account address using the new paths.
 
 ## 4.0.1
 
