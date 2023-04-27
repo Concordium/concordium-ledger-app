@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+* Support for update contract transaction.
+
 ## 4.0.1
 
 ### Changed
