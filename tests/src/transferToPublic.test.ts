@@ -29,7 +29,7 @@ async function transferToPublic(sim: Zemu, transport: Transport, handleUi: () =>
 
 test('[NANO S] Transfer to public', setupZemu('nanos', async (sim, transport) => {
     await transferToPublic(sim, transport, async () => {
-        await sim.navigateAndCompareSnapshots('.', 'nanos_transfer_to_public', [7, 0]);
+        await sim.navigateAndCompareSnapshots('.', 'nanos_transfer_to_public', [8, 0]);
     });
 }));
 

@@ -9,7 +9,7 @@
 void handleSignTransferToEncrypted(uint8_t *cdata, volatile unsigned int *flags);
 
 typedef struct {
-    uint8_t amount[26];
+    uint8_t amount[30];
 } signTransferToEncrypted_t;
 
 #endif

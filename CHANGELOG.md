@@ -6,6 +6,12 @@
 
 * Allow export of prfKey, IdCredSec, blinding randomness and attribute commitment randomness using the new paths.
 
+## 4.0.1
+
+### Changed
+
+* Transfer amounts are now prefixed with CCD inline with the amount, instead of (CCD) in the upper line.
+
 ## 4.0.0
 
 ### Changed
@@ -13,11 +19,18 @@
 * Transfer amounts now show (CCD) in upper line.
 * Compare now has accept/reject screens.
 * signIpInfo initial screen be part of the 1st public key flow.
+* Improved the UI flow for transactions that can contain a memo to make it more seamless, i.e. require fewer "both button clicks".
 
 ### Removed
 
 * Support for chain updates
 * Support for old baker transactions
+
+## 3.1.0
+
+### Added
+
+* Support for the Nano S Plus 1.1.0 firmware.
 
 ## 3.0.1
 
