@@ -15,7 +15,7 @@ async function transferToEncrypted(sim: Zemu, transport: Transport, handleUi: ()
 
 test('[NANO S] Transfer to encrypted', setupZemu('nanos', async (sim, transport) => {
     await transferToEncrypted(sim, transport, async () => {
-        await sim.navigateAndCompareSnapshots('.', 'nanos_transfer_to_encrypted', [8, 0]);
+        await sim.navigateAndCompareSnapshots('.', 'nanos_transfer_to_encrypted', [9, 0]);
     });
 }));
 

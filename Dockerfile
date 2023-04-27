@@ -5,15 +5,11 @@
 
 # Run commands from makefile (load, delete, release, etc.)
 
-FROM ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:sha-229b03c
+FROM ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:eb27b9eb2917620b95f5df03a16ea61d62ef2032
 
-RUN apt-get update --allow-releaseinfo-change && apt-get upgrade -qy && \
-    apt-get install -qy zip
+RUN apk add --update zip
 
-ENV NANOS_SDK=/app/nanos-secure-sdk
-ENV NANOS_PLUS_SDK=/app/nanosplus-secure-sdk
-ENV NANOX_SDK=/app/nanox-secure-sdk
-
-ENV BOLOS_SDK=${NANOS_SDK}
+ENV WORK_DIR=/app
+ENV TARGET=nanos
 
 CMD ["/bin/bash"]
