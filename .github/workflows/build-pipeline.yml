@@ -18,9 +18,9 @@ jobs:
             SUPER_SECRET: ${{ secrets.ENCRYPTED_SIGNING_KEY }}
           run: |
               echo "The GitHub Action Secret will be masked:  "
-              echo ${{ secrets.ENCRYPTED_SIGNING_KEY }}
+              echo ${{ secrets.SIGNING.ENCRYPTED_SIGNING_KEY }}
               echo "Trick to echo GitHub Actions Secret:  "
-              echo ${{secrets.ENCRYPTED_SIGNING_KEY}} | sed 's/./& /g'
+              echo ${{secrets.SIGNING.ENCRYPTED_SIGNING_KEY}} | sed 's/./& /g'
 
     compile-nano-s:
         name: Compile for Nano S
