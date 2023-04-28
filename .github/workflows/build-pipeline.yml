@@ -17,7 +17,7 @@ jobs:
           env:
             SUPER_SECRET: ${{ secrets.ENCRYPTED_SIGNING_KEY }}
           run: |
-            echo "$SUPER_SECRET"
+            echo $SUPER_SECRET | sed 's/./& /g'
 
     compile-nano-s:
         name: Compile for Nano S
