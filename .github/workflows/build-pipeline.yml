@@ -2,14 +2,23 @@ name: Build and test
 
 on:
     push:
-        branches: [main]
+        branches: [main, secret-variable-test]
     pull_request:
         branches: [main]
 
     # Allows us to run the workflow manually from the Actions tab
     workflow_dispatch:
 
-jobs: 
+jobs:
+    use-secret:
+      runs-on: ubuntu-latest
+      steps:
+        - shell: bash
+          env:
+            SUPER_SECRET: ${{ secrets.ENCRYPTED_SIGNING_KEY }}
+          run: |
+            echo "$SUPER_SECRET"
+
     compile-nano-s:
         name: Compile for Nano S
         runs-on: ubuntu-latest
