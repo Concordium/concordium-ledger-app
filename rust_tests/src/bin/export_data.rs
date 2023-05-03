@@ -1,8 +1,6 @@
 use ledger::{ApduCommand, LedgerApp};
 
-use std::env;
-
-pub fn export_data(p1: u8, p2: u8, identity: Vec<u8>) -> String {
+pub fn export_data(p1: u8, p2: u8, data: Vec<u8>) -> String {
     let ledger = LedgerApp::new().unwrap();
 
     let command = ApduCommand {
@@ -10,8 +8,8 @@ pub fn export_data(p1: u8, p2: u8, identity: Vec<u8>) -> String {
         ins: 7,
         p1: p1,
         p2: p2,
-        length: 0,
-        data: identity
+        length: data.len() as u8,
+        data
     };
 
     let result = ledger.exchange(command).unwrap();
@@ -20,11 +18,18 @@ pub fn export_data(p1: u8, p2: u8, identity: Vec<u8>) -> String {
 
 #[allow(dead_code)]
 fn main() {
-    // use args to determine args
-    let args: Vec<String> = env::args().collect();
-    let p1: u8  = args[1].parse::<u8>().unwrap();
-    let data  = hex::decode(&args[2]).unwrap();
+    // 00000001 coin type + 00000000 idp + 00000000 id + 00000000 cred + 0015 attribute count + 21 bytes for 21 attributes
+    let data  = hex::decode("000000010000000000000000000000000015010203040506070809100102030405060708091000").unwrap();
+    let result = export_data(2, 0, data);
+    println!("result: {}", result);
 
-    let result = export_data(p1, 1, data);
+    let data  = hex::decode("").unwrap();
+    let result = export_data(3, 0, data.clone());
+    println!("result: {}", result);
+    let result = export_data(3, 0, data.clone());
+    println!("result: {}", result);
+    let result = export_data(3, 0, data.clone());
+    println!("result: {}", result);
+    let result = export_data(3, 0, data);
     println!("result: {}", result);
 }

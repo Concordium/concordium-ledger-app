@@ -165,7 +165,7 @@ static void concordium_main(void) {
                         handleExportPrivateKey(cdata, p1, p2, &flags);
                         break;
                     case INS_EXPORT_PRIVATE_IDENTITY_DATA:
-                        handleExportPrivateIdentityData(cdata, p1, p2, &flags, isInitialCall);
+                        handleExportPrivateIdentityData(cdata, p1, lc, &flags, isInitialCall);
                         break;
                     case INS_TRANSFER_TO_ENCRYPTED:
                         handleSignTransferToEncrypted(cdata, &flags);
