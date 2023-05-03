@@ -10,7 +10,7 @@ static tx_state_t *tx_state = &global_tx_state;
 UX_STEP_NOCB(
     ux_sign_public_info_for_ip_display_public_key,
     bnnn_paging,
-    {.title = "Public key", .text = (char *) global.signPublicInformationForIp.publicKey});
+    {.title = "Identity", .text = (char *) global.signPublicInformationForIp.publicKey});
 
 UX_STEP_CB(ux_sign_public_info_for_ip_continue, nn, sendSuccessNoIdle(), {"Continue", "reviewing info"});
 

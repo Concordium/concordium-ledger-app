@@ -120,9 +120,10 @@ void handleVerifyAddress(uint8_t *cdata, volatile unsigned int *flags) {
     uint32_t credCounter = U4BE(cdata, 4);
     getIdentityAccountDisplay(ctx->display, sizeof(ctx->display), identity, credCounter);
 
+    // TODO use P1 to support new version
     uint32_t prfKeyPath[6] = {
-        CONCORDIUM_PURPOSE | HARDENED_OFFSET,
-        CONCORDIUM_COIN_TYPE | HARDENED_OFFSET,
+        CONCORDIUM_PURPOSE_LEGACY | HARDENED_OFFSET,
+        CONCORDIUM_COIN_TYPE_LEGACY | HARDENED_OFFSET,
         ACCOUNT_SUBTREE | HARDENED_OFFSET,
         NORMAL_ACCOUNTS | HARDENED_OFFSET,
         identity | HARDENED_OFFSET,
