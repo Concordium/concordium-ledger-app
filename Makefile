@@ -17,23 +17,20 @@
 #  limitations under the License.
 #*******************************************************************************
 
-ifndef TARGET
-$(error Environment variable TARGET is not set.)
-endif
-
-
-# Main app configuration
-APPNAME = "Concordium"
-
-ifeq ($(TARGET),nanos)
-    ICONNAME=icons/nanos-concordium-icon.gif
-    BOLOS_SDK=$(WORK_DIR/)nanos-secure-sdk
-else
-    ICONNAME=icons/nanosplus-concordium-icon.gif
-    BOLOS_SDK=$(WORK_DIR/)ledger-secure-sdk
+ifndef BOLOS_SDK
+$(error Environment variable BOLOS_SDK is not set.)
 endif
 
 include $(BOLOS_SDK)/Makefile.defines
+
+ifeq ($(TARGET_NAME),TARGET_NANOS)
+    ICONNAME=icons/nanos-concordium-icon.gif
+else
+    ICONNAME=icons/nanosplus-concordium-icon.gif
+endif
+
+# Main app configuration
+APPNAME = "Concordium"
 
 # Version must be no greater than 99.99.999, otherwise
 # extra memory must be allocated in menu.c.
