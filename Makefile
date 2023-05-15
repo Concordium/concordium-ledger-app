@@ -39,7 +39,14 @@ APPVERSION_MINOR=0
 APPVERSION_PATCH=1
 APPVERSION=$(APPVERSION_MAJOR).$(APPVERSION_MINOR).$(APPVERSION_PATCH)
 
-APP_LOAD_PARAMS = --appFlags 0x00 $(COMMON_LOAD_PARAMS)
+ifeq ($(TARGET_NAME), TARGET_NANOX)
+APP_LOAD_PARAMS=--appFlags 0x200  # APPLICATION_FLAG_BOLOS_SETTINGS
+else
+APP_LOAD_PARAMS=--appFlags 0x000
+endif
+
+APP_LOAD_PARAMS += $(COMMON_LOAD_PARAMS)
+
 
 # Restrict derivation paths to the Concordium specific path.
 APP_LOAD_PARAMS += --path "1105'/0'"
@@ -86,6 +93,11 @@ DEFINES += APPVERSION_PATCH=$(APPVERSION_PATCH)
 
 # Stop execution after a stack overflow
 DEFINES += HAVE_BOLOS_APP_STACK_CANARY
+
+# Bluetooth settings for Nano X
+ifeq ($(TARGET_NAME), TARGET_NANOX)
+	DEFINES += HAVE_BLE BLE_COMMAND_TIMEOUT_MS=2000 HAVE_BLE_APDU
+endif
 
 # Compiler, assembler, and linker
 ifneq ($(BOLOS_ENV),)
