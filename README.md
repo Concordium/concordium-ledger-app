@@ -10,9 +10,7 @@ git submodule update --init
 ```
 
 ## Building and deploying
-
-### The Docker way
-We provide a small Dockerfile that wraps [ledger-app-builder](https://github.com/LedgerHQ/ledger-app-builder) which can be used for building, loading and deleting an application for the Ledger Nano S and Ledger Nano S Plus devices. Our Dockerfile ensures that we can control the secure SDK dependencies, as they are hardcoded in Ledger's image, and provides the dependency required for zipping a release for sideloading.
+We provide a small Dockerfile that wraps [ledger-app-builder](https://github.com/LedgerHQ/ledger-app-builder) which can be used for building, loading and deleting an application for the Ledger Nano S and Ledger Nano S Plus devices. Our Dockerfile provides the dependency required for zipping a release for sideloading.
 
 To build the Docker image run:
 ```bash
@@ -31,28 +29,10 @@ root@410e7ab19bea:/app# make load
 root@410e7ab19bea:/app# make delete
 
 // Switch BOLOS_SDK to build for Nano S Plus
-// Note that 'make clean' is a requirement when switching TARGET.
-root@f382ee774923:/app# export TARGET=nanos2
+// Note that 'make clean' is a requirement when switching BOLOS_SDK.
+root@f382ee774923:/app# export BOLOS_SDK=$NANOSP_SDK
 root@f382ee774923:/app# make clean
 root@f382ee774923:/app# make load
-```
-
-### Without Docker
-It is possible to setup a local Ubuntu environment to build and deploy Ledger applications without the user of Docker. The best place to check the required tools for building is in the [ledger-app-builder Dockerfile](https://github.com/LedgerHQ/ledger-app-builder/blob/master/Dockerfile). We do not provide a full guide to install these as the Docker image can be used as an alternative. Note that there is some maintenance required as the dependencies used may change over time, so on updates to SDK's your setup may break.
-
-When your dependencies are setup you can load the application with
-```bash
-make load
-```
-and delete the application from the device with
-```bash
-make delete
-```
-Switching `TARGET` to build for a different device:
-```bash
-export TARGET=nanos2
-make clean
-make load
 ```
 
 ### For the Speculos emulator
@@ -61,7 +41,7 @@ As the Ledger Nano X does not support sideloading, the only way to test updates 
 to use the [Speculos emulator](https://github.com/LedgerHQ/speculos). Please follow their documentation
 for how to setup the emulator. To build the `.elf` file required by the emulator run:
 ```
-export TARGET=nanox (or nanos/nanos2)
+export BOLOS_SDK=$NANOX_SDK
 make emulator
 ```
 The file will be available at `bin/app.elf`.
@@ -102,7 +82,7 @@ CTEST_OUTPUT_ON_FAILURE=1 make -C build test
 
 ### Running end to end tests
 An end to end test is available for each instruction implemented in the application. The end
-to end tests depend on having built the application for Nano S and Nano X, and having placed
+to end tests depend on having built the application for Nano S, Nano SP and Nano X, and having placed
 their `.elf` files correctly. This can achieved by running:
 ```bash
 cd tests
@@ -121,8 +101,7 @@ yarn test
 ## Building a release
 Note that it is only possible to build a release for the Ledger Nano S and the Ledger Nano S plus. This is because only those devices allow for sideloading of an application.
 
-To make a new release of the Concordium Ledger application you must have set up the build
-environment like described above (either the Docker setup or a local setup).
+To make a new release of the Concordium Ledger application you must use the Docker setup described above.
 
 Additionally you must set the following environment variables
 ```
@@ -132,11 +111,11 @@ LEDGER_PUBLIC_KEY=public_key_matching_the_signing_key
 To build a new release make sure that `APPVERSION` has been bumped correctly, and then run
 ```
 make clean
-export TARGET=nanos
+export BOLOS_SDK=$NANOS_SDK
 make release
 
 make clean
-export TARGET=nanos2
+export TARGET=$NANOSP_SDK
 make release
 ```
 The release will be packaged into two `.zip` archives, each with the required binary and the corresponding install scripts.
