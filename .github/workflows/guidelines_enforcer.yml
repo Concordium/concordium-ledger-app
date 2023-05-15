@@ -7,15 +7,10 @@ on:
       - main
       - ledger-enforce-rules
   pull_request:
-  workflow_call:
-    inputs:
-      run_for_devices:
-        description: 'The list of device(s) on which the checking will run (defaults to ["nanos", "nanox", "nanosp"])'
-        required: false
-        default: '["nanos", "nanox", "nanosp"]'
-        type: string
 
 jobs:
   guidelines_enforcer:
     name: Call Ledger guidelines_enforcer
     uses: LedgerHQ/ledger-app-workflows/.github/workflows/reusable_guidelines_enforcer.yml@v1
+    with:
+      run_for_devices: '["nanos", "nanox", "nanosp"]'
