@@ -56,8 +56,8 @@ APP_LOAD_PARAMS +=--curve ed25519
 # Parameters required by the Ledger workflows. Can allow for different
 # variants to be built. For the Concordium app we do not use this, and only
 # have a single variant.
-VARIANT_PARAM = CCD
-VARIANT_VALUES = CCD
+VARIANT_PARAM = concordium
+VARIANT_VALUES = concordium
 
 # Build configuration
 APP_SOURCE_PATH += src
