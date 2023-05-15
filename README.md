@@ -115,7 +115,7 @@ export BOLOS_SDK=$NANOS_SDK
 make release
 
 make clean
-export TARGET=$NANOSP_SDK
+export BOLOS_SDK=$NANOSP_SDK
 make release
 ```
 The release will be packaged into two `.zip` archives, each with the required binary and the corresponding install scripts.

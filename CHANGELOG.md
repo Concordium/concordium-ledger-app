@@ -1,5 +1,15 @@
 # Changelog
 
+## 4.1.0
+
+### Added
+
+* Bluetooth and airplane mode handling for Nano X. Experimental.
+
+### Changed
+
+* Updated application to run Ledger's guidelines enforcer.
+
 ## 4.0.1
 
 ### Changed
