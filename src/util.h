@@ -60,11 +60,11 @@ void sendSuccess(uint8_t tx);
  * Note that any method using this method MUST zero the private key right after use of the private key,
  * as to limit any risk of leaking a private key.
  *
- * @param keyPath the key derivation path to get the private key for
+ * @param keyPathInput the key derivation path to get the private key for
  * @param keyPathLength length of the key derivation path
  * @param privateKey [out] where to write the derived private key to
  */
-void getPrivateKey(uint32_t *keyPath, uint8_t keyPathLength, cx_ecfp_private_key_t *privateKey);
+void getPrivateKey(uint32_t *keyPathInput, uint8_t keyPathLength, cx_ecfp_private_key_t *privateKey);
 
 /**
  * Gets the public-key for the keypath that has been loaded into the state. It is a
@@ -133,11 +133,11 @@ int handleHeaderAndToAddress(uint8_t *cdata, uint8_t kind, uint8_t *recipientDst
  * Note that any method using this method MUST zero the private key right after use of the private key,
  * as to limit any risk of leaking a private key.
  *
- * @param keyPath the key derivation path to get the private key seed from
+ * @param keyPathInput the key derivation path to get the private key seed from
  * @param keyPathLength length of the key derivation path
  * @param privateKey [out] where to write the derived private key to
  * @param privateKeyLength length of privateKey
  */
-void getBlsPrivateKey(uint32_t *keyPath, uint8_t keyPathLength, uint8_t *privateKey, size_t privateKeyLength);
+void getBlsPrivateKey(uint32_t *keyPathInput, uint8_t keyPathLength, uint8_t *privateKey, size_t privateKeyLength);
 
 #endif

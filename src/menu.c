@@ -3,7 +3,7 @@
 #include "ux.h"
 
 static tx_state_t *tx_state = &global_tx_state;
-uint8_t version[10];
+uint8_t appVersion[10];
 
 /**
  * Constructs the version in the format MAJOR.MINOR.PATCH. We only
@@ -39,7 +39,7 @@ UX_STEP_NOCB(
     bn,
     {
         "Version",
-        (char *) version,
+        (char *) appVersion,
     });
 UX_FLOW(ux_menu_idle_flow, &ux_menu_idle_flow_1_step, &ux_menu_idle_flow_2_step, &ux_menu_idle_flow_3_step, FLOW_LOOP);
 
@@ -48,6 +48,6 @@ void ui_idle(void) {
     if (G_ux.stack_count == 0) {
         ux_stack_push();
     }
-    loadVersion(version);
+    loadVersion(appVersion);
     ux_flow_init(0, ux_menu_idle_flow, NULL);
 }
