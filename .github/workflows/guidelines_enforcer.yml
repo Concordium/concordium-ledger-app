@@ -1,0 +1,14 @@
+name: Ensure compliance with Ledger guidelines
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - ledger-enforce-rules
+  pull_request:
+
+jobs:
+  guidelines_enforcer:
+    name: Call Ledger guidelines_enforcer
+    uses: LedgerHQ/ledger-app-workflows/.github/workflows/reusable_guidelines_enforcer.yml@v1
