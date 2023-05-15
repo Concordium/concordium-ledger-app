@@ -83,7 +83,7 @@ CTEST_OUTPUT_ON_FAILURE=1 make -C build test
 ### Running end to end tests
 An end to end test is available for each instruction implemented in the application. The end
 to end tests depend on having built the application for Nano S, Nano SP and Nano X, and having placed
-their `.elf` files correctly. This can achieved by running:
+their `.elf` files correctly. This can achieved by running (from within Docker):
 ```bash
 cd tests
 ./build_binaries.sh
