@@ -47,7 +47,6 @@ endif
 
 APP_LOAD_PARAMS += $(COMMON_LOAD_PARAMS)
 
-
 # Restrict derivation paths to the Concordium specific path.
 APP_LOAD_PARAMS += --path "1105'/0'"
 # Restrict derivation to only be able to use ed25519
@@ -62,10 +61,6 @@ VARIANT_VALUES = concordium
 # Build configuration
 APP_SOURCE_PATH += src
 SDK_SOURCE_PATH += lib_stusb lib_stusb_impl
-
-ifeq ($(TARGET_NAME),TARGET_NANOX)
-	SDK_SOURCE_PATH  += lib_blewbxx lib_blewbxx_impl
-endif
 
 ifeq ($(TARGET_NAME),TARGET_NANOS)
 	DEFINES += IO_SEPROXYHAL_BUFFER_SIZE_B=128
@@ -101,6 +96,7 @@ DEFINES += HAVE_BOLOS_APP_STACK_CANARY
 # Bluetooth settings for Nano X
 ifeq ($(TARGET_NAME), TARGET_NANOX)
 	DEFINES += HAVE_BLE BLE_COMMAND_TIMEOUT_MS=2000 HAVE_BLE_APDU
+	SDK_SOURCE_PATH  += lib_blewbxx lib_blewbxx_impl
 endif
 
 # Compiler, assembler, and linker
