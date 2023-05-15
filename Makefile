@@ -219,6 +219,10 @@ delete:
 lint:
 	find . -regex './src/.*\.\(c\|h\)\|./unit_tests/.*\.\(c\|h\)' -exec clang-format -style=file -i {} \;
 
+# TODO: Use Makefile.standard_app to get this automatically in the future.
+listvariants:
+	@echo VARIANTS $(VARIANT_PARAM) $(VARIANT_VALUES)
+
 # Import rules to compile the glyphs supplied in the glyphs/ directory
 include $(BOLOS_SDK)/Makefile.glyphs
 
