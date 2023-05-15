@@ -63,6 +63,10 @@ VARIANT_VALUES = concordium
 APP_SOURCE_PATH += src
 SDK_SOURCE_PATH += lib_stusb lib_stusb_impl
 
+ifeq ($(TARGET_NAME),TARGET_NANOX)
+	SDK_SOURCE_PATH  += lib_blewbxx lib_blewbxx_impl
+endif
+
 ifeq ($(TARGET_NAME),TARGET_NANOS)
 	DEFINES += IO_SEPROXYHAL_BUFFER_SIZE_B=128
 else
