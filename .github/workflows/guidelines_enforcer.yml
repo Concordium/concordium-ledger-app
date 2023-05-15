@@ -1,12 +1,13 @@
 name: Ensure compliance with Ledger guidelines
 
 on:
-  workflow_dispatch:
-  push:
-    branches:
-      - main
-      - ledger-enforce-rules
-  pull_request:
+    push:
+        branches: [main]
+    pull_request:
+        branches: [main]
+
+    # Allows us to run the workflow manually from the Actions tab
+    workflow_dispatch:
 
 jobs:
   guidelines_enforcer:
