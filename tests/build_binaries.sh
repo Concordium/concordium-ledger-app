@@ -4,17 +4,17 @@ mkdir -p bin/nanosplus
 
 cd ..
 
-TARGET=nanos make clean
-TARGET=nanos make
+BOLOS_SDK=$NANOS_SDK make clean
+BOLOS_SDK=$NANOS_SDK make
 
 cp bin/app.elf "tests/bin/nanos/concordium_nanos.elf"
 
-TARGET=nanos2 make clean
-TARGET=nanos2 make
+BOLOS_SDK=$NANOSP_SDK make clean
+BOLOS_SDK=$NANOSP_SDK make
 
 cp bin/app.elf "tests/bin/nanosplus/concordium_nanosplus.elf"
 
-TARGET=nanox make clean
-TARGET=nanox make
+BOLOS_SDK=$NANOX_SDK make clean
+BOLOS_SDK=$NANOX_SDK make
 
 cp bin/app.elf "tests/bin/nanox/concordium_nanox.elf"

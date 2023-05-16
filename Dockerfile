@@ -5,11 +5,8 @@
 
 # Run commands from makefile (load, delete, release, etc.)
 
-FROM ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:eb27b9eb2917620b95f5df03a16ea61d62ef2032
+FROM ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
 
 RUN apk add --update zip
-
-ENV WORK_DIR=/app
-ENV TARGET=nanos
 
 CMD ["/bin/bash"]

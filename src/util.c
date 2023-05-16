@@ -143,7 +143,7 @@ void getIdentityAccountDisplay(uint8_t *dst, size_t dstLength, uint32_t identity
     bin2dec(dst + offset, dstLength - offset, accountIndex);
 }
 
-void getPrivateKey(uint32_t *keyPath, uint8_t keyPathLength, cx_ecfp_private_key_t *privateKey) {
+void getPrivateKey(uint32_t *keyPathInput, uint8_t keyPathLength, cx_ecfp_private_key_t *privateKey) {
     uint8_t privateKeyData[32];
 
     // Invoke the device methods for generating a private key.
@@ -153,7 +153,7 @@ void getPrivateKey(uint32_t *keyPath, uint8_t keyPathLength, cx_ecfp_private_key
             os_perso_derive_node_bip32_seed_key(
                 HDW_ED25519_SLIP10,
                 CX_CURVE_Ed25519,
-                keyPath,
+                keyPathInput,
                 keyPathLength,
                 privateKeyData,
                 NULL,
@@ -226,6 +226,25 @@ void sign(uint8_t *input, uint8_t *signatureOnInput) {
 
 #define l_CONST        48  // ceil((3 * ceil(log2(r))) / 16)
 #define BLS_KEY_LENGTH 32
+#define SEED_LENGTH    32
+
+// We must declare the functions for the static analyzer to be happy. Ideally we would have
+// access to the declarations from the Ledger SDK.
+void cx_hkdf_extract(
+    const cx_md_t hash_id,
+    const unsigned char *ikm,
+    unsigned int ikm_len,
+    unsigned char *salt,
+    unsigned int salt_len,
+    unsigned char *prk);
+void cx_hkdf_expand(
+    const cx_md_t hash_id,
+    const unsigned char *prk,
+    unsigned int prk_len,
+    unsigned char *info,
+    unsigned int info_len,
+    unsigned char *okm,
+    unsigned int okm_len);
 
 static const uint8_t l_bytes[2] = {0, l_CONST};
 
@@ -237,6 +256,8 @@ static const uint8_t l_bytes[2] = {0, l_CONST};
 void blsKeygen(const uint8_t *seed, size_t seedLength, uint8_t *dst, size_t dstLength) {
     if (dstLength < BLS_KEY_LENGTH) {
         THROW(ERROR_BUFFER_OVERFLOW);
+    } else if (seedLength != SEED_LENGTH) {
+        THROW(ERROR_INVALID_TRANSACTION);
     }
 
     uint8_t sk[l_CONST];
@@ -245,16 +266,16 @@ void blsKeygen(const uint8_t *seed, size_t seedLength, uint8_t *dst, size_t dstL
         66, 76, 83, 45, 83, 73, 71, 45, 75, 69,
         89, 71, 69, 78, 45, 83, 65, 76, 84, 45};  // Initially set to the byte representation of "BLS-SIG-KEYGEN-SALT-"
     size_t saltSize = 20;                         // 20 = size of initial salt seed
-    uint8_t ikm[seedLength + 1];
+    uint8_t ikm[SEED_LENGTH + 1];
 
-    memcpy(ikm, seed, seedLength);
-    ikm[seedLength] = 0;
+    memcpy(ikm, seed, SEED_LENGTH);
+    ikm[SEED_LENGTH] = 0;
 
     do {
         cx_hash_sha256(salt, saltSize, salt, sizeof(salt));
         saltSize = sizeof(salt);
         cx_hkdf_extract(CX_SHA256, ikm, sizeof(ikm), salt, sizeof(salt), prk);
-        cx_hkdf_expand(CX_SHA256, prk, sizeof(prk), l_bytes, sizeof(l_bytes), sk, sizeof(sk));
+        cx_hkdf_expand(CX_SHA256, prk, sizeof(prk), (unsigned char *) l_bytes, sizeof(l_bytes), sk, sizeof(sk));
         cx_math_modm(sk, sizeof(sk), r, sizeof(r));
     } while (cx_math_is_zero(sk, sizeof(sk)));
 
@@ -262,11 +283,11 @@ void blsKeygen(const uint8_t *seed, size_t seedLength, uint8_t *dst, size_t dstL
     memmove(dst, sk + l_CONST - BLS_KEY_LENGTH, BLS_KEY_LENGTH);
 }
 
-void getBlsPrivateKey(uint32_t *keyPath, uint8_t keyPathLength, uint8_t *privateKey, size_t privateKeySize) {
+void getBlsPrivateKey(uint32_t *keyPathInput, uint8_t keyPathLength, uint8_t *privateKey, size_t privateKeySize) {
     cx_ecfp_private_key_t privateKeySeed;
     BEGIN_TRY {
         TRY {
-            getPrivateKey(keyPath, keyPathLength, &privateKeySeed);
+            getPrivateKey(keyPathInput, keyPathLength, &privateKeySeed);
             blsKeygen(privateKeySeed.d, sizeof(privateKeySeed.d), privateKey, privateKeySize);
         }
         FINALLY {

@@ -94,8 +94,7 @@ size_t decimalNumberToDisplay(
         dst[0] = '0';
         dst[1] = '.';
         // We decrement the length an extra time, to make sure there is space for the termination.
-        size_t length = decimalDigitsDisplay(dst + 2, dstLength - 3, amount, decimalDigitsLength) + 2;
-        return length;
+        return decimalDigitsDisplay(dst + 2, dstLength - 3, amount, decimalDigitsLength) + 2;
     }
 
     size_t offset = 0;

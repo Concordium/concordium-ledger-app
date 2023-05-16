@@ -17,37 +17,46 @@
 #  limitations under the License.
 #*******************************************************************************
 
-ifndef TARGET
-$(error Environment variable TARGET is not set.)
-endif
-
-
-# Main app configuration
-APPNAME = "Concordium"
-
-ifeq ($(TARGET),nanos)
-    ICONNAME=icons/nanos-concordium-icon.gif
-    BOLOS_SDK=$(WORK_DIR/)nanos-secure-sdk
-else
-    ICONNAME=icons/nanosplus-concordium-icon.gif
-    BOLOS_SDK=$(WORK_DIR/)ledger-secure-sdk
+ifndef BOLOS_SDK
+$(error Environment variable BOLOS_SDK is not set.)
 endif
 
 include $(BOLOS_SDK)/Makefile.defines
 
+ifeq ($(TARGET_NAME),TARGET_NANOS)
+    ICONNAME=icons/nanos-concordium-icon.gif
+else
+    ICONNAME=icons/nanosplus-concordium-icon.gif
+endif
+
+# Main app configuration
+APPNAME = "Concordium"
+
 # Version must be no greater than 99.99.999, otherwise
 # extra memory must be allocated in menu.c.
 APPVERSION_MAJOR=4
-APPVERSION_MINOR=0
-APPVERSION_PATCH=1
+APPVERSION_MINOR=1
+APPVERSION_PATCH=0
 APPVERSION=$(APPVERSION_MAJOR).$(APPVERSION_MINOR).$(APPVERSION_PATCH)
 
-APP_LOAD_PARAMS = --appFlags 0x00 $(COMMON_LOAD_PARAMS)
+ifeq ($(TARGET_NAME), TARGET_NANOX)
+APP_LOAD_PARAMS=--appFlags 0x200  # APPLICATION_FLAG_BOLOS_SETTINGS
+else
+APP_LOAD_PARAMS=--appFlags 0x000
+endif
+
+APP_LOAD_PARAMS += $(COMMON_LOAD_PARAMS)
 
 # Restrict derivation paths to the Concordium specific path.
 APP_LOAD_PARAMS += --path "1105'/0'"
 # Restrict derivation to only be able to use ed25519
 APP_LOAD_PARAMS +=--curve ed25519
+
+# Parameters required by the Ledger workflows. Can allow for different
+# variants to be built. For the Concordium app we do not use this, and only
+# have a single variant.
+VARIANT_PARAM = concordium
+VARIANT_VALUES = concordium
 
 # Build configuration
 APP_SOURCE_PATH += src
@@ -83,6 +92,12 @@ DEFINES += APPVERSION_PATCH=$(APPVERSION_PATCH)
 
 # Stop execution after a stack overflow
 DEFINES += HAVE_BOLOS_APP_STACK_CANARY
+
+# Bluetooth settings for Nano X
+ifeq ($(TARGET_NAME), TARGET_NANOX)
+	DEFINES += HAVE_BLE BLE_COMMAND_TIMEOUT_MS=2000 HAVE_BLE_APDU
+	SDK_SOURCE_PATH  += lib_blewbxx lib_blewbxx_impl
+endif
 
 # Compiler, assembler, and linker
 ifneq ($(BOLOS_ENV),)
@@ -215,6 +230,10 @@ delete:
 
 lint:
 	find . -regex './src/.*\.\(c\|h\)\|./unit_tests/.*\.\(c\|h\)' -exec clang-format -style=file -i {} \;
+
+# TODO: Use Makefile.standard_app to get this automatically in the future.
+listvariants:
+	@echo VARIANTS $(VARIANT_PARAM) $(VARIANT_VALUES)
 
 # Import rules to compile the glyphs supplied in the glyphs/ directory
 include $(BOLOS_SDK)/Makefile.glyphs
