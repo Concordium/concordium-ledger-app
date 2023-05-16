@@ -14,18 +14,16 @@ jobs:
         name: Compile for Nano S
         runs-on: ubuntu-latest
 
-        container: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:eb27b9eb2917620b95f5df03a16ea61d62ef2032
+        container: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
 
         steps:
             - uses: actions/checkout@v3
               with:
                   submodules: 'recursive'
             - name: Build
-              env:
-                TARGET: nanos
               run: |
                   make clean
-                  make
+                  BOLOS_SDK=$NANOS_SDK make
                   mv bin/app.elf concordium_nanos.elf
 
             - name: Upload binary
@@ -38,7 +36,7 @@ jobs:
         name: Compile for Nano S Plus
         runs-on: ubuntu-latest
 
-        container: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:eb27b9eb2917620b95f5df03a16ea61d62ef2032
+        container: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
 
         steps:
             - uses: actions/checkout@v3
@@ -46,11 +44,9 @@ jobs:
                   submodules: 'recursive'
 
             - name: Build
-              env:
-                TARGET: nanos2
               run: |
                   make clean
-                  make
+                  BOLOS_SDK=$NANOSP_SDK make
                   mv bin/app.elf concordium_nanosplus.elf
 
             - name: Upload binary
@@ -63,7 +59,7 @@ jobs:
         name: Compile for Nano X
         runs-on: ubuntu-latest
 
-        container: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:eb27b9eb2917620b95f5df03a16ea61d62ef2032
+        container: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
 
         steps:
             - uses: actions/checkout@v3
@@ -71,11 +67,9 @@ jobs:
                   submodules: 'recursive'
 
             - name: Build
-              env:
-                TARGET: nanox
               run: |
                   make clean
-                  make
+                  BOLOS_SDK=$NANOX_SDK make
                   mv bin/app.elf concordium_nanox.elf
 
             - name: Upload binary
@@ -88,7 +82,7 @@ jobs:
         name: Run Clang Static Analyzer
         runs-on: ubuntu-latest
 
-        container: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:eb27b9eb2917620b95f5df03a16ea61d62ef2032
+        container: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
 
         steps:
             - uses: actions/checkout@v3
@@ -96,8 +90,6 @@ jobs:
                   submodules: 'recursive'
 
             - name: Clang Static Analyzer
-              env:
-                TARGET: nanos
               run: |
                   make clean
                   scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build --status-bugs make default
