@@ -27,8 +27,6 @@ extern int G_io_apdu_buffer[100];
 #define CX_CURVE_Ed25519   1
 #define CX_RND_RFC6979     1
 #define CX_LAST            1
-#define CX_SHA512          1
-#define CX_SHA256          1
 
 // redefining U2BE, U4BE
 #define U2BE(buf, off) ((((buf)[off] & 0xFF) << 8) | ((buf)[off + 1] & 0xFF))
