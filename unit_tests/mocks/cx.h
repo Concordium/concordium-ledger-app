@@ -15,9 +15,9 @@ void cx_sha256_init(cx_sha256_t* t);
 
 // From "lcx_hash.h"
 enum cx_md_e {
-  CX_NONE = 0,                          ///< No message digest algorithm
-  CX_SHA256 = 3,                        ///< SHA256 digest
-  CX_SHA512 = 5,                        ///< SHA512 digest
+    CX_NONE = 0,    ///< No message digest algorithm
+    CX_SHA256 = 3,  ///< SHA256 digest
+    CX_SHA512 = 5,  ///< SHA512 digest
 };
 typedef enum cx_md_e cx_md_t;
 
