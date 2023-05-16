@@ -229,7 +229,7 @@ void sign(uint8_t *input, uint8_t *signatureOnInput) {
 #define SEED_LENGTH    32
 
 // We must declare the functions for the static analyzer to be happy. Ideally we would have
-// access to these from the Ledger SDK.
+// access to the declarations from the Ledger SDK.
 void cx_hkdf_extract(
     const cx_md_t hash_id,
     const unsigned char *ikm,
