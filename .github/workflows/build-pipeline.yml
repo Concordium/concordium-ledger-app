@@ -2,14 +2,14 @@ name: Build and test
 
 on:
     push:
-        branches: [main]
+        branches: [main, develop]
     pull_request:
-        branches: [main]
+        branches: [main, develop]
 
     # Allows us to run the workflow manually from the Actions tab
     workflow_dispatch:
 
-jobs: 
+jobs:
     compile-nano-s:
         name: Compile for Nano S
         runs-on: ubuntu-latest
@@ -77,7 +77,7 @@ jobs:
               with:
                 name: nanox
                 path: ./concordium_nanox.elf
-    
+
     scan-build:
         name: Run Clang Static Analyzer
         runs-on: ubuntu-latest
