@@ -2,9 +2,9 @@ name: Ensure compliance with Ledger guidelines
 
 on:
     push:
-        branches: [main]
+        branches: [main, develop]
     pull_request:
-        branches: [main]
+        branches: [main, develop]
 
     # Allows us to run the workflow manually from the Actions tab
     workflow_dispatch:
