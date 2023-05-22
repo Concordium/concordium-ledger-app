@@ -12,15 +12,13 @@ async function identityProvider(_device: 'nanos' | 'nanox' | 'nanosp', sim: Zemu
 
     data = Buffer.from('000146a3e38ddf8b493be6e979034510b91db5448da9cba48c106139c288d658a004', 'hex');
     transport.send(0xe0, 0x20, 0x01, 0x00, data);
-    await Zemu.sleep(1000);
     await sim.waitUntilScreenIsNot(snapshot1);
     const snapshot2 = await handleKeyUi('key2', 1);
 
     data = Buffer.from('000271d5f16bc3be249043dc0f9e20b4872f5c3477bf2f285336609c5b0873ab3c9c', 'hex');
-    transport.send(0xe0, 0x20, 0x01, 0x00, data);
+    await transport.send(0xe0, 0x20, 0x01, 0x00, data);
     data = Buffer.from('02');
     const tx = transport.send(0xe0, 0x20, 0x02, 0x00, data);
-    await Zemu.sleep(1000);
     await sim.waitUntilScreenIsNot(snapshot2);
     await handleKeyUi('final', 2);
 
@@ -33,7 +31,7 @@ function getKeyUiHandler(sim: Zemu, keySteps: number, device: LedgerModel) {
     return async (key: string, extraSteps: number) => {
         await sim.navigateAndCompareSnapshots('.', `${device}_public_info_for_ip/${key}`, [keySteps + extraSteps]);
         return sim.clickBoth(undefined, false);
-    }
+    };
 }
 
 test('[NANO S] Public information for identity provider', setupZemu('nanos', async (sim, transport) => {
