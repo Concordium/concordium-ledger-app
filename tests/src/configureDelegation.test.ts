@@ -1,11 +1,12 @@
 import Transport from '@ledgerhq/hw-transport';
 import Zemu from '@zondax/zemu';
 import { LedgerModel, setupZemu } from './options';
+import { safeWaitUntilScreenIsNot } from './helpers';
 
 async function configureDelegation(transaction: string, signature: string, sim: Zemu, transport: Transport, handleUi: () => Promise<void>) {
     const data = Buffer.from(transaction, 'hex');
     const tx = transport.send(0xe0, 0x17, 0x00, 0x00, data);
-    await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
+    await safeWaitUntilScreenIsNot(sim, sim.getMainMenuSnapshot());
     await handleUi();
     await expect(tx).resolves.toEqual(
         Buffer.from(signature, 'hex'),

@@ -1,6 +1,6 @@
 import Transport from '@ledgerhq/hw-transport';
 import Zemu from '@zondax/zemu';
-import chunkBuffer from './helpers';
+import { chunkBuffer } from './helpers';
 import { setupZemu, LedgerModel } from './options';
 
 async function encryptedTransfer(transport: Transport, handleUi: () => Promise<void>) {
