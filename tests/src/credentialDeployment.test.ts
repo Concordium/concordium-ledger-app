@@ -1,6 +1,6 @@
 import Transport from '@ledgerhq/hw-transport';
 import Zemu from '@zondax/zemu';
-import { chunkBuffer } from './helpers';
+import chunkBuffer from './helpers';
 import { setupZemu } from './options';
 
 enum CredentialDeploymentType {

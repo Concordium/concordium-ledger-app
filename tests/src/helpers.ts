@@ -1,7 +1,4 @@
-import Zemu from "@zondax/zemu";
-import { ISnapshot } from "@zondax/zemu/dist/types";
-
-export function chunkBuffer(buffer: Buffer, chunkSize: number): Buffer[] {
+export default function chunkBuffer(buffer: Buffer, chunkSize: number): Buffer[] {
     if (chunkSize <= 0) {
         throw new Error('Chunk size has to be a positive number.');
     }

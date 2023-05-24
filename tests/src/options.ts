@@ -45,8 +45,8 @@ class ConcordiumZemu extends Zemu {
     // the screen has changed from the provided screenshot. This method waits a little bit
     // after the screen has changed in an attempt to ensure that it is fully rendered.
     async waitUntilScreenIsNot(screen: ISnapshot, timeout?: number | undefined): Promise<void> {
-        await super.waitUntilScreenIsNot(screen);
-        await Zemu.sleep(1000);
+        await super.waitUntilScreenIsNot(screen, timeout);
+        await Zemu.sleep(100);
     }
 }
 

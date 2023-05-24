@@ -1,6 +1,6 @@
 import Transport from '@ledgerhq/hw-transport';
 import Zemu from '@zondax/zemu';
-import { chunkBuffer } from './helpers';
+import chunkBuffer from './helpers';
 import { LedgerModel, setupZemu } from './options';
 
 const header = '08000004510000000000000000000000000000000000000002000000000000000020a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7000000000000000a0000000000000064000000290000000063de5da719';

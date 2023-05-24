@@ -1,6 +1,6 @@
 import Transport from '@ledgerhq/hw-transport';
 import Zemu from '@zondax/zemu';
-import { chunkBuffer } from './helpers';
+import chunkBuffer from './helpers';
 import { LedgerModel, setupZemu } from './options';
 
 async function transferToPublic(sim: Zemu, transport: Transport, handleUi: () => Promise<void>) {
