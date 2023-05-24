@@ -1,6 +1,6 @@
 import Transport from '@ledgerhq/hw-transport';
 import Zemu from '@zondax/zemu';
-import { chunkBuffer, safeWaitUntilScreenIsNot } from './helpers';
+import { chunkBuffer } from './helpers';
 import { LedgerModel, setupZemu } from './options';
 
 const header = '08000004510000000000000000000000000000000000000002000000000000000020a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7000000000000000a0000000000000064000000290000000063de5da719';
@@ -34,7 +34,7 @@ async function configureBakerStep1(transaction: string, aggregationKey: string |
         const aggregationData = Buffer.from(aggregationKey, 'hex');
         tx = transport.send(0xe0, 0x18, 0x02, 0x00, aggregationData);
     }
-    await safeWaitUntilScreenIsNot(sim, sim.getMainMenuSnapshot());
+    await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
     await handleUi();
     return tx;
 }
@@ -51,7 +51,7 @@ async function configureBakerUrlStep(url: string, sim: Zemu, transport: Transpor
     let i = 0;
     for (const serializedUrlChunk of chunkedUrl) {
         tx = transport.send(0xe0, 0x18, 0x04, 0x00, serializedUrlChunk);
-        await safeWaitUntilScreenIsNot(sim, previousScreen);
+        await sim.waitUntilScreenIsNot(previousScreen);
         await handleUi(i);
         previousScreen = await sim.snapshot();
         await sim.clickBoth(undefined, false);
@@ -99,7 +99,7 @@ async function configureBakerCommissionStep(transactionFee: boolean, bakingRewar
 
     const current = await sim.snapshot();
     const tx = transport.send(0xe0, 0x18, 0x05, 0x00, serializedCommissionRates);
-    await safeWaitUntilScreenIsNot(sim, current);
+    await sim.waitUntilScreenIsNot(current);
     await sim.navigateAndCompareSnapshots('.', `${device}_configure_baker/${navigationDir}`, [navigationSteps]);
     await sim.clickBoth(undefined, false);
 
@@ -232,7 +232,7 @@ test('[NANO S] Configure-baker: URL only', setupZemu('nanos', async (sim, transp
     const bitmap = '0010';
     await configureBakerStep0(bitmap, transport);
     await expect(configureBakerUrlStep(url, sim, transport, async () => {
-        await safeWaitUntilScreenIsNot(sim, sim.getMainMenuSnapshot());
+        await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
         await sim.navigateAndCompareSnapshots('.', 'nanos_configure_baker/url', [20]);
     })).resolves.toEqual(Buffer.from('83221ba7a2b53559ae2dd419915be2946b193aaff16ed7fe2ca98d55ed882643dc9505b0501799fff8253c75263a56aeb3c0f16b228a4ca33fe1c74845f3aa049000', 'hex'));
 }));
