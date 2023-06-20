@@ -13,7 +13,6 @@
 #include "util.h"
 
 static signCredentialDeploymentContext_t *ctx = &global.signCredentialDeploymentContext;
-static cx_sha256_t attributeHash;
 static tx_state_t *tx_state = &global_tx_state;
 
 void processNextVerificationKey(void);
@@ -309,9 +308,6 @@ void handleSignCredentialDeployment(
             sizeof(ctx->anonymityRevocationThreshold) - offset,
             ctx->anonymityRevocationListLength);
 
-        // Initialize values for later.
-        cx_sha256_init(&attributeHash);
-
         ctx->state = TX_CREDENTIAL_DEPLOYMENT_AR_IDENTITY;
 
         // Display the loaded data.
@@ -366,14 +362,12 @@ void handleSignCredentialDeployment(
         uint8_t attributeTag[1];
         memmove(attributeTag, dataBuffer, 1);
         dataBuffer += 1;
-        cx_hash((cx_hash_t *) &attributeHash, 0, attributeTag, 1, NULL, 0);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, attributeTag, 1, NULL, 0);
 
         // Parse attribute length, so we know how much to parse in next packet.
         uint8_t attributeValueLength[1];
         memmove(attributeValueLength, dataBuffer, 1);
         ctx->attributeValueLength = attributeValueLength[0];
-        cx_hash((cx_hash_t *) &attributeHash, 0, attributeValueLength, 1, NULL, 0);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, attributeValueLength, 1, NULL, 0);
 
         ctx->state = TX_CREDENTIAL_DEPLOYMENT_ATTRIBUTE_VALUE;
@@ -381,19 +375,11 @@ void handleSignCredentialDeployment(
         sendSuccessNoIdle();
     } else if (p1 == P1_ATTRIBUTE_VALUE && ctx->state == TX_CREDENTIAL_DEPLOYMENT_ATTRIBUTE_VALUE) {
         // Add attribute value to the hash.
-        cx_hash((cx_hash_t *) &attributeHash, 0, dataBuffer, ctx->attributeValueLength, NULL, 0);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, ctx->attributeValueLength, NULL, 0);
         ctx->attributeListLength -= 1;
 
         // We have processed all attributes
         if (ctx->attributeListLength == 0) {
-            uint8_t attributeHashBytes[32];
-            cx_hash((cx_hash_t *) &attributeHash, CX_LAST, NULL, 0, attributeHashBytes, 32);
-            toPaginatedHex(
-                attributeHashBytes,
-                sizeof(attributeHashBytes),
-                ctx->attributeHashDisplay,
-                sizeof(ctx->attributeHashDisplay));
             ctx->state = TX_CREDENTIAL_DEPLOYMENT_LENGTH_OF_PROOFS;
             sendSuccessNoIdle();
         } else {

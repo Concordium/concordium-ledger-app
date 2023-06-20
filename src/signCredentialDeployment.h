@@ -64,7 +64,6 @@ typedef struct {
 
     cx_sha256_t attributeHash;
     uint8_t attributeValueLength;
-    char attributeHashDisplay[68];
 
     uint32_t proofLength;
     uint8_t accountAddress[57];
