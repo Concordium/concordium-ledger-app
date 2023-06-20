@@ -333,11 +333,6 @@ void handleSignCredentialDeployment(
         // to validate.
         uint8_t encIdCredPubShare[96];
         memmove(encIdCredPubShare, dataBuffer, 96);
-        toPaginatedHex(
-            encIdCredPubShare,
-            sizeof(encIdCredPubShare),
-            ctx->encIdCredPubShare,
-            sizeof(ctx->encIdCredPubShare));
         cx_hash((cx_hash_t *) &tx_state->hash, 0, encIdCredPubShare, 96, NULL, 0);
 
         if (ctx->anonymityRevocationListLength == 1) {
