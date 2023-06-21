@@ -69,6 +69,7 @@ typedef struct {
     uint8_t accountAddress[57];
 
     protocolState_t state;
+    bool showIntro;
 } signCredentialDeploymentContext_t;
 
 #endif

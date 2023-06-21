@@ -23,9 +23,9 @@ void handleSignCredentialDeployment(
     volatile unsigned int *flags,
     bool isInitialCall);
 
-UX_STEP_CB(ux_credential_deployment_initial_flow_0_step, nn, sendSuccessNoIdle(), {"Review", "details"});
+UX_STEP_CB(ux_credential_deployment_review_details, nn, sendSuccessNoIdle(), {"Review", "details"});
+
 UX_STEP_CB(ux_update_credentials_initial_flow_1_step, nn, sendSuccessNoIdle(), {"Continue", "with transaction"});
-UX_FLOW(ux_credential_deployment_initial_flow, &ux_credential_deployment_initial_flow_0_step);
 
 UX_FLOW(
     ux_update_credentials_initial_flow,
@@ -33,12 +33,26 @@ UX_FLOW(
     &ux_sign_flow_account_sender_view,
     &ux_update_credentials_initial_flow_1_step);
 
-UX_STEP_CB(
+UX_STEP_NOCB(
     ux_credential_deployment_verification_key_flow_0_step,
     bnnn_paging,
-    processNextVerificationKey(),
     {.title = "Public key", .text = (char *) global.signCredentialDeploymentContext.accountVerificationKey});
-UX_FLOW(ux_credential_deployment_verification_key_flow, &ux_credential_deployment_verification_key_flow_0_step);
+
+UX_STEP_CB(
+    ux_credential_deployment_verification_key_flow_1_step,
+    nn,
+    processNextVerificationKey(),
+    {"Continue", "with transaction"});
+
+UX_FLOW(
+    ux_credential_deployment_verification_key_flow,
+    &ux_credential_deployment_verification_key_flow_0_step,
+    &ux_credential_deployment_verification_key_flow_1_step);
+UX_FLOW(
+    ux_credential_deployment_verification_key_flow_with_intro,
+    &ux_credential_deployment_review_details,
+    &ux_credential_deployment_verification_key_flow_0_step,
+    &ux_credential_deployment_verification_key_flow_1_step);
 
 UX_STEP_NOCB(
     ux_credential_deployment_threshold_flow_0_step,
@@ -49,10 +63,6 @@ UX_STEP_CB(
     bn,
     sendSuccessNoIdle(),
     {"AR threshold", (char *) global.signCredentialDeploymentContext.anonymityRevocationThreshold});
-UX_FLOW(
-    ux_credential_deployment_threshold_flow,
-    &ux_credential_deployment_threshold_flow_0_step,
-    &ux_credential_deployment_threshold_flow_1_step);
 
 UX_STEP_NOCB(
     ux_sign_credential_deployment_0_step,
@@ -70,13 +80,38 @@ UX_STEP_CB(
     {&C_icon_crossmark, "Decline to", "sign details"});
 
 UX_FLOW(
-    ux_sign_credential_deployment_existing,
+    ux_sign_credential_deployment_existing_with_intro,
+    &ux_credential_deployment_review_details,
+    &ux_credential_deployment_verification_key_flow_0_step,
+    &ux_credential_deployment_threshold_flow_0_step,
+    &ux_credential_deployment_threshold_flow_1_step,
     &ux_sign_credential_deployment_0_step,
     &ux_sign_credential_deployment_1_step,
     &ux_sign_credential_deployment_2_step);
 
 UX_FLOW(
+    ux_sign_credential_deployment_existing,
+    &ux_credential_deployment_verification_key_flow_0_step,
+    &ux_credential_deployment_threshold_flow_0_step,
+    &ux_credential_deployment_threshold_flow_1_step,
+    &ux_sign_credential_deployment_0_step,
+    &ux_sign_credential_deployment_1_step,
+    &ux_sign_credential_deployment_2_step);
+
+UX_FLOW(
+    ux_sign_credential_deployment_new_with_intro,
+    &ux_credential_deployment_review_details,
+    &ux_credential_deployment_verification_key_flow_0_step,
+    &ux_credential_deployment_threshold_flow_0_step,
+    &ux_credential_deployment_threshold_flow_1_step,
+    &ux_sign_credential_deployment_1_step,
+    &ux_sign_credential_deployment_2_step);
+
+UX_FLOW(
     ux_sign_credential_deployment_new,
+    &ux_credential_deployment_verification_key_flow_0_step,
+    &ux_credential_deployment_threshold_flow_0_step,
+    &ux_credential_deployment_threshold_flow_1_step,
     &ux_sign_credential_deployment_1_step,
     &ux_sign_credential_deployment_2_step);
 
@@ -87,10 +122,6 @@ UX_STEP_CB(
     {.title = "Rem. credential", .text = (char *) global.signCredentialDeploymentContext.credentialId});
 UX_FLOW(ux_sign_credential_update_id, &ux_sign_credential_update_id_0_step);
 
-/*
- * The UI flow for the final part of the update credential, which displays
- * the threshold and allows the user to either sign or decline.
- */
 UX_STEP_NOCB(
     ux_sign_credential_update_threshold_0_step,
     bnnn_paging,
@@ -140,9 +171,6 @@ void parseVerificationKey(uint8_t *buffer) {
         ctx->accountVerificationKey,
         sizeof(ctx->accountVerificationKey));
     ctx->numberOfVerificationKeys -= 1;
-
-    // Show to the user.
-    ux_flow_init(0, ux_credential_deployment_verification_key_flow, NULL);
 }
 
 // APDU parameters specific to credential deployment transaction (multiple packets protocol).
@@ -257,8 +285,9 @@ void handleSignCredentialDeployment(
         // Initialize values.
         cx_sha256_init(&tx_state->hash);
         ctx->state = TX_CREDENTIAL_DEPLOYMENT_VERIFICATION_KEYS_LENGTH;
+        ctx->showIntro = true;
 
-        ux_flow_init(0, ux_credential_deployment_initial_flow, NULL);
+        sendSuccessNoIdle();
     } else if (p1 == P1_VERIFICATION_KEY_LENGTH && ctx->state == TX_CREDENTIAL_DEPLOYMENT_VERIFICATION_KEYS_LENGTH) {
         ctx->numberOfVerificationKeys = dataBuffer[0];
         cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 1, NULL, 0);
@@ -270,6 +299,23 @@ void handleSignCredentialDeployment(
         } else {
             THROW(ERROR_INVALID_STATE);
         }
+
+        if (ctx->numberOfVerificationKeys > 0) {
+            if (ctx->showIntro) {
+                // For the first key we also display the initial view.
+                ctx->showIntro = false;
+                ux_flow_init(0, ux_credential_deployment_verification_key_flow_with_intro, NULL);
+            } else {
+                // Display a key with continue here.
+                ux_flow_init(0, ux_credential_deployment_verification_key_flow, NULL);
+            }
+            *flags |= IO_ASYNCH_REPLY;
+        } else {
+            // Do not display the last verification key here. This is deferred to the final UI flow.
+            ctx->state = TX_CREDENTIAL_DEPLOYMENT_SIGNATURE_THRESHOLD;
+            sendSuccessNoIdle();
+        }
+
     } else if (p1 == P1_SIGNATURE_THRESHOLD && ctx->state == TX_CREDENTIAL_DEPLOYMENT_SIGNATURE_THRESHOLD) {
         if (ctx->numberOfVerificationKeys != 0) {
             THROW(
@@ -310,8 +356,7 @@ void handleSignCredentialDeployment(
 
         ctx->state = TX_CREDENTIAL_DEPLOYMENT_AR_IDENTITY;
 
-        // Display the loaded data.
-        ux_flow_init(0, ux_credential_deployment_threshold_flow, NULL);
+        sendSuccessNoIdle();
     } else if (p1 == P1_AR_IDENTITY && ctx->state == TX_CREDENTIAL_DEPLOYMENT_AR_IDENTITY) {
         if (ctx->anonymityRevocationListLength == 0) {
             // Invalid state, sender says ar identity pair is incoming, but we already received all.
@@ -426,7 +471,11 @@ void handleSignCredentialDeployment(
 
         if (newOrExisting == 0) {
             cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 8, NULL, 0);
-            ux_flow_init(0, ux_sign_credential_deployment_new, NULL);
+            if (ctx->showIntro) {
+                ux_flow_init(0, ux_sign_credential_deployment_new_with_intro, NULL);
+            } else {
+                ux_flow_init(0, ux_sign_credential_deployment_new, NULL);
+            }
         } else if (newOrExisting == 1) {
             uint8_t accountAddress[32];
             memmove(accountAddress, dataBuffer, 32);
@@ -438,9 +487,13 @@ void handleSignCredentialDeployment(
                 THROW(ERROR_INVALID_TRANSACTION);
             }
             ctx->accountAddress[55] = '\0';
-
             cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 32, NULL, 0);
-            ux_flow_init(0, ux_sign_credential_deployment_existing, NULL);
+
+            if (ctx->showIntro) {
+                ux_flow_init(0, ux_sign_credential_deployment_existing_with_intro, NULL);
+            } else {
+                ux_flow_init(0, ux_sign_credential_deployment_existing, NULL);
+            }
         } else {
             THROW(ERROR_INVALID_TRANSACTION);
         }

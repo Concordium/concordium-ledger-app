@@ -8,3 +8,7 @@ export default function chunkBuffer(buffer: Buffer, chunkSize: number): Buffer[]
     }
     return chunks;
 }
+
+export function toHex(input: number) {
+    return input.toString(16).padStart(2, '0');
+}
