@@ -57,8 +57,6 @@ typedef struct {
     uint8_t anonymityRevocationThreshold[13];
     uint16_t anonymityRevocationListLength;
 
-    char encIdCredPubShare[204];
-
     uint8_t validTo[8];
     uint8_t createdAt[8];
 
@@ -66,12 +64,12 @@ typedef struct {
 
     cx_sha256_t attributeHash;
     uint8_t attributeValueLength;
-    char attributeHashDisplay[68];
 
     uint32_t proofLength;
     uint8_t accountAddress[57];
 
     protocolState_t state;
+    bool showIntro;
 } signCredentialDeploymentContext_t;
 
 #endif

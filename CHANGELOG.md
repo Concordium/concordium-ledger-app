@@ -1,5 +1,11 @@
 # Changelog
 
+## 4.1.1
+
+### Changed
+
+* Improved the UI of the credential deployment transaction to be more seamless.
+
 ## 4.1.0
 
 ### Added

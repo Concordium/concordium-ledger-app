@@ -13,7 +13,6 @@
 #include "util.h"
 
 static signCredentialDeploymentContext_t *ctx = &global.signCredentialDeploymentContext;
-static cx_sha256_t attributeHash;
 static tx_state_t *tx_state = &global_tx_state;
 
 void processNextVerificationKey(void);
@@ -24,9 +23,9 @@ void handleSignCredentialDeployment(
     volatile unsigned int *flags,
     bool isInitialCall);
 
-UX_STEP_CB(ux_credential_deployment_initial_flow_0_step, nn, sendSuccessNoIdle(), {"Review", "details"});
+UX_STEP_CB(ux_credential_deployment_review_details, nn, sendSuccessNoIdle(), {"Review", "details"});
+
 UX_STEP_CB(ux_update_credentials_initial_flow_1_step, nn, sendSuccessNoIdle(), {"Continue", "with transaction"});
-UX_FLOW(ux_credential_deployment_initial_flow, &ux_credential_deployment_initial_flow_0_step);
 
 UX_FLOW(
     ux_update_credentials_initial_flow,
@@ -34,12 +33,26 @@ UX_FLOW(
     &ux_sign_flow_account_sender_view,
     &ux_update_credentials_initial_flow_1_step);
 
-UX_STEP_CB(
+UX_STEP_NOCB(
     ux_credential_deployment_verification_key_flow_0_step,
     bnnn_paging,
-    processNextVerificationKey(),
     {.title = "Public key", .text = (char *) global.signCredentialDeploymentContext.accountVerificationKey});
-UX_FLOW(ux_credential_deployment_verification_key_flow, &ux_credential_deployment_verification_key_flow_0_step);
+
+UX_STEP_CB(
+    ux_credential_deployment_verification_key_flow_1_step,
+    nn,
+    processNextVerificationKey(),
+    {"Continue", "with transaction"});
+
+UX_FLOW(
+    ux_credential_deployment_verification_key_flow,
+    &ux_credential_deployment_verification_key_flow_0_step,
+    &ux_credential_deployment_verification_key_flow_1_step);
+UX_FLOW(
+    ux_credential_deployment_verification_key_flow_with_intro,
+    &ux_credential_deployment_review_details,
+    &ux_credential_deployment_verification_key_flow_0_step,
+    &ux_credential_deployment_verification_key_flow_1_step);
 
 UX_STEP_NOCB(
     ux_credential_deployment_threshold_flow_0_step,
@@ -50,10 +63,6 @@ UX_STEP_CB(
     bn,
     sendSuccessNoIdle(),
     {"AR threshold", (char *) global.signCredentialDeploymentContext.anonymityRevocationThreshold});
-UX_FLOW(
-    ux_credential_deployment_threshold_flow,
-    &ux_credential_deployment_threshold_flow_0_step,
-    &ux_credential_deployment_threshold_flow_1_step);
 
 UX_STEP_NOCB(
     ux_sign_credential_deployment_0_step,
@@ -71,13 +80,38 @@ UX_STEP_CB(
     {&C_icon_crossmark, "Decline to", "sign details"});
 
 UX_FLOW(
-    ux_sign_credential_deployment_existing,
+    ux_sign_credential_deployment_existing_with_intro,
+    &ux_credential_deployment_review_details,
+    &ux_credential_deployment_verification_key_flow_0_step,
+    &ux_credential_deployment_threshold_flow_0_step,
+    &ux_credential_deployment_threshold_flow_1_step,
     &ux_sign_credential_deployment_0_step,
     &ux_sign_credential_deployment_1_step,
     &ux_sign_credential_deployment_2_step);
 
 UX_FLOW(
+    ux_sign_credential_deployment_existing,
+    &ux_credential_deployment_verification_key_flow_0_step,
+    &ux_credential_deployment_threshold_flow_0_step,
+    &ux_credential_deployment_threshold_flow_1_step,
+    &ux_sign_credential_deployment_0_step,
+    &ux_sign_credential_deployment_1_step,
+    &ux_sign_credential_deployment_2_step);
+
+UX_FLOW(
+    ux_sign_credential_deployment_new_with_intro,
+    &ux_credential_deployment_review_details,
+    &ux_credential_deployment_verification_key_flow_0_step,
+    &ux_credential_deployment_threshold_flow_0_step,
+    &ux_credential_deployment_threshold_flow_1_step,
+    &ux_sign_credential_deployment_1_step,
+    &ux_sign_credential_deployment_2_step);
+
+UX_FLOW(
     ux_sign_credential_deployment_new,
+    &ux_credential_deployment_verification_key_flow_0_step,
+    &ux_credential_deployment_threshold_flow_0_step,
+    &ux_credential_deployment_threshold_flow_1_step,
     &ux_sign_credential_deployment_1_step,
     &ux_sign_credential_deployment_2_step);
 
@@ -88,10 +122,6 @@ UX_STEP_CB(
     {.title = "Rem. credential", .text = (char *) global.signCredentialDeploymentContext.credentialId});
 UX_FLOW(ux_sign_credential_update_id, &ux_sign_credential_update_id_0_step);
 
-/*
- * The UI flow for the final part of the update credential, which displays
- * the threshold and allows the user to either sign or decline.
- */
 UX_STEP_NOCB(
     ux_sign_credential_update_threshold_0_step,
     bnnn_paging,
@@ -141,9 +171,6 @@ void parseVerificationKey(uint8_t *buffer) {
         ctx->accountVerificationKey,
         sizeof(ctx->accountVerificationKey));
     ctx->numberOfVerificationKeys -= 1;
-
-    // Show to the user.
-    ux_flow_init(0, ux_credential_deployment_verification_key_flow, NULL);
 }
 
 // APDU parameters specific to credential deployment transaction (multiple packets protocol).
@@ -258,8 +285,9 @@ void handleSignCredentialDeployment(
         // Initialize values.
         cx_sha256_init(&tx_state->hash);
         ctx->state = TX_CREDENTIAL_DEPLOYMENT_VERIFICATION_KEYS_LENGTH;
+        ctx->showIntro = true;
 
-        ux_flow_init(0, ux_credential_deployment_initial_flow, NULL);
+        sendSuccessNoIdle();
     } else if (p1 == P1_VERIFICATION_KEY_LENGTH && ctx->state == TX_CREDENTIAL_DEPLOYMENT_VERIFICATION_KEYS_LENGTH) {
         ctx->numberOfVerificationKeys = dataBuffer[0];
         cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 1, NULL, 0);
@@ -271,6 +299,23 @@ void handleSignCredentialDeployment(
         } else {
             THROW(ERROR_INVALID_STATE);
         }
+
+        if (ctx->numberOfVerificationKeys > 0) {
+            if (ctx->showIntro) {
+                // For the first key we also display the initial view.
+                ctx->showIntro = false;
+                ux_flow_init(0, ux_credential_deployment_verification_key_flow_with_intro, NULL);
+            } else {
+                // Display a key with continue here.
+                ux_flow_init(0, ux_credential_deployment_verification_key_flow, NULL);
+            }
+            *flags |= IO_ASYNCH_REPLY;
+        } else {
+            // Do not display the last verification key here. This is deferred to the final UI flow.
+            ctx->state = TX_CREDENTIAL_DEPLOYMENT_SIGNATURE_THRESHOLD;
+            sendSuccessNoIdle();
+        }
+
     } else if (p1 == P1_SIGNATURE_THRESHOLD && ctx->state == TX_CREDENTIAL_DEPLOYMENT_SIGNATURE_THRESHOLD) {
         if (ctx->numberOfVerificationKeys != 0) {
             THROW(
@@ -309,13 +354,9 @@ void handleSignCredentialDeployment(
             sizeof(ctx->anonymityRevocationThreshold) - offset,
             ctx->anonymityRevocationListLength);
 
-        // Initialize values for later.
-        cx_sha256_init(&attributeHash);
-
         ctx->state = TX_CREDENTIAL_DEPLOYMENT_AR_IDENTITY;
 
-        // Display the loaded data.
-        ux_flow_init(0, ux_credential_deployment_threshold_flow, NULL);
+        sendSuccessNoIdle();
     } else if (p1 == P1_AR_IDENTITY && ctx->state == TX_CREDENTIAL_DEPLOYMENT_AR_IDENTITY) {
         if (ctx->anonymityRevocationListLength == 0) {
             // Invalid state, sender says ar identity pair is incoming, but we already received all.
@@ -333,11 +374,6 @@ void handleSignCredentialDeployment(
         // to validate.
         uint8_t encIdCredPubShare[96];
         memmove(encIdCredPubShare, dataBuffer, 96);
-        toPaginatedHex(
-            encIdCredPubShare,
-            sizeof(encIdCredPubShare),
-            ctx->encIdCredPubShare,
-            sizeof(ctx->encIdCredPubShare));
         cx_hash((cx_hash_t *) &tx_state->hash, 0, encIdCredPubShare, 96, NULL, 0);
 
         if (ctx->anonymityRevocationListLength == 1) {
@@ -371,14 +407,12 @@ void handleSignCredentialDeployment(
         uint8_t attributeTag[1];
         memmove(attributeTag, dataBuffer, 1);
         dataBuffer += 1;
-        cx_hash((cx_hash_t *) &attributeHash, 0, attributeTag, 1, NULL, 0);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, attributeTag, 1, NULL, 0);
 
         // Parse attribute length, so we know how much to parse in next packet.
         uint8_t attributeValueLength[1];
         memmove(attributeValueLength, dataBuffer, 1);
         ctx->attributeValueLength = attributeValueLength[0];
-        cx_hash((cx_hash_t *) &attributeHash, 0, attributeValueLength, 1, NULL, 0);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, attributeValueLength, 1, NULL, 0);
 
         ctx->state = TX_CREDENTIAL_DEPLOYMENT_ATTRIBUTE_VALUE;
@@ -386,19 +420,11 @@ void handleSignCredentialDeployment(
         sendSuccessNoIdle();
     } else if (p1 == P1_ATTRIBUTE_VALUE && ctx->state == TX_CREDENTIAL_DEPLOYMENT_ATTRIBUTE_VALUE) {
         // Add attribute value to the hash.
-        cx_hash((cx_hash_t *) &attributeHash, 0, dataBuffer, ctx->attributeValueLength, NULL, 0);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, ctx->attributeValueLength, NULL, 0);
         ctx->attributeListLength -= 1;
 
         // We have processed all attributes
         if (ctx->attributeListLength == 0) {
-            uint8_t attributeHashBytes[32];
-            cx_hash((cx_hash_t *) &attributeHash, CX_LAST, NULL, 0, attributeHashBytes, 32);
-            toPaginatedHex(
-                attributeHashBytes,
-                sizeof(attributeHashBytes),
-                ctx->attributeHashDisplay,
-                sizeof(ctx->attributeHashDisplay));
             ctx->state = TX_CREDENTIAL_DEPLOYMENT_LENGTH_OF_PROOFS;
             sendSuccessNoIdle();
         } else {
@@ -445,7 +471,11 @@ void handleSignCredentialDeployment(
 
         if (newOrExisting == 0) {
             cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 8, NULL, 0);
-            ux_flow_init(0, ux_sign_credential_deployment_new, NULL);
+            if (ctx->showIntro) {
+                ux_flow_init(0, ux_sign_credential_deployment_new_with_intro, NULL);
+            } else {
+                ux_flow_init(0, ux_sign_credential_deployment_new, NULL);
+            }
         } else if (newOrExisting == 1) {
             uint8_t accountAddress[32];
             memmove(accountAddress, dataBuffer, 32);
@@ -457,9 +487,13 @@ void handleSignCredentialDeployment(
                 THROW(ERROR_INVALID_TRANSACTION);
             }
             ctx->accountAddress[55] = '\0';
-
             cx_hash((cx_hash_t *) &tx_state->hash, 0, dataBuffer, 32, NULL, 0);
-            ux_flow_init(0, ux_sign_credential_deployment_existing, NULL);
+
+            if (ctx->showIntro) {
+                ux_flow_init(0, ux_sign_credential_deployment_existing_with_intro, NULL);
+            } else {
+                ux_flow_init(0, ux_sign_credential_deployment_existing, NULL);
+            }
         } else {
             THROW(ERROR_INVALID_TRANSACTION);
         }
