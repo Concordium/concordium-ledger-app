@@ -10,5 +10,9 @@ export default function chunkBuffer(buffer: Buffer, chunkSize: number): Buffer[]
 }
 
 export function toHex(input: number) {
-    return input.toString(16).padStart(2, '0');
+    const unpadded = input.toString(16);
+    if (unpadded.length % 2 === 1) {
+        return '0' + unpadded;
+    }
+    return unpadded;
 }
