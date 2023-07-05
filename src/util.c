@@ -43,14 +43,14 @@ int parseKeyDerivationPath(uint8_t *cdata) {
  * instead of using this method directly.
  */
 int hashHeaderAndType(uint8_t *cdata, uint8_t headerLength, uint8_t validType) {
-    cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, headerLength, NULL, 0);
+    updateHash((cx_hash_t *) &tx_state->hash, cdata, headerLength);
     cdata += headerLength;
 
     uint8_t type = cdata[0];
     if (type != validType) {
         THROW(ERROR_INVALID_TRANSACTION);
     }
-    cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 1, NULL, 0);
+    updateHash((cx_hash_t *) &tx_state->hash, cdata, 1);
 
     return headerLength + 1;
 }
@@ -100,7 +100,7 @@ int handleHeaderAndToAddress(uint8_t *cdata, uint8_t kind, uint8_t *recipientDst
     // Extract the recipient address and add to the hash.
     uint8_t toAddress[32];
     memmove(toAddress, cdata, 32);
-    cx_hash((cx_hash_t *) &tx_state->hash, 0, toAddress, 32, NULL, 0);
+    updateHash((cx_hash_t *) &tx_state->hash, toAddress, 32);
 
     // The recipient address is in a base58 format, so we need to encode it to be
     // able to display in a human-readable way.
@@ -227,6 +227,22 @@ void sign(uint8_t *input, uint8_t *signatureOnInput) {
 #define l_CONST        48  // ceil((3 * ceil(log2(r))) / 16)
 #define BLS_KEY_LENGTH 32
 #define SEED_LENGTH    32
+
+void hash(
+    cx_hash_t *hashContext,
+    uint32_t mode,
+    const unsigned char *in,
+    unsigned int len,
+    unsigned char *out,
+    unsigned int out_len) {
+    if (cx_hash_no_throw(hashContext, mode, in, len, out, out_len) != CX_OK) {
+        THROW(ERROR_FAILED_HASHING);
+    }
+}
+
+void updateHash(cx_hash_t *hashContext, const unsigned char *in, unsigned int len) {
+    return hash(hashContext, 0, in, len, NULL, 0);
+}
 
 // We must declare the functions for the static analyzer to be happy. Ideally we would have
 // access to the declarations from the Ledger SDK.

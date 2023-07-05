@@ -57,7 +57,7 @@ void handleSignRegisterData(
             THROW(ERROR_INVALID_PARAM);
         }
         data_ctx->cborLength = ctx->dataLength;
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 2, NULL, 0);
+        updateHash((cx_hash_t *) &tx_state->hash, cdata, 2);
 
         ctx->state = TX_REGISTER_DATA_PAYLOAD_START;
         ux_flow_init(0, ux_register_data_initial, NULL);
@@ -67,7 +67,7 @@ void handleSignRegisterData(
             THROW(ERROR_INVALID_TRANSACTION);
         }
         ctx->dataLength -= dataLength;
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, dataLength, NULL, 0);
+        updateHash((cx_hash_t *) &tx_state->hash, cdata, dataLength);
 
         switch (ctx->state) {
             case TX_REGISTER_DATA_PAYLOAD_START:

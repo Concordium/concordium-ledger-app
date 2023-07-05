@@ -1,6 +1,7 @@
 /** Mock unused functions to do nothing. They should be properly mocked, if a function using them is tested */
 
-void cx_hash() {
+typedef int cx_err_t;
+cx_err_t cx_hash_no_throw() {
 }
 void cx_sha256_init() {
 }

@@ -214,7 +214,7 @@ void handleCommissionRates(uint8_t *cdata, uint8_t dataLength) {
             ctx->commissionRates.transactionFeeCommissionRate,
             sizeof(ctx->commissionRates.transactionFeeCommissionRate),
             rate);
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 4, NULL, 0);
+        updateHash((cx_hash_t *) &tx_state->hash, cdata, 4);
         cdata += 4;
         dataLength -= 4;
     }
@@ -225,7 +225,7 @@ void handleCommissionRates(uint8_t *cdata, uint8_t dataLength) {
             ctx->commissionRates.bakingRewardCommissionRate,
             sizeof(ctx->commissionRates.bakingRewardCommissionRate),
             rate);
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 4, NULL, 0);
+        updateHash((cx_hash_t *) &tx_state->hash, cdata, 4);
         cdata += 4;
         dataLength -= 4;
     }
@@ -236,7 +236,7 @@ void handleCommissionRates(uint8_t *cdata, uint8_t dataLength) {
             ctx->commissionRates.finalizationRewardCommissionRate,
             sizeof(ctx->commissionRates.finalizationRewardCommissionRate),
             rate);
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 4, NULL, 0);
+        updateHash((cx_hash_t *) &tx_state->hash, cdata, 4);
         dataLength -= 4;
     }
 
@@ -260,7 +260,7 @@ void handleSignConfigureBaker(
         ctx->firstDisplay = true;
 
         // The initial 2 bytes tells us the fields we are receiving.
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 2, NULL, 0);
+        updateHash((cx_hash_t *) &tx_state->hash, cdata, 2);
         uint16_t bitmap = U2BE(cdata, 0);
 
         // An empty transaction with none of the optionals available is invalid,
@@ -302,14 +302,14 @@ void handleSignConfigureBaker(
                     sizeof(ctx->capitalRestakeDelegation.displayCapital),
                     capitalAmount);
             }
-            cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 8, NULL, 0);
+            updateHash((cx_hash_t *) &tx_state->hash, cdata, 8);
             cdata += 8;
             lengthCheck -= 8;
         }
 
         if (ctx->hasRestakeEarnings) {
             uint8_t restake = cdata[0];
-            cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 1, NULL, 0);
+            updateHash((cx_hash_t *) &tx_state->hash, cdata, 1);
             cdata += 1;
             lengthCheck -= 1;
             if (restake == 0) {
@@ -323,7 +323,7 @@ void handleSignConfigureBaker(
 
         if (ctx->hasOpenForDelegation) {
             uint8_t openForDelegation = cdata[0];
-            cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 1, NULL, 0);
+            updateHash((cx_hash_t *) &tx_state->hash, cdata, 1);
             cdata += 1;
             lengthCheck -= 1;
 
@@ -349,19 +349,19 @@ void handleSignConfigureBaker(
             // for the user to verify. If need be, we can start showing them by parsing
             // the values into hex strings here.
             // Election verify key
-            cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 32, NULL, 0);
+            updateHash((cx_hash_t *) &tx_state->hash, cdata, 32);
             cdata += 32;
 
             // Election Proof
-            cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 64, NULL, 0);
+            updateHash((cx_hash_t *) &tx_state->hash, cdata, 64);
             cdata += 64;
 
             // Signature verify key
-            cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 32, NULL, 0);
+            updateHash((cx_hash_t *) &tx_state->hash, cdata, 32);
             cdata += 32;
 
             // Signature Proof
-            cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 64, NULL, 0);
+            updateHash((cx_hash_t *) &tx_state->hash, cdata, 64);
 
             // We delay the display until we get the aggregation key.
             ctx->state = CONFIGURE_BAKER_AGGREGATION_KEY;
@@ -388,11 +388,11 @@ void handleSignConfigureBaker(
         }
 
         // Aggregation verify key
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 96, NULL, 0);
+        updateHash((cx_hash_t *) &tx_state->hash, cdata, 96);
         cdata += 96;
 
         // Election Proof
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 64, NULL, 0);
+        updateHash((cx_hash_t *) &tx_state->hash, cdata, 64);
 
         if (ctx->hasMetadataUrl) {
             ctx->state = CONFIGURE_BAKER_URL_LENGTH;
@@ -414,7 +414,7 @@ void handleSignConfigureBaker(
             THROW(ERROR_INVALID_TRANSACTION);
         }
 
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 2, NULL, 0);
+        updateHash((cx_hash_t *) &tx_state->hash, cdata, 2);
 
         if (ctx->url.urlLength == 0) {
             // If the url has length zero, we don't wait for the url bytes.
@@ -432,7 +432,7 @@ void handleSignConfigureBaker(
         }
     } else if (P1_URL == p1 && ctx->state == CONFIGURE_BAKER_URL) {
         if (ctx->url.urlLength > dataLength) {
-            cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, dataLength, NULL, 0);
+            updateHash((cx_hash_t *) &tx_state->hash, cdata, dataLength);
             ctx->url.urlLength -= dataLength;
             memmove(ctx->url.urlDisplay, cdata, dataLength);
             startConfigureBakerUrlDisplay(false);
@@ -440,7 +440,7 @@ void handleSignConfigureBaker(
         } else if (ctx->url.urlLength == dataLength) {
             memmove(ctx->url.urlDisplay, cdata, ctx->url.urlLength);
             memmove(ctx->url.urlDisplay + ctx->url.urlLength, "\0", 1);
-            cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, ctx->url.urlLength, NULL, 0);
+            updateHash((cx_hash_t *) &tx_state->hash, cdata, ctx->url.urlLength);
 
             if (hasCommissionRate()) {
                 ctx->state = CONFIGURE_BAKER_COMMISSION_RATES;
