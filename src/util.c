@@ -144,7 +144,8 @@ void getIdentityAccountDisplay(uint8_t *dst, size_t dstLength, uint32_t identity
 }
 
 void getPrivateKey(uint32_t *keyPathInput, uint8_t keyPathLength, cx_ecfp_private_key_t *privateKey) {
-    uint8_t privateKeyData[32];
+    // TODO Why does it require 64 bytes now instead of 32?
+    uint8_t privateKeyData[64];
 
     // Invoke the device methods for generating a private key.
     // Wrap in try/finally to ensure that private key information is cleaned up, even if a system call fails.
@@ -159,7 +160,9 @@ void getPrivateKey(uint32_t *keyPathInput, uint8_t keyPathLength, cx_ecfp_privat
                 NULL,
                 (unsigned char *) "ed25519 seed",
                 12);
-            cx_ecfp_init_private_key(CX_CURVE_Ed25519, privateKeyData, 32, privateKey);
+
+            // TODO Handle other return values than CX_OK
+            cx_ecfp_init_private_key_no_throw(CX_CURVE_Ed25519, privateKeyData, 32, privateKey);
         }
         FINALLY {
             // Clean up the private key seed data, so that we cannot leak it.
@@ -178,7 +181,9 @@ void getPublicKey(uint8_t *publicKeyArray) {
         TRY {
             getPrivateKey(keyPath->keyDerivationPath, keyPath->pathLength, &privateKey);
             // Invoke the device method for generating a public-key pair.
-            cx_ecfp_generate_pair(CX_CURVE_Ed25519, &publicKey, &privateKey, 1);
+
+            // TODO Handle errors here.
+            cx_ecfp_generate_pair_no_throw(CX_CURVE_Ed25519, &publicKey, &privateKey, 1);
         }
         FINALLY {
             // Clean up the private key as we are done using it, so that we cannot leak it.
@@ -204,17 +209,9 @@ void sign(uint8_t *input, uint8_t *signatureOnInput) {
     BEGIN_TRY {
         TRY {
             getPrivateKey(keyPath->keyDerivationPath, keyPath->pathLength, &privateKey);
-            cx_eddsa_sign(
-                &privateKey,
-                CX_RND_RFC6979 | CX_LAST,
-                CX_SHA512,
-                input,
-                32,
-                NULL,
-                0,
-                signatureOnInput,
-                64,
-                NULL);
+
+            // Handle errors here.
+            cx_eddsa_sign_no_throw(&privateKey, CX_SHA512, input, 32, signatureOnInput, 64);
         }
         FINALLY {
             // Clean up the private key, so that we cannot leak it.
@@ -292,7 +289,9 @@ void blsKeygen(const uint8_t *seed, size_t seedLength, uint8_t *dst, size_t dstL
         saltSize = sizeof(salt);
         cx_hkdf_extract(CX_SHA256, ikm, sizeof(ikm), salt, sizeof(salt), prk);
         cx_hkdf_expand(CX_SHA256, prk, sizeof(prk), (unsigned char *) l_bytes, sizeof(l_bytes), sk, sizeof(sk));
-        cx_math_modm(sk, sizeof(sk), r, sizeof(r));
+
+        // TODO Handle errors here.
+        cx_math_modm_no_throw(sk, sizeof(sk), r, sizeof(r));
     } while (cx_math_is_zero(sk, sizeof(sk)));
 
     // Skip the first 16 bytes, because they are 0 due to calculating modulo r, which is 32 bytes (and sk has 48 bytes).
