@@ -151,7 +151,9 @@ void getPrivateKey(uint32_t *keyPathInput, uint8_t keyPathLength, cx_ecfp_privat
     // Wrap in try/finally to ensure that private key information is cleaned up, even if a system call fails.
     BEGIN_TRY {
         TRY {
-            os_perso_derive_node_bip32_seed_key(
+
+            // TODO Handle errors here.
+            os_derive_bip32_with_seed_no_throw(
                 HDW_ED25519_SLIP10,
                 CX_CURVE_Ed25519,
                 keyPathInput,
