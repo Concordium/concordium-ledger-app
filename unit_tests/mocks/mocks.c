@@ -2,7 +2,7 @@
 
 typedef int cx_err_t;
 cx_err_t cx_hash_no_throw() {
-    return 1;
+    return 0;
 }
 void cx_sha256_init() {
 }
@@ -10,7 +10,8 @@ void io_exchange() {
 }
 void ui_idle() {
 }
-void os_perso_derive_node_bip32_seed_key() {
+cx_err_t os_derive_bip32_with_seed_no_throw() {
+    return 0;
 }
 void cx_ecfp_init_private_key_no_throw() {
 }

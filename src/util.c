@@ -162,6 +162,10 @@ void getPrivateKey(uint32_t *keyPathInput, uint8_t keyPathLength, cx_ecfp_privat
                 (unsigned char *) "ed25519 seed",
                 12);
 
+            if (result != CX_OK) {
+                THROW(ERROR_FAILED_CRYPTO)
+            }
+
             // TODO Handle other return values than CX_OK
             cx_ecfp_init_private_key_no_throw(CX_CURVE_Ed25519, privateKeyData, 32, privateKey);
         }
