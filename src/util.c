@@ -163,7 +163,7 @@ void getPrivateKey(uint32_t *keyPathInput, uint8_t keyPathLength, cx_ecfp_privat
                 12);
 
             if (result != CX_OK) {
-                THROW(ERROR_FAILED_CRYPTO)
+                THROW(ERROR_FAILED_CRYPTO);
             }
 
             // TODO Handle other return values than CX_OK
