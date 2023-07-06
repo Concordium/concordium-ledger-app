@@ -143,6 +143,22 @@ void getIdentityAccountDisplay(uint8_t *dst, size_t dstLength, uint32_t identity
     bin2dec(dst + offset, dstLength - offset, accountIndex);
 }
 
+/**
+ * Used to validate that an error result code from a Ledger library call
+ * is equal CX_OK. If it is not CX_OK, then throw an ERROR_FAILED_CX_OPERATION
+ * error that should be sent back to the callee.
+ */
+void ensureNoError(cx_err_t errorCode) {
+    // TODO An improvement would be to stop using THROW for a control flow like this
+    // and to explicitly send back the error instead and then stop the flow.
+    // This implementation is a quick patch to the changes made to the Ledger SDK to
+    // mimic the old library functions that would do a similar throw.
+
+    if (errorCode != CX_OK) {
+        THROW(ERROR_FAILED_CX_OPERATION);
+    }
+}
+
 void getPrivateKey(uint32_t *keyPathInput, uint8_t keyPathLength, cx_ecfp_private_key_t *privateKey) {
     // TODO Why does it require 64 bytes now instead of 32?
     uint8_t privateKeyData[64];
@@ -151,8 +167,7 @@ void getPrivateKey(uint32_t *keyPathInput, uint8_t keyPathLength, cx_ecfp_privat
     // Wrap in try/finally to ensure that private key information is cleaned up, even if a system call fails.
     BEGIN_TRY {
         TRY {
-            // TODO Handle errors here.
-            cx_err_t result = os_derive_bip32_with_seed_no_throw(
+            ensureNoError(os_derive_bip32_with_seed_no_throw(
                 HDW_ED25519_SLIP10,
                 CX_CURVE_Ed25519,
                 keyPathInput,
@@ -160,14 +175,8 @@ void getPrivateKey(uint32_t *keyPathInput, uint8_t keyPathLength, cx_ecfp_privat
                 privateKeyData,
                 NULL,
                 (unsigned char *) "ed25519 seed",
-                12);
-
-            if (result != CX_OK) {
-                THROW(ERROR_FAILED_CRYPTO);
-            }
-
-            // TODO Handle other return values than CX_OK
-            cx_ecfp_init_private_key_no_throw(CX_CURVE_Ed25519, privateKeyData, 32, privateKey);
+                12));
+            ensureNoError(cx_ecfp_init_private_key_no_throw(CX_CURVE_Ed25519, privateKeyData, 32, privateKey));
         }
         FINALLY {
             // Clean up the private key seed data, so that we cannot leak it.
@@ -186,9 +195,7 @@ void getPublicKey(uint8_t *publicKeyArray) {
         TRY {
             getPrivateKey(keyPath->keyDerivationPath, keyPath->pathLength, &privateKey);
             // Invoke the device method for generating a public-key pair.
-
-            // TODO Handle errors here.
-            cx_ecfp_generate_pair_no_throw(CX_CURVE_Ed25519, &publicKey, &privateKey, 1);
+            ensureNoError(cx_ecfp_generate_pair_no_throw(CX_CURVE_Ed25519, &publicKey, &privateKey, 1));
         }
         FINALLY {
             // Clean up the private key as we are done using it, so that we cannot leak it.
@@ -214,9 +221,7 @@ void sign(uint8_t *input, uint8_t *signatureOnInput) {
     BEGIN_TRY {
         TRY {
             getPrivateKey(keyPath->keyDerivationPath, keyPath->pathLength, &privateKey);
-
-            // Handle errors here.
-            cx_eddsa_sign_no_throw(&privateKey, CX_SHA512, input, 32, signatureOnInput, 64);
+            ensureNoError(cx_eddsa_sign_no_throw(&privateKey, CX_SHA512, input, 32, signatureOnInput, 64));
         }
         FINALLY {
             // Clean up the private key, so that we cannot leak it.
@@ -237,9 +242,7 @@ void hash(
     unsigned int len,
     unsigned char *out,
     unsigned int out_len) {
-    if (cx_hash_no_throw(hashContext, mode, in, len, out, out_len) != CX_OK) {
-        THROW(ERROR_FAILED_HASHING);
-    }
+    ensureNoError(cx_hash_no_throw(hashContext, mode, in, len, out, out_len));
 }
 
 void updateHash(cx_hash_t *hashContext, const unsigned char *in, unsigned int len) {
@@ -295,8 +298,7 @@ void blsKeygen(const uint8_t *seed, size_t seedLength, uint8_t *dst, size_t dstL
         cx_hkdf_extract(CX_SHA256, ikm, sizeof(ikm), salt, sizeof(salt), prk);
         cx_hkdf_expand(CX_SHA256, prk, sizeof(prk), (unsigned char *) l_bytes, sizeof(l_bytes), sk, sizeof(sk));
 
-        // TODO Handle errors here.
-        cx_math_modm_no_throw(sk, sizeof(sk), r, sizeof(r));
+        ensureNoError(cx_math_modm_no_throw(sk, sizeof(sk), r, sizeof(r)));
     } while (cx_math_is_zero(sk, sizeof(sk)));
 
     // Skip the first 16 bytes, because they are 0 due to calculating modulo r, which is 32 bytes (and sk has 48 bytes).

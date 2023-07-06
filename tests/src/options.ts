@@ -26,7 +26,7 @@ export const optionsNanoSPlus: IStartOptions = {
     ...sharedOptions,
     model: 'nanosp',
     // set APILEVEL to 5, to ensure speculos uses a compatible SDK
-    custom: `${sharedOptions.custom}-a 5`,
+    custom: `${sharedOptions.custom}-a 1`,
 };
 
 export const optionsNanoX: IStartOptions = {
