@@ -25,15 +25,15 @@ export const optionsNanoS: IStartOptions = {
 export const optionsNanoSPlus: IStartOptions = {
     ...sharedOptions,
     model: 'nanosp',
-    // set APILEVEL to 1, to ensure speculos uses a compatible SDK
-    custom: `${sharedOptions.custom}-a 1`,
+    // set APILEVEL to 5, to ensure speculos uses a compatible SDK
+    custom: `${sharedOptions.custom}-a 5`,
 };
 
 export const optionsNanoX: IStartOptions = {
     ...sharedOptions,
     model: 'nanox',
-    // set APILEVEL to 1, to ensure speculos uses a compatible SDK
-    custom: `${sharedOptions.custom}-a 1`,
+    // set APILEVEL to 5, to ensure speculos uses a compatible SDK
+    custom: `${sharedOptions.custom}-a 5`,
 };
 
 export const NANOS_ELF_PATH = resolve('bin/nanos/concordium_nanos.elf');
