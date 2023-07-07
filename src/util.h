@@ -93,7 +93,7 @@ void sign(uint8_t *input, uint8_t *signatureOnInput);
 
 /**
  * Performs the hashing operation. This is our internal replacement of the deprecated cx_hash
- * provided by Ledger. The function throws an ERROR_FAILED_HASHING error if the hashing fails.
+ * provided by Ledger. The function throws an ERROR_FAILED_CX_OPERATION error if the hashing fails.
  * @param[in] hash Pointer to the hash context
  * @param[in] in Data to be hashed
  * @param[in] len Length of the input data

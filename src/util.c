@@ -149,7 +149,7 @@ void getIdentityAccountDisplay(uint8_t *dst, size_t dstLength, uint32_t identity
  * error that should be sent back to the callee.
  */
 void ensureNoError(cx_err_t errorCode) {
-    // TODO An improvement would be to stop using THROW for a control flow like this
+    // TODO An improvement would be to stop using THROW for the control flow like this
     // and to explicitly send back the error instead and then stop the flow.
     // This implementation is a quick patch to the changes made to the Ledger SDK to
     // mimic the old library functions that would do a similar throw.
@@ -160,7 +160,6 @@ void ensureNoError(cx_err_t errorCode) {
 }
 
 void getPrivateKey(uint32_t *keyPathInput, uint8_t keyPathLength, cx_ecfp_private_key_t *privateKey) {
-    // TODO Why does it require 64 bytes now instead of 32?
     uint8_t privateKeyData[64];
 
     // Invoke the device methods for generating a private key.
