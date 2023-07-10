@@ -27,7 +27,7 @@ void handleSignTransferToEncrypted(uint8_t *cdata, volatile unsigned int *flags)
     // Parse transaction amount so it can be displayed.
     uint64_t amountToEncrypted = U8BE(cdata, 0);
     amountToGtuDisplay(ctx->amount, sizeof(ctx->amount), amountToEncrypted);
-    cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 8, NULL, 0);
+    updateHash((cx_hash_t *) &tx_state->hash, cdata, 8);
 
     ux_flow_init(0, ux_sign_transfer_to_encrypted, NULL);
     *flags |= IO_ASYNCH_REPLY;

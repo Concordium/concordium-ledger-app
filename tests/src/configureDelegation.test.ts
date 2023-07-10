@@ -131,7 +131,7 @@ async function configureDelegationCapitalRestakeXAndSP(sim: Zemu, transport: Tra
     });
 }
 
-test('[NANO SP] Configure delegation (capital, restake)', setupZemu('nanox', configureDelegationCapitalRestakeXAndSP));
+test('[NANO SP] Configure delegation (capital, restake)', setupZemu('nanosp', configureDelegationCapitalRestakeXAndSP));
 
 test('[NANO X] Configure delegation (capital, restake)', setupZemu('nanox', configureDelegationCapitalRestakeXAndSP));
 

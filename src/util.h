@@ -92,6 +92,31 @@ int parseKeyDerivationPath(uint8_t *cdata);
 void sign(uint8_t *input, uint8_t *signatureOnInput);
 
 /**
+ * Performs the hashing operation. This is our internal replacement of the deprecated cx_hash
+ * provided by Ledger. The function throws an ERROR_FAILED_CX_OPERATION error if the hashing fails.
+ * @param[in] hash Pointer to the hash context
+ * @param[in] in Data to be hashed
+ * @param[in] len Length of the input data
+ * @param[out] out Buffer where to store the message digest.
+ * @param[out] out_len The size of the output buffer. If the buffer is too small to store the hash, then an exception is
+ * thrown.
+ */
+void hash(
+    cx_hash_t *hash,
+    uint32_t mode,
+    const unsigned char *in,
+    unsigned int len,
+    unsigned char *out,
+    unsigned int out_len);
+
+/**
+ * Hashes the provided input to the hashing context.
+ * @param[in] hash Pointer to the hash context
+ * @param[in] in Data to be hashed
+ * @param[in] len Length of the input data
+ */
+void updateHash(cx_hash_t *hash, const unsigned char *in, unsigned int len);
+/**
  * Builds a human-readable representation of the identity/account path.
  * @param dst [out] where to write the identity/account string
  * @param dstLength length of dst

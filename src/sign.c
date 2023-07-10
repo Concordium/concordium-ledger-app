@@ -28,7 +28,7 @@ UX_FLOW(ux_sign_flow_shared, &ux_sign_flow_shared_sign, &ux_sign_flow_shared_dec
 
 // Hashes transaction, signs it and sends the signature back to the computer.
 void buildAndSignTransactionHash() {
-    cx_hash((cx_hash_t *) &tx_state->hash, CX_LAST, NULL, 0, tx_state->transactionHash, 32);
+    hash((cx_hash_t *) &tx_state->hash, CX_LAST, NULL, 0, tx_state->transactionHash, 32);
 
     uint8_t signedHash[64];
     sign(tx_state->transactionHash, signedHash);

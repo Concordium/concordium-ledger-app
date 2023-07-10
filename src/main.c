@@ -204,6 +204,7 @@ static void concordium_main(void) {
                     case ERROR_INVALID_PARAM:
                     case ERROR_INVALID_TRANSACTION:
                     case ERROR_INVALID_INSTRUCTION:
+                    case ERROR_FAILED_CX_OPERATION:
                     case ERROR_INVALID_CLA:
                     case ERROR_DEVICE_LOCKED:
                         global_tx_state.currentInstruction = -1;

@@ -1,5 +1,11 @@
 # Changelog
 
+## 4.1.2
+
+### Changed
+
+* Removed usage of a number of deprecated functions supplied by Ledger.
+
 ## 4.1.1
 
 ### Changed

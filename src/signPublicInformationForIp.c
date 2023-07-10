@@ -75,17 +75,17 @@ void handleSignPublicInformationForIp(uint8_t *cdata, uint8_t p1, volatile unsig
 
         // We do not display IdCredPub as it is infeasible for the user to verify its correctness,
         // and maliciously replacing this value cannot give an attacker control of an account.
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 48, NULL, 0);
+        updateHash((cx_hash_t *) &tx_state->hash, cdata, 48);
         cdata += 48;
 
         // We do not display CredId as it is infeasible for the user to verify its correctness,
         // and maliciously replacing this value cannot give an attacker control of an account.
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 48, NULL, 0);
+        updateHash((cx_hash_t *) &tx_state->hash, cdata, 48);
         cdata += 48;
 
         // Parse number of public-keys that will be received next.
         ctx->publicKeysLength = cdata[0];
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 1, NULL, 0);
+        updateHash((cx_hash_t *) &tx_state->hash, cdata, 1);
 
         ctx->showIntro = true;
         ctx->state = TX_PUBLIC_INFO_FOR_IP_VERIFICATION_KEY;
@@ -95,17 +95,17 @@ void handleSignPublicInformationForIp(uint8_t *cdata, uint8_t p1, volatile unsig
             THROW(ERROR_INVALID_STATE);
         }
         // Hash key index
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 1, NULL, 0);
+        updateHash((cx_hash_t *) &tx_state->hash, cdata, 1);
         cdata += 1;
 
         // Hash key type
         // We do not display the key type, as currently only ed_25519 is used.
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 1, NULL, 0);
+        updateHash((cx_hash_t *) &tx_state->hash, cdata, 1);
         cdata += 1;
 
         uint8_t publicKey[32];
         memmove(publicKey, cdata, 32);
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, publicKey, 32, NULL, 0);
+        updateHash((cx_hash_t *) &tx_state->hash, publicKey, 32);
         toPaginatedHex(publicKey, 32, ctx->publicKey, sizeof(ctx->publicKey));
 
         ctx->publicKeysLength -= 1;
@@ -125,7 +125,7 @@ void handleSignPublicInformationForIp(uint8_t *cdata, uint8_t p1, volatile unsig
         }
     } else if (p1 == P1_THRESHOLD && ctx->state == TX_PUBLIC_INFO_FOR_IP_THRESHOLD) {
         // Read the threshold byte and parse it to display it.
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 1, NULL, 0);
+        updateHash((cx_hash_t *) &tx_state->hash, cdata, 1);
         bin2dec(ctx->threshold, sizeof(ctx->threshold), cdata[0]);
 
         if (ctx->showIntro) {

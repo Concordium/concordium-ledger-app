@@ -67,7 +67,7 @@ void handleSignConfigureDelegation(uint8_t *cdata, uint8_t dataLength, volatile 
     cdata += accountTransactionHeaderAndKindLength;
 
     // The initial 2 bytes tells us the fields we are receiving.
-    cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 2, NULL, 0);
+    updateHash((cx_hash_t *) &tx_state->hash, cdata, 2);
     uint16_t bitmap = U2BE(cdata, 0);
     cdata += 2;
     uint8_t expectedDataLength = keyDerivationPathLength + accountTransactionHeaderAndKindLength + 2;
@@ -89,14 +89,14 @@ void handleSignConfigureDelegation(uint8_t *cdata, uint8_t dataLength, volatile 
             ctx->stopDelegation = false;
             amountToGtuDisplay(ctx->displayCapital, sizeof(ctx->displayCapital), capitalAmount);
         }
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 8, NULL, 0);
+        updateHash((cx_hash_t *) &tx_state->hash, cdata, 8);
         expectedDataLength += 8;
         cdata += 8;
     }
 
     if (ctx->hasRestakeEarnings) {
         uint8_t restake = cdata[0];
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 1, NULL, 0);
+        updateHash((cx_hash_t *) &tx_state->hash, cdata, 1);
         expectedDataLength += 1;
         cdata += 1;
         if (restake == 0) {
@@ -110,7 +110,7 @@ void handleSignConfigureDelegation(uint8_t *cdata, uint8_t dataLength, volatile 
 
     if (ctx->hasDelegationTarget) {
         uint8_t delegationType = cdata[0];
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 1, NULL, 0);
+        updateHash((cx_hash_t *) &tx_state->hash, cdata, 1);
         expectedDataLength += 1;
         cdata += 1;
 
@@ -121,7 +121,7 @@ void handleSignConfigureDelegation(uint8_t *cdata, uint8_t dataLength, volatile 
             expectedDataLength += 8;
             memmove(ctx->displayDelegationTarget, "Baker ID ", 9);
             bin2dec(ctx->displayDelegationTarget + 9, 21, bakerId);
-            cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 8, NULL, 0);
+            updateHash((cx_hash_t *) &tx_state->hash, cdata, 8);
         } else {
             THROW(ERROR_INVALID_TRANSACTION);
         }

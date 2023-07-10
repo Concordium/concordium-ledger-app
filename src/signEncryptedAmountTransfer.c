@@ -48,14 +48,14 @@ void startEncryptedTransferDisplay(bool displayMemo) {
 
 void handleRemainingAmount(uint8_t *cdata) {
     // Hash remaining amount. Remaining amount is encrypted, and so we cannot display it.
-    cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 192, NULL, 0);
+    updateHash((cx_hash_t *) &tx_state->hash, cdata, 192);
     ctx->state = TX_ENCRYPTED_AMOUNT_TRANSFER_TRANSFER_AMOUNT;
     sendSuccessNoIdle();
 }
 
 void handleTransferAmountAggIndexProofSize(uint8_t *cdata) {
     // Hash transfer amount and agg index. Transfer amount is encrypted, and so we cannot display it.
-    cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 200, NULL, 0);
+    updateHash((cx_hash_t *) &tx_state->hash, cdata, 200);
     cdata += 200;
 
     // Save proof size so that we know when we are done processing the
@@ -67,7 +67,7 @@ void handleTransferAmountAggIndexProofSize(uint8_t *cdata) {
 }
 
 void handleProofs(uint8_t *cdata, uint8_t dataLength, volatile unsigned int *flags, bool displayMemo) {
-    cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, dataLength, NULL, 0);
+    updateHash((cx_hash_t *) &tx_state->hash, cdata, dataLength);
     ctx->proofSize -= dataLength;
 
     if (ctx->proofSize == 0) {
@@ -107,12 +107,12 @@ void handleSignEncryptedAmountTransferWithMemo(
             THROW(ERROR_INVALID_PARAM);
         }
 
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 2, NULL, 0);
+        updateHash((cx_hash_t *) &tx_state->hash, cdata, 2);
 
         ctx->state = TX_ENCRYPTED_AMOUNT_TRANSFER_MEMO_START;
         sendSuccessNoIdle();
     } else if (p1 == P1_MEMO && ctx->state == TX_ENCRYPTED_AMOUNT_TRANSFER_MEMO_START) {
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, dataLength, NULL, 0);
+        updateHash((cx_hash_t *) &tx_state->hash, cdata, dataLength);
 
         // Read initial part of memo and then display it:
         readCborInitial(cdata, dataLength);
@@ -124,7 +124,7 @@ void handleSignEncryptedAmountTransferWithMemo(
             sendSuccessNoIdle();
         }
     } else if (p1 == P1_MEMO && ctx->state == TX_ENCRYPTED_AMOUNT_TRANSFER_MEMO) {
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, dataLength, NULL, 0);
+        updateHash((cx_hash_t *) &tx_state->hash, cdata, dataLength);
 
         // Read current part of memo and then display it:
         readCborContent(cdata, dataLength);
