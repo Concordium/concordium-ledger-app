@@ -1,5 +1,17 @@
 # Changelog
 
+## 4.1.2
+
+### Changed
+
+* Removed usage of a number of deprecated functions supplied by Ledger.
+
+## 4.1.1
+
+### Changed
+
+* Improved the UI of the credential deployment transaction to be more seamless.
+
 ## 4.1.0
 
 ### Added
