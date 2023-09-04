@@ -24,19 +24,19 @@ endif
 include $(BOLOS_SDK)/Makefile.defines
 
 ifeq ($(TARGET_NAME),TARGET_NANOS)
-    ICONNAME=icons/nanos-concordium-icon.gif
+    ICONNAME=../icons/nanos-concordium-icon.gif
 else
-    ICONNAME=icons/nanosplus-concordium-icon.gif
+    ICONNAME=../icons/nanosplus-concordium-icon.gif
 endif
 
 # Main app configuration
-APPNAME = "Concordium"
+APPNAME = "CCD Governance"
 
 # Version must be no greater than 99.99.999, otherwise
 # extra memory must be allocated in menu.c.
-APPVERSION_MAJOR=4
-APPVERSION_MINOR=1
-APPVERSION_PATCH=2
+APPVERSION_MAJOR=0
+APPVERSION_MINOR=0
+APPVERSION_PATCH=1
 APPVERSION=$(APPVERSION_MAJOR).$(APPVERSION_MINOR).$(APPVERSION_PATCH)
 
 ifeq ($(TARGET_NAME), TARGET_NANOX)
@@ -59,7 +59,7 @@ VARIANT_PARAM = concordium
 VARIANT_VALUES = concordium
 
 # Build configuration
-APP_SOURCE_PATH += src src/common
+APP_SOURCE_PATH += src ../src/common
 SDK_SOURCE_PATH += lib_stusb lib_stusb_impl
 
 ifeq ($(TARGET_NAME),TARGET_NANOS)

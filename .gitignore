@@ -24,3 +24,10 @@ concordium-ledger-app-*
 /unit_tests/build
 /unit_tests/coverage
 /unit_tests/coverage*
+/governance-app/src/glyphs.c
+/governance-app/src/glyphs.h
+/governance-app/build
+/governance-app/dep*
+/governance-app/obj*
+/governance-app/debug*
+/governance-app/bin
