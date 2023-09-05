@@ -40,7 +40,7 @@ export const NANOS_ELF_PATH = resolve('bin/nanos/concordium_nanos.elf');
 export const NANOX_ELF_PATH = resolve('bin/nanox/concordium_nanox.elf');
 export const NANOS_PLUS_ELF_PATH = resolve('bin/nanosplus/concordium_nanosplus.elf');
 
-class ConcordiumZemu extends Zemu {
+export class ConcordiumZemu extends Zemu {
     // This is a hack to get around the issue where a screen is not fully rendered, but
     // the screen has changed from the provided screenshot. This method waits a little bit
     // after the screen has changed in an attempt to ensure that it is fully rendered.
