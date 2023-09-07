@@ -1,11 +1,10 @@
 import { resolve } from 'path';
 import Transport from '@ledgerhq/hw-transport';
-import { ConcordiumZemu, optionsNanoS, optionsNanoX } from '../options';
+import { ConcordiumZemu, optionsNanoS } from '../options';
 
 export const NANOS_ELF_PATH = resolve('bin/governance-nanos/ccdGovernance_nanos.elf');
-export const NANOX_ELF_PATH = resolve('bin/governance-nanox/ccdGovernance_nanox.elf');
 
-export function setupZemu(device: 'nanos' | 'nanox', func: (sim: ConcordiumZemu, transport: Transport, device: 'nanos' | 'nanox') => Promise<void>) {
+export function setupZemu(device: 'nanos', func: (sim: ConcordiumZemu, transport: Transport, device: 'nanos') => Promise<void>) {
     return async () => {
         let sim;
         let simOptions;
@@ -13,8 +12,7 @@ export function setupZemu(device: 'nanos' | 'nanox', func: (sim: ConcordiumZemu,
             sim = new ConcordiumZemu(NANOS_ELF_PATH);
             simOptions = optionsNanoS;
         } else {
-            sim = new ConcordiumZemu(NANOX_ELF_PATH);
-            simOptions = optionsNanoX;
+            throw new Error('Not supported device');
         }
 
         try {

@@ -17,7 +17,3 @@ async function updateEuroPerEnergy(sim: Zemu, transport: Transport) {
 test('[NANO S] Update euro per energy', setupZemu('nanos', async (sim, transport) => {
     await updateEuroPerEnergy(sim, transport);
 }));
-
-test('[NANO X] Update euro per energy', setupZemu('nanox', async (sim, transport) => {
-    await updateEuroPerEnergy(sim, transport);
-}));

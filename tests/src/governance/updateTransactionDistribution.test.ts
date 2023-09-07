@@ -18,7 +18,3 @@ async function updateTransactionDistribution(sim: Zemu, transport: Transport) {
 test('[NANO S] Update transaction distribution', setupZemu('nanos', async (sim, transport) => {
     await updateTransactionDistribution(sim, transport);
 }));
-
-test('[NANO X] Update transaction distribution', setupZemu('nanox', async (sim, transport) => {
-    await updateTransactionDistribution(sim, transport);
-}));
