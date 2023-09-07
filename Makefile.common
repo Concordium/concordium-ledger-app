@@ -69,14 +69,16 @@ ifeq ($(GCCPATH),)
 $(info GCCPATH is not set: arm-none-eabi-* will be used from PATH)
 endif
 
+COMPILE_FLAGS = -DAPPNAME=\"$(APPNAME)\"
+
 CC := $(CLANGPATH)clang
-CFLAGS += -O3 -Os
+CFLAGS += -O3 -Os $(COMPILE_FLAGS)
 
 AS := $(GCCPATH)arm-none-eabi-gcc
-AFLAGS +=
+AFLAGS += $(COMPILE_FLAGS)
 
 LD := $(GCCPATH)arm-none-eabi-gcc
-LDFLAGS += -O3 -Os
+LDFLAGS += -O3 -Os $(COMPILE_FLAGS)
 LDLIBS += -lm -lgcc -lc
 
 # If a test signing key has been set, then use that to sign when loading
