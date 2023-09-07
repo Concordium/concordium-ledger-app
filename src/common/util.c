@@ -317,3 +317,13 @@ void getBlsPrivateKey(uint32_t *keyPathInput, uint8_t keyPathLength, uint8_t *pr
     }
     END_TRY;
 }
+
+size_t hashAndLoadU64Ratio(uint8_t *cdata, uint8_t *dst, uint8_t sizeOfDst) {
+    uint64_t numerator = U8BE(cdata, 0);
+    uint64_t denominator = U8BE(cdata, 8);
+    updateHash((cx_hash_t *) &tx_state->hash, cdata, 16);
+    int numLength = numberToText(dst, sizeOfDst, numerator);
+    memmove(dst + numLength, " / ", 3);
+    numberToText(dst + numLength + 3, sizeOfDst - (numLength + 3), denominator);
+    return 16;
+}

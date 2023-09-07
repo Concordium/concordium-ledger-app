@@ -48,19 +48,7 @@ void handleSignUpdateExchangeRate(uint8_t *cdata, volatile unsigned int *flags) 
         THROW(ERROR_INVALID_TRANSACTION);
     }
 
-    // Numerator is the first 8 bytes.
-    uint64_t numerator = U8BE(cdata, 0);
-    int offset = numberToText(ctx->ratio, sizeof(ctx->ratio), numerator);
-    cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 8, NULL, 0);
-    cdata += 8;
-
-    memmove(ctx->ratio + offset, " / ", 3);
-    offset += 3;
-
-    // Denominator is the last 8 bytes.
-    uint64_t denominator = U8BE(cdata, 0);
-    bin2dec(ctx->ratio + offset, sizeof(ctx->ratio) - offset, denominator);
-    cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 8, NULL, 0);
+    hashAndLoadU64Ratio(cdata, ctx->ratio, sizeof(ctx->ratio));
 
     ux_flow_init(0, ux_sign_exchange_rate, NULL);
     *flags |= IO_ASYNCH_REPLY;
