@@ -1,25 +1,15 @@
 import { resolve } from 'path';
-import Transport from '@ledgerhq/hw-transport';
-import { ConcordiumZemu, optionsNanoS } from '../options';
+import { ConcordiumZemu, getSetupZemu } from '../options';
 
 export const NANOS_ELF_PATH = resolve('bin/governance-nanos/ccdGovernance_nanos.elf');
+export const NANOS_PLUS_ELF_PATH = resolve('bin/governance-nanosplus/ccdGovernance_nanosplus.elf');
 
-export function setupZemu(device: 'nanos', func: (sim: ConcordiumZemu, transport: Transport, device: 'nanos') => Promise<void>) {
-    return async () => {
-        let sim;
-        let simOptions;
-        if (device === 'nanos') {
-            sim = new ConcordiumZemu(NANOS_ELF_PATH);
-            simOptions = optionsNanoS;
-        } else {
-            throw new Error('Not supported device');
-        }
-
-        try {
-            await sim.start(simOptions);
-            await func(sim, sim.getTransport(), device);
-        } finally {
-            await sim.close();
-        }
-    };
+function getZemu(device: 'nanos' | 'nanosp' | 'nanox') {
+    if (device === 'nanos') {
+        return new ConcordiumZemu(NANOS_ELF_PATH);
+    } else {
+        return new ConcordiumZemu(NANOS_PLUS_ELF_PATH);
+    }
 }
+
+export const setupZemu = getSetupZemu(getZemu);

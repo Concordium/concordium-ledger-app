@@ -28,3 +28,8 @@ BOLOS_SDK=$NANOS_SDK make clean
 BOLOS_SDK=$NANOS_SDK make
 
 cp bin/app.elf "../tests/bin/governance-nanos/ccdGovernance_nanos.elf"
+
+BOLOS_SDK=$NANOSP_SDK make clean
+BOLOS_SDK=$NANOSP_SDK make
+
+cp bin/app.elf "../tests/bin/governance-nanosplus/ccdGovernance_nanosplus.elf"

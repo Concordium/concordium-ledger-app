@@ -9,7 +9,7 @@ async function updateAuthorizations(
     prefix: string,
     expectedSignature: string,
     handleKeyUi: () => Promise<any>,
-    device: 'nanos' | 'nanox'
+    device: 'nanos' | 'nanosp'
 ) {
     const p2 = 0x01;
     const data = Buffer.concat([
@@ -85,6 +85,22 @@ test('[NANO S] Update level 2 keys with root keys', setupZemu('nanos', async (si
     );
 }));
 
+test('[NANO X] Update level 2 keys with root keys', setupZemu('nanox', async (sim, transport) => {
+    await updateAuthorizations(
+        sim,
+        transport,
+        0x2a,
+        '0a',
+        '03',
+        '02f76c94c76d552364e8b054001f86c2cd4417de90343920558ac00529e2bc429f6db1a37c7f75fea69ec663bfadcc847ad568996545de93adfa1674b12d41079000',
+        async () => {
+            await sim.clickRight();
+            return sim.clickBoth(undefined, false);
+        },
+        'nanosp'
+    );
+}));
+
 test('[NANO S] Update level 2 keys with level 1 keys', setupZemu('nanos', async (sim, transport) => {
     await updateAuthorizations(
         sim,
@@ -101,5 +117,21 @@ test('[NANO S] Update level 2 keys with level 1 keys', setupZemu('nanos', async 
             return sim.clickBoth(undefined, false);
         },
         'nanos'
+    );
+}));
+
+test('[NANO SP] Update level 2 keys with level 1 keys', setupZemu('nanosp', async (sim, transport) => {
+    await updateAuthorizations(
+        sim,
+        transport,
+        0x2b,
+        '0b',
+        '02',
+        'ab92d78f158730042a1a4c2f738600f064ad5100551afad3760053f8f9e28e12d47a4e0484417f879e065332612e3cc4c5315e4f610f3fd4e3d7469c058556019000',
+        async () => {
+            await sim.clickRight();
+            return sim.clickBoth(undefined, false);
+        },
+        'nanosp'
     );
 }));
