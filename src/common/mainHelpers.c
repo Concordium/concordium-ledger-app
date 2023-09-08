@@ -44,15 +44,9 @@ tx_state_t global_tx_state;
 
 // Main entry of application that listens for APDU commands that will be received from the
 // computer. The APDU commands control what flow is activated, i.e. which control flow is initiated.
-void concordium_main( void (*handler)(
-                                 uint8_t,
-                                             uint8_t *,
-                                             uint8_t,
-                                             uint8_t,
-                                             uint8_t,
-                                             volatile unsigned int *,
-                                             bool
- ), void *global_state) {
+void concordium_main(
+    void (*handler)(uint8_t, uint8_t *, uint8_t, uint8_t, uint8_t, volatile unsigned int *, bool),
+    void *global_state) {
     volatile unsigned int rx = 0;
     volatile unsigned int tx = 0;
     volatile unsigned int flags = 0;
