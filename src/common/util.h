@@ -168,7 +168,7 @@ void getBlsPrivateKey(uint32_t *keyPathInput, uint8_t keyPathLength, uint8_t *pr
 /**
  * Loads a u64 ratio into the destination provided in a displayable format (numerator / denominator). The bytes
  * of the ratio are also added to the hash.
- * 
+ *
  * @param cdata the incoming command data pointing to the start of the input containing the ratio
  * @param dst where to write the displayable u64 ratio
  * @param sizeOfDst the size of dst
