@@ -42,6 +42,7 @@
 #include "signUpdateTimeoutParameters.h"
 #include "signUpdateMinBlockTime.h"
 #include "signUpdateBlockEnergyLimit.h"
+#include "signUpdateFinalizationCommitteeParameters.h"
 #include "ux.h"
 
 // Global variable definitions
@@ -91,6 +92,7 @@ accountSender_t global_account_sender;
 #define INS_UPDATE_TIMEOUT_PARAMETERS 0x43
 #define INS_UPDATE_MIN_BLOCK_TIME     0x44
 #define INS_UPDATE_BLOCK_ENERGY_LIMIT 0x45
+#define INS_UPDATE_FINALIZATION_COMMITTEE_PARAMETERS 0x46
 
 // Main entry of application that listens for APDU commands that will be received from the
 // computer. The APDU commands control what flow is activated, i.e. which control flow is initiated.
@@ -216,6 +218,9 @@ static void concordium_main(void) {
                         break;
                     case INS_UPDATE_BLOCK_ENERGY_LIMIT:
                         handleSignUpdateBlockEnergyLimit(cdata, &flags);
+                        break;
+                    case INS_UPDATE_FINALIZATION_COMMITTEE_PARAMETERS:
+                        handleSignUpdateFinalizationCommitteeParameters(cdata, &flags);
                         break;
                     default:
                         THROW(ERROR_INVALID_INSTRUCTION);

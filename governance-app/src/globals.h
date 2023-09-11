@@ -26,6 +26,7 @@
 #include "signUpdateTimeoutParameters.h"
 #include "signUpdateMinBlockTime.h"
 #include "signUpdateBlockEnergyLimit.h"
+#include "signUpdateFinalizationCommitteeParameters.h"
 #include "ux.h"
 
 #define CONCORDIUM_PURPOSE   1105
@@ -128,6 +129,7 @@ typedef union {
     signUpdateTimeoutParametersContext_t signUpdateTimeoutParameters;
     signUpdateMinBlockTimeContext_t signUpdateMinBlockTime;
     signUpdateBlockEnergyLimitContext_t signUpdateBlockEnergyLimit;
+    signUpdateFinalizationCommitteeParametersContext_t signUpdateFinalizationCommitteeParameters;
     updateWithDescription_t withDescription;
 } instructionContext;
 extern instructionContext global;
