@@ -9,6 +9,10 @@
 - Support for update block energy limit transaction.
 - Support for update finalization committee parameters.
 
+### Changed
+
+- GAS rewards update no longer contains the finalization proof part.
+
 ## 0.0.1
 
 - Initial version
