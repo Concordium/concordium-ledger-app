@@ -7,8 +7,10 @@ export const NANOS_PLUS_ELF_PATH = resolve('bin/governance-nanosplus/ccdGovernan
 function getZemu(device: 'nanos' | 'nanosp' | 'nanox') {
     if (device === 'nanos') {
         return new ConcordiumZemu(NANOS_ELF_PATH);
-    } else {
+    } else if (device === 'nanosp') {
         return new ConcordiumZemu(NANOS_PLUS_ELF_PATH);
+    } else {
+        throw new Error('nanox is not supported for governance app');
     }
 }
 

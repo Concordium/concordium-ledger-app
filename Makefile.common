@@ -45,6 +45,8 @@ DEFINES += APPVERSION_MAJOR=$(APPVERSION_MAJOR)
 DEFINES += APPVERSION_MINOR=$(APPVERSION_MINOR)
 DEFINES += APPVERSION_PATCH=$(APPVERSION_PATCH)
 
+DEFINES += APPNAME=\"$(APPNAME)\"
+
 # Stop execution after a stack overflow
 DEFINES += HAVE_BOLOS_APP_STACK_CANARY
 
@@ -69,16 +71,14 @@ ifeq ($(GCCPATH),)
 $(info GCCPATH is not set: arm-none-eabi-* will be used from PATH)
 endif
 
-COMPILE_FLAGS = -DAPPNAME=\"$(APPNAME)\"
-
 CC := $(CLANGPATH)clang
-CFLAGS += -O3 -Os $(COMPILE_FLAGS)
+CFLAGS += -O3 -Os
 
 AS := $(GCCPATH)arm-none-eabi-gcc
-AFLAGS += $(COMPILE_FLAGS)
+AFLAGS +=
 
 LD := $(GCCPATH)arm-none-eabi-gcc
-LDFLAGS += -O3 -Os $(COMPILE_FLAGS)
+LDFLAGS += -O3 -Os
 LDLIBS += -lm -lgcc -lc
 
 # If a test signing key has been set, then use that to sign when loading
