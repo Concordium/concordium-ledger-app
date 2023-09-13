@@ -12,6 +12,7 @@
 ### Changed
 
 - GAS rewards update no longer contains the finalization proof part.
+- 'Election difficulty' title in update authorizations has been renamed to 'Consensus parameters'.
 
 ### Removed
 
