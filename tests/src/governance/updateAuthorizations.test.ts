@@ -85,7 +85,7 @@ test('[NANO S] Update level 2 keys with root keys', setupZemu('nanos', async (si
     );
 }));
 
-test('[NANO X] Update level 2 keys with root keys', setupZemu('nanox', async (sim, transport) => {
+test('[NANO SP] Update level 2 keys with root keys', setupZemu('nanosp', async (sim, transport) => {
     await updateAuthorizations(
         sim,
         transport,
