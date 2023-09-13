@@ -13,7 +13,6 @@
 #include "signUpdateAuthorizations.h"
 
 #include "signUpdateBakerStakeThreshold.h"
-#include "signUpdateElectionDifficulty.h"
 #include "signUpdateExchangeRate.h"
 #include "signUpdateFoundationAccount.h"
 #include "signUpdateGasRewards.h"
@@ -46,7 +45,6 @@
 typedef enum {
     UPDATE_TYPE_AUTHORIZATION = 0,
     UPDATE_TYPE_PROTOCOL = 1,
-    UPDATE_TYPE_ELECTION_DIFFICULTY = 2,
     UPDATE_TYPE_EURO_PER_ENERGY = 3,
     UPDATE_TYPE_MICRO_GTU_PER_EURO = 4,
     UPDATE_TYPE_FOUNDATION_ACCOUNT = 5,
@@ -120,7 +118,6 @@ typedef union {
     signUpdateGasRewardsContext_t signUpdateGasRewardsContext;
     signUpdateFoundationAccountContext_t signUpdateFoundationAccountContext;
     signUpdateMintDistribution_t signUpdateMintDistribution;
-    signElectionDifficultyContext_t signElectionDifficulty;
     signUpdateBakerStakeThresholdContext_t signUpdateBakerStakeThreshold;
     signUpdateTimeParametersContext_t signTimeParameters;
     signUpdateCooldownParametersContext_t signCooldownParameters;

@@ -13,6 +13,10 @@
 
 - GAS rewards update no longer contains the finalization proof part.
 
+### Removed
+
+- Support for the update election difficulty transaction.
+
 ## 0.0.1
 
 - Initial version
