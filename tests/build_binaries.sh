@@ -2,6 +2,7 @@ mkdir -p bin/nanos
 mkdir -p bin/nanox
 mkdir -p bin/nanosplus
 mkdir -p bin/governance-nanos
+mkdir -p bin/governance-nanosplus
 
 cd ..
 

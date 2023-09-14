@@ -30,7 +30,7 @@ else
 endif
 
 # Main app configuration
-APPNAME = "CCD Governance"
+APPNAME = CCDGovernance
 
 # Version must be no greater than 99.99.999, otherwise
 # extra memory must be allocated in menu.c.
