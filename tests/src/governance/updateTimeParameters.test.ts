@@ -16,3 +16,7 @@ async function timeParameters(sim: Zemu, transport: Transport, images: string) {
 test('[NANO S] Time parameters', setupZemu('nanos', async (sim, transport) => {
     await timeParameters(sim, transport, 'nanos_time_parameters');
 }));
+
+test('[NANO SP] Time parameters', setupZemu('nanosp', async (sim, transport) => {
+    await timeParameters(sim, transport, 'nanosp_time_parameters');
+}));

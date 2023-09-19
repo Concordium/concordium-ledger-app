@@ -15,3 +15,7 @@ async function timeoutParameters(sim: Zemu, transport: Transport, images: string
 test('[NANO S] Timeout parameters', setupZemu('nanos', async (sim, transport) => {
     await timeoutParameters(sim, transport, 'nanos_timeout_parameters');
 }));
+
+test('[NANO SP] Timeout parameters', setupZemu('nanosp', async (sim, transport) => {
+    await timeoutParameters(sim, transport, 'nanosp_timeout_parameters');
+}));
