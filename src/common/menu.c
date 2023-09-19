@@ -23,7 +23,7 @@ UX_STEP_NOCB(
     ux_menu_idle_flow_1_step,
     bn,
     {
-        "Concordium",
+        APPNAME,
         "is ready",
     });
 UX_STEP_CB(

@@ -40,7 +40,7 @@ export const NANOS_ELF_PATH = resolve('bin/nanos/concordium_nanos.elf');
 export const NANOX_ELF_PATH = resolve('bin/nanox/concordium_nanox.elf');
 export const NANOS_PLUS_ELF_PATH = resolve('bin/nanosplus/concordium_nanosplus.elf');
 
-class ConcordiumZemu extends Zemu {
+export class ConcordiumZemu extends Zemu {
     // This is a hack to get around the issue where a screen is not fully rendered, but
     // the screen has changed from the provided screenshot. This method waits a little bit
     // after the screen has changed in an attempt to ensure that it is fully rendered.
@@ -50,26 +50,37 @@ class ConcordiumZemu extends Zemu {
     }
 }
 
-export function setupZemu(device: 'nanos' | 'nanosp' | 'nanox', func: (sim: ConcordiumZemu, transport: Transport, device: 'nanos' | 'nanosp' | 'nanox') => Promise<void>) {
-    return async () => {
-        let sim;
-        let simOptions;
-        if (device === 'nanos') {
-            sim = new ConcordiumZemu(NANOS_ELF_PATH);
-            simOptions = optionsNanoS;
-        } else if (device === 'nanosp') {
-            sim = new ConcordiumZemu(NANOS_PLUS_ELF_PATH);
-            simOptions = optionsNanoSPlus;
-        } else {
-            sim = new ConcordiumZemu(NANOX_ELF_PATH);
-            simOptions = optionsNanoX;
-        }
-
-        try {
-            await sim.start(simOptions);
-            await func(sim, sim.getTransport(), device);
-        } finally {
-            await sim.close();
-        }
-    };
+function getZemu(device: 'nanos' | 'nanosp' | 'nanox') {
+    if (device === 'nanos') {
+        return new ConcordiumZemu(NANOS_ELF_PATH);
+    } else if (device === 'nanosp') {
+        return new ConcordiumZemu(NANOS_PLUS_ELF_PATH);
+    } else {
+        return new ConcordiumZemu(NANOX_ELF_PATH);
+    }
 }
+
+export function getSetupZemu(getter: typeof getZemu) {
+    return (device: 'nanos' | 'nanosp' | 'nanox', func: (sim: ConcordiumZemu, transport: Transport, device: 'nanos' | 'nanosp' | 'nanox') => Promise<void>) => {
+        return async () => {
+            const sim = getter(device);
+            let simOptions;
+            if (device === 'nanos') {
+                simOptions = optionsNanoS;
+            } else if (device === 'nanosp') {
+                simOptions = optionsNanoSPlus;
+            } else {
+                simOptions = optionsNanoX;
+            }
+
+            try {
+                await sim.start(simOptions);
+                await func(sim, sim.getTransport(), device);
+            } finally {
+                await sim.close();
+            }
+        };
+    }
+}
+
+export const setupZemu = getSetupZemu(getZemu);

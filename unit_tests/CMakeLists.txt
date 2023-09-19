@@ -36,6 +36,7 @@ endif()
 add_compile_definitions(TEST)
 
 include_directories(../src)
+include_directories(../src/common)
 include_directories(./mocks)
 
 add_executable(test_numberHelpers tests/testNumberHelpers.c)
@@ -43,10 +44,10 @@ add_executable(test_time tests/testTime.c)
 add_executable(test_base58Check tests/testBase58Check.c)
 add_executable(test_util tests/testUtil.c)
 
-add_library(numberHelpers ../src/numberHelpers.c)
-add_library(time  ../src/numberHelpers.c ../src/time.c)
-add_library(base58Check ../src/base58check.c mocks/shaMock.c mocks/sha256.c mocks/sha256.h)
-add_library(util mocks/os.c mocks/mocks.c mocks/globals.c ../src/util.c)
+add_library(numberHelpers ../src/common/numberHelpers.c)
+add_library(time  ../src/common/numberHelpers.c ../src/common/time.c)
+add_library(base58Check ../src/common/base58check.c mocks/shaMock.c mocks/sha256.c mocks/sha256.h)
+add_library(util mocks/os.c mocks/mocks.c mocks/globals.c ../src/common/util.c)
 
 target_link_libraries(test_numberHelpers PUBLIC cmocka numberHelpers)
 target_link_libraries(test_time PUBLIC cmocka  time)
