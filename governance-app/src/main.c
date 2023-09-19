@@ -153,7 +153,7 @@ void handler(
                         handleSignUpdatePoolParameters(cdata, p1, flags, isInitialCall);
                         break;
                     case INS_UPDATE_TIMEOUT_PARAMETERS:
-                        handleSignTimeoutParameters(cdata, &flags);
+                        handleSignTimeoutParameters(cdata, flags);
                         break;
                     default:
                         THROW(ERROR_INVALID_INSTRUCTION);
