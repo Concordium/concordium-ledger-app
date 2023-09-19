@@ -40,6 +40,7 @@
 #include "signUpdateTimeParameters.h"
 #include "signUpdateCooldownParameters.h"
 #include "signUpdatePoolParameters.h"
+#include "signUpdateTimeoutParameters.h"
 #include "ux.h"
 
 // Global variable definitions
@@ -69,6 +70,9 @@ instructionContext global;
 #define INS_UPDATE_COOLDOWN_PARAMETERS 0x40
 #define INS_UPDATE_POOL_PARAMETERS     0x41
 #define INS_UPDATE_TIME_PARAMETERS     0x42
+
+// Protocol update 6 transactions.
+#define INS_UPDATE_TIMEOUT_PARAMETERS 0x43
 
 void handler(
     uint8_t INS,
@@ -147,6 +151,9 @@ void handler(
                         break;
                     case INS_UPDATE_POOL_PARAMETERS:
                         handleSignUpdatePoolParameters(cdata, p1, flags, isInitialCall);
+                        break;
+                    case INS_UPDATE_TIMEOUT_PARAMETERS:
+                        handleSignTimeoutParameters(cdata, flags);
                         break;
                     default:
                         THROW(ERROR_INVALID_INSTRUCTION);

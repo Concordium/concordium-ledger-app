@@ -165,4 +165,14 @@ int handleHeaderAndToAddress(uint8_t *cdata, uint8_t kind, uint8_t *recipientDst
  */
 void getBlsPrivateKey(uint32_t *keyPathInput, uint8_t keyPathLength, uint8_t *privateKey, size_t privateKeyLength);
 
+/**
+ * Loads a u64 ratio into the destination provided in a displayable format (numerator / denominator). The bytes
+ * of the ratio are also added to the hash.
+ *
+ * @param cdata the incoming command data pointing to the start of the input containing the ratio
+ * @param dst where to write the displayable u64 ratio
+ * @param sizeOfDst the size of dst
+ */
+size_t hashAndLoadU64Ratio(uint8_t *cdata, uint8_t *dst, uint8_t sizeOfDst);
+
 #endif

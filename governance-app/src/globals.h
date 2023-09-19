@@ -23,6 +23,7 @@
 #include "signUpdateTimeParameters.h"
 #include "signUpdateCooldownParameters.h"
 #include "signUpdatePoolParameters.h"
+#include "signUpdateTimeoutParameters.h"
 #include "ux.h"
 
 #define CONCORDIUM_PURPOSE   1105
@@ -57,7 +58,12 @@ typedef enum {
     UPDATE_TYPE_COOLDOWN_PARAMETERS = 14,
     UPDATE_TYPE_POOL_PARAMETERS = 15,
     UPDATE_TYPE_TIME_PARAMETERS = 16,
-    UPDATE_TYPE_MINT_DISTRIBUTION_V1 = 17
+    UPDATE_TYPE_MINT_DISTRIBUTION_V1 = 17,
+    UPDATE_TYPE_TIMEOUT_PARAMETERS = 18,
+    UPDATE_TYPE_MIN_BLOCK_TIME_UPDATE = 19,
+    UPDATE_TYPE_BLOCK_ENERGY_LIMIT = 20,
+    UPDATE_TYPE_GAS_REWARDS_CPV2 = 21,
+    UPDATE_TYPE_FINALIZATION_COMMITTEE_PARAMETERS = 22
 } updateType_e;
 
 typedef struct {
@@ -117,6 +123,7 @@ typedef union {
     signUpdateCooldownParametersContext_t signCooldownParameters;
     signUpdatePoolParametersContext_t signPoolParameters;
     signUpdateKeysWithRootKeysContext_t signUpdateKeysWithRootKeysContext;
+    signUpdateTimeoutParametersContext_t signUpdateTimeoutParameters;
     updateWithDescription_t withDescription;
 } instructionContext;
 extern instructionContext global;
