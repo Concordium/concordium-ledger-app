@@ -17,3 +17,9 @@ test('[NANO S] Update micro GTU per euro', setupZemu('nanos', async (sim, transp
         await sim.navigateAndCompareSnapshots('.', 'nanos_update_micro_ccd_per_euro', [2, 0]);
     });
 }));
+
+test('[NANO SP] Update micro GTU per euro', setupZemu('nanosp', async (sim, transport) => {
+    await updateMicroGtuPerEuro(sim, transport, async () => {
+        await sim.navigateAndCompareSnapshots('.', 'nanosp_update_micro_ccd_per_euro', [2, 0]);
+    });
+}));

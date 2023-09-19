@@ -18,3 +18,7 @@ async function updateMintRateDistribution(sim: Zemu, transport: Transport) {
 test('[NANO S] Update mint rate distribution', setupZemu('nanos', async (sim, transport) => {
     await updateMintRateDistribution(sim, transport);
 }));
+
+test('[NANO SP] Update mint rate distribution', setupZemu('nanosp', async (sim, transport) => {
+    await updateMintRateDistribution(sim, transport);
+}));
