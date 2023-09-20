@@ -26,3 +26,7 @@ async function poolParameters(sim: Zemu, transport: Transport, images: string, e
 test('[NANO S] Pool parameters', setupZemu('nanos', async (sim, transport) => {
     await poolParameters(sim, transport, 'nanos_pool_parameters', 5);
 }));
+
+test('[NANO SP] Pool parameters', setupZemu('nanosp', async (sim, transport) => {
+    await poolParameters(sim, transport, 'nanosp_pool_parameters', 3);
+}));

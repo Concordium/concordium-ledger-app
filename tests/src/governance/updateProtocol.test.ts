@@ -71,3 +71,19 @@ test('[NANO S] Update protocol', setupZemu('nanos', async (sim, transport) => {
         return sim.clickBoth(undefined, false);
     });
 }));
+
+test('[NANO SP] Update protocol', setupZemu('nanosp', async (sim, transport) => {
+    await updateProtocol(sim, transport, async () => {
+        await sim.clickRight(undefined, false);
+        return sim.clickBoth(undefined, false);
+    },
+    async () => {
+        await sim.clickRight(undefined, false);
+        return sim.clickBoth(undefined, false);
+    },
+    async () => {
+        await sim.clickRight();
+        await sim.clickRight(undefined, false);
+        return sim.clickBoth(undefined, false);
+    });
+}));

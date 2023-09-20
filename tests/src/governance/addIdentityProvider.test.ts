@@ -29,6 +29,7 @@ async function addIdentityProviderShared(sim: Zemu, transport: Transport) {
     transport.send(0xe0, 0x2d, 0x02, 0x00, data);
     Zemu.sleep(1000);
     await sim.waitUntilScreenIsNot(snapshot2);
+    // This right click is unnecessary for Nano X, but does nothing
     await sim.clickRight(undefined, false);
     const snapshot3 = await sim.clickBoth(undefined, false);
 
@@ -61,6 +62,29 @@ test('[NANO S] Add identity provider', setupZemu('nanos', async (sim, transport)
     await sim.waitUntilScreenIsNot(snapshot5);
     await sim.clickRight();
     await sim.clickRight();
+    await sim.clickRight();
+    await sim.clickRight();
+    await sim.clickBoth(undefined, false);
+
+    await expect(tx).resolves.toEqual(
+        Buffer.from('8acfbd91b0726ccfd1830ae8df58a3e6bff8c9c079f6bf3c773ebb84b37a6df3c5fe3e1f0189d3f7aa60ffaa3bbac076962fb5204eabde3c9ca44a7c8354010c9000', 'hex'),
+    );
+}));
+
+test('[NANO SP] Add identity provider', setupZemu('nanosp', async (sim, transport) => {
+    const snapshot4 = await addIdentityProviderShared(sim, transport);
+
+    // Verify key
+    let data = Buffer.from('00000010', 'hex');
+    transport.send(0xe0, 0x2d, 0x03, 0x00, data);
+    await sim.waitUntilScreenIsNot(snapshot4);
+    await sim.clickRight();
+    const snapshot5 = await sim.clickBoth(undefined, false);
+
+    // CDI key
+    data = Buffer.from('37efcc5b9180fc9c43a5a51a2f27d6581e63e4b2b3dad75b8510061b8c2db39f', 'hex');
+    const tx = transport.send(0xe0, 0x2d, 0x04, 0x00, data);
+    await sim.waitUntilScreenIsNot(snapshot5);
     await sim.clickRight();
     await sim.clickRight();
     await sim.clickBoth(undefined, false);
