@@ -20,3 +20,10 @@ test('[NANO S] Update foundation account', setupZemu('nanos', async (sim, transp
         await sim.clickBoth(undefined, false);
     });
 }));
+
+test('[NANO SP] Update foundation account', setupZemu('nanosp', async (sim, transport) => {
+    await updateFoundationAccount(sim, transport, async () => {
+        await sim.navigateAndCompareSnapshots('.', 'nanosp_update_foundation_account', [3]);
+        await sim.clickBoth(undefined, false);
+    });
+}));

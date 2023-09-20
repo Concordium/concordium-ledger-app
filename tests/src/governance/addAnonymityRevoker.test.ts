@@ -68,3 +68,22 @@ test('[NANO S] Add anonymity revoker', setupZemu('nanos', async (sim, transport)
         Buffer.from('82f58dd72bb0ead83139282032da854b1077a341646db5bacd227554ab985b7814fb9aae9ae2cd6a5557b6e6174c1524a9cf81acae3bf1422cd43e63f5189c099000', 'hex'),
     );
 }));
+
+test('[NANO SP] Add anonymity revoker', setupZemu('nanosp', async (sim, transport) => {
+    const snapshot = await addAnonymityRevokerShared(sim, transport);
+
+    // The AR public key
+    const data = Buffer.from('993fdc40bb8af4cb75caf8a53928d247be6285784b29578a06df312c28854c1bfac2fd0183967338b578772398d412018a4afcfaae1ba3ccd63a5b0868a8a9c49deec35a8817d35d0082761b39c0c6bd2357ef997c0f319fefd5b336e6667b7b', 'hex');
+    const tx = transport.send(0xe0, 0x2c, 0x03, 0x00, data);
+    await sim.waitUntilScreenIsNot(snapshot);
+
+    await sim.clickRight();
+    await sim.clickRight();
+    await sim.clickRight();
+    await sim.clickRight();
+    await sim.clickBoth(undefined, false);
+
+    await expect(tx).resolves.toEqual(
+        Buffer.from('82f58dd72bb0ead83139282032da854b1077a341646db5bacd227554ab985b7814fb9aae9ae2cd6a5557b6e6174c1524a9cf81acae3bf1422cd43e63f5189c099000', 'hex'),
+    );
+}));
