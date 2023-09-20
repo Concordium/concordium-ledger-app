@@ -15,3 +15,7 @@ async function minBlockTime(sim: Zemu, transport: Transport, images: string) {
 test('[NANO S] Min block time', setupZemu('nanos', async (sim, transport) => {
     await minBlockTime(sim, transport, 'nanos_min_block_time');
 }));
+
+test('[NANO SP] Min block time', setupZemu('nanosp', async (sim, transport) => {
+    await minBlockTime(sim, transport, 'nanosp_min_block_time');
+}));

@@ -16,3 +16,7 @@ async function cooldownParameters(sim: Zemu, transport: Transport, images: strin
 test('[NANO S] Cooldown parameters', setupZemu('nanos', async (sim, transport) => {
     await cooldownParameters(sim, transport, 'nanos_cooldown_parameters');
 }));
+
+test('[NANO SP] Cooldown parameters', setupZemu('nanosp', async (sim, transport) => {
+    await cooldownParameters(sim, transport, 'nanosp_cooldown_parameters');
+}));

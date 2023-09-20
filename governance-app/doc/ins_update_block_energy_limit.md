@@ -1,4 +1,4 @@
-# Update timeout parameters
+# Update block energy limit
 
 Used for updating the block energy limit.
 
