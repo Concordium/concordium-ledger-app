@@ -43,6 +43,7 @@
 #include "signUpdateTimeoutParameters.h"
 #include "signUpdateMinBlockTime.h"
 #include "signUpdateBlockEnergyLimit.h"
+#include "signUpdateFinalizationCommitteeParameters.h"
 #include "ux.h"
 
 // Global variable definitions
@@ -77,6 +78,7 @@ instructionContext global;
 #define INS_UPDATE_TIMEOUT_PARAMETERS 0x43
 #define INS_UPDATE_MIN_BLOCK_TIME     0x44
 #define INS_UPDATE_BLOCK_ENERGY_LIMIT 0x45
+#define INS_UPDATE_FINALIZATION_COMMITTEE_PARAMETERS 0x46
 
 void handler(
     uint8_t INS,
@@ -164,6 +166,9 @@ void handler(
                         break;
                     case INS_UPDATE_BLOCK_ENERGY_LIMIT:
                         handleSignUpdateBlockEnergyLimit(cdata, flags);
+                        break;
+                    case INS_UPDATE_FINALIZATION_COMMITTEE_PARAMETERS:
+                        handleSignUpdateFinalizationCommitteeParameters(cdata, flags);
                         break;
                     default:
                         THROW(ERROR_INVALID_INSTRUCTION);
