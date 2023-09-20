@@ -9,6 +9,15 @@
 - Support for update block energy limit transaction.
 - Support for update finalization committee parameters.
 
+### Changed
+
+- GAS rewards update no longer contains the finalization proof part.
+- 'Election difficulty' title in update authorizations has been renamed to 'Consensus'.
+
+### Removed
+
+- Support for the update election difficulty transaction.
+
 ## 0.0.1
 
 - Initial version

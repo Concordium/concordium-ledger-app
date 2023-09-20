@@ -65,8 +65,8 @@ const char *getAuthorizationName(authorizationType_e type) {
             return "Emergency";
         case AUTHORIZATION_PROTOCOL:
             return "Protocol";
-        case AUTHORIZATION_ELECTION_DIFFICULTY:
-            return "Election difficulty";
+        case AUTHORIZATION_CONSENSUS_PARAMETERS:
+            return "Consensus";
         case AUTHORIZATION_EURO_PER_ENERGY:
             return "Euro per energy";
         case AUTHORIZATION_MICRO_GTU_PER_EURO:
