@@ -25,6 +25,7 @@
 #include "signUpdatePoolParameters.h"
 #include "signUpdateTimeoutParameters.h"
 #include "signUpdateMinBlockTime.h"
+#include "signUpdateBlockEnergyLimit.h"
 #include "ux.h"
 
 #define CONCORDIUM_PURPOSE   1105
@@ -126,6 +127,7 @@ typedef union {
     signUpdateKeysWithRootKeysContext_t signUpdateKeysWithRootKeysContext;
     signUpdateTimeoutParametersContext_t signUpdateTimeoutParameters;
     signUpdateMinBlockTimeContext_t signUpdateMinBlockTime;
+    signUpdateBlockEnergyLimitContext_t signUpdateBlockEnergyLimit;
     updateWithDescription_t withDescription;
 } instructionContext;
 extern instructionContext global;

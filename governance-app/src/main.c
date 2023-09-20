@@ -42,6 +42,7 @@
 #include "signUpdatePoolParameters.h"
 #include "signUpdateTimeoutParameters.h"
 #include "signUpdateMinBlockTime.h"
+#include "signUpdateBlockEnergyLimit.h"
 #include "ux.h"
 
 // Global variable definitions
@@ -75,6 +76,7 @@ instructionContext global;
 // Protocol update 6 transactions.
 #define INS_UPDATE_TIMEOUT_PARAMETERS 0x43
 #define INS_UPDATE_MIN_BLOCK_TIME     0x44
+#define INS_UPDATE_BLOCK_ENERGY_LIMIT 0x45
 
 void handler(
     uint8_t INS,
@@ -159,6 +161,9 @@ void handler(
                         break;
                     case INS_UPDATE_MIN_BLOCK_TIME:
                         handleSignMinBlockTime(cdata, flags);
+                        break;
+                    case INS_UPDATE_BLOCK_ENERGY_LIMIT:
+                        handleSignUpdateBlockEnergyLimit(cdata, flags);
                         break;
                     default:
                         THROW(ERROR_INVALID_INSTRUCTION);

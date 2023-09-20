@@ -6,6 +6,7 @@
 
 - Support for update timeout parameters transaction.
 - Support for update minimum block time transaction.
+- Support for update block energy limit transaction.
 
 ## 0.0.1
 
