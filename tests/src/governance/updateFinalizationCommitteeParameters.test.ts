@@ -15,3 +15,8 @@ async function finalizationCommitteeParameters(sim: Zemu, transport: Transport, 
 test('[NANO S] Finalization committee parameters', setupZemu('nanos', async (sim, transport) => {
     await finalizationCommitteeParameters(sim, transport, 'nanos_finalization_committee_parameters');
 }));
+
+
+test('[NANO SP] Finalization committee parameters', setupZemu('nanosp', async (sim, transport) => {
+    await finalizationCommitteeParameters(sim, transport, 'nanosp_finalization_committee_parameters');
+}));

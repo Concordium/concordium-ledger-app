@@ -1,4 +1,4 @@
-# Update timeout parameters
+# Update finalization committee parameters
 
 Used for updating the finalization committee parameters. This controls how many finalizers there are, and how much relative stake is required to be part of the finalization committee.
 

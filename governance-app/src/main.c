@@ -168,7 +168,7 @@ void handler(
                         handleSignUpdateBlockEnergyLimit(cdata, flags);
                         break;
                     case INS_UPDATE_FINALIZATION_COMMITTEE_PARAMETERS:
-                        handleSignUpdateFinalizationCommitteeParameters(cdata, &flags);
+                        handleSignUpdateFinalizationCommitteeParameters(cdata, flags);
                         break;
                     default:
                         THROW(ERROR_INVALID_INSTRUCTION);
