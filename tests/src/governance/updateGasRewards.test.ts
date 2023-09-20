@@ -12,7 +12,7 @@ async function updateGasRewards(sim: Zemu, transport: Transport) {
     await sim.clickRight();
     await sim.clickBoth();
     await expect(tx).resolves.toEqual(
-        Buffer.from('e4e0bd1d1f565362172004c0ff45a7c3468bee69f3344ff9d4b8bdf9b3538d0212103243014a6f28df0262aba42ec43c2e53dc1de3e5b0cab7588ab498a5a5019000', 'hex'),
+        Buffer.from('6de9e500bdd742b37923055f4e22c00124692395fa39ac5f178a53fc2ab66a3c7aef896d6b7e31a1a133f656fbc35a7e0cea365dbc120a80667c0ee4e7dd7d059000', 'hex'),
     );
 }
 
