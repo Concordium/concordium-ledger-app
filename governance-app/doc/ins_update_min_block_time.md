@@ -1,4 +1,4 @@
-# Update timeout parameters
+# Update minimum block time
 
 Used for updating the minimum block time.
 

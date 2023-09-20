@@ -158,7 +158,7 @@ void handler(
                         handleSignTimeoutParameters(cdata, flags);
                         break;
                     case INS_UPDATE_MIN_BLOCK_TIME:
-                        handleSignMinBlockTime(cdata, &flags);
+                        handleSignMinBlockTime(cdata, flags);
                         break;
                     default:
                         THROW(ERROR_INVALID_INSTRUCTION);
