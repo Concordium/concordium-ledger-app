@@ -163,7 +163,7 @@ void handler(
                         handleSignMinBlockTime(cdata, flags);
                         break;
                     case INS_UPDATE_BLOCK_ENERGY_LIMIT:
-                        handleSignUpdateBlockEnergyLimit(cdata, &flags);
+                        handleSignUpdateBlockEnergyLimit(cdata, flags);
                         break;
                     default:
                         THROW(ERROR_INVALID_INSTRUCTION);
