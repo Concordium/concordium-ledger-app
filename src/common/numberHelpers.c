@@ -30,6 +30,19 @@ size_t numberToText(uint8_t *dst, size_t dstLength, uint64_t number) {
     return len;
 }
 
+size_t numberToTextWithUnit(uint8_t *dst, size_t dstLength, uint64_t number, uint8_t *unit, size_t unitLength) {
+    size_t len = numberToText(dst, dstLength, number);
+
+    if (dstLength - len < unitLength + 2) {
+        THROW(ERROR_BUFFER_OVERFLOW);
+    }
+    memmove(dst + len, " ", 1);
+    memmove(dst + len + 1, unit, unitLength);
+    memmove(dst + len + 1 + unitLength, "\0", 1);
+
+    return len + unitLength + 2;
+}
+
 size_t bin2dec(uint8_t *dst, size_t dstLength, uint64_t number) {
     size_t characterLength = numberToText(dst, dstLength, number);
     if (dstLength < characterLength + 1) {

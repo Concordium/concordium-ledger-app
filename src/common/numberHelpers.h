@@ -25,6 +25,16 @@ size_t amountToGtuDisplay(uint8_t *dst, size_t dstLength, uint64_t microGtuAmoun
 size_t numberToText(uint8_t *dst, size_t dstLength, uint64_t number);
 
 /**
+ * Helper methods that writes the input integer to a format that the device
+ * can display on screen. The integer is postfixed with a unit and is string terminated.
+ * @param dst where to write the text representation of the integer and the unit
+ * @param dstLength the number of bytes that may be written to 'dst'
+ * @param number the integer to convert to characters
+ * @return number of bytes written to 'dst'
+ */
+size_t numberToTextWithUnit(uint8_t *dst, size_t dstLength, uint64_t number, uint8_t *unit, size_t unitLength);
+
+/**
  * Helper method that writes the input integer to a format that the device can
  * display on the screen.
  * @param dst where to write the text representation of the integer
