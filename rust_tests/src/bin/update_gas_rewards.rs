@@ -20,8 +20,6 @@ fn main() {
     command_data.append(&mut account_creation_gas);
     command_data.append(&mut chain_update_gas);
 
-    println!("{}", hex::encode(&command_data));
-
     let command = ApduCommand {
         cla: 224,   // Has to be this value for all commands.
         ins: 35,    // Sign GAS rewards update
