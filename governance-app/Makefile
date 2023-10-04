@@ -32,6 +32,8 @@ endif
 # Main app configuration
 APPNAME = CCDGovernance
 
+APP_FILE_NAME = concordium-governance-ledger-app
+
 # Version must be no greater than 99.99.999, otherwise
 # extra memory must be allocated in menu.c.
 APPVERSION_MAJOR=1
