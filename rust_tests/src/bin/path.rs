@@ -1,7 +1,14 @@
 use hex;
 
+pub fn generate_testnet_key_derivation_path() -> Vec<u8> {
+    generate_path(build_testnet_key_derivation_path())
+}
+
 pub fn generate_key_derivation_path() -> Vec<u8> {
-    let mut key_derivation_path = build_key_derivation_path();
+    generate_path(build_legacy_key_derivation_path())
+}
+
+fn generate_path(mut key_derivation_path: Vec<u8>) -> Vec<u8> {
     let key_path_length: u8 = (key_derivation_path.len() / 4) as u8;
 
     let mut result = Vec::new();
@@ -11,7 +18,37 @@ pub fn generate_key_derivation_path() -> Vec<u8> {
     return result;
 }
 
-fn build_key_derivation_path() -> Vec<u8> {
+fn build_testnet_key_derivation_path() -> Vec<u8> {
+    // Purpose = 44
+    let mut purpose = hex::decode("0000002C").unwrap();
+
+    // Coin type = 1.
+    let mut coin_type = hex::decode("00000001").unwrap();
+
+    // Identity provider
+    let mut identity_provider = hex::decode("00000000").unwrap();
+
+    // Identity
+    let mut identity = hex::decode("00000000").unwrap();
+
+    // Account index
+    let mut account_index = hex::decode("00000000").unwrap();
+
+    // Signature index
+    let mut sig_index = hex::decode("00000000").unwrap();
+
+    let mut key_derivation_path = Vec::new();
+    key_derivation_path.append(&mut purpose);
+    key_derivation_path.append(&mut coin_type);
+    key_derivation_path.append(&mut identity_provider);
+    key_derivation_path.append(&mut identity);
+    key_derivation_path.append(&mut account_index);
+    key_derivation_path.append(&mut sig_index);
+
+    return key_derivation_path;
+}
+
+fn build_legacy_key_derivation_path() -> Vec<u8> {
     // Purpose = 1105.
     let mut purpose = hex::decode("00000451").unwrap();
 
@@ -48,6 +85,7 @@ fn build_key_derivation_path() -> Vec<u8> {
 
     return key_derivation_path;
 }
+
 
 #[allow(dead_code)]
 fn main() { }

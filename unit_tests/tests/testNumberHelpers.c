@@ -218,6 +218,14 @@ static void test_toPaginatedHex() {
     assert_string_equal(text, "ab221f4853ab221d 4853221d1f48221d 1f48221d1f48");
 }
 
+static void test_toPaginatedHex_255_length() {
+    char text[256];
+    text[255] = 1;
+    uint8_t bytes[] = {171, 34, 31, 72, 83, 171, 34, 29, 72, 83, 34, 29, 31, 72, 34, 29, 31, 72, 34, 29, 31, 72, 171, 34, 31, 72, 83, 171, 34, 29, 72, 83, 34, 29, 31, 72, 34, 29, 31, 72, 34, 29, 31, 42, 171, 34, 31, 72, 83, 171, 34, 29, 72, 83, 34, 29, 31, 72, 34, 29, 31, 72, 34, 29, 31, 72, 171, 34, 31, 72, 83, 171, 34, 29, 72, 83, 34, 29, 31, 72, 34, 29, 31, 72, 34, 29, 31, 42, 171, 34, 31, 72, 83, 171, 34, 29, 72, 83, 34, 29, 31, 72, 34, 29, 31, 72, 34, 29, 31, 72, 171, 34, 31, 72, 83, 171, 34, 29, 72, 83, 21, 21, 21};
+    toPaginatedHex(bytes, 123, text, sizeof(text) - 1);
+    assert_int_equal(text[255], 1);
+}
+
 static void test_toPaginatedHex_stops_after_given_length() {
     char text[12];
     text[11] = 100;
@@ -264,6 +272,7 @@ int main() {
         cmocka_unit_test(test_amountToGtuDisplay_zero),
         cmocka_unit_test(test_amountToGtuDisplay_max),
         cmocka_unit_test(test_toPaginatedHex),
+        cmocka_unit_test(test_toPaginatedHex_255_length),
         cmocka_unit_test(test_toPaginatedHex_stops_after_given_length),
         cmocka_unit_test(test_toPaginatedHex_does_not_have_trailing_space),
         cmocka_unit_test(test_toPaginatedHex_inserts_white_space),
