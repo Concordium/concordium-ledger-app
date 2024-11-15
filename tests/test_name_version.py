@@ -12,4 +12,4 @@ def test_get_app_and_version(backend, backend_name):
     app_name, version = unpack_get_app_and_version_response(response.data)
 
     assert app_name == "Concordium"
-    assert version == "2.1.0"
+    assert version == "5.0.0"

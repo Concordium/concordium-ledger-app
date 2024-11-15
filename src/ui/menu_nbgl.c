@@ -1,7 +1,7 @@
 
 /*****************************************************************************
  *   Ledger App Concordium.
- *   (c) 2020 Ledger SAS.
+ *   (c) 2024 Concordium.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ void app_quit(void) {
 //  -----------------------------------------------------------
 #define SETTING_INFO_NB 2
 static const char* const INFO_TYPES[SETTING_INFO_NB] = {"Version", "Developer"};
-static const char* const INFO_CONTENTS[SETTING_INFO_NB] = {APPVERSION, "Ledger"};
+static const char* const INFO_CONTENTS[SETTING_INFO_NB] = {APPVERSION, "Blooo"};
 
 // settings switches definitions
 enum { DUMMY_SWITCH_1_TOKEN = FIRST_USER_TOKEN, DUMMY_SWITCH_2_TOKEN };
