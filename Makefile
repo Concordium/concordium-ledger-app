@@ -28,9 +28,9 @@ include $(BOLOS_SDK)/Makefile.defines
 APPNAME = "Concordium"
 
 # Application version
-APPVERSION_M = 4
-APPVERSION_N = 1
-APPVERSION_P = 3
+APPVERSION_M = 5
+APPVERSION_N = 0
+APPVERSION_P = 0
 APPVERSION = "$(APPVERSION_M).$(APPVERSION_N).$(APPVERSION_P)"
 
 # Application source files
