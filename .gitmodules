@@ -1,6 +1,0 @@
-[submodule "ledger-secure-sdk"]
-	path = ledger-secure-sdk
-	url = https://github.com/LedgerHQ/ledger-secure-sdk
-[submodule "nanos-secure-sdk"]
-	path = nanos-secure-sdk
-	url = https://github.com/LedgerHQ/nanos-secure-sdk.git
