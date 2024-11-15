@@ -9,7 +9,8 @@ from ragger.navigator import NavInsID, NavIns
 
 # In this test we check that the GET_PUBLIC_KEY works in non-confirmation mode
 def test_get_public_key_no_confirm(backend):
-    for path in ["m/44'/1'/0'/0/0", "m/44'/1'/0/0/0", "m/44'/1'/911'/0/0", "m/44'/1'/255/255/255", "m/44'/1'/2147483647/0/0/0/0/0/0/0"]:
+    for path in ["m/44'/919'/0'/0/0", "m/44'/919'/0/0/0", "m/44'/919'/911'/0/0", "m/44'/919'/255/255/255", "m/44'/919'/2147483647/0/0/0/0/0/0/0",
+                 "m/1105'/0'/0'/0/0", "m/1105'/0'/0/0/0", "m/1105'/0'/911'/0/0", "m/1105'/0'/255/255/255", "m/1105'/0'/2147483647/0/0/0/0/0/0/0"]:
         client = BoilerplateCommandSender(backend)
         response = client.get_public_key(path=path).data
         _, public_key, _, chain_code = unpack_get_public_key_response(response)
@@ -22,7 +23,7 @@ def test_get_public_key_no_confirm(backend):
 # In this test we check that the GET_PUBLIC_KEY works in confirmation mode
 def test_get_public_key_confirm_accepted(backend, scenario_navigator):
     client = BoilerplateCommandSender(backend)
-    path = "m/44'/1'/0'/0/0"
+    path = "m/44'/919'/0'/0/0"
     with client.get_public_key_with_confirmation(path=path):
         scenario_navigator.address_review_approve()
 
@@ -37,7 +38,7 @@ def test_get_public_key_confirm_accepted(backend, scenario_navigator):
 # In this test we check that the GET_PUBLIC_KEY in confirmation mode replies an error if the user refuses
 def test_get_public_key_confirm_refused(backend, scenario_navigator):
     client = BoilerplateCommandSender(backend)
-    path = "m/44'/1'/0'/0/0"
+    path = "m/44'/919'/0'/0/0"
 
     with pytest.raises(ExceptionRAPDU) as e:
         with client.get_public_key_with_confirmation(path=path):
