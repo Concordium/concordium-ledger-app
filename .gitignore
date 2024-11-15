@@ -1,33 +1,34 @@
-/obj
-/obj_nano*
-/debug
-/debug_nano*
-/bin
-/dep
-/dep_nano*
-/build
-/gen_src_nano*
-/src/glyphs.c
-/src/glyphs.h
-/output-scan-build
-/scan-build
-concordium-ledger-app-*
-.vscode
-.idea
-**/target/
-*.lock
-/tests/node_modules
-/tests/*.eslintcache
-.eslintcache
-/tests/bin
-/tests/snapshots-tmp
-/unit_tests/build
-/unit_tests/coverage
-/unit_tests/coverage*
-/governance-app/src/glyphs.c
-/governance-app/src/glyphs.h
-/governance-app/build
-/governance-app/dep*
-/governance-app/obj*
-/governance-app/debug*
-/governance-app/bin
+# Compilation files of the application
+build/
+
+# Legacy compilation output
+bin/
+debug/
+
+# Temporary directory with snapshots taken during test runs
+tests/snapshots-tmp/
+
+# Unit tests and code coverage
+unit-tests/build/
+unit-tests/coverage/
+unit-tests/coverage.info
+
+# Fuzzing
+fuzzing/build/
+fuzzing/corpus/
+fuzzing/out/
+
+# Python
+*.pyc[cod]
+*.egg
+__pycache__/
+*.egg-info/
+.eggs/
+.python-version
+
+# Doxygen
+doc/html
+doc/latex
+
+# Virtual env for sideload (macOS and Windows)
+ledger/
