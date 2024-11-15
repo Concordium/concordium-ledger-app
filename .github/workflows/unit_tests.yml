@@ -17,6 +17,11 @@ jobs:
       image: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder-lite:latest
 
     steps:
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gpg
+      
       - name: Clone
         uses: actions/checkout@v3
 
