@@ -17,6 +17,7 @@ jobs:
       image: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder-lite:latest
 
     steps:
+      
       - name: Clone
         uses: actions/checkout@v3
 
@@ -52,6 +53,8 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./unit-tests/coverage.info
           flags: unittests
-          name: codecov-app-boilerplate
+          name: codecov-app-concordium
           fail_ci_if_error: true
           verbose: true
+        env:
+          CODECOV_DEBUG: true

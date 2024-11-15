@@ -1,5 +1,5 @@
 /*****************************************************************************
- *   Ledger App Boilerplate.
+ *   Ledger App Concordium.
  *   (c) 2020 Ledger SAS.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -153,7 +153,7 @@ int ui_display_transaction() {
                       EXPONENT_SMALLEST_UNIT)) {
         return io_send_sw(SW_DISPLAY_AMOUNT_FAIL);
     }
-    snprintf(g_amount, sizeof(g_amount), "BOL %.*s", sizeof(amount), amount);
+    snprintf(g_amount, sizeof(g_amount), "CCD %.*s", sizeof(amount), amount);
     PRINTF("Amount: %s\n", g_amount);
 
     memset(g_address, 0, sizeof(g_address));
