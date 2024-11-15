@@ -28,9 +28,9 @@ include $(BOLOS_SDK)/Makefile.defines
 APPNAME = "Concordium"
 
 # Application version
-APPVERSION_M = 2
+APPVERSION_M = 4
 APPVERSION_N = 1
-APPVERSION_P = 0
+APPVERSION_P = 3
 APPVERSION = "$(APPVERSION_M).$(APPVERSION_N).$(APPVERSION_P)"
 
 # Application source files
@@ -56,7 +56,8 @@ CURVE_APP_LOAD_PARAMS = secp256k1
 # and SLIP-0044 standards.
 # If your app needs it, you can specify multiple path by using:
 # `PATH_APP_LOAD_PARAMS = "44'/1'" "45'/1'"`
-PATH_APP_LOAD_PARAMS = "44'/1'"   # purpose=coin(44) / coin_type=Testnet(1)
+# purpose=coin(44) / coin_type=Testnet(1)
+PATH_APP_LOAD_PARAMS = "44'/919'" "1105'/0'"
 
 # Setting to allow building variant applications
 # - <VARIANT_PARAM> is the name of the parameter which should be set
