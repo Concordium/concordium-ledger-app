@@ -47,19 +47,12 @@ jobs:
           name: code-coverage
           path: unit-tests/coverage
 
-      - name: Upload results to Codecov
+      - name: Upload to codecov.io
         uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          slug: blooo-io/concordium-ledger-app
-
-
-#      - name: Upload to codecov.io
-#        uses: codecov/codecov-action@v3
-#        with:
-#          token: ${{ secrets.CODECOV_TOKEN }}
-#          files: ./unit-tests/coverage.info
-#          flags: unittests
-#          name: blooo-io/concordium-ledger-app
-#          fail_ci_if_error: true
-#          verbose: true
+          files: ./unit-tests/coverage.info
+          flags: unittests
+          name: codecov-app-boilerplate
+          fail_ci_if_error: true
+          verbose: true
