@@ -76,7 +76,7 @@ int ui_display_transaction_bs_choice(bool is_blind_signed) {
                       EXPONENT_SMALLEST_UNIT)) {
         return io_send_sw(SW_DISPLAY_AMOUNT_FAIL);
     }
-    snprintf(g_amount, sizeof(g_amount), "BOL %.*s", sizeof(amount), amount);
+    snprintf(g_amount, sizeof(g_amount), "CCD %.*s", sizeof(amount), amount);
     memset(g_address, 0, sizeof(g_address));
 
     if (format_hex(G_context.tx_info.transaction.to, ADDRESS_LEN, g_address, sizeof(g_address)) ==
@@ -100,9 +100,9 @@ int ui_display_transaction_bs_choice(bool is_blind_signed) {
         nbgl_useCaseReviewBlindSigning(TYPE_TRANSACTION,
                                        &pairList,
                                        &C_app_concordium_64px,
-                                       "Review transaction\nto send BOL",
+                                       "Review transaction\nto send CCD",
                                        NULL,
-                                       "Sign transaction\nto send BOL",
+                                       "Sign transaction\nto send CCD",
                                        NULL,
                                        review_choice);
     } else {
@@ -110,9 +110,9 @@ int ui_display_transaction_bs_choice(bool is_blind_signed) {
         nbgl_useCaseReview(TYPE_TRANSACTION,
                            &pairList,
                            &C_app_concordium_64px,
-                           "Review transaction\nto send BOL",
+                           "Review transaction\nto send CCD",
                            NULL,
-                           "Sign transaction\nto send BOL",
+                           "Sign transaction\nto send CCD",
                            review_choice);
     }
 

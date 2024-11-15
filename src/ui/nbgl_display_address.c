@@ -67,7 +67,7 @@ int ui_display_address() {
     nbgl_useCaseAddressReview(g_address,
                               NULL,
                               &C_app_concordium_64px,
-                              "Verify BOL address",
+                              "Verify CCD address",
                               NULL,
                               review_choice);
     return 0;
