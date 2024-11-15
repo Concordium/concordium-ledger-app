@@ -56,3 +56,5 @@ jobs:
           name: codecov-app-boilerplate
           fail_ci_if_error: true
           verbose: true
+        env:
+          CODECOV_DEBUG: true
