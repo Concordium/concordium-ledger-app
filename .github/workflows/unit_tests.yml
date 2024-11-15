@@ -51,10 +51,6 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           slug: blooo-io/concordium-ledger-app
-          files: ./unit-tests/coverage.info
-          flags: unittests
-          fail_ci_if_error: true
-          verbose: true
 
 
 #      - name: Upload to codecov.io
