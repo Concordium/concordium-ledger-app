@@ -53,7 +53,7 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./unit-tests/coverage.info
           flags: unittests
-          name: codecov-app-boilerplate
+          name: codecov-app-concordium
           fail_ci_if_error: true
           verbose: true
         env:

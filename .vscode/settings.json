@@ -6,4 +6,7 @@
     "editor.formatOnSave": false,
     "python.terminal.activateEnvironment": false,
     "git.ignoreLimitWarning": true,
+    "ledgerDevTools.appSettings": {
+        "selectedUseCase": "release"
+    },
 }

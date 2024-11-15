@@ -1,5 +1,5 @@
 /*****************************************************************************
- *   Ledger App Boilerplate.
+ *   Ledger App Concordium.
  *   (c) 2020 Ledger SAS.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -99,7 +99,7 @@ int ui_display_transaction_bs_choice(bool is_blind_signed) {
         // Start blind-signing review flow
         nbgl_useCaseReviewBlindSigning(TYPE_TRANSACTION,
                                        &pairList,
-                                       &C_app_boilerplate_64px,
+                                       &C_app_concordium_64px,
                                        "Review transaction\nto send BOL",
                                        NULL,
                                        "Sign transaction\nto send BOL",
@@ -109,7 +109,7 @@ int ui_display_transaction_bs_choice(bool is_blind_signed) {
         // Start review flow
         nbgl_useCaseReview(TYPE_TRANSACTION,
                            &pairList,
-                           &C_app_boilerplate_64px,
+                           &C_app_concordium_64px,
                            "Review transaction\nto send BOL",
                            NULL,
                            "Sign transaction\nto send BOL",
