@@ -28,6 +28,7 @@
 #include "../types.h"
 #include "../sw.h"
 #include "../handler/get_version.h"
+#include "../handler/verify_address.h"
 #include "../handler/get_app_name.h"
 #include "../handler/get_public_key.h"
 #include "../handler/sign_tx.h"
@@ -54,6 +55,19 @@ int apdu_dispatcher(const command_t *cmd) {
             }
 
             return handler_get_app_name();
+
+        case VERIFY_ADDRESS:
+            if (cmd->p1 != 0 || cmd->p2 != 0) {
+                return io_send_sw(SW_WRONG_P1P2);
+            }
+            if (!cmd->data) {
+                return io_send_sw(SW_WRONG_DATA_LENGTH);
+            }
+            buf.ptr = cmd->data;
+            buf.size = cmd->lc;
+            buf.offset = 0;
+            return handler_verify_address(&buf);
+
         case GET_PUBLIC_KEY:
             if (cmd->p1 > 1 || cmd->p2 > 0) {
                 return io_send_sw(SW_WRONG_P1P2);

@@ -12,6 +12,15 @@
 void validate_pubkey(bool choice);
 
 /**
+ * Action for verify address validation.
+ *
+ * @param[in] choice
+ *   User choice (either approved or rejected).
+ *
+ */
+void validate_verify_address(bool choice);
+
+/**
  * Action for transaction information validation.
  *
  * @param[in] choice

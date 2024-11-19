@@ -34,3 +34,53 @@
  * Exponent used to convert mCCD to CCD unit (N CCD = N * 10^3 mCCD).
  */
 #define EXPONENT_SMALLEST_UNIT 3
+
+/**
+ * Hardened offset for BIP32 path.
+ */
+#define HARDENED_OFFSET 0x80000000
+
+/**
+ * Maximum length of BIP32 path. Ex: m/44'/501'/0'/0/0/0
+ */
+#define MAX_BIP32_PATH 6
+
+/**
+ * BIP44 purpose value for legacy derivation paths.
+ */
+#define LEGACY_PURPOSE 1105
+
+/**
+ * Coin type value for Concordium in legacy derivation paths.
+ */
+#define LEGACY_COIN_TYPE 0
+
+/**
+ * Account subtree index for legacy derivation paths.
+ */
+#define LEGACY_ACCOUNT_SUBTREE 0
+
+/**
+ * Normal account index used in legacy derivation paths.
+ */
+#define LEGACY_NORMAL_ACCOUNT 0
+
+/**
+ * PRF key index used in legacy derivation paths.
+ */
+#define LEGACY_PRF_KEY_INDEX 1
+
+/**
+ * Length of the credential ID.
+ */
+#define CREDENTIAL_ID_LEN 48
+
+/**
+ * Length of the address.
+ */
+#define CONCORDIUM_ADDRESS_LEN 32
+
+/**
+ * Concordium version byte.
+ */
+#define CONCORDIUM_VERSION_BYTE 1
