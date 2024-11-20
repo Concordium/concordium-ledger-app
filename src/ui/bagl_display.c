@@ -164,11 +164,7 @@ int ui_display_verify_address() {
 
     memset(g_verify_address, 0, sizeof(g_verify_address));
 
-    PRINTF("Address: %s\n", G_context.verify_address_info.address);
-
     memcpy(g_verify_address, G_context.verify_address_info.address, sizeof(g_verify_address));
-
-    PRINTF("Verify Address: %s\n", g_verify_address);
 
     g_validate_callback = &ui_action_validate_verify_address;
 

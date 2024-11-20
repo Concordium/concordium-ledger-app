@@ -37,42 +37,69 @@
 #include "../menu.h"
 
 // TODO: IMPLEMENT THE WHOLE FLOW
+// Buffer where the transaction amount string is written
+static char g_verify_address_data[14];
+// Buffer where the transaction address string is written
+static char g_address[57];
 
+static nbgl_layoutTagValue_t pairs[2];
+static nbgl_layoutTagValueList_t pairList;
 
-// static char g_address[43];
 
 static void review_choice(bool confirm) {
-    // // Answer, display a status page and go back to main
-    // validate_pubkey(confirm);
-    // if (confirm) {
-    //     nbgl_useCaseReviewStatus(STATUS_TYPE_ADDRESS_VERIFIED, ui_menu_main);
-    // } else {
-    //     nbgl_useCaseReviewStatus(STATUS_TYPE_ADDRESS_REJECTED, ui_menu_main);
-    // }
+    // Answer, display a status page and go back to main
+    validate_verify_address(confirm);
+    if (confirm) {
+        nbgl_useCaseReviewStatus(STATUS_TYPE_ADDRESS_VERIFIED, ui_menu_main);
+    } else {
+        nbgl_useCaseReviewStatus(STATUS_TYPE_ADDRESS_REJECTED, ui_menu_main);
+    }
 }
 
 int ui_display_verify_address() {
-    // if (G_context.req_type != CONFIRM_ADDRESS || G_context.state != STATE_NONE) {
-    //     G_context.state = STATE_NONE;
-    //     return io_send_sw(SW_BAD_STATE);
-    // }
+    if (G_context.req_type != CONFIRM_ADDRESS || G_context.state != STATE_NONE) {
+        G_context.state = STATE_NONE;
+        return io_send_sw(SW_BAD_STATE);
+    }
 
-    // memset(g_address, 0, sizeof(g_address));
-    // uint8_t address[ADDRESS_LEN] = {0};
-    // if (!address_from_pubkey(G_context.pk_info.raw_public_key, address, sizeof(address))) {
-    //     return io_send_sw(SW_DISPLAY_ADDRESS_FAIL);
-    // }
+    // Format the identity index and credential counter
+    char identity_index[10];
+    char credential_counter[10];
+    char verify_address_data[14];
+    snprintf(identity_index, sizeof(identity_index), "%u", G_context.verify_address_info.identity_index);
+    snprintf(credential_counter, sizeof(credential_counter), "%u", G_context.verify_address_info.credential_counter);
 
-    // if (format_hex(address, sizeof(address), g_address, sizeof(g_address)) == -1) {
-    //     return io_send_sw(SW_DISPLAY_ADDRESS_FAIL);
-    // }
+    snprintf(verify_address_data,
+            sizeof(verify_address_data),
+            "%s/%s",
+            identity_index,
+            credential_counter);
 
-    // nbgl_useCaseAddressReview(g_address,
-    //                           NULL,
-    //                           &C_app_concordium_64px,
-    //                           "Verify CCD address",
-    //                           NULL,
-    //                           review_choice);
+    memset(g_address, 0, sizeof(g_address));
+
+    memcpy(g_address, G_context.verify_address_info.address, sizeof(g_address));
+
+    // Setup data to display
+    pairs[0].item = "Verify Address";
+    pairs[0].value = verify_address_data;
+    pairs[1].item = "Address";
+    pairs[1].value = g_address;
+
+    // Setup list
+    pairList.nbMaxLinesForValue = 0;
+    pairList.nbPairs = 2;
+    pairList.pairs = pairs;
+
+
+    // Start review flow
+    nbgl_useCaseReview(TYPE_OPERATION,
+                        &pairList,
+                        &C_app_concordium_64px,
+                        "Verify Address",
+                        NULL,
+                        "Confirm",
+                        review_choice);
+
     return 0;
 }
 
