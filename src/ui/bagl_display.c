@@ -152,23 +152,21 @@ int ui_display_verify_address() {
     char identity_index[10];
     char credential_counter[10];
 
-    // TODO: fix format_hex is not working
-    // format_hex(G_context.verify_address_info.identity_index, 4, identity_index, sizeof(identity_index));
-    // format_hex(G_context.verify_address_info.credential_counter, 4, credential_counter, sizeof(credential_counter));
-    // snprintf(g_verify_address_data,
-    //          sizeof(g_verify_address_data),
-    //          "%s/%s",
-    //          identity_index,
-    //          credential_counter);
-
+    // Use snprintf directly for uint32_t values
+    snprintf(identity_index, sizeof(identity_index), "%u", G_context.verify_address_info.identity_index);
+    snprintf(credential_counter, sizeof(credential_counter), "%u", G_context.verify_address_info.credential_counter);
+    
+    snprintf(g_verify_address_data,
+             sizeof(g_verify_address_data),
+             "%s/%s",
+             identity_index,
+             credential_counter);
 
     memset(g_verify_address, 0, sizeof(g_verify_address));
 
     PRINTF("Address: %s\n", G_context.verify_address_info.address);
 
-    if(format_hex(G_context.verify_address_info.address, ADDRESS_LEN, g_verify_address, sizeof(g_verify_address)) == -1) {
-        return io_send_sw(SW_VERIFY_ADDRESS_FAIL);
-    }
+    memcpy(g_verify_address, G_context.verify_address_info.address, sizeof(g_verify_address));
 
     PRINTF("Verify Address: %s\n", g_verify_address);
 

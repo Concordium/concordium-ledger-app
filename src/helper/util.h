@@ -34,11 +34,11 @@ int address_to_base58(const uint8_t *address, size_t address_len, char *encoded_
  *
  * @param[in] path          Pointer to the BIP32 path
  * @param[in] path_len      Length of the BIP32 path
- * @param[out] private_key  Buffer to store the derived private key (32 bytes)
+ * @param[out] private_key  Pointer to the private key
  *
  * @return 0 on success, -1 on error
  */
-int get_private_key_from_path(uint32_t *path, size_t path_len, uint8_t *private_key);
+int get_private_key_from_path(uint32_t *path, size_t path_len, cx_ecfp_private_key_t *private_key);
 
 /**
  * Generate a BLS private key from a seed.

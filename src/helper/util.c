@@ -35,7 +35,7 @@ int address_to_base58(const uint8_t *address, size_t address_len, char *encoded_
   return rtn;
 }
 
-int get_private_key_from_path(uint32_t *path, size_t path_len, uint8_t *private_key) {
+int get_private_key_from_path(uint32_t *path, size_t path_len, cx_ecfp_private_key_t *private_key) {
   int rtn = 0;
   uint8_t private_key_data[64];
   if(os_derive_bip32_with_seed_no_throw(HDW_ED25519_SLIP10,
@@ -91,16 +91,16 @@ int bls_key_gen_from_seed(uint8_t *seed, size_t seed_len, uint8_t *private_key, 
 }
 
 int get_bls_private_key(uint32_t *path, size_t path_len, uint8_t *private_key, size_t private_key_len) {
-  uint8_t private_key_seed[32];
+  cx_ecfp_private_key_t private_key_seed;
 
-  if(get_private_key_from_path(path, path_len, private_key_seed) == -1) {
+  if(get_private_key_from_path(path, path_len, &private_key_seed) == -1) {
     return -1;
   }
 
-  if(bls_key_gen_from_seed(private_key_seed, sizeof(private_key_seed), private_key, private_key_len) == -1) {
+  if(bls_key_gen_from_seed(private_key_seed.d, sizeof(private_key_seed.d), private_key, private_key_len) == -1) {
     return -1;
   }
 
-  explicit_bzero(private_key_seed, sizeof(private_key_seed));
+  explicit_bzero(&private_key_seed, sizeof(private_key_seed));
   return 0;
 }
