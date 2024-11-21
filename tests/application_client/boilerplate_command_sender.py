@@ -25,6 +25,7 @@ class P2(IntEnum):
     P2_MORE = 0x80
 
 class InsType(IntEnum):
+    VERIFY_ADDRESS = 0x00
     GET_VERSION    = 0x03
     GET_APP_NAME   = 0x04
     GET_PUBLIC_KEY = 0x05
@@ -95,6 +96,16 @@ class BoilerplateCommandSender:
                                          p1=P1.P1_CONFIRM,
                                          p2=P2.P2_LAST,
                                          data=pack_derivation_path(path)) as response:
+            yield response
+
+    @contextmanager
+    def verify_address(self, identity_index: int, credential_counter: int) -> Generator[None, None, None]:
+        data = identity_index.to_bytes(4, byteorder='big') + credential_counter.to_bytes(4, byteorder='big')
+        with self.backend.exchange_async(cla=CLA,
+                                         ins=InsType.VERIFY_ADDRESS,
+                                         p1=P1.P1_START,
+                                         p2=P2.P2_LAST,
+                                         data=data) as response:
             yield response
 
 
