@@ -65,12 +65,11 @@ int ui_display_verify_address() {
     // Format the identity index and credential counter
     char identity_index[10];
     char credential_counter[10];
-    char verify_address_data[14];
     snprintf(identity_index, sizeof(identity_index), "%u", G_context.verify_address_info.identity_index);
     snprintf(credential_counter, sizeof(credential_counter), "%u", G_context.verify_address_info.credential_counter);
 
-    snprintf(verify_address_data,
-            sizeof(verify_address_data),
+    snprintf(g_verify_address_data,
+            sizeof(g_verify_address_data),
             "%s/%s",
             identity_index,
             credential_counter);
@@ -81,7 +80,7 @@ int ui_display_verify_address() {
 
     // Setup data to display
     pairs[0].item = "Verify Address";
-    pairs[0].value = verify_address_data;
+    pairs[0].value = g_verify_address_data;
     pairs[1].item = "Address";
     pairs[1].value = g_address;
 
@@ -92,12 +91,12 @@ int ui_display_verify_address() {
 
 
     // Start review flow
-    nbgl_useCaseReview(TYPE_OPERATION,
+    nbgl_useCaseReviewLight(TYPE_OPERATION,
                         &pairList,
                         &C_app_concordium_64px,
                         "Verify Address",
                         NULL,
-                        "Confirm",
+                        "Verify Address",
                         review_choice);
 
     return 0;
