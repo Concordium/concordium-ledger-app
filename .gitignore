@@ -32,3 +32,6 @@ doc/latex
 
 # Virtual env for sideload (macOS and Windows)
 ledger/
+
+# macOS
+.DS_Store
