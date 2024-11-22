@@ -104,3 +104,19 @@ int get_bls_private_key(uint32_t *path, size_t path_len, uint8_t *private_key, s
   explicit_bzero(&private_key_seed, sizeof(private_key_seed));
   return 0;
 }
+
+int derivation_path_type(uint32_t *bip32_path, size_t bip32_path_len) {
+    if(bip32_path_len == 5) {
+        return 1;
+    }
+    else if(bip32_path_len == 4) {
+        return 2;
+    }
+    return 0;
+}
+
+void harden_derivation_path(uint32_t *bip32_path, size_t bip32_path_len) {
+    for(size_t i = 0; i < bip32_path_len; i++) {
+        bip32_path[i] |= HARDENED_OFFSET;
+    }
+}

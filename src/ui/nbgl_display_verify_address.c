@@ -38,7 +38,7 @@
 
 // TODO: IMPLEMENT THE WHOLE FLOW
 // Buffer where the transaction amount string is written
-static char g_verify_address_data[14];
+static char g_verify_address_data[21];
 // Buffer where the transaction address string is written
 static char g_address[57];
 
@@ -62,17 +62,26 @@ int ui_display_verify_address() {
         return io_send_sw(SW_BAD_STATE);
     }
 
-    // Format the identity index and credential counter
+   char idp_index[10];
     char identity_index[10];
     char credential_counter[10];
+
+    if(G_context.verify_address_info.idp_index != 0xffffffff) {
+        // Format the idp index
+        snprintf(idp_index, sizeof(idp_index), "%u", G_context.verify_address_info.idp_index);
+        // Prepend the idp index to the address data
+        strncpy(g_verify_address_data, idp_index, sizeof(idp_index));
+        strncat(g_verify_address_data, "/", sizeof(g_verify_address_data) - strlen(g_verify_address_data));
+    }
+
+    // Use snprintf directly for uint32_t values
     snprintf(identity_index, sizeof(identity_index), "%u", G_context.verify_address_info.identity_index);
     snprintf(credential_counter, sizeof(credential_counter), "%u", G_context.verify_address_info.credential_counter);
 
-    snprintf(g_verify_address_data,
-            sizeof(g_verify_address_data),
-            "%s/%s",
-            identity_index,
-            credential_counter);
+    strncat(g_verify_address_data, identity_index, sizeof(g_verify_address_data) - strlen(g_verify_address_data));
+    strncat(g_verify_address_data, "/", sizeof(g_verify_address_data) - strlen(g_verify_address_data));
+    strncat(g_verify_address_data, credential_counter, sizeof(g_verify_address_data) - strlen(g_verify_address_data));
+
 
     memset(g_address, 0, sizeof(g_address));
 

@@ -94,34 +94,54 @@ end:
     return error;
 }
 
-int handler_verify_address(buffer_t *cdata) {
+int handler_verify_address(buffer_t *cdata, bool is_new_address) {
     // Reset context
     explicit_bzero(&G_context, sizeof(G_context));
     G_context.req_type = CONFIRM_ADDRESS;
     G_context.state = STATE_NONE;
 
-    // Check the data length
-    PRINTF("cdata->size: %d\n", cdata->size);
-    if (cdata->size != 8 ||
-        // Read the identity index and credential counter
+    if(cdata->size != 8 && cdata->size != 12) {
+        return io_send_sw(SW_WRONG_DATA_LENGTH);
+    }
+    // Set the idp index to 0xffffffff
+    G_context.verify_address_info.idp_index = 0xffffffff;
+    // Read the idp index if it is a new address
+    if(is_new_address) {
+        if(!buffer_read_u32(cdata, &G_context.verify_address_info.idp_index, BE)) {
+            return io_send_sw(SW_WRONG_DATA_LENGTH);
+        }
+    }
+
+    // Read the identity index and credential counter
+    if (
         !buffer_read_u32(cdata, &G_context.verify_address_info.identity_index, BE) ||
         !buffer_read_u32(cdata, &G_context.verify_address_info.credential_counter, BE)) {
         return io_send_sw(SW_WRONG_DATA_LENGTH);
     }
 
-    uint32_t prf_key_path[MAX_BIP32_PATH] = {
-        LEGACY_PURPOSE | HARDENED_OFFSET,
-        LEGACY_COIN_TYPE | HARDENED_OFFSET,
-        LEGACY_ACCOUNT_SUBTREE | HARDENED_OFFSET,
-        LEGACY_NORMAL_ACCOUNT | HARDENED_OFFSET,
-        G_context.verify_address_info.identity_index | HARDENED_OFFSET,
-        LEGACY_PRF_KEY_INDEX | HARDENED_OFFSET
-    };
+    size_t prf_key_path_len = is_new_address ? 5 : 6;
+    uint32_t prf_key_path[prf_key_path_len];
+    if(is_new_address) {
+        prf_key_path[0] = NEW_PURPOSE | HARDENED_OFFSET;
+        prf_key_path[1] = NEW_COIN_TYPE | HARDENED_OFFSET;
+        prf_key_path[2] = G_context.verify_address_info.idp_index | HARDENED_OFFSET;
+        prf_key_path[3] = G_context.verify_address_info.identity_index | HARDENED_OFFSET;
+        prf_key_path[4] = NEW_PRF_KEY | HARDENED_OFFSET;
+    }
+    else{
+        prf_key_path[0] = LEGACY_PURPOSE | HARDENED_OFFSET;
+        prf_key_path[1] = LEGACY_COIN_TYPE | HARDENED_OFFSET;
+        prf_key_path[2] = LEGACY_ACCOUNT_SUBTREE | HARDENED_OFFSET;
+        prf_key_path[3] = LEGACY_NORMAL_ACCOUNT | HARDENED_OFFSET;
+        prf_key_path[4] = G_context.verify_address_info.identity_index | HARDENED_OFFSET;
+        prf_key_path[5] = LEGACY_PRF_KEY | HARDENED_OFFSET;
+    }
+
 
     uint8_t credential_id[CREDENTIAL_ID_LEN];
     uint8_t prf_key[32];
 
-    if(get_bls_private_key(prf_key_path, 6, prf_key, sizeof(prf_key)) == -1) {
+    if(get_bls_private_key(prf_key_path, prf_key_path_len, prf_key, sizeof(prf_key)) == -1) {
         return io_send_sw(SW_VERIFY_ADDRESS_FAIL);
     }
 

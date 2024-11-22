@@ -61,6 +61,7 @@ typedef struct {
  */
 typedef struct {
     char address[57];
+    uint32_t idp_index;
     uint32_t identity_index;
     uint32_t credential_counter;
 } verify_address_ctx_t;

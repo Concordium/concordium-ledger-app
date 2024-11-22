@@ -12,10 +12,11 @@
  *
  * @param[in,out] cdata
  *   Command data with identity index and credential counter.
+ * @param[in] is_new_address: true if the new address format is used, false for the legacy address format.
  *
  * @return zero or positive integer if success, negative integer otherwise.
  */
-int handler_verify_address(buffer_t *cdata);
+int handler_verify_address(buffer_t *cdata, bool is_new_address);
 
 /**
  * Calculates the credential  ID from the given prf key and credential counter.

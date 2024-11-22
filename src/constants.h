@@ -66,9 +66,33 @@
 #define LEGACY_NORMAL_ACCOUNT 0
 
 /**
- * PRF key index used in legacy derivation paths.
+ * Legacy key indexes used in derivation paths.
  */
-#define LEGACY_PRF_KEY_INDEX 1
+enum legacy_key_indexes {
+    LEGACY_ID_CRED = 0,
+    LEGACY_PRF_KEY = 1,
+    LEGACY_SIGN_KEY = 2,
+    LEGACY_R = 3,
+    LEGACY_M0 = 4
+};
+
+/**
+ * Purpose value for new address format.
+ */
+#define NEW_PURPOSE 44
+
+/**
+ * Coin type value for new address format.
+ */
+#define NEW_COIN_TYPE 919
+
+enum new_key_indexes {
+    NEW_SIGN_KEY = 0,
+    NEW_ID_CRED = 1,
+    NEW_PRF_KEY = 2,
+    NEW_M0 = 3,
+    NEW_R = 4
+};
 
 /**
  * Length of the credential ID.
