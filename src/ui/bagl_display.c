@@ -158,9 +158,9 @@ int ui_display_verify_address() {
         // Format the idp index
         snprintf(idp_index, sizeof(idp_index), "%u", G_context.verify_address_info.idp_index);
         // Prepend the idp index to the address data
-        strncpy(temp_data, idp_index, sizeof(idp_index));
-        if(strlen(temp_data) < sizeof(temp_data)) {
-            strncat(temp_data, "/", strlen(temp_data));
+        strncpy(temp_data, idp_index, sizeof(temp_data)-1);
+        if(strlen(temp_data) < sizeof(temp_data)-1) {
+            strncat(temp_data, "/", sizeof(temp_data) - strlen(temp_data) - 1);
         }
     }
 
@@ -169,12 +169,12 @@ int ui_display_verify_address() {
     snprintf(credential_counter, sizeof(credential_counter), "%u", G_context.verify_address_info.credential_counter);
 
     if(strlen(temp_data) == 0) {
-        strncpy(temp_data, identity_index, strlen(identity_index));
+        strncpy(temp_data, identity_index, sizeof(temp_data)-1);
     } else {
-        strncat(temp_data, identity_index, strlen(temp_data));
+        strncat(temp_data, identity_index, sizeof(temp_data) - strlen(temp_data) - 1);
     }
-    strncat(temp_data, "/", strlen(temp_data));
-    strncat(temp_data, credential_counter, strlen(temp_data));
+    strncat(temp_data, "/", sizeof(temp_data) - strlen(temp_data) - 1);
+    strncat(temp_data, credential_counter, sizeof(temp_data) - strlen(temp_data) - 1);
 
     memcpy(g_verify_address_data, temp_data, strlen(temp_data));
 
