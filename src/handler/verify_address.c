@@ -7,6 +7,7 @@
 #include "../sw.h"
 #include "../helper/util.h"
 #include "../constants.h"
+#include "../ui/display.h" // For ui_display_verify_address
 
 
 // gX and gY are the coordinates of g, which is the first part of the onchainCommitmentKey.
@@ -54,7 +55,7 @@ cx_err_t get_credential_id(uint8_t *prf_key, size_t prf_key_len, uint32_t creden
     CX_CHECK(cx_ecpoint_alloc(&commitmentKey, CX_CURVE_BLS12_381_G1));
     CX_CHECK(cx_ecpoint_init(&commitmentKey, gX, sizeof(gX), gY, sizeof(gY)));
 
-    //  multipy commitmentKey with credIdExponent
+    //  multiply commitmentKey with credIdExponent
     CX_CHECK(cx_ecpoint_scalarmul_bn(&commitmentKey, credIdExponentBn));
     CX_CHECK(cx_bn_destroy(&credIdExponentBn));
 
@@ -120,21 +121,25 @@ int handler_verify_address(buffer_t *cdata, bool is_new_address) {
     }
 
     size_t prf_key_path_len = is_new_address ? 5 : 6;
-    uint32_t prf_key_path[prf_key_path_len];
+    uint32_t *prf_key_path;
     if(is_new_address) {
-        prf_key_path[0] = NEW_PURPOSE | HARDENED_OFFSET;
-        prf_key_path[1] = NEW_COIN_TYPE | HARDENED_OFFSET;
-        prf_key_path[2] = G_context.verify_address_info.idp_index | HARDENED_OFFSET;
-        prf_key_path[3] = G_context.verify_address_info.identity_index | HARDENED_OFFSET;
-        prf_key_path[4] = NEW_PRF_KEY | HARDENED_OFFSET;
+        prf_key_path = (uint32_t[5]) {
+            NEW_PURPOSE | HARDENED_OFFSET,
+            NEW_COIN_TYPE | HARDENED_OFFSET,
+            G_context.verify_address_info.idp_index | HARDENED_OFFSET,
+            G_context.verify_address_info.identity_index | HARDENED_OFFSET,
+            NEW_PRF_KEY | HARDENED_OFFSET
+        };
     }
     else{
-        prf_key_path[0] = LEGACY_PURPOSE | HARDENED_OFFSET;
-        prf_key_path[1] = LEGACY_COIN_TYPE | HARDENED_OFFSET;
-        prf_key_path[2] = LEGACY_ACCOUNT_SUBTREE | HARDENED_OFFSET;
-        prf_key_path[3] = LEGACY_NORMAL_ACCOUNT | HARDENED_OFFSET;
-        prf_key_path[4] = G_context.verify_address_info.identity_index | HARDENED_OFFSET;
-        prf_key_path[5] = LEGACY_PRF_KEY | HARDENED_OFFSET;
+        prf_key_path = (uint32_t[6]) {
+            LEGACY_PURPOSE | HARDENED_OFFSET,
+            LEGACY_COIN_TYPE | HARDENED_OFFSET,
+            LEGACY_ACCOUNT_SUBTREE | HARDENED_OFFSET,
+            LEGACY_NORMAL_ACCOUNT | HARDENED_OFFSET,
+            G_context.verify_address_info.identity_index | HARDENED_OFFSET,
+            LEGACY_PRF_KEY | HARDENED_OFFSET
+        };
     }
 
 

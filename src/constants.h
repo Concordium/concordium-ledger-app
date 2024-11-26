@@ -41,11 +41,6 @@
 #define HARDENED_OFFSET 0x80000000
 
 /**
- * Maximum length of BIP32 path. Ex: m/44'/501'/0'/0/0/0
- */
-#define MAX_BIP32_PATH 6
-
-/**
  * BIP44 purpose value for legacy derivation paths.
  */
 #define LEGACY_PURPOSE 1105

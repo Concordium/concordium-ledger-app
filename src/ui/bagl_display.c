@@ -152,21 +152,31 @@ int ui_display_verify_address() {
     char identity_index[10];
     char credential_counter[10];
 
+    char temp_data[21] = {0};
+
     if(G_context.verify_address_info.idp_index != 0xffffffff) {
         // Format the idp index
         snprintf(idp_index, sizeof(idp_index), "%u", G_context.verify_address_info.idp_index);
         // Prepend the idp index to the address data
-        strncpy(g_verify_address_data, idp_index, sizeof(idp_index));
-        strncat(g_verify_address_data, "/", sizeof(g_verify_address_data) - strlen(g_verify_address_data));
+        strncpy(temp_data, idp_index, sizeof(idp_index));
+        if(strlen(temp_data) < sizeof(temp_data)) {
+            strncat(temp_data, "/", strlen(temp_data));
+        }
     }
 
-    // Use snprintf directly for uint32_t values
+    // Turn the uint32_t values into strings
     snprintf(identity_index, sizeof(identity_index), "%u", G_context.verify_address_info.identity_index);
     snprintf(credential_counter, sizeof(credential_counter), "%u", G_context.verify_address_info.credential_counter);
 
-    strncat(g_verify_address_data, identity_index, sizeof(g_verify_address_data) - strlen(g_verify_address_data));
-    strncat(g_verify_address_data, "/", sizeof(g_verify_address_data) - strlen(g_verify_address_data));
-    strncat(g_verify_address_data, credential_counter, sizeof(g_verify_address_data) - strlen(g_verify_address_data));
+    if(strlen(temp_data) == 0) {
+        strncpy(temp_data, identity_index, strlen(identity_index));
+    } else {
+        strncat(temp_data, identity_index, strlen(temp_data));
+    }
+    strncat(temp_data, "/", strlen(temp_data));
+    strncat(temp_data, credential_counter, strlen(temp_data));
+
+    memcpy(g_verify_address_data, temp_data, strlen(temp_data));
 
     memset(g_verify_address, 0, sizeof(g_verify_address));
 

@@ -5,6 +5,7 @@
 #include <os.h>
 #include <cx.h>
 
+
 #define l_CONST        48  // ceil((3 * ceil(log2(r))) / 16)
 #define BLS_KEY_LENGTH 32
 #define SEED_LENGTH    32
@@ -18,7 +19,7 @@ int address_to_base58(const uint8_t *address, size_t address_len, char *encoded_
   }
   // 1 byte for the version + 32 bytes for the address + 4 bytes for the checksum
   size_t buffer_len = 1 + CONCORDIUM_ADDRESS_LEN + 4;
-  uint8_t buffer[buffer_len];
+  uint8_t buffer[1 + CONCORDIUM_ADDRESS_LEN + 4];
   buffer[0] = CONCORDIUM_VERSION_BYTE;
   memcpy(buffer + 1, address, CONCORDIUM_ADDRESS_LEN);
 
@@ -82,7 +83,9 @@ int bls_key_gen_from_seed(uint8_t *seed, size_t seed_len, uint8_t *private_key, 
       cx_hkdf_extract(CX_SHA256, ikm, sizeof(ikm), salt, sizeof(salt), prk);
       cx_hkdf_expand(CX_SHA256, prk, sizeof(prk), (unsigned char *) l_bytes, sizeof(l_bytes), sk, sizeof(sk));
 
-      (cx_math_modm_no_throw(sk, sizeof(sk), r, sizeof(r)));
+      if(cx_math_modm_no_throw(sk, sizeof(sk), r, sizeof(r)) != CX_OK) {
+        return -1;
+      }
   } while (cx_math_is_zero(sk, sizeof(sk)));
 
   // Skip the first 16 bytes, because they are 0 due to calculating modulo r, which is 32 bytes (and sk has 48 bytes).
@@ -106,10 +109,10 @@ int get_bls_private_key(uint32_t *path, size_t path_len, uint8_t *private_key, s
 }
 
 int derivation_path_type(uint32_t *bip32_path, size_t bip32_path_len) {
-    if(bip32_path_len == 5) {
+    if(bip32_path_len == 5 && bip32_path[0] == NEW_PURPOSE) {
         return 1;
     }
-    else if(bip32_path_len == 4) {
+    else if(bip32_path_len == 4 && bip32_path[0] == LEGACY_PURPOSE) {
         return 2;
     }
     return 0;
