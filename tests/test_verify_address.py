@@ -67,7 +67,7 @@ def test_verify_address_confirm_legacy_path_accepted(
 
 
 # In this test we check that the VERIFY ADDRESS works in confirmation mode
-def test_verify_addressß_confirm_new_path_accepted(
+def test_verify_address_confirm_new_path_accepted(
     backend, scenario_navigator, test_name, default_screenshot_path
 ):
     client = BoilerplateCommandSender(backend)
