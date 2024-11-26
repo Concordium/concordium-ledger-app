@@ -5,4 +5,4 @@ devices = ["nanox", "nanos+", "stax", "flex"]
 
 [tests]
 unit_directory = "./unit-tests/"
-pytest_directory = "./tests/test_verify_address.py"
+pytest_directory = "./tests/"
