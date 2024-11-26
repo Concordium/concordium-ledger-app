@@ -10,22 +10,31 @@ from ragger.navigator import NavInsID, NavIns
 
 
 # In this test we check that the VERIFY ADDRESS works in confirmation mode
-def test_verify_address_confirm_accepted(backend, scenario_navigator):
+def test_verify_address_confirm_legacy_path_accepted(backend, scenario_navigator):
     client = BoilerplateCommandSender(backend)
     with client.verify_address(identity_index=0, credential_counter=0):
         scenario_navigator.review_approve()
 
-    response = client.get_async_response().data
-    print(response)
-    assert(response == b"9000")
+    response = client.get_async_response().status
+    assert(response == 0x9000)
+
+# In this test we check that the VERIFY ADDRESS works in confirmation mode
+def test_verify_address_confirm_new_path_accepted(backend, scenario_navigator):
+    client = BoilerplateCommandSender(backend)
+    with client.verify_address(identity_index=0, credential_counter=0, idp_index=0):
+        scenario_navigator.review_approve()
+
+    response = client.get_async_response().status
+    assert(response == 0x9000)
 
 
 # In this test we check that the VERIFY ADDRESS in confirmation mode replies an error if the user refuses
 def test_verify_address_confirm_refused(backend, scenario_navigator):
     client = BoilerplateCommandSender(backend)
-    with client.verify_address(identity_index=0, credential_counter=0):
-        scenario_navigator.review_reject()
+    try:
+        with client.verify_address(identity_index=0, credential_counter=0):
+            scenario_navigator.review_reject()
+    except ExceptionRAPDU as e:
+        response = e.status
 
-    response = client.get_async_response().data
-    print(response)
-    assert(response == b"6985")
+    assert(response == 0x6985)

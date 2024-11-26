@@ -13,6 +13,8 @@ CLA: int = 0xE0
 class P1(IntEnum):
     # Parameter 1 for first APDU number.
     P1_START = 0x00
+    # Parameter 1 for verify address new derivation path
+    P1_VERIFY_ADDRESS_NEW_PATH = 0x01
     # Parameter 1 for maximum APDU number.
     P1_MAX   = 0x03
     # Parameter 1 for screen confirmation for GET_PUBLIC_KEY.
@@ -99,11 +101,18 @@ class BoilerplateCommandSender:
             yield response
 
     @contextmanager
-    def verify_address(self, identity_index: int, credential_counter: int) -> Generator[None, None, None]:
-        data = identity_index.to_bytes(4, byteorder='big') + credential_counter.to_bytes(4, byteorder='big')
+    def verify_address(self, identity_index: int, credential_counter: int, idp_index: int = -1) -> Generator[None, None, None]:
+        data = b""
+        p1 = P1.P1_START
+
+        if idp_index != -1:
+            data += idp_index.to_bytes(4, byteorder='big')
+            p1 = P1.P1_VERIFY_ADDRESS_NEW_PATH
+
+        data += identity_index.to_bytes(4, byteorder='big') + credential_counter.to_bytes(4, byteorder='big')
         with self.backend.exchange_async(cla=CLA,
                                          ins=InsType.VERIFY_ADDRESS,
-                                         p1=P1.P1_START,
+                                         p1=p1,
                                          p2=P2.P2_LAST,
                                          data=data) as response:
             yield response
