@@ -1,6 +1,6 @@
 /*****************************************************************************
  *   Ledger App Concordium.
- *   (c) 2020 Ledger SAS.
+ *   (c) 2024 Concordium.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ void ui_menu_main() {
     ux_flow_init(0, ux_menu_main_flow, NULL);
 }
 
-UX_STEP_NOCB(ux_menu_info_step, bn, {"Concordium App", "(c) 2020 Ledger"});
+UX_STEP_NOCB(ux_menu_info_step, bn, {"Concordium App", "(c) 2024 Concordium"});
 UX_STEP_CB(ux_menu_back_step, pb, ui_menu_main(), {&C_icon_back, "Back"});
 
 // FLOW for the about submenu:

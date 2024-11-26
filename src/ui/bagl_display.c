@@ -1,6 +1,6 @@
 /*****************************************************************************
  *   Ledger App Concordium.
- *   (c) 2020 Ledger SAS.
+ *   (c) 2024 Concordium.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -39,10 +39,18 @@
 static action_validate_cb g_validate_callback;
 static char g_amount[30];
 static char g_address[43];
+static char g_verify_address[57];
+static char g_verify_address_data[21];
 
 // Validate/Invalidate public key and go back to home
 static void ui_action_validate_pubkey(bool choice) {
     validate_pubkey(choice);
+    ui_menu_main();
+}
+
+// Validate/Invalidate verify address and go back to home
+static void ui_action_validate_verify_address(bool choice) {
+    validate_verify_address(choice);
     ui_menu_main();
 }
 
@@ -107,6 +115,79 @@ int ui_display_address() {
     g_validate_callback = &ui_action_validate_pubkey;
 
     ux_flow_init(0, ux_display_pubkey_flow, NULL);
+    return 0;
+}
+
+// Step with title/text for identity index and credential counter
+UX_STEP_NOCB(ux_verify_address_0_step,
+             bnnn_paging,
+             {.title = "Verify Address", .text = g_verify_address_data});
+
+// Step with title/text for address
+UX_STEP_NOCB(ux_verify_address_1_step, bnnn_paging, {.title = "Address", .text = g_verify_address});
+UX_STEP_CB(ux_verify_address_approve_step,
+           pb,
+           (*g_validate_callback)(true),
+           {&C_icon_validate_14, "Approve"});
+UX_STEP_CB(ux_verify_address_reject_step,
+           pb,
+           (*g_validate_callback)(false),
+           {&C_icon_crossmark, "Reject"});
+UX_FLOW(ux_display_verify_address_flow,
+        &ux_verify_address_0_step,
+        &ux_verify_address_1_step,
+        &ux_verify_address_approve_step,
+        &ux_verify_address_reject_step);
+
+int ui_display_verify_address() {
+    if (G_context.req_type != CONFIRM_ADDRESS || G_context.state != STATE_NONE) {
+        G_context.state = STATE_NONE;
+        return io_send_sw(SW_BAD_STATE);
+    }
+    char idp_index[10];
+    char identity_index[10];
+    char credential_counter[10];
+
+    char temp_data[21] = {0};
+
+    if (G_context.verify_address_info.idp_index != 0xffffffff) {
+        // Format the idp index
+        snprintf(idp_index, sizeof(idp_index), "%u", G_context.verify_address_info.idp_index);
+        // Prepend the idp index to the address data
+        strncpy(temp_data, idp_index, sizeof(temp_data) - 1);
+        if (strlen(temp_data) < sizeof(temp_data) - 1) {
+            strncat(temp_data, "/", sizeof(temp_data) - strlen(temp_data) - 1);
+        }
+    }
+
+    // Turn the uint32_t values into strings
+    snprintf(identity_index,
+             sizeof(identity_index),
+             "%u",
+             G_context.verify_address_info.identity_index);
+    snprintf(credential_counter,
+             sizeof(credential_counter),
+             "%u",
+             G_context.verify_address_info.credential_counter);
+
+    if (strlen(temp_data) == 0) {
+        strncpy(temp_data, identity_index, sizeof(temp_data) - 1);
+    } else {
+        strncat(temp_data, identity_index, sizeof(temp_data) - strlen(temp_data) - 1);
+    }
+    strncat(temp_data, "/", sizeof(temp_data) - strlen(temp_data) - 1);
+    strncat(temp_data, credential_counter, sizeof(temp_data) - strlen(temp_data) - 1);
+
+    memcpy(g_verify_address_data, temp_data, strlen(temp_data));
+
+    memset(g_verify_address, 0, sizeof(g_verify_address));
+
+    memcpy(g_verify_address, G_context.verify_address_info.address, sizeof(g_verify_address));
+
+    g_validate_callback = &ui_action_validate_verify_address;
+
+    ux_flow_init(0, ux_display_verify_address_flow, NULL);
+
     return 0;
 }
 

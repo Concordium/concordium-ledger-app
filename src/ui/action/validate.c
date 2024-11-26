@@ -1,6 +1,6 @@
 /*****************************************************************************
  *   Ledger App Concordium.
- *   (c) 2020 Ledger SAS.
+ *   (c) 2024 Concordium.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -28,6 +28,13 @@
 void validate_pubkey(bool choice) {
     if (choice) {
         helper_send_response_pubkey();
+    } else {
+        io_send_sw(SW_DENY);
+    }
+}
+void validate_verify_address(bool choice) {
+    if (choice) {
+        io_send_sw(SW_OK);
     } else {
         io_send_sw(SW_DENY);
     }

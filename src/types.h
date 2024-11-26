@@ -12,6 +12,7 @@
  * Enumeration with expected INS of APDU commands.
  */
 typedef enum {
+    VERIFY_ADDRESS = 0x00,  /// verify address
     GET_VERSION = 0x03,     /// version of the application
     GET_APP_NAME = 0x04,    /// name of the application
     GET_PUBLIC_KEY = 0x05,  /// public key of corresponding BIP32 path
@@ -56,13 +57,24 @@ typedef struct {
 } transaction_ctx_t;
 
 /**
+ * Structure for verify address context.
+ */
+typedef struct {
+    char address[57];
+    uint32_t idp_index;
+    uint32_t identity_index;
+    uint32_t credential_counter;
+} verify_address_ctx_t;
+
+/**
  * Structure for global context.
  */
 typedef struct {
     state_e state;  /// state of the context
     union {
-        pubkey_ctx_t pk_info;       /// public key context
-        transaction_ctx_t tx_info;  /// transaction context
+        pubkey_ctx_t pk_info;                      /// public key context
+        transaction_ctx_t tx_info;                 /// transaction context
+        verify_address_ctx_t verify_address_info;  /// verify address context
     };
     request_type_e req_type;              /// user request
     uint32_t bip32_path[MAX_BIP32_PATH];  /// BIP32 path
