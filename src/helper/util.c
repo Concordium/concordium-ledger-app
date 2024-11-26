@@ -81,10 +81,10 @@ int bls_key_gen_from_seed(uint8_t *seed,
     uint8_t sk[l_CONST];
     uint8_t prk[32];
     uint8_t salt[32] = {
-        66, 76, 83, 45, 83, 73, 71, 45, 75, 69, 89,
-        71, 69, 78, 45, 83, 65, 76, 84, 45};  // Initially set to the byte representation of
-                                              // "BLS-SIG-KEYGEN-SALT-"
-    size_t saltSize = 20;                     // 20 = size of initial salt seed
+        66, 76, 83, 45, 83, 73, 71, 45, 75, 69,
+        89, 71, 69, 78, 45, 83, 65, 76, 84, 45};  // Initially set to the byte representation of
+                                                  // "BLS-SIG-KEYGEN-SALT-"
+    size_t saltSize = 20;                         // 20 = size of initial salt seed
     uint8_t ikm[SEED_LENGTH + 1];
 
     memcpy(ikm, seed, SEED_LENGTH);
