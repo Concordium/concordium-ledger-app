@@ -75,3 +75,21 @@ void harden_derivation_path(uint32_t *bip32_path, size_t bip32_path_len);
  * if it is invalid.
  */
 int derivation_path_type(uint32_t *bip32_path, size_t bip32_path_len);
+
+// We must declare the functions for the static analyzer to be happy. Ideally we would have
+// access to the declarations from the Ledger SDK.
+void cx_hkdf_extract(
+    const cx_md_t hash_id,
+    const unsigned char *ikm,
+    unsigned int ikm_len,
+    unsigned char *salt,
+    unsigned int salt_len,
+    unsigned char *prk);
+void cx_hkdf_expand(
+    const cx_md_t hash_id,
+    const unsigned char *prk,
+    unsigned int prk_len,
+    unsigned char *info,
+    unsigned int info_len,
+    unsigned char *okm,
+    unsigned int okm_len);

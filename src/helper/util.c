@@ -4,6 +4,11 @@
 #include "../constants.h"
 #include <os.h>
 #include <cx.h>
+#include <base58.h>
+// #include "cx_hkdf.h"
+// #include "cx_hash.h"
+// #include "cx_hmac.h"
+// #include "cx_ram.h"
 
 #define l_CONST        48  // ceil((3 * ceil(log2(r))) / 16)
 #define BLS_KEY_LENGTH 32
