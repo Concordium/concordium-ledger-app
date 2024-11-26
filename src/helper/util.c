@@ -66,11 +66,9 @@ int bls_key_gen_from_seed(uint8_t *seed,
                           uint8_t *private_key,
                           size_t private_key_len) {
     if (private_key_len != BLS_KEY_LENGTH) {
-        PRINTF("private_key_len != BLS_KEY_LENGTH\n");
         return -1;
     }
     if (seed_len != SEED_LENGTH) {
-        PRINTF("seed_len != SEED_LENGTH\n");
         return -1;
     }
 

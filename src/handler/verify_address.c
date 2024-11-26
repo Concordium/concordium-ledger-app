@@ -89,9 +89,6 @@ cx_err_t get_credential_id(uint8_t *prf_key,
 
     // CX_CHECK label to goto in case of an error
 end:
-    if (error != CX_OK) {
-        PRINTF("something went wrong\n");
-    }
     cx_bn_unlock();
     return error;
 }
