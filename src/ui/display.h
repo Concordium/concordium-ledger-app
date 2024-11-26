@@ -30,3 +30,11 @@ int ui_display_transaction(void);
  *
  */
 int ui_display_blind_signed_transaction(void);
+
+/**
+ * Display verify address information on the device and ask confirmation to export.
+ *
+ * @return 0 if success, negative integer otherwise.
+ *
+ */
+int ui_display_verify_address(void);

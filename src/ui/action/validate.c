@@ -32,6 +32,13 @@ void validate_pubkey(bool choice) {
         io_send_sw(SW_DENY);
     }
 }
+void validate_verify_address(bool choice) {
+    if (choice) {
+        io_send_sw(SW_OK);
+    } else {
+        io_send_sw(SW_DENY);
+    }
+}
 
 static int crypto_sign_message(void) {
     uint32_t info = 0;
