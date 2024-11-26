@@ -57,8 +57,8 @@ int apdu_dispatcher(const command_t *cmd) {
             return handler_get_app_name();
 
         case VERIFY_ADDRESS:
-            // p1 can be 0 or 1: 
-            //0 for the legacy address format, 1 for the new address format
+            // p1 can be 0 or 1:
+            // 0 for the legacy address format, 1 for the new address format
             if ((cmd->p1 != 0 && cmd->p1 != 1) || cmd->p2 != 0) {
                 return io_send_sw(SW_WRONG_P1P2);
             }

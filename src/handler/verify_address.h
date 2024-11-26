@@ -12,7 +12,8 @@
  *
  * @param[in,out] cdata
  *   Command data with identity index and credential counter.
- * @param[in] is_new_address: true if the new address format is used, false for the legacy address format.
+ * @param[in] is_new_address: true if the new address format is used, false for the legacy address
+ * format.
  *
  * @return zero or positive integer if success, negative integer otherwise.
  */
@@ -22,4 +23,8 @@ int handler_verify_address(buffer_t *cdata, bool is_new_address);
  * Calculates the credential  ID from the given prf key and credential counter.
  * The size of the computed credential ID is 48 bytes.
  */
-cx_err_t get_credential_id(uint8_t *prf_key, size_t prf_key_len, uint32_t credential_counter, uint8_t *credential_id, size_t credential_id_len);
+cx_err_t get_credential_id(uint8_t *prf_key,
+                           size_t prf_key_len,
+                           uint32_t credential_counter,
+                           uint8_t *credential_id,
+                           size_t credential_id_len);

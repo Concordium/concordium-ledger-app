@@ -81,13 +81,7 @@ enum legacy_key_indexes {
  */
 #define NEW_COIN_TYPE 919
 
-enum new_key_indexes {
-    NEW_SIGN_KEY = 0,
-    NEW_ID_CRED = 1,
-    NEW_PRF_KEY = 2,
-    NEW_M0 = 3,
-    NEW_R = 4
-};
+enum new_key_indexes { NEW_SIGN_KEY = 0, NEW_ID_CRED = 1, NEW_PRF_KEY = 2, NEW_M0 = 3, NEW_R = 4 };
 
 /**
  * Length of the credential ID.

@@ -6,7 +6,6 @@
 #include "../types.h"
 #include <cx.h>
 
-
 /**
  * BLS12-381 subgroup G1's order:
  */
@@ -22,12 +21,18 @@ int get_identity_index_account_display();
 /**
  * Get the BLS private key from the path.
  */
-int get_bls_private_key(uint32_t *path, size_t path_len, uint8_t *private_key, size_t private_key_len);
+int get_bls_private_key(uint32_t *path,
+                        size_t path_len,
+                        uint8_t *private_key,
+                        size_t private_key_len);
 
 /**
  * Convert an address to a base58 encoded string.
  */
-int address_to_base58(const uint8_t *address, size_t address_len, char *encoded_address, size_t encoded_address_len);
+int address_to_base58(const uint8_t *address,
+                      size_t address_len,
+                      char *encoded_address,
+                      size_t encoded_address_len);
 
 /**
  * Derive a private key from a BIP32 path.
@@ -50,7 +55,10 @@ int get_private_key_from_path(uint32_t *path, size_t path_len, cx_ecfp_private_k
  *
  * @return 0 on success, -1 on error
  */
-int bls_key_gen_from_seed(uint8_t *seed, size_t seed_len, uint8_t *private_key, size_t private_key_len);
+int bls_key_gen_from_seed(uint8_t *seed,
+                          size_t seed_len,
+                          uint8_t *private_key,
+                          size_t private_key_len);
 
 /**
  * Harden the derivation path.
@@ -63,6 +71,7 @@ void harden_derivation_path(uint32_t *bip32_path, size_t bip32_path_len);
  * Check the type of the derivation path.
  * @param bip32_path: The BIP32 path.
  * @param bip32_path_len: The length of the BIP32 path.
- * @return 1 if the path is for the legacy address format, 2 if it is for the new address format, 0 if it is invalid.
+ * @return 1 if the path is for the legacy address format, 2 if it is for the new address format, 0
+ * if it is invalid.
  */
 int derivation_path_type(uint32_t *bip32_path, size_t bip32_path_len);

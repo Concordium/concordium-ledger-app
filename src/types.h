@@ -72,8 +72,8 @@ typedef struct {
 typedef struct {
     state_e state;  /// state of the context
     union {
-        pubkey_ctx_t pk_info;       /// public key context
-        transaction_ctx_t tx_info;  /// transaction context
+        pubkey_ctx_t pk_info;                      /// public key context
+        transaction_ctx_t tx_info;                 /// transaction context
         verify_address_ctx_t verify_address_info;  /// verify address context
     };
     request_type_e req_type;              /// user request

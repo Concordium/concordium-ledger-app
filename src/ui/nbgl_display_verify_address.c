@@ -45,7 +45,6 @@ static char g_address[57];
 static nbgl_layoutTagValue_t pairs[2];
 static nbgl_layoutTagValueList_t pairList;
 
-
 static void review_choice(bool confirm) {
     // Answer, display a status page and go back to main
     validate_verify_address(confirm);
@@ -62,26 +61,39 @@ int ui_display_verify_address() {
         return io_send_sw(SW_BAD_STATE);
     }
 
-   char idp_index[10];
+    char idp_index[10];
     char identity_index[10];
     char credential_counter[10];
 
-    if(G_context.verify_address_info.idp_index != 0xffffffff) {
+    if (G_context.verify_address_info.idp_index != 0xffffffff) {
         // Format the idp index
         snprintf(idp_index, sizeof(idp_index), "%u", G_context.verify_address_info.idp_index);
         // Prepend the idp index to the address data
         strncpy(g_verify_address_data, idp_index, sizeof(idp_index));
-        strncat(g_verify_address_data, "/", sizeof(g_verify_address_data) - strlen(g_verify_address_data) -1);
+        strncat(g_verify_address_data,
+                "/",
+                sizeof(g_verify_address_data) - strlen(g_verify_address_data) - 1);
     }
 
     // Use snprintf directly for uint32_t values
-    snprintf(identity_index, sizeof(identity_index), "%u", G_context.verify_address_info.identity_index);
-    snprintf(credential_counter, sizeof(credential_counter), "%u", G_context.verify_address_info.credential_counter);
+    snprintf(identity_index,
+             sizeof(identity_index),
+             "%u",
+             G_context.verify_address_info.identity_index);
+    snprintf(credential_counter,
+             sizeof(credential_counter),
+             "%u",
+             G_context.verify_address_info.credential_counter);
 
-    strncat(g_verify_address_data, identity_index, sizeof(g_verify_address_data) - strlen(g_verify_address_data) - 1);
-    strncat(g_verify_address_data, "/", sizeof(g_verify_address_data) - strlen(g_verify_address_data) - 1);
-    strncat(g_verify_address_data, credential_counter, sizeof(g_verify_address_data) - strlen(g_verify_address_data) - 1);
-
+    strncat(g_verify_address_data,
+            identity_index,
+            sizeof(g_verify_address_data) - strlen(g_verify_address_data) - 1);
+    strncat(g_verify_address_data,
+            "/",
+            sizeof(g_verify_address_data) - strlen(g_verify_address_data) - 1);
+    strncat(g_verify_address_data,
+            credential_counter,
+            sizeof(g_verify_address_data) - strlen(g_verify_address_data) - 1);
 
     memset(g_address, 0, sizeof(g_address));
 
@@ -98,15 +110,14 @@ int ui_display_verify_address() {
     pairList.nbPairs = 2;
     pairList.pairs = pairs;
 
-
     // Start review flow
     nbgl_useCaseReviewLight(TYPE_OPERATION,
-                        &pairList,
-                        &C_app_concordium_64px,
-                        "Verify Address",
-                        NULL,
-                        "Verify Address",
-                        review_choice);
+                            &pairList,
+                            &C_app_concordium_64px,
+                            "Verify Address",
+                            NULL,
+                            "Verify Address",
+                            review_choice);
 
     return 0;
 }

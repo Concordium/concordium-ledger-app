@@ -119,24 +119,20 @@ int ui_display_address() {
 }
 
 // Step with title/text for identity index and credential counter
-UX_STEP_NOCB(
-    ux_verify_address_0_step,
-    bnnn_paging,
-    {
-        .title = "Verify Address",
-        .text = g_verify_address_data
-    });
+UX_STEP_NOCB(ux_verify_address_0_step,
+             bnnn_paging,
+             {.title = "Verify Address", .text = g_verify_address_data});
 
 // Step with title/text for address
-UX_STEP_NOCB(
-    ux_verify_address_1_step,
-    bnnn_paging,
-    {
-        .title = "Address",
-        .text = g_verify_address
-    });
-UX_STEP_CB(ux_verify_address_approve_step, pb, (*g_validate_callback)(true), {&C_icon_validate_14, "Approve"});
-UX_STEP_CB(ux_verify_address_reject_step, pb, (*g_validate_callback)(false), {&C_icon_crossmark, "Reject"});
+UX_STEP_NOCB(ux_verify_address_1_step, bnnn_paging, {.title = "Address", .text = g_verify_address});
+UX_STEP_CB(ux_verify_address_approve_step,
+           pb,
+           (*g_validate_callback)(true),
+           {&C_icon_validate_14, "Approve"});
+UX_STEP_CB(ux_verify_address_reject_step,
+           pb,
+           (*g_validate_callback)(false),
+           {&C_icon_crossmark, "Reject"});
 UX_FLOW(ux_display_verify_address_flow,
         &ux_verify_address_0_step,
         &ux_verify_address_1_step,
@@ -154,22 +150,28 @@ int ui_display_verify_address() {
 
     char temp_data[21] = {0};
 
-    if(G_context.verify_address_info.idp_index != 0xffffffff) {
+    if (G_context.verify_address_info.idp_index != 0xffffffff) {
         // Format the idp index
         snprintf(idp_index, sizeof(idp_index), "%u", G_context.verify_address_info.idp_index);
         // Prepend the idp index to the address data
-        strncpy(temp_data, idp_index, sizeof(temp_data)-1);
-        if(strlen(temp_data) < sizeof(temp_data)-1) {
+        strncpy(temp_data, idp_index, sizeof(temp_data) - 1);
+        if (strlen(temp_data) < sizeof(temp_data) - 1) {
             strncat(temp_data, "/", sizeof(temp_data) - strlen(temp_data) - 1);
         }
     }
 
     // Turn the uint32_t values into strings
-    snprintf(identity_index, sizeof(identity_index), "%u", G_context.verify_address_info.identity_index);
-    snprintf(credential_counter, sizeof(credential_counter), "%u", G_context.verify_address_info.credential_counter);
+    snprintf(identity_index,
+             sizeof(identity_index),
+             "%u",
+             G_context.verify_address_info.identity_index);
+    snprintf(credential_counter,
+             sizeof(credential_counter),
+             "%u",
+             G_context.verify_address_info.credential_counter);
 
-    if(strlen(temp_data) == 0) {
-        strncpy(temp_data, identity_index, sizeof(temp_data)-1);
+    if (strlen(temp_data) == 0) {
+        strncpy(temp_data, identity_index, sizeof(temp_data) - 1);
     } else {
         strncat(temp_data, identity_index, sizeof(temp_data) - strlen(temp_data) - 1);
     }
