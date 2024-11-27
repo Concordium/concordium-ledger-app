@@ -140,11 +140,11 @@ int handler_verify_address(buffer_t *cdata, bool is_new_address) {
 
     int rtn = get_bls_private_key(prf_key_path, prf_key_path_len, prf_key, sizeof(prf_key));
     switch (rtn) {
-        case -1: // derivation path error
+        case -1:  // derivation path error
             return io_send_sw(SW_DERIVATION_PATH_FAIL);
-        case -2: // key initialization error
+        case -2:  // key initialization error
             return io_send_sw(SW_KEY_INIT_FAIL);
-        case -3: // BLS key generation error
+        case -3:  // BLS key generation error
             return io_send_sw(SW_BLS_KEY_GEN_FAIL);
         default:
             break;
