@@ -55,7 +55,7 @@ int get_private_key_from_path(uint32_t *path, size_t path_len, cx_ecfp_private_k
     if (rtn == 0 &&
         cx_ecfp_init_private_key_no_throw(CX_CURVE_Ed25519, private_key_data, 32, private_key) !=
             CX_OK) {
-        rtn = -1;
+        rtn = -2;
     }
     explicit_bzero(private_key_data, sizeof(private_key_data));
     return rtn;
@@ -113,15 +113,24 @@ int get_bls_private_key(uint32_t *path,
                         size_t private_key_len) {
     cx_ecfp_private_key_t private_key_seed;
 
-    if (get_private_key_from_path(path, path_len, &private_key_seed) == -1) {
-        return -1;
+    int rtn = get_private_key_from_path(path, path_len, &private_key_seed);
+    switch (rtn) {
+      case -1: // derivation path error
+          return -1;
+      case -2: // key initialization error
+          return -2;
+      default:
+        break;
     }
-
-    if (bls_key_gen_from_seed(private_key_seed.d,
-                              sizeof(private_key_seed.d),
-                              private_key,
-                              private_key_len) == -1) {
-        return -1;
+    rtn = bls_key_gen_from_seed(private_key_seed.d,
+                                sizeof(private_key_seed.d),
+                                private_key,
+                                private_key_len);
+    switch (rtn) {
+      case -1: // BLS key generation error
+          return -3;
+      default:
+        break;
     }
 
     explicit_bzero(&private_key_seed, sizeof(private_key_seed));

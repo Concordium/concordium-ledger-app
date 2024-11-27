@@ -134,11 +134,20 @@ int handler_verify_address(buffer_t *cdata, bool is_new_address) {
                                      LEGACY_PRF_KEY | HARDENED_OFFSET};
     }
 
+    // Initialize credential ID and PRF key
     uint8_t credential_id[CREDENTIAL_ID_LEN];
     uint8_t prf_key[32];
 
-    if (get_bls_private_key(prf_key_path, prf_key_path_len, prf_key, sizeof(prf_key)) == -1) {
-        return io_send_sw(SW_VERIFY_ADDRESS_FAIL);
+    int rtn = get_bls_private_key(prf_key_path, prf_key_path_len, prf_key, sizeof(prf_key));
+    switch (rtn) {
+        case -1: // derivation path error
+            return io_send_sw(SW_DERIVATION_PATH_FAIL);
+        case -2: // key initialization error
+            return io_send_sw(SW_KEY_INIT_FAIL);
+        case -3: // BLS key generation error
+            return io_send_sw(SW_BLS_KEY_GEN_FAIL);
+        default:
+            break;
     }
 
     if (get_credential_id(prf_key,
@@ -146,7 +155,7 @@ int handler_verify_address(buffer_t *cdata, bool is_new_address) {
                           G_context.verify_address_info.credential_counter,
                           credential_id,
                           sizeof(credential_id)) != CX_OK) {
-        return io_send_sw(SW_VERIFY_ADDRESS_FAIL);
+        return io_send_sw(SW_CREDENTIAL_ID_GEN_FAIL);
     }
 
     // Empty prf_key
@@ -158,12 +167,12 @@ int handler_verify_address(buffer_t *cdata, bool is_new_address) {
     size_t address_len = sizeof(G_context.verify_address_info.address);
 
     // This function will return the number of bytes encoded, or -1 on error.
-    int rtn = address_to_base58(account_address,
-                                sizeof(account_address),
-                                G_context.verify_address_info.address,
-                                address_len);
+    rtn = address_to_base58(account_address,
+                            sizeof(account_address),
+                            G_context.verify_address_info.address,
+                            address_len);
     if (rtn < 0) {
-        return io_send_sw(SW_VERIFY_ADDRESS_FAIL);
+        return io_send_sw(SW_ADDRESS_ENCODING_FAIL);
     }
 
     return ui_display_verify_address();
