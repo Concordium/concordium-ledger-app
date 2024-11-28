@@ -41,5 +41,7 @@ int helper_send_response_pubkey() {
 }
 
 int helper_send_response_sig() {
-    return io_send_response_pointer(G_context.tx_info.signature, G_context.tx_info.signature_len, SW_OK);
+    return io_send_response_pointer(G_context.tx_info.signature,
+                                    G_context.tx_info.signature_len,
+                                    SW_OK);
 }

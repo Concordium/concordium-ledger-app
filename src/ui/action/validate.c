@@ -57,11 +57,11 @@ static int crypto_sign_message(void) {
     }
     // sign the message
     error = cx_eddsa_sign_no_throw(&private_key,
-                                    CX_SHA512,
-                                    G_context.tx_info.m_hash,
-                                    sizeof(G_context.tx_info.m_hash),
-                                    G_context.tx_info.signature,
-                                    sig_len);
+                                   CX_SHA512,
+                                   G_context.tx_info.m_hash,
+                                   sizeof(G_context.tx_info.m_hash),
+                                   G_context.tx_info.signature,
+                                   sig_len);
 
     if (error != CX_OK) {
         return -1;

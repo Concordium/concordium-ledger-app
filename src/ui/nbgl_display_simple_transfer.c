@@ -60,7 +60,6 @@ static void review_choice(bool confirm) {
     }
 }
 
-
 // Flow used to display a clear-signed transaction
 
 // Public function to start the transaction review
@@ -68,7 +67,6 @@ static void review_choice(bool confirm) {
 // - Format the amount and address strings in g_amount and g_address buffers
 // - Display the first screen of the transaction review
 int ui_display_simple_transfer() {
-
     if (G_context.req_type != CONFIRM_TRANSACTION || G_context.state != STATE_PARSED) {
         G_context.state = STATE_NONE;
         return io_send_sw(SW_BAD_STATE);
@@ -87,12 +85,18 @@ int ui_display_simple_transfer() {
     memset(g_recipient_address, 0, sizeof(g_recipient_address));
     memset(g_sender_address, 0, sizeof(g_sender_address));
 
-     // Format the recipient address
-    if(address_to_base58(G_context.tx_info.transaction.simple_transfer.recipient, ADDRESS_LEN, g_recipient_address, sizeof(g_recipient_address)) == -1){
+    // Format the recipient address
+    if (address_to_base58(G_context.tx_info.transaction.simple_transfer.recipient,
+                          ADDRESS_LEN,
+                          g_recipient_address,
+                          sizeof(g_recipient_address)) == -1) {
         return io_send_sw(SW_DISPLAY_ADDRESS_FAIL);
     }
     // Format the sender address
-    if(address_to_base58(G_context.tx_info.transaction.simple_transfer.sender, ADDRESS_LEN, g_sender_address, sizeof(g_sender_address)) == -1){
+    if (address_to_base58(G_context.tx_info.transaction.simple_transfer.sender,
+                          ADDRESS_LEN,
+                          g_sender_address,
+                          sizeof(g_sender_address)) == -1) {
         return io_send_sw(SW_DISPLAY_ADDRESS_FAIL);
     }
 
@@ -111,12 +115,12 @@ int ui_display_simple_transfer() {
 
     // Start review flow
     nbgl_useCaseReview(TYPE_TRANSACTION,
-                        &pairList,
-                        &C_app_concordium_64px,
-                        "Review\nSimple transfer",
-                        NULL,
-                        "Sign\nSimple transfer",
-                        review_choice);
+                       &pairList,
+                       &C_app_concordium_64px,
+                       "Review\nSimple transfer",
+                       NULL,
+                       "Sign\nSimple transfer",
+                       review_choice);
 
     return 0;
 }

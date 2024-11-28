@@ -19,17 +19,17 @@ typedef enum {
 } parser_status_e;
 
 typedef struct {
-    uint64_t value;     /// amount value (8 bytes)
-    uint8_t *recipient; /// pointer to recipient (32 bytes)
-    uint8_t *sender;    /// pointer to sender (32 bytes)
+    uint64_t value;      /// amount value (8 bytes)
+    uint8_t *recipient;  /// pointer to recipient (32 bytes)
+    uint8_t *sender;     /// pointer to sender (32 bytes)
 } simple_transfer_t;
 
 typedef struct {
-    uint64_t value;     /// amount value (8 bytes)
-    uint8_t *recipient; /// pointer to recipient (32 bytes)
-    uint8_t *sender;    /// pointer to sender (32 bytes)
-    uint8_t *memo;      /// pointer to memo (variable length)
-    uint64_t memo_len;  /// length of memo (8 bytes)
+    uint64_t value;      /// amount value (8 bytes)
+    uint8_t *recipient;  /// pointer to recipient (32 bytes)
+    uint8_t *sender;     /// pointer to sender (32 bytes)
+    uint8_t *memo;       /// pointer to memo (variable length)
+    uint64_t memo_len;   /// length of memo (8 bytes)
 } simple_transfer_with_memo_t;
 
 // TODO: ADD OTHER TRANSACTION TYPES HERE

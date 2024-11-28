@@ -208,7 +208,6 @@ UX_STEP_NOCB(ux_display_amount_step,
                  .text = g_amount,
              });
 
-
 // Step with icon and text
 UX_STEP_NOCB(ux_display_review_simple_transfer_step,
              pnn,
@@ -252,7 +251,6 @@ int ui_display_simple_transfer() {
         return io_send_sw(SW_BAD_STATE);
     }
 
-
     // Format the amount
     memset(g_amount, 0, sizeof(g_amount));
     char amount[30] = {0};
@@ -265,14 +263,19 @@ int ui_display_simple_transfer() {
     snprintf(g_amount, sizeof(g_amount), "CCD %.*s", sizeof(amount), amount);
 
     // Format the recipient address
-    if(address_to_base58(G_context.tx_info.transaction.simple_transfer.recipient, ADDRESS_LEN, g_recipient_address, sizeof(g_recipient_address)) == -1){
+    if (address_to_base58(G_context.tx_info.transaction.simple_transfer.recipient,
+                          ADDRESS_LEN,
+                          g_recipient_address,
+                          sizeof(g_recipient_address)) == -1) {
         return io_send_sw(SW_DISPLAY_ADDRESS_FAIL);
     }
     // Format the sender address
-    if(address_to_base58(G_context.tx_info.transaction.simple_transfer.sender, ADDRESS_LEN, g_sender_address, sizeof(g_sender_address)) == -1){
+    if (address_to_base58(G_context.tx_info.transaction.simple_transfer.sender,
+                          ADDRESS_LEN,
+                          g_sender_address,
+                          sizeof(g_sender_address)) == -1) {
         return io_send_sw(SW_DISPLAY_ADDRESS_FAIL);
     }
-
 
     g_validate_callback = &ui_action_validate_transaction;
 

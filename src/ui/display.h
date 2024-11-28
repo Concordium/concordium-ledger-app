@@ -46,5 +46,3 @@ int ui_display_verify_address(void);
  *
  */
 int ui_display_simple_transfer(void);
-
-

@@ -37,7 +37,7 @@ parser_status_e simple_transfer_deserialize(buffer_t *buf, transaction_ctx_t *tx
     }
 
     // Sender address (32 bytes)
-    tx->transaction.simple_transfer.sender = (uint8_t *)(buf->ptr + buf->offset);
+    tx->transaction.simple_transfer.sender = (uint8_t *) (buf->ptr + buf->offset);
     if (!buffer_seek_cur(buf, ADDRESS_LEN)) {
         return SENDER_PARSING_ERROR;
     }
@@ -68,7 +68,7 @@ parser_status_e simple_transfer_deserialize(buffer_t *buf, transaction_ctx_t *tx
     }
 
     // Recipient address (32 bytes)
-    tx->transaction.simple_transfer.recipient = (uint8_t *)(buf->ptr + buf->offset);
+    tx->transaction.simple_transfer.recipient = (uint8_t *) (buf->ptr + buf->offset);
     if (!buffer_seek_cur(buf, ADDRESS_LEN)) {
         return RECIPIENT_PARSING_ERROR;
     }

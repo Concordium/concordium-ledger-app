@@ -81,7 +81,7 @@ int handler_sign_simple_transfer(buffer_t *cdata, uint8_t chunk, bool more) {
                 return io_send_sw(SW_TX_PARSING_FAIL);
             }
             // TODO: add a specific SW for wrong type
-            if(G_context.tx_info.type != TRANSACTION_TYPE_SIMPLE_TRANSFER) {
+            if (G_context.tx_info.type != TRANSACTION_TYPE_SIMPLE_TRANSFER) {
                 return io_send_sw(SW_BAD_STATE);
             }
 
@@ -95,9 +95,7 @@ int handler_sign_simple_transfer(buffer_t *cdata, uint8_t chunk, bool more) {
 
             PRINTF("Hash: %.*H\n", sizeof(G_context.tx_info.m_hash), G_context.tx_info.m_hash);
 
-
             return ui_display_simple_transfer();
-            
         }
     }
 
