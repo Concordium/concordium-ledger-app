@@ -115,7 +115,6 @@ int ui_display_address() {
     }
 
     g_validate_callback = &ui_action_validate_pubkey;
-
     ux_flow_init(0, ux_display_pubkey_flow, NULL);
     return 0;
 }
@@ -209,49 +208,6 @@ UX_STEP_NOCB(ux_display_amount_step,
                  .text = g_amount,
              });
 
-// FLOW to display transaction information:
-// #1 screen : eye icon + "Review Transaction"
-// #2 screen : display amount
-// #3 screen : display destination address
-// #4 screen : approve button
-// #5 screen : reject button
-UX_FLOW(ux_display_transaction_flow,
-        &ux_display_review_step,
-        &ux_display_address_step,
-        &ux_display_amount_step,
-        &ux_display_approve_step,
-        &ux_display_reject_step);
-
-// int ui_display_transaction() {
-//     if (G_context.req_type != CONFIRM_TRANSACTION || G_context.state != STATE_PARSED) {
-//         G_context.state = STATE_NONE;
-//         return io_send_sw(SW_BAD_STATE);
-//     }
-
-//     memset(g_amount, 0, sizeof(g_amount));
-//     char amount[30] = {0};
-//     if (!format_fpu64(amount,
-//                       sizeof(amount),
-//                       G_context.tx_info.transaction.value,
-//                       EXPONENT_SMALLEST_UNIT)) {
-//         return io_send_sw(SW_DISPLAY_AMOUNT_FAIL);
-//     }
-//     snprintf(g_amount, sizeof(g_amount), "CCD %.*s", sizeof(amount), amount);
-//     PRINTF("Amount: %s\n", g_amount);
-
-//     memset(g_address, 0, sizeof(g_address));
-
-//     if (format_hex(G_context.tx_info.transaction.to, ADDRESS_LEN, g_address, sizeof(g_address)) ==
-//         -1) {
-//         return io_send_sw(SW_DISPLAY_ADDRESS_FAIL);
-//     }
-
-//     g_validate_callback = &ui_action_validate_transaction;
-
-//     ux_flow_init(0, ux_display_transaction_flow, NULL);
-
-//     return 0;
-// }
 
 // Step with icon and text
 UX_STEP_NOCB(ux_display_review_simple_transfer_step,
@@ -295,6 +251,7 @@ int ui_display_simple_transfer() {
         G_context.state = STATE_NONE;
         return io_send_sw(SW_BAD_STATE);
     }
+
 
     // Format the amount
     memset(g_amount, 0, sizeof(g_amount));

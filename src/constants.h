@@ -28,7 +28,7 @@
 /**
  * Maximum signature length (bytes).
  */
-#define MAX_DER_SIG_LEN 72
+#define MAX_DER_SIG_LEN 64
 
 /**
  * Maximum BIP32 path length supported by the app.

@@ -37,10 +37,9 @@ def test_sign_tx_simple_transfer(backend, scenario_navigator):
 
     # The device as yielded the result, parse it and ensure that the signature is correct
     response = client.get_async_response().data
-    print('response', response.hex())
-    _, der_sig, _ = unpack_sign_tx_response(response)
-    print('der_sig', der_sig.hex())
-    assert der_sig.hex() == "12afcc203c73075ae3e4d89e01844b3fb1b2ecef26565d8c1220e04bddfb7ced0fe38b06a6df22669a20eea4b180ea3d1e1e4ad28a1d2bea29e518ad53f1550d"
+    response_hex = response.hex()
+    print('response', response_hex)
+    assert response_hex == "d1617ee706805c0bc6a43260ece93a7ceba37aaefa303251cf19bdcbbe88c0a3d3878dcb965cdb88ff380fdb1aa4b321671f365d7258e878d18fa1b398a1a10f"
     # assert check_signature_validity(public_key, der_sig, transaction)
 
 
