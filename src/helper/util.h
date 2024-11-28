@@ -19,7 +19,16 @@ static const uint8_t r[32] = {0x73, 0xed, 0xa7, 0x53, 0x29, 0x9d, 0x7d, 0x48, 0x
 int get_identity_index_account_display();
 
 /**
- * Get the BLS private key from the path.
+ * Derive a BLS private key from a BIP32 path by first deriving an Ed25519 seed
+ * and then converting it to a BLS key.
+ *
+ * @param[in] path              Pointer to the BIP32 path
+ * @param[in] path_len          Length of the BIP32 path
+ * @param[out] private_key      Buffer to store the derived BLS private key
+ * @param[in] private_key_len   Length of the private key buffer
+ *
+ * @return 0 on success, -1 on derivation path error, -2 on key initialization error,
+ *         -3 on BLS key generation error
  */
 int get_bls_private_key(uint32_t *path,
                         size_t path_len,
@@ -48,13 +57,13 @@ int address_to_base58(const uint8_t *address,
                       size_t encoded_address_len);
 
 /**
- * Derive a private key from a BIP32 path.
+ * Derive an Ed25519 private key from a BIP32 path using SLIP-0010 derivation.
  *
  * @param[in] path          Pointer to the BIP32 path
  * @param[in] path_len      Length of the BIP32 path
- * @param[out] private_key  Pointer to the private key
+ * @param[out] private_key  Pointer to store the derived private key
  *
- * @return 0 on success, -1 on error
+ * @return 0 on success, -1 on derivation error, -2 on key initialization error
  */
 int get_private_key_from_path(uint32_t *path, size_t path_len, cx_ecfp_private_key_t *private_key);
 

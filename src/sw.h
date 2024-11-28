@@ -64,3 +64,9 @@
  * Status word for error in verify address.
  */
 #define SW_VERIFY_ADDRESS_FAIL 0xB009
+
+#define SW_BLS_KEY_GEN_FAIL       0xB00A
+#define SW_KEY_INIT_FAIL          0xB00B
+#define SW_CREDENTIAL_ID_GEN_FAIL 0xB00C
+#define SW_ADDRESS_ENCODING_FAIL  0xB00D
+#define SW_DERIVATION_PATH_FAIL   0xB00E
