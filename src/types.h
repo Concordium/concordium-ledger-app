@@ -16,7 +16,7 @@ typedef enum {
     GET_VERSION = 0x03,     /// version of the application
     GET_APP_NAME = 0x04,    /// name of the application
     GET_PUBLIC_KEY = 0x05,  /// public key of corresponding BIP32 path
-    SIGN_TX = 0x06          /// sign transaction with BIP32 path
+    SIGN_SIMPLE_TRANSFER = 0x06    /// sign simple transfer with BIP32 path
 } command_e;
 /**
  * Enumeration with parsing state.
@@ -49,7 +49,12 @@ typedef struct {
 typedef struct {
     uint8_t raw_tx[MAX_TRANSACTION_LEN];  /// raw transaction serialized
     size_t raw_tx_len;                    /// length of raw transaction
-    transaction_t transaction;            /// structured transaction
+    uint8_t type;                         /// transaction type
+    union {
+        simple_transfer_t simple_transfer;
+        simple_transfer_with_memo_t simple_transfer_with_memo;
+        // Add other transaction types here as needed
+    } transaction;
     uint8_t m_hash[32];                   /// message hash digest
     uint8_t signature[MAX_DER_SIG_LEN];   /// transaction signature encoded in DER
     uint8_t signature_len;                /// length of transaction signature
@@ -77,6 +82,6 @@ typedef struct {
         verify_address_ctx_t verify_address_info;  /// verify address context
     };
     request_type_e req_type;              /// user request
-    uint32_t bip32_path[MAX_BIP32_PATH];  /// BIP32 path
+    uint32_t bip32_path[MAX_BIP32_PATH_SUPPORTED];  /// BIP32 path
     uint8_t bip32_path_len;               /// length of BIP32 path
 } global_ctx_t;

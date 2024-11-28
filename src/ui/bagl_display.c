@@ -35,12 +35,14 @@
 #include "action/validate.h"
 #include "../transaction/types.h"
 #include "../menu.h"
+#include "../helper/util.h"
 
 static action_validate_cb g_validate_callback;
 static char g_amount[30];
 static char g_address[43];
-static char g_verify_address[57];
+static char g_sender_address[57];
 static char g_verify_address_data[21];
+static char g_recipient_address[57];
 
 // Validate/Invalidate public key and go back to home
 static void ui_action_validate_pubkey(bool choice) {
@@ -124,7 +126,7 @@ UX_STEP_NOCB(ux_verify_address_0_step,
              {.title = "Verify Address", .text = g_verify_address_data});
 
 // Step with title/text for address
-UX_STEP_NOCB(ux_verify_address_1_step, bnnn_paging, {.title = "Address", .text = g_verify_address});
+UX_STEP_NOCB(ux_verify_address_1_step, bnnn_paging, {.title = "Address", .text = g_sender_address});
 UX_STEP_CB(ux_verify_address_approve_step,
            pb,
            (*g_validate_callback)(true),
@@ -180,9 +182,9 @@ int ui_display_verify_address() {
 
     memcpy(g_verify_address_data, temp_data, strlen(temp_data));
 
-    memset(g_verify_address, 0, sizeof(g_verify_address));
+    memset(g_sender_address, 0, sizeof(g_sender_address));
 
-    memcpy(g_verify_address, G_context.verify_address_info.address, sizeof(g_verify_address));
+    memcpy(g_sender_address, G_context.verify_address_info.address, sizeof(g_sender_address));
 
     g_validate_callback = &ui_action_validate_verify_address;
 
@@ -220,35 +222,105 @@ UX_FLOW(ux_display_transaction_flow,
         &ux_display_approve_step,
         &ux_display_reject_step);
 
-int ui_display_transaction() {
+// int ui_display_transaction() {
+//     if (G_context.req_type != CONFIRM_TRANSACTION || G_context.state != STATE_PARSED) {
+//         G_context.state = STATE_NONE;
+//         return io_send_sw(SW_BAD_STATE);
+//     }
+
+//     memset(g_amount, 0, sizeof(g_amount));
+//     char amount[30] = {0};
+//     if (!format_fpu64(amount,
+//                       sizeof(amount),
+//                       G_context.tx_info.transaction.value,
+//                       EXPONENT_SMALLEST_UNIT)) {
+//         return io_send_sw(SW_DISPLAY_AMOUNT_FAIL);
+//     }
+//     snprintf(g_amount, sizeof(g_amount), "CCD %.*s", sizeof(amount), amount);
+//     PRINTF("Amount: %s\n", g_amount);
+
+//     memset(g_address, 0, sizeof(g_address));
+
+//     if (format_hex(G_context.tx_info.transaction.to, ADDRESS_LEN, g_address, sizeof(g_address)) ==
+//         -1) {
+//         return io_send_sw(SW_DISPLAY_ADDRESS_FAIL);
+//     }
+
+//     g_validate_callback = &ui_action_validate_transaction;
+
+//     ux_flow_init(0, ux_display_transaction_flow, NULL);
+
+//     return 0;
+// }
+
+// Step with icon and text
+UX_STEP_NOCB(ux_display_review_simple_transfer_step,
+             pnn,
+             {
+                 &C_icon_eye,
+                 "Review",
+                 "Simple Transfer",
+             });
+
+// Step with title/text for sender address
+UX_STEP_NOCB(ux_display_sender_address_step,
+             bnnn_paging,
+             {
+                 .title = "Sender",
+                 .text = g_sender_address,
+             });
+// Step with title/text for recipient address
+UX_STEP_NOCB(ux_display_recipient_address_step,
+             bnnn_paging,
+             {
+                 .title = "Recipient",
+                 .text = g_recipient_address,
+             });
+
+// FLOW to display transaction information:
+// #1 screen : eye icon + "Review Transaction"
+// #2 screen : display amount
+// #3 screen : display recipient address
+// #4 screen : approve button
+// #5 screen : reject button
+UX_FLOW(ux_display_simple_transfer_flow,
+        &ux_display_review_simple_transfer_step,
+        &ux_display_sender_address_step,
+        &ux_display_amount_step,
+        &ux_display_recipient_address_step,
+        &ux_display_approve_step,
+        &ux_display_reject_step);
+int ui_display_simple_transfer() {
     if (G_context.req_type != CONFIRM_TRANSACTION || G_context.state != STATE_PARSED) {
         G_context.state = STATE_NONE;
         return io_send_sw(SW_BAD_STATE);
     }
 
+    // Format the amount
     memset(g_amount, 0, sizeof(g_amount));
     char amount[30] = {0};
     if (!format_fpu64(amount,
                       sizeof(amount),
-                      G_context.tx_info.transaction.value,
+                      G_context.tx_info.transaction.simple_transfer.value,
                       EXPONENT_SMALLEST_UNIT)) {
         return io_send_sw(SW_DISPLAY_AMOUNT_FAIL);
     }
     snprintf(g_amount, sizeof(g_amount), "CCD %.*s", sizeof(amount), amount);
-    PRINTF("Amount: %s\n", g_amount);
 
-    memset(g_address, 0, sizeof(g_address));
-
-    if (format_hex(G_context.tx_info.transaction.to, ADDRESS_LEN, g_address, sizeof(g_address)) ==
-        -1) {
+    // Format the recipient address
+    if(address_to_base58(G_context.tx_info.transaction.simple_transfer.recipient, ADDRESS_LEN, g_recipient_address, sizeof(g_recipient_address)) == -1){
+        return io_send_sw(SW_DISPLAY_ADDRESS_FAIL);
+    }
+    // Format the sender address
+    if(address_to_base58(G_context.tx_info.transaction.simple_transfer.sender, ADDRESS_LEN, g_sender_address, sizeof(g_sender_address)) == -1){
         return io_send_sw(SW_DISPLAY_ADDRESS_FAIL);
     }
 
+
     g_validate_callback = &ui_action_validate_transaction;
 
-    ux_flow_init(0, ux_display_transaction_flow, NULL);
+    ux_flow_init(0, ux_display_simple_transfer_flow, NULL);
 
     return 0;
 }
-
 #endif

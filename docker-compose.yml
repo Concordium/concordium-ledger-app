@@ -6,7 +6,6 @@ services:
     volumes:
       - ./bin:/speculos/apps
       - ./src:/speculos/sources
-      - ./lib-app-bitcoin:/speculos/lib
       - ./build:/speculos/build
     ports:
       - "5000:5000" # api

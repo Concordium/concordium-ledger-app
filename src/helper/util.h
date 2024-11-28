@@ -27,7 +27,20 @@ int get_bls_private_key(uint32_t *path,
                         size_t private_key_len);
 
 /**
- * Convert an address to a base58 encoded string.
+ * Converts a Concordium address to its Base58 string representation.
+ * The function adds version byte and checksum before encoding.
+ * 
+ * @param[in]  address              Pointer to the raw address bytes to encode
+ * @param[in]  address_len          Length of the input address (must be CONCORDIUM_ADDRESS_LEN)
+ * @param[out] encoded_address      Buffer to store the resulting Base58 encoded string
+ * @param[in]  encoded_address_len  Size of the output buffer
+ * 
+ * @return     The number of bytes written to encoded_address (excluding null terminator) on success,
+ *             or -1 on error (e.g., if address_len is invalid)
+ * 
+ * @note       The function will automatically append a null terminator to the encoded string
+ * @note       The encoded address format is: Base58(version_byte || address || checksum)
+ *             where checksum is the first 4 bytes of double SHA256 of (version_byte || address)
  */
 int address_to_base58(const uint8_t *address,
                       size_t address_len,

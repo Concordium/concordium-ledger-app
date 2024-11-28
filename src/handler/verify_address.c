@@ -158,6 +158,7 @@ int handler_verify_address(buffer_t *cdata, bool is_new_address) {
     size_t address_len = sizeof(G_context.verify_address_info.address);
 
     // This function will return the number of bytes encoded, or -1 on error.
+    // TODO: Move this inside the function ui_display_verify_address()
     int rtn = address_to_base58(account_address,
                                 sizeof(account_address),
                                 G_context.verify_address_info.address,

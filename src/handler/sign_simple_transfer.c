@@ -22,16 +22,18 @@
 
 #include "os.h"
 #include "cx.h"
+// #include "cx_sha256.h"
 #include "buffer.h"
 
-#include "sign_tx.h"
+#include "sign_transfer.h"
 #include "../sw.h"
 #include "../globals.h"
 #include "../ui/display.h"
 #include "../transaction/types.h"
 #include "../transaction/deserialize.h"
 
-int handler_sign_tx(buffer_t *cdata, uint8_t chunk, bool more) {
+// TODO: FINISH THIS
+int handler_sign_simple_transfer(buffer_t *cdata, uint8_t chunk, bool more) {
     if (chunk == 0) {  // first APDU, parse BIP32 path
         explicit_bzero(&G_context, sizeof(G_context));
         G_context.req_type = CONFIRM_TRANSACTION;
@@ -73,33 +75,29 @@ int handler_sign_tx(buffer_t *cdata, uint8_t chunk, bool more) {
                             .size = G_context.tx_info.raw_tx_len,
                             .offset = 0};
 
-            parser_status_e status = transaction_deserialize(&buf, &G_context.tx_info.transaction);
+            parser_status_e status = simple_transfer_deserialize(&buf, &G_context.tx_info);
             PRINTF("Parsing status: %d.\n", status);
             if (status != PARSING_OK) {
                 return io_send_sw(SW_TX_PARSING_FAIL);
             }
+            // TODO: add a specific SW for wrong type
+            if(G_context.tx_info.type != TRANSACTION_TYPE_SIMPLE_TRANSFER) {
+                return io_send_sw(SW_BAD_STATE);
+            }
 
             G_context.state = STATE_PARSED;
-
-            if (cx_keccak_256_hash(G_context.tx_info.raw_tx,
-                                   G_context.tx_info.raw_tx_len,
-                                   G_context.tx_info.m_hash) != CX_OK) {
+            if (cx_hash_sha256(G_context.tx_info.raw_tx,
+                               G_context.tx_info.raw_tx_len,
+                               G_context.tx_info.m_hash,
+                               sizeof(G_context.tx_info.m_hash)) == 0) {
                 return io_send_sw(SW_TX_HASH_FAIL);
             }
 
             PRINTF("Hash: %.*H\n", sizeof(G_context.tx_info.m_hash), G_context.tx_info.m_hash);
 
-            // Example to trig a blind-sign flow
-            if (strcmp((char *) G_context.tx_info.transaction.memo, "Blind-sign") == 0) {
-// to remove when Nbgl will be available for Nanos
-#ifdef HAVE_NBGL
-                return ui_display_blind_signed_transaction();
-#else
-                return ui_display_transaction();
-#endif
-            } else {
-                return ui_display_transaction();
-            }
+
+            return ui_display_simple_transfer();
+            
         }
     }
 

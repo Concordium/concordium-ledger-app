@@ -6,7 +6,7 @@
 #include "buffer.h"
 
 /**
- * Handler for SIGN_TX command. If successfully parse BIP32 path
+ * Handler for SIGN_SIMPLE_TRANSFER command. If successfully parse BIP32 path
  * and transaction, sign transaction and send APDU response.
  *
  * @see G_context.bip32_path, G_context.tx_info.raw_transaction,
@@ -22,4 +22,4 @@
  * @return zero or positive integer if success, negative integer otherwise.
  *
  */
-int handler_sign_tx(buffer_t *cdata, uint8_t chunk, bool more);
+int handler_sign_simple_transfer(buffer_t *cdata, uint8_t chunk, bool more);

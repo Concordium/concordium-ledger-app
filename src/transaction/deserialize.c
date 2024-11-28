@@ -27,7 +27,8 @@
 #include "ledger_assert.h"
 #endif
 
-parser_status_e transaction_deserialize(buffer_t *buf, transaction_t *tx) {
+// TODO: EDIT THIS FUNCTION
+parser_status_e simple_transfer_deserialize(buffer_t *buf, transaction_ctx_t *tx) {
     LEDGER_ASSERT(buf != NULL, "NULL buf");
     LEDGER_ASSERT(tx != NULL, "NULL tx");
 
@@ -35,38 +36,47 @@ parser_status_e transaction_deserialize(buffer_t *buf, transaction_t *tx) {
         return WRONG_LENGTH_ERROR;
     }
 
-    // nonce
-    if (!buffer_read_u64(buf, &tx->nonce, BE)) {
-        return NONCE_PARSING_ERROR;
-    }
-
-    tx->to = (uint8_t *) (buf->ptr + buf->offset);
-
-    // TO address
+    // Sender address (32 bytes)
+    tx->transaction.simple_transfer.sender = (uint8_t *)(buf->ptr + buf->offset);
     if (!buffer_seek_cur(buf, ADDRESS_LEN)) {
-        return TO_PARSING_ERROR;
+        return SENDER_PARSING_ERROR;
     }
 
-    // amount value
-    if (!buffer_read_u64(buf, &tx->value, BE)) {
-        return VALUE_PARSING_ERROR;
+    // Skip sequence number (8 bytes)
+    if (!buffer_seek_cur(buf, 8)) {
+        return PARSING_ERROR;
     }
 
-    // length of memo
-    if (!buffer_read_varint(buf, &tx->memo_len) && tx->memo_len > MAX_MEMO_LEN) {
-        return MEMO_LENGTH_ERROR;
+    // Skip energy allowance (8 bytes)
+    if (!buffer_seek_cur(buf, 8)) {
+        return PARSING_ERROR;
     }
 
-    // memo
-    tx->memo = (uint8_t *) (buf->ptr + buf->offset);
-
-    if (!buffer_seek_cur(buf, tx->memo_len)) {
-        return MEMO_PARSING_ERROR;
+    // Skip payload size (4 bytes)
+    if (!buffer_seek_cur(buf, 4)) {
+        return PARSING_ERROR;
     }
 
-    if (!transaction_utils_check_encoding(tx->memo, tx->memo_len)) {
-        return MEMO_ENCODING_ERROR;
+    // Skip expiration (8 bytes)
+    if (!buffer_seek_cur(buf, 8)) {
+        return PARSING_ERROR;
     }
 
-    return (buf->offset == buf->size) ? PARSING_OK : WRONG_LENGTH_ERROR;
+    // Transaction type (1 byte)
+    if (!buffer_read_u8(buf, &tx->type)) {
+        return TYPE_PARSING_ERROR;
+    }
+
+    // Recipient address (32 bytes)
+    tx->transaction.simple_transfer.recipient = (uint8_t *)(buf->ptr + buf->offset);
+    if (!buffer_seek_cur(buf, ADDRESS_LEN)) {
+        return RECIPIENT_PARSING_ERROR;
+    }
+
+    // Amount (8 bytes)
+    if (!buffer_read_u64(buf, &tx->transaction.simple_transfer.value, BE)) {
+        return AMOUNT_PARSING_ERROR;
+    }
+
+    return PARSING_OK;
 }
