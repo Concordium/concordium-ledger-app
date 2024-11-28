@@ -1,7 +1,7 @@
 import pytest
 
 from application_client.boilerplate_transaction import Transaction
-from application_client.boilerplate_command_sender import BoilerplateCommandSender, Errors
+from application_client.boilerplate_command_sender import BoilerplateCommandSender, Errors, InsType
 from application_client.boilerplate_response_unpacker import unpack_get_public_key_response, unpack_sign_tx_response
 from ragger.error import ExceptionRAPDU
 from ragger.navigator import NavInsID
@@ -24,12 +24,14 @@ def test_sign_tx_simple_transfer(backend, scenario_navigator):
     # _, public_key, _, _ = unpack_get_public_key_response(rapdu.data)
 
     # Create the transaction that will be sent to the device for signing
-    transaction = b"20a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7000000000000000a0000000000000064000000290000000063de5da71620a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d70005"
+    transaction = '20a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7000000000000000a0000000000000064000000290000000063de5da70320a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7ffffffffffffffff'
+    transaction = bytes.fromhex(transaction)
 
     # Send the sign device instruction.
     # As it requires on-screen validation, the function is asynchronous.
     # It will yield the result when the navigation is done
-    with client.sign_tx(path=path, transaction=transaction):
+    ins_type = InsType.SIGN_SIMPLE_TRANSFER
+    with client.sign_tx(path=path, tx_type_ins=ins_type, transaction=transaction):
         # Validate the on-screen request by performing the navigation appropriate for this device
         scenario_navigator.review_approve()
 

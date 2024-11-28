@@ -34,7 +34,7 @@ class InsType(IntEnum):
     GET_VERSION = 0x03
     GET_APP_NAME = 0x04
     GET_PUBLIC_KEY = 0x05
-    SIGN_TX = 0x06
+    SIGN_SIMPLE_TRANSFER = 0x06
 
 
 class Errors(IntEnum):
@@ -123,10 +123,10 @@ class BoilerplateCommandSender:
             yield response
 
     @contextmanager
-    def sign_tx(self, path: str, transaction: bytes) -> Generator[None, None, None]:
+    def sign_tx(self, path: str, tx_type_ins: InsType, transaction: bytes) -> Generator[None, None, None]:
         self.backend.exchange(
             cla=CLA,
-            ins=InsType.SIGN_TX,
+            ins=tx_type_ins,
             p1=P1.P1_START,
             p2=P2.P2_MORE,
             data=pack_derivation_path(path),
@@ -136,12 +136,12 @@ class BoilerplateCommandSender:
 
         for msg in messages[:-1]:
             self.backend.exchange(
-                cla=CLA, ins=InsType.SIGN_TX, p1=idx, p2=P2.P2_MORE, data=msg
+                cla=CLA, ins=tx_type_ins, p1=idx, p2=P2.P2_MORE, data=msg
             )
             idx += 1
 
         with self.backend.exchange_async(
-            cla=CLA, ins=InsType.SIGN_TX, p1=idx, p2=P2.P2_LAST, data=messages[-1]
+            cla=CLA, ins=tx_type_ins, p1=idx, p2=P2.P2_LAST, data=messages[-1]
         ) as response:
             yield response
 
