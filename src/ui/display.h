@@ -46,3 +46,12 @@ int ui_display_verify_address(void);
  *
  */
 int ui_display_simple_transfer(void);
+
+
+/**
+ * Display public key information on the device and ask confirmation to export.
+ *
+ * @return 0 if success, negative integer otherwise.
+ *
+ */
+int ui_display_pubkey(void);

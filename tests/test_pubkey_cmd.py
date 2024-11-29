@@ -26,6 +26,7 @@ from ragger.navigator import NavInsID, NavIns
 def test_get_legacy_public_key_confirm_accepted(backend, scenario_navigator):
     client = BoilerplateCommandSender(backend)
     path = "m/1105/0/0/0/0/2/0/0"
+    # TODO: Edit instruction for nbgl display to click on approve
     with client.get_public_key_with_confirmation(path=path):
         scenario_navigator.address_review_approve()
 

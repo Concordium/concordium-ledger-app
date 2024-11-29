@@ -37,6 +37,10 @@
 #include "../menu.h"
 
 static char g_public_key[PUBKEY_LEN * 2 + 1];
+static char g_bip32_path_string[MAX_SERIALIZED_BIP32_PATH_LENGTH + 1];
+
+static nbgl_layoutTagValue_t pairs[2];
+static nbgl_layoutTagValueList_t pairList;
 
 static void review_choice(bool confirm) {
     // Answer, display a status page and go back to main
@@ -61,12 +65,28 @@ int ui_display_pubkey() {
         return io_send_sw(SW_PUBLIC_KEY_DISPLAY_FAIL);
     }
 
-    nbgl_useCaseAddressReview(g_public_key,
-                              NULL,
-                              &C_app_concordium_64px,
-                              "Verify Public Key",
-                              NULL,
-                              review_choice);
+    bip32_path_format(G_context.bip32_path, G_context.bip32_path_len, g_bip32_path_string, sizeof(g_bip32_path_string));
+
+   // Setup data to display
+    pairs[0].item = "BIP32 Path";
+    pairs[0].value = g_bip32_path_string;
+    pairs[1].item = "Public Key";
+    pairs[1].value = g_public_key;
+
+    // Setup list
+    pairList.nbMaxLinesForValue = 0;
+    pairList.nbPairs = 2;
+    pairList.pairs = pairs;
+
+    // Start review flow
+    nbgl_useCaseReviewLight(TYPE_OPERATION,
+                            &pairList,
+                            &C_app_concordium_64px,
+                            "Verify Public Key",
+                            NULL,
+                            "Verify Public Key",
+                            review_choice);
+
     return 0;
 }
 

@@ -95,9 +95,11 @@ int handler_get_public_key(buffer_t *cdata, bool display, bool sign_public_key) 
     }
     int path_type = derivation_path_type(G_context.bip32_path, G_context.bip32_path_len);
     if (display) {
-        // Special display for governance keys
+        // TODO: Implement special display for signed public keys ?
+
+        // TODO: Display governance key info
         if (path_type >= 10) {
-            // TODO: Display governance key info
+            // Special display for governance keys
         } else {
             return ui_display_pubkey();
         }
