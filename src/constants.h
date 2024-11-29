@@ -107,3 +107,10 @@ enum new_key_indexes { NEW_SIGN_KEY = 0, NEW_ID_CRED = 1, NEW_PRF_KEY = 2, NEW_M
  * Length of the public key.
  */
 #define PUBKEY_LEN 32
+
+/**
+ * Maximum length of a string representing a BIP32 derivation path.
+ * Each step is up to 11 characters (10 decimal digits, plus the "hardened" symbol),
+ * and there is 1 separator before each step.
+ */
+#define MAX_SERIALIZED_BIP32_PATH_LENGTH (12 * MAX_BIP32_PATH_SUPPORTED)

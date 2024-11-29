@@ -139,12 +139,20 @@ int get_bls_private_key(uint32_t *path,
 }
 
 int derivation_path_type(uint32_t *bip32_path, size_t bip32_path_len) {
-    if (bip32_path_len == 5 && bip32_path[0] == NEW_PURPOSE) {
-        return 1;
-    } else if (bip32_path_len == 4 && bip32_path[0] == LEGACY_PURPOSE) {
-        return 2;
+    int path_type = 0;
+    if (bip32_path_len >= 5 && bip32_path[0] == LEGACY_PURPOSE) {
+        path_type = 1;
+        if (bip32_path_len == 5) {
+            path_type += 10;
+        }
+    } else if (bip32_path_len >= 4 && bip32_path[0] == NEW_PURPOSE) {
+        path_type = 2;
+        if (bip32_path_len == 4) {
+            path_type += 10;
+        }
     }
-    return 0;
+
+    return path_type;
 }
 
 void harden_derivation_path(uint32_t *bip32_path, size_t bip32_path_len) {
@@ -167,12 +175,7 @@ int sign(uint8_t *m_hash, size_t m_hash_len, uint8_t *signature, size_t signatur
         return -1;
     }
     // sign the message
-    error = cx_eddsa_sign_no_throw(&private_key,
-                                   CX_SHA512,
-                                   m_hash,
-                                   m_hash_len,
-                                   signature,
-                                   sig_len);
+    error = cx_eddsa_sign_no_throw(&private_key, CX_SHA512, m_hash, m_hash_len, signature, sig_len);
 
     if (error != CX_OK) {
         return -2;

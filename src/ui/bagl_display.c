@@ -44,6 +44,7 @@ static char g_sender_address[57];
 static char g_verify_address_data[21];
 static char g_recipient_address[57];
 static char g_public_key[65];
+static char g_bip32_path_string[MAX_SERIALIZED_BIP32_PATH_LENGTH + 1];
 
 // Validate/Invalidate public key and go back to home
 static void ui_action_validate_pubkey(bool choice) {
@@ -238,6 +239,10 @@ int ui_display_simple_transfer() {
 
 // Step with icon and text
 UX_STEP_NOCB(ux_display_confirm_public_key_step, pn, {&C_icon_eye, "Confirm Public Key"});
+// Step with title/text for identity index and credential counter
+UX_STEP_NOCB(ux_display_bip32_path_step,
+             bnnn_paging,
+             {.title = "BIP32 Path", .text = g_bip32_path_string});
 // Step with title/text for address
 UX_STEP_NOCB(ux_display_public_key_step,
              bnnn_paging,
@@ -253,6 +258,7 @@ UX_STEP_NOCB(ux_display_public_key_step,
 // #5 screen : reject button
 UX_FLOW(ux_display_public_key_flow,
         &ux_display_confirm_public_key_step,
+        &ux_display_bip32_path_step,
         &ux_display_public_key_step,
         &ux_display_approve_step,
         &ux_display_reject_step);
@@ -268,22 +274,9 @@ int ui_display_pubkey() {
         return io_send_sw(SW_PUBLIC_KEY_DISPLAY_FAIL);
     }
 
+    bip32_path_format(G_context.bip32_path, G_context.bip32_path_len, g_bip32_path_string, sizeof(g_bip32_path_string));
     g_validate_callback = &ui_action_validate_pubkey;
     ux_flow_init(0, ux_display_public_key_flow, NULL);
     return 0;
-
-    // memset(g_address, 0, sizeof(g_address));
-    // uint8_t address[ADDRESS_LEN] = {0};
-    // if (!address_from_pubkey(G_context.pk_info.raw_public_key, address, sizeof(address))) {
-    //     return io_send_sw(SW_DISPLAY_ADDRESS_FAIL);
-    // }
-
-    // if (format_hex(address, sizeof(address), g_address, sizeof(g_address)) == -1) {
-    //     return io_send_sw(SW_DISPLAY_ADDRESS_FAIL);
-    // }
-
-    // g_validate_callback = &ui_action_validate_pubkey;
-    // ux_flow_init(0, ux_display_pubkey_flow, NULL);
-    // return 0;
 }
 #endif
