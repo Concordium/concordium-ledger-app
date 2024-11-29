@@ -43,7 +43,6 @@ typedef struct {
     // uint8_t raw_public_key[65];  /// format (1), x-coordinate (32), y-coodinate (32)
     uint8_t public_key[32];       /// public key
     bool sign_public_key;        /// whether to sign the public key
-    uint8_t m_hash[32];          /// message hash digest
     uint8_t signature[MAX_DER_SIG_LEN];  /// transaction signature encoded in DER
     uint8_t signature_len;               /// length of transaction signature
 } pubkey_ctx_t;

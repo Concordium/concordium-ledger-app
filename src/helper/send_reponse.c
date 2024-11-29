@@ -40,8 +40,8 @@ int helper_send_response_pubkey() {
 
     // Sign public key if requested and add to response
     if (G_context.pk_info.sign_public_key) {
-        if (sign(G_context.pk_info.m_hash,
-                 sizeof(G_context.pk_info.m_hash),
+        if (sign(G_context.pk_info.public_key,
+                 sizeof(G_context.pk_info.public_key),
                  G_context.pk_info.signature,
                  MAX_DER_SIG_LEN) != 0) {
             return io_send_sw(SW_SIGNATURE_FAIL);
