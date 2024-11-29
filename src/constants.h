@@ -102,3 +102,8 @@ enum new_key_indexes { NEW_SIGN_KEY = 0, NEW_ID_CRED = 1, NEW_PRF_KEY = 2, NEW_M
  * Concordium version byte.
  */
 #define CONCORDIUM_VERSION_BYTE 1
+
+/**
+ * Length of the public key.
+ */
+#define PUBKEY_LEN 32

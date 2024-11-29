@@ -71,7 +71,7 @@ int apdu_dispatcher(const command_t *cmd) {
             return handler_verify_address(&buf, (bool) cmd->p1);
 
         case GET_PUBLIC_KEY:
-            if (cmd->p1 > 1 || cmd->p2 > 0) {
+            if (cmd->p1 > 1 || cmd->p2 > 1) {
                 return io_send_sw(SW_WRONG_P1P2);
             }
 
@@ -83,7 +83,7 @@ int apdu_dispatcher(const command_t *cmd) {
             buf.size = cmd->lc;
             buf.offset = 0;
 
-            return handler_get_public_key(&buf, (bool) cmd->p1);
+            return handler_get_public_key(&buf, (bool) cmd->p1, (bool) cmd->p2);
         case SIGN_SIMPLE_TRANSFER:
             if ((cmd->p1 == P1_START && cmd->p2 != P2_MORE) ||  //
                 cmd->p1 > P1_MAX ||                             //

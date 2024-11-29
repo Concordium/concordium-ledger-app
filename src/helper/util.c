@@ -5,6 +5,7 @@
 #include <os.h>
 #include <cx.h>
 #include <base58.h>
+#include "../globals.h"
 
 #define l_CONST        48  // ceil((3 * ceil(log2(r))) / 16)
 #define BLS_KEY_LENGTH 32
@@ -150,4 +151,33 @@ void harden_derivation_path(uint32_t *bip32_path, size_t bip32_path_len) {
     for (size_t i = 0; i < bip32_path_len; i++) {
         bip32_path[i] |= HARDENED_OFFSET;
     }
+}
+
+int sign(uint8_t *m_hash, size_t m_hash_len, uint8_t *signature, size_t signature_len) {
+    size_t sig_len = signature_len;
+    cx_ecfp_private_key_t private_key;
+
+    cx_err_t error = CX_OK;
+
+    // harden the path
+    harden_derivation_path(G_context.bip32_path, G_context.bip32_path_len);
+    // get private key from path
+    if (get_private_key_from_path(G_context.bip32_path, G_context.bip32_path_len, &private_key) !=
+        0) {
+        return -1;
+    }
+    // sign the message
+    error = cx_eddsa_sign_no_throw(&private_key,
+                                   CX_SHA512,
+                                   m_hash,
+                                   m_hash_len,
+                                   signature,
+                                   sig_len);
+
+    if (error != CX_OK) {
+        return -2;
+    }
+
+    PRINTF("Signature: %.*H\n", sig_len, signature);
+    return 0;
 }

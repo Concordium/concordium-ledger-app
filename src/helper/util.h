@@ -98,6 +98,24 @@ void harden_derivation_path(uint32_t *bip32_path, size_t bip32_path_len);
  */
 int derivation_path_type(uint32_t *bip32_path, size_t bip32_path_len);
 
+/**
+ * Signs a message hash using EdDSA (Ed25519) with the private key derived from the current BIP32 path.
+ *
+ * @param[in]  m_hash          Pointer to the message hash to be signed
+ * @param[in]  m_hash_len      Length of the message hash
+ * @param[out] signature       Buffer to store the resulting signature
+ * @param[in]  signature_len   Size of the signature buffer
+ *
+ * @return 0 on success
+ *         -1 if private key derivation fails
+ *         -2 if signing operation fails
+ *
+ * @note This function uses the BIP32 path stored in G_context.bip32_path
+ * @note The path is automatically hardened before key derivation
+ * @note The signature length is stored in G_context.tx_info.signature_len
+ */
+int sign(uint8_t *m_hash, size_t m_hash_len, uint8_t *signature, size_t signature_len);
+
 // We must declare the functions for the static analyzer to be happy. Ideally we would have
 // access to the declarations from the Ledger SDK.
 void cx_hkdf_extract(const cx_md_t hash_id,

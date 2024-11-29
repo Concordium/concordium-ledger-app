@@ -31,31 +31,71 @@
 #include "../types.h"
 #include "../sw.h"
 #include "../ui/display.h"
+#include "../helper/util.h"
 #include "../helper/send_response.h"
 
-int handler_get_public_key(buffer_t *cdata, bool display) {
+int get_public_key(uint32_t *path, size_t path_len, uint8_t *public_key_array) {
+    cx_ecfp_private_key_t private_key;
+    cx_ecfp_public_key_t public_key;
+    int rtn = get_private_key_from_path(path, path_len, &private_key);
+    if (rtn != 0) {
+        return rtn;
+    }
+    if (cx_ecfp_generate_pair_no_throw(CX_CURVE_Ed25519, &public_key, &private_key, 1) != CX_OK) {
+        // Clear the private key
+        explicit_bzero(&private_key, sizeof(private_key));
+        return -3;
+    }
+
+    explicit_bzero(&private_key, sizeof(private_key));
+
+    // Format the public key
+    for (int i = 0; i < 32; i++) {
+        public_key_array[i] = public_key.W[64 - i];
+    }
+    if ((public_key.W[32] & 1) != 0) {
+        public_key_array[31] |= 0x80;
+    }
+    return 0;
+}
+
+int handler_get_public_key(buffer_t *cdata, bool display, bool sign_public_key) {
     explicit_bzero(&G_context, sizeof(G_context));
-    G_context.req_type = CONFIRM_ADDRESS;
+    G_context.req_type = CONFIRM_PUBLIC_KEY;
     G_context.state = STATE_NONE;
 
     if (!buffer_read_u8(cdata, &G_context.bip32_path_len) ||
         !buffer_read_bip32_path(cdata, G_context.bip32_path, (size_t) G_context.bip32_path_len)) {
         return io_send_sw(SW_WRONG_DATA_LENGTH);
     }
+    harden_derivation_path(G_context.bip32_path, G_context.bip32_path_len);
+    int rtn = get_public_key(G_context.bip32_path,
+                             G_context.bip32_path_len,
+                             G_context.pk_info.public_key);
+    // Error handling
+    switch (rtn) {
+        case -1:
+            // Derivation path failed
+            return io_send_sw(SW_DERIVATION_PATH_FAIL);
+        case -2:
+            // Key initialization failed
+            return io_send_sw(SW_KEY_INIT_FAIL);
+        case -3:
+            // Public key derivation failed
+            return io_send_sw(SW_PUBLIC_KEY_DERIVATION_FAIL);
+        case 0:
+            break;
+        default:
+            // This should never happen
+            return io_send_sw(SW_BAD_STATE);
+    }
 
-    cx_err_t error = bip32_derive_get_pubkey_256(CX_CURVE_256K1,
-                                                 G_context.bip32_path,
-                                                 G_context.bip32_path_len,
-                                                 G_context.pk_info.raw_public_key,
-                                                 G_context.pk_info.chain_code,
-                                                 CX_SHA512);
-
-    if (error != CX_OK) {
-        return io_send_sw(error);
+    if (sign_public_key) {
+        G_context.pk_info.sign_public_key = true;
     }
 
     if (display) {
-        return ui_display_address();
+        return ui_display_pubkey();
     }
 
     return helper_send_response_pubkey();

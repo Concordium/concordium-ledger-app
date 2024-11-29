@@ -3,14 +3,9 @@
 #include "os.h"
 #include "macros.h"
 
-/**
- * Length of public key.
- */
-#define PUBKEY_LEN (MEMBER_SIZE(pubkey_ctx_t, raw_public_key))
-/**
- * Length of chain code.
- */
-#define CHAINCODE_LEN (MEMBER_SIZE(pubkey_ctx_t, chain_code))
+
+
+
 
 /**
  * Helper to send APDU response with public key and chain code.
@@ -23,6 +18,7 @@
  * @return zero or positive integer if success, -1 otherwise.
  *
  */
+// TODO: update the docs here
 int helper_send_response_pubkey(void);
 
 /**

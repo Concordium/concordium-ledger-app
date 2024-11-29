@@ -12,7 +12,8 @@
         "string": "c",
         "string_view": "c",
         "unordered_map": "c",
-        "vector": "c"
+        "vector": "c",
+        "locale": "c"
     },
     "C_Cpp.clang_format_path": "/usr/bin/clang-format",
     "editor.formatOnSave": false,
