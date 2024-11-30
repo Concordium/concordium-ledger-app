@@ -27,7 +27,6 @@
 #include "../sw.h"
 #include "../helper/util.h"
 
-// TODO: fix this, something is wrong here, the signatures don't match
 int helper_send_response_pubkey() {
 
     uint8_t resp[1 + PUBKEY_LEN + 1 + MAX_DER_SIG_LEN] = {0};

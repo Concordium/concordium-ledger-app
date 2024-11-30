@@ -52,7 +52,6 @@ static void review_choice(bool confirm) {
     }
 }
 
-// TODO: IMPLEMENT THIS 
 int ui_display_pubkey() {
     if (G_context.req_type != CONFIRM_PUBLIC_KEY || G_context.state != STATE_NONE) {
         G_context.state = STATE_NONE;
