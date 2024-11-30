@@ -125,7 +125,9 @@ class BoilerplateCommandSender:
             yield response
 
     @contextmanager
-    def sign_tx(self, path: str, tx_type_ins: InsType, transaction: bytes) -> Generator[None, None, None]:
+    def sign_tx(
+        self, path: str, tx_type_ins: InsType, transaction: bytes
+    ) -> Generator[None, None, None]:
         self.backend.exchange(
             cla=CLA,
             ins=tx_type_ins,
