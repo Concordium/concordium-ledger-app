@@ -5,6 +5,7 @@ from application_client.boilerplate_response_unpacker import unpack_get_public_k
 from ragger.bip import calculate_public_key_and_chaincode, CurveChoice
 from ragger.error import ExceptionRAPDU
 from ragger.navigator import NavInsID, NavIns
+from utils import navigate_until_text_and_compare
 
 
 # TODO: remove this test
@@ -23,23 +24,24 @@ from ragger.navigator import NavInsID, NavIns
 # TODO: Write the same 2 tests for New derivation path
 
 # In this test we check that the GET_PUBLIC_KEY works in confirmation mode
-def test_get_legacy_public_key_confirm_accepted(backend, scenario_navigator):
+def test_get_legacy_public_key_confirm_accepted(backend, navigator, firmware, default_screenshot_path):
     client = BoilerplateCommandSender(backend)
     path = "m/1105/0/0/0/0/2/0/0"
     # TODO: Edit instruction for nbgl display to click on approve
     with client.get_public_key_with_confirmation(path=path):
-        scenario_navigator.address_review_approve()
+        navigate_until_text_and_compare(firmware, navigator, "Approve", default_screenshot_path)
+
 
     response = client.get_async_response().data
     print("km------------------|response:", response.hex())
     assert(response.hex() == "2087e16c8269270b1c75b930224df456d2927b80c760ffa77e57dbd738f6399492")
 
 
-def test_get_signed_legacy_public_key_confirm_accepted(backend, scenario_navigator):
+def test_get_signed_legacy_public_key_confirm_accepted(backend, navigator, firmware, default_screenshot_path):
     client = BoilerplateCommandSender(backend)
     path = "m/1105/0/0/0/0/2/0/0"
     with client.get_public_key_with_confirmation(path=path, signPublicKey=True):
-        scenario_navigator.address_review_approve()
+        navigate_until_text_and_compare(firmware, navigator, "Approve", default_screenshot_path)
 
     response = client.get_async_response().data
     print("km------------------|response:", response.hex())

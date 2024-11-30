@@ -5,6 +5,8 @@ from ecdsa.curves import SECP256k1
 from ecdsa.keys import VerifyingKey
 from ecdsa.util import sigdecode_der
 
+from ragger.navigator import NavInsID
+
 
 # Check if a signature of a given message is valid
 def check_signature_validity(public_key: bytes, signature: bytes, message: bytes) -> bool:
@@ -18,8 +20,57 @@ def check_signature_validity(public_key: bytes, signature: bytes, message: bytes
                      hashfunc=keccak_256,
                      sigdecode=sigdecode_der)
 
+def instructions_builder(number_of_screens_until_confirm: int, backend) -> list[NavInsID]:
+    if backend.firmware.device.startswith(("stax", "flex")):
+        go_right_instruction = NavInsID.SWIPE_CENTER_TO_LEFT
+        confirm_instruction = NavInsID.USE_CASE_REVIEW_CONFIRM
+    else:
+        go_right_instruction = NavInsID.SWIPE_CENTER_TO_LEFT
+        confirm_instruction = NavInsID.USE_CASE_ADDRESS_CONFIRMATION_CONFIRM
 
+    # Add the go right instruction for the number of screens needed
+    instructions = [go_right_instruction] * number_of_screens_until_confirm
+    # Add the confirm instruction
+    instructions.append(confirm_instruction)
+    return instructions
 
+def navigate_until_text_and_compare(firmware, navigator, text: str, screenshot_path: str):
+    """Navigate through device screens until specified text is found and compare screenshots.
+
+    This function handles navigation through device screens differently based on the device type (Stax/Flex vs others).
+    It will navigate through screens until the specified text is found, taking screenshots for comparison along the way.
+
+    Args:
+        firmware: The firmware object containing device information
+        navigator: The navigator object used to control device navigation
+        text: The text string to search for on device screens
+        screenshot_path: Path where screenshot comparison files will be saved
+
+    Returns:
+        None
+
+    Note:
+        For Stax/Flex devices:
+        - Uses swipe left gesture for navigation
+        - Uses review confirm for confirmation
+        For other devices:
+        - Uses right click for navigation
+        - Uses both click for confirmation
+    """
+    if firmware.device.startswith(("stax", "flex")):
+        go_right_instruction = NavInsID.SWIPE_CENTER_TO_LEFT
+        #TODO: check if this is the correct instruction
+        confirm_instructions = [NavInsID.USE_CASE_ADDRESS_CONFIRMATION_CONFIRM]
+    else:
+        go_right_instruction = NavInsID.RIGHT_CLICK
+        confirm_instructions = [NavInsID.BOTH_CLICK]
+
+    navigator.navigate_until_text_and_compare(
+        go_right_instruction,
+        confirm_instructions,
+        text,
+        screenshot_path
+    )
 # The following functions might be useful someday, they are not tested, so some of them might not behave as expected
 
 # def hkdf_expand(prk: bytes, info: bytes, length: int) -> bytes:
