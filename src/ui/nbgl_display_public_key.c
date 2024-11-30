@@ -64,9 +64,12 @@ int ui_display_pubkey() {
         return io_send_sw(SW_PUBLIC_KEY_DISPLAY_FAIL);
     }
 
-    bip32_path_format(G_context.bip32_path, G_context.bip32_path_len, g_bip32_path_string, sizeof(g_bip32_path_string));
+    bip32_path_format(G_context.bip32_path,
+                      G_context.bip32_path_len,
+                      g_bip32_path_string,
+                      sizeof(g_bip32_path_string));
 
-   // Setup data to display
+    // Setup data to display
     pairs[0].item = "BIP32 Path";
     pairs[0].value = g_bip32_path_string;
     pairs[1].item = "Public Key";

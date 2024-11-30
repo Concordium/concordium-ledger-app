@@ -44,11 +44,11 @@ void validate_verify_address(bool choice) {
 
 static int crypto_sign_message(void) {
     size_t sig_len = sizeof(G_context.tx_info.signature);
-    
+
     int result = sign(G_context.tx_info.m_hash,
-                     sizeof(G_context.tx_info.m_hash),
-                     G_context.tx_info.signature,
-                     sig_len);
+                      sizeof(G_context.tx_info.m_hash),
+                      G_context.tx_info.signature,
+                      sig_len);
 
     if (result != 0) {
         return -1;

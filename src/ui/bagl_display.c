@@ -37,7 +37,6 @@
 #include "../menu.h"
 #include "../helper/util.h"
 
-
 static action_validate_cb g_validate_callback;
 static char g_amount[30];
 static char g_sender_address[57];
@@ -274,7 +273,10 @@ int ui_display_pubkey() {
         return io_send_sw(SW_PUBLIC_KEY_DISPLAY_FAIL);
     }
 
-    bip32_path_format(G_context.bip32_path, G_context.bip32_path_len, g_bip32_path_string, sizeof(g_bip32_path_string));
+    bip32_path_format(G_context.bip32_path,
+                      G_context.bip32_path_len,
+                      g_bip32_path_string,
+                      sizeof(g_bip32_path_string));
     g_validate_callback = &ui_action_validate_pubkey;
     ux_flow_init(0, ux_display_public_key_flow, NULL);
     return 0;

@@ -91,10 +91,10 @@ void harden_derivation_path(uint32_t *bip32_path, size_t bip32_path_len);
 
 /**
  * Determines the type of derivation path based on its length and purpose.
- * 
+ *
  * @param[in] bip32_path     Pointer to an array containing the BIP32 derivation path
  * @param[in] bip32_path_len Length of the derivation path array
- * 
+ *
  * @return Path type identifier:
  *         - 0:  Invalid/unknown path
  *         - 1:  Legacy path (≥5 elements) with LEGACY_PURPOSE
@@ -105,7 +105,8 @@ void harden_derivation_path(uint32_t *bip32_path, size_t bip32_path_len);
 int derivation_path_type(uint32_t *bip32_path, size_t bip32_path_len);
 
 /**
- * Signs a message hash using EdDSA (Ed25519) with the private key derived from the current BIP32 path.
+ * Signs a message hash using EdDSA (Ed25519) with the private key derived from the current BIP32
+ * path.
  *
  * @param[in]  m_hash          Pointer to the message hash to be signed
  * @param[in]  m_hash_len      Length of the message hash

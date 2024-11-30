@@ -67,11 +67,11 @@
 /**
  * Status word for failure in BLS key generation.
  */
-#define SW_BLS_KEY_GEN_FAIL       0xB00A
+#define SW_BLS_KEY_GEN_FAIL 0xB00A
 /**
  * Status word for failure in key initialization.
  */
-#define SW_KEY_INIT_FAIL          0xB00B
+#define SW_KEY_INIT_FAIL 0xB00B
 /**
  * Status word for failure in credential ID generation.
  */
@@ -79,11 +79,11 @@
 /**
  * Status word for failure in address encoding.
  */
-#define SW_ADDRESS_ENCODING_FAIL  0xB00D
+#define SW_ADDRESS_ENCODING_FAIL 0xB00D
 /**
  * Status word for failure in derivation path processing.
  */
-#define SW_DERIVATION_PATH_FAIL   0xB00E
+#define SW_DERIVATION_PATH_FAIL 0xB00E
 /**
  * Status word for failure in public key derivation.
  */

@@ -31,9 +31,9 @@ typedef enum {
  * Enumeration with user request type.
  */
 typedef enum {
-    CONFIRM_PUBLIC_KEY,         /// confirm public key
-    CONFIRM_ADDRESS,        /// confirm address derived from public key
-    CONFIRM_TRANSACTION     /// confirm transaction information
+    CONFIRM_PUBLIC_KEY,  /// confirm public key
+    CONFIRM_ADDRESS,     /// confirm address derived from public key
+    CONFIRM_TRANSACTION  /// confirm transaction information
 } request_type_e;
 
 /**
@@ -41,8 +41,8 @@ typedef enum {
  */
 typedef struct {
     // uint8_t raw_public_key[65];  /// format (1), x-coordinate (32), y-coodinate (32)
-    uint8_t public_key[32];       /// public key
-    bool sign_public_key;        /// whether to sign the public key
+    uint8_t public_key[32];              /// public key
+    bool sign_public_key;                /// whether to sign the public key
     uint8_t signature[MAX_DER_SIG_LEN];  /// transaction signature encoded in DER
     uint8_t signature_len;               /// length of transaction signature
 } pubkey_ctx_t;
