@@ -45,6 +45,7 @@ typedef struct {
     bool sign_public_key;                /// whether to sign the public key
     uint8_t signature[MAX_DER_SIG_LEN];  /// transaction signature encoded in DER
     uint8_t signature_len;               /// length of transaction signature
+    char public_key_title[36];           /// title of the public key
 } pubkey_ctx_t;
 
 /**

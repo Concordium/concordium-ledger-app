@@ -68,6 +68,11 @@ int handler_get_public_key(buffer_t *cdata, bool display, bool sign_public_key) 
         !buffer_read_bip32_path(cdata, G_context.bip32_path, (size_t) G_context.bip32_path_len)) {
         return io_send_sw(SW_WRONG_DATA_LENGTH);
     }
+    int path_type = derivation_path_type(G_context.bip32_path, G_context.bip32_path_len);
+    if (path_type <= 0) {
+        PRINTF("ERROR: Invalid path type: %d\n", path_type);
+        return io_send_sw(SW_INVALID_PATH);
+    }
     harden_derivation_path(G_context.bip32_path, G_context.bip32_path_len);
     int rtn = get_public_key(G_context.bip32_path,
                              G_context.bip32_path_len,
@@ -93,16 +98,54 @@ int handler_get_public_key(buffer_t *cdata, bool display, bool sign_public_key) 
     if (sign_public_key) {
         G_context.pk_info.sign_public_key = true;
     }
-    int path_type = derivation_path_type(G_context.bip32_path, G_context.bip32_path_len);
-    if (display) {
-        // TODO: Implement special display for signed public keys ?
+    // Change the title of the public key depending on if signed or not or if it is a governance key
+    char temp_title[36];
+    size_t offset = 0;
+    strncpy(temp_title, "Get ", 4);
+    offset += 4;
 
-        // TODO: Display governance key info
-        if (path_type >= 10) {
-            // Special display for governance keys
-        } else {
-            return ui_display_pubkey();
+    // Append "Signed" to the title if needed
+    if (sign_public_key) {
+        strncpy(temp_title + offset, "Signed ", 7);
+        offset += 7;
+    }
+
+    // Append "Gov." to the title if needed
+    if (path_type >= 10) {
+        strncpy(temp_title + offset, "Gov. ", 5);
+        offset += 5;
+        // Get the purpose of the key
+        // TODO: enter the correct index for new path in constants.h and add a check for it
+        uint32_t purpose = G_context.bip32_path[LEGACY_PATH_PURPOSE_INDEX];
+        // Change the title of the public key depending on the purpose
+        switch (purpose) {
+            case 0 | HARDENED_OFFSET:
+                strncpy(temp_title + offset, "Root ", 5);
+                offset += 5;
+                break;
+            case 1 | HARDENED_OFFSET:
+                strncpy(temp_title + offset, "Level 1 ", 7);
+                offset += 7;
+                break;
+            case 2 | HARDENED_OFFSET:
+                strncpy(temp_title + offset, "Level 2 ", 7);
+                offset += 7;
+                break;
+            default:
+                PRINTF("Unknown purpose: %lx\n", purpose);
+                return io_send_sw(SW_INVALID_PATH);
         }
+    }
+
+    // Append "Public Key" to the title
+    strncpy(temp_title + offset, "Public Key", 11);
+    offset += 11;
+    // Add null terminator
+    temp_title[offset] = '\0';
+    strncpy(G_context.pk_info.public_key_title, temp_title, 36);
+
+    if (display) {
+        return ui_display_pubkey();
     }
 
     return helper_send_response_pubkey();

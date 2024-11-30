@@ -140,13 +140,27 @@ int get_bls_private_key(uint32_t *path,
 
 int derivation_path_type(uint32_t *bip32_path, size_t bip32_path_len) {
     int path_type = 0;
+    // Check if it is a legacy key
     if (bip32_path_len >= 5 && bip32_path[0] == LEGACY_PURPOSE) {
         path_type = 1;
+        // Check if it is a governance key
         if (bip32_path_len == 5) {
             path_type += 10;
+            uint32_t subtree = bip32_path[LEGACY_PATH_SUBTREE_INDEX];
+            // print path length
+            for (size_t i = 0; i < bip32_path_len; i++) {
+                PRINTF("%x ", bip32_path[i]);
+            }
+            PRINTF("\n");
+            if (subtree != 1 && subtree != LEGACY_GOVERNANCE_SUBTREE) {
+                path_type = -1;
+            }
         }
-    } else if (bip32_path_len >= 4 && bip32_path[0] == NEW_PURPOSE) {
+    }
+    // Check if it is a new key
+    else if (bip32_path_len >= 4 && bip32_path[0] == NEW_PURPOSE) {
         path_type = 2;
+        // Check if it is a governance key
         if (bip32_path_len == 4) {
             path_type += 10;
         }

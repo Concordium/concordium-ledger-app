@@ -38,6 +38,7 @@
 
 static char g_public_key[PUBKEY_LEN * 2 + 1];
 static char g_bip32_path_string[MAX_SERIALIZED_BIP32_PATH_LENGTH + 1];
+static char g_public_key_title[36];
 
 static nbgl_layoutTagValue_t pairs[2];
 static nbgl_layoutTagValueList_t pairList;
@@ -57,13 +58,18 @@ int ui_display_pubkey() {
         G_context.state = STATE_NONE;
         return io_send_sw(SW_BAD_STATE);
     }
+    // Copy the public key title to the global variable
+    memset(g_public_key_title, 0, sizeof(g_public_key_title));
+    memmove(g_public_key_title,
+            G_context.pk_info.public_key_title,
+            strlen(G_context.pk_info.public_key_title));
 
     // Format the public key
     if (format_hex(G_context.pk_info.public_key, PUBKEY_LEN, g_public_key, sizeof(g_public_key)) ==
         -1) {
         return io_send_sw(SW_PUBLIC_KEY_DISPLAY_FAIL);
     }
-
+    // Format the BIP32 path
     bip32_path_format(G_context.bip32_path,
                       G_context.bip32_path_len,
                       g_bip32_path_string,
@@ -84,9 +90,9 @@ int ui_display_pubkey() {
     nbgl_useCaseReviewLight(TYPE_OPERATION,
                             &pairList,
                             &C_app_concordium_64px,
-                            "Verify Public Key",
+                            g_public_key_title,
                             NULL,
-                            "Verify Public Key",
+                            g_public_key_title,
                             review_choice);
 
     return 0;

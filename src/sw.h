@@ -92,3 +92,7 @@
  * Status word for failure in public key display.
  */
 #define SW_PUBLIC_KEY_DISPLAY_FAIL 0xB010
+/**
+ * Status word for invalid governance path.
+ */
+#define SW_INVALID_PATH 0xB011

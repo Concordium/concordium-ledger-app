@@ -14,7 +14,7 @@ simple transfer 1 (from concordium old app)
 curl command:
   curl -X POST 'http://localhost:5000/apdu' \
        -H 'Content-Type: application/json' \
-       -d '{"data":"e00101002108800003ed80000000800000000000000000000000000000020000000000000000"}'
+       -d '{"data":"e001010115050000045100000000000000000000000100000000"}'
 
 get public key:
   apdu:

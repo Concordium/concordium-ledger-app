@@ -43,6 +43,7 @@ static char g_sender_address[57];
 static char g_verify_address_data[21];
 static char g_recipient_address[57];
 static char g_public_key[65];
+static char g_public_key_title[36];
 static char g_bip32_path_string[MAX_SERIALIZED_BIP32_PATH_LENGTH + 1];
 
 // Validate/Invalidate public key and go back to home
@@ -237,7 +238,7 @@ int ui_display_simple_transfer() {
 }
 
 // Step with icon and text
-UX_STEP_NOCB(ux_display_confirm_public_key_step, pn, {&C_icon_eye, "Confirm Public Key"});
+UX_STEP_NOCB(ux_display_confirm_public_key_step, bnnn_paging, {"", g_public_key_title});
 // Step with title/text for identity index and credential counter
 UX_STEP_NOCB(ux_display_bip32_path_step,
              bnnn_paging,
@@ -266,13 +267,18 @@ int ui_display_pubkey() {
         G_context.state = STATE_NONE;
         return io_send_sw(SW_BAD_STATE);
     }
+    // Copy the public key title to the global variable
+    memset(g_public_key_title, 0, sizeof(g_public_key_title));
+    memmove(g_public_key_title,
+            G_context.pk_info.public_key_title,
+            strlen(G_context.pk_info.public_key_title));
 
     // Format the public key
     if (format_hex(G_context.pk_info.public_key, PUBKEY_LEN, g_public_key, sizeof(g_public_key)) ==
         -1) {
         return io_send_sw(SW_PUBLIC_KEY_DISPLAY_FAIL);
     }
-
+    // Format the BIP32 path
     bip32_path_format(G_context.bip32_path,
                       G_context.bip32_path_len,
                       g_bip32_path_string,

@@ -38,7 +38,7 @@ def instructions_builder(
 
 
 def navigate_until_text_and_compare(
-    firmware, navigator, text: str, screenshot_path: str
+    firmware, navigator, text: str, screenshot_path: str, test_name: str
 ):
     """Navigate through device screens until specified text is found and compare screenshots.
 
@@ -50,7 +50,7 @@ def navigate_until_text_and_compare(
         navigator: The navigator object used to control device navigation
         text: The text string to search for on device screens
         screenshot_path: Path where screenshot comparison files will be saved
-
+        test_name: The name of the test that is being run
     Returns:
         None
 
@@ -70,7 +70,7 @@ def navigate_until_text_and_compare(
         confirm_instructions = [NavInsID.BOTH_CLICK]
 
     navigator.navigate_until_text_and_compare(
-        go_right_instruction, confirm_instructions, text, screenshot_path
+        go_right_instruction, confirm_instructions, text, screenshot_path, test_name
     )
 
 

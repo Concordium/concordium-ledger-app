@@ -114,3 +114,22 @@ enum new_key_indexes { NEW_SIGN_KEY = 0, NEW_ID_CRED = 1, NEW_PRF_KEY = 2, NEW_M
  * and there is 1 separator before each step.
  */
 #define MAX_SERIALIZED_BIP32_PATH_LENGTH (12 * MAX_BIP32_PATH_SUPPORTED)
+
+/**
+ * Index of the purpose in the legacy derivation path.
+ */
+#define LEGACY_PATH_PURPOSE_INDEX 3
+
+/**
+ * Index of the subtree in the legacy derivation path.
+ */
+#define LEGACY_PATH_SUBTREE_INDEX 2
+
+/**
+ * Subtree value for governance keys in the legacy derivation path.
+ */
+#define LEGACY_GOVERNANCE_SUBTREE 0x80000001
+
+// TODO: enter the correct index for new path
+#define NEW_PATH_PURPOSE_INDEX
+#define NEW_PATH_SUBTREE_INDEX

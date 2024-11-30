@@ -90,17 +90,18 @@ int bls_key_gen_from_seed(uint8_t *seed,
 void harden_derivation_path(uint32_t *bip32_path, size_t bip32_path_len);
 
 /**
- * Determines the type of derivation path based on its length and purpose.
+ * Determines the type of derivation path based on its structure.
  *
- * @param[in] bip32_path     Pointer to an array containing the BIP32 derivation path
- * @param[in] bip32_path_len Length of the derivation path array
+ * @param[in] bip32_path      Pointer to the derivation path array
+ * @param[in] bip32_path_len  Length of the derivation path array
  *
  * @return Path type identifier:
- *         - 0:  Invalid/unknown path
- *         - 1:  Legacy path (≥5 elements) with LEGACY_PURPOSE
- *         - 11: Legacy path (exactly 5 elements) with LEGACY_PURPOSE
- *         - 2:  New path (≥4 elements) with NEW_PURPOSE
- *         - 12: New path (exactly 4 elements) with NEW_PURPOSE
+ *         -1: Invalid legacy governance path
+ *          0: Invalid/unknown path type
+ *          1: Legacy normal key path
+ *          2: New normal key path
+ *         11: Legacy governance key path
+ *         12: New governance key path
  */
 int derivation_path_type(uint32_t *bip32_path, size_t bip32_path_len);
 
