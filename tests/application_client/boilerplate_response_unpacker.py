@@ -62,7 +62,9 @@ def unpack_get_public_key_response(response: bytes) -> Tuple[int, bytes]:
     return pub_key_len, pub_key
 
 
-def unpack_get_signed_public_key_response(response: bytes) -> Tuple[int, bytes, int]:
+def unpack_get_signed_public_key_response(
+    response: bytes,
+) -> Tuple[int, bytes, int, bytes]:
     response, pub_key_len, pub_key = pop_size_prefixed_buf_from_buf(response)
     response, der_sig_len, der_sig = pop_size_prefixed_buf_from_buf(response)
 
