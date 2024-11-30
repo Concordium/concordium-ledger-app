@@ -50,7 +50,7 @@ def test_wrong_data_length(backend):
 def test_invalid_state(backend):
     with pytest.raises(ExceptionRAPDU) as e:
         backend.exchange(cla=CLA,
-                         ins=InsType.SIGN_TX,
+                         ins=InsType.SIGN_SIMPLE_TRANSFER,
                          p1=P1.P1_START + 1,  # Try to continue a flow instead of start a new one
                          p2=P2.P2_MORE,
                          data=b"abcde")  # data is not parsed in this case

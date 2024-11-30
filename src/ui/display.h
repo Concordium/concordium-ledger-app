@@ -38,3 +38,11 @@ int ui_display_blind_signed_transaction(void);
  *
  */
 int ui_display_verify_address(void);
+
+/**
+ * Display simple transfer information on the device and ask confirmation to sign.
+ *
+ * @return 0 if success, negative integer otherwise.
+ *
+ */
+int ui_display_simple_transfer(void);

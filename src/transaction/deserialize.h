@@ -3,6 +3,7 @@
 #include "buffer.h"
 
 #include "types.h"
+#include "../types.h"
 
 /**
  * Deserialize raw transaction in structure.
@@ -15,4 +16,4 @@
  * @return PARSING_OK if success, error status otherwise.
  *
  */
-parser_status_e transaction_deserialize(buffer_t *buf, transaction_t *tx);
+parser_status_e simple_transfer_deserialize(buffer_t *buf, transaction_ctx_t *tx);

@@ -28,7 +28,12 @@
 /**
  * Maximum signature length (bytes).
  */
-#define MAX_DER_SIG_LEN 72
+#define MAX_DER_SIG_LEN 64
+
+/**
+ * Maximum BIP32 path length supported by the app.
+ */
+#define MAX_BIP32_PATH_SUPPORTED 8
 
 /**
  * Exponent used to convert mCCD to CCD unit (N CCD = N * 10^3 mCCD).
