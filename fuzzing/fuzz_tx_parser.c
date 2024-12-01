@@ -1,4 +1,3 @@
-#define FUZZ_BUILD
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
@@ -8,7 +7,6 @@
 #include "transaction/utils.h"
 #include "transaction/types.h"
 #include "format.h"
-#include "mocks/ux.h"
 
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     buffer_t buf = {.ptr = data, .size = size, .offset = 0};
