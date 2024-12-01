@@ -95,12 +95,10 @@ file(GLOB_RECURSE APPLICATION_SRC
 # Filter out main.c from the SDK and the entire dbg folder
 list(FILTER APPLICATION_SRC EXCLUDE REGEX "${CMAKE_CURRENT_SOURCE_DIR}/../unit-tests")
 
-add_executable(fuzz
+add_executable(fuzz_tx_parser
+  fuzz_tx_parser.c
   ${APPLICATION_SRC}
   
-  # fuzzing specific files
-  fuzz_tx_parser.c
-
   # mocks.c
 
   # sdk utils
