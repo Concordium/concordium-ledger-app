@@ -97,8 +97,8 @@ list(FILTER APPLICATION_SRC EXCLUDE REGEX "${CMAKE_CURRENT_SOURCE_DIR}/../unit-t
 
 add_executable(fuzz
   ${APPLICATION_SRC}
+  
   # fuzzing specific files
-  fuzz_tx_parser
   fuzz_tx_parser.c
 
   # mocks.c
