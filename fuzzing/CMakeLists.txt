@@ -46,3 +46,8 @@ add_executable(fuzz_tx_parser fuzz_tx_parser.c)
 target_compile_options(fuzz_tx_parser PUBLIC ${COMPILATION_FLAGS})
 target_link_options(fuzz_tx_parser PUBLIC ${COMPILATION_FLAGS})
 target_link_libraries(fuzz_tx_parser PUBLIC txparser)
+
+add_compile_definitions(
+  APPNAME="Concordium"
+  FUZZ
+)
