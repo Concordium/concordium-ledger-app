@@ -53,7 +53,9 @@ set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -ggdb2 -O3")
 set(SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../src")
 
 add_compile_definitions(
-  APPNAME= "Concordium"
+  APPNAME="Concordium"
+  IO_SEPROXYHAL_BUFFER_SIZE_B=128
+  HAVE_MOCK_UX
 )
 
 
@@ -84,6 +86,7 @@ include_directories(
   ${BOLOS_SDK}/lib_cxng/src
   ${BOLOS_SDK}/target/nanox/include
   ${SRC_DIR}
+  ${CMAKE_CURRENT_SOURCE_DIR}/mocks
 )
 
 # Take all source files from the application and the sdk
