@@ -20,7 +20,7 @@
     "python.terminal.activateEnvironment": false,
     "git.ignoreLimitWarning": true,
     "ledgerDevTools.appSettings": {
-        "selectedUseCase": "release",
+        "selectedUseCase": "debug",
         "selectedVariant": "CCD",
         "selectedDevice": "Nano S Plus"
     },
@@ -45,4 +45,5 @@
         "titleBar.inactiveForeground": "#15202b99"
     },
     "peacock.color": "#47A2AF",
+    "codeQL.githubDatabase.update": "never",
 }
