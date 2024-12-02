@@ -111,11 +111,10 @@ int handler_get_public_key(buffer_t *cdata, bool display, bool sign_public_key) 
     }
 
     // Append "Gov." to the title if needed
-    if (path_type >= 10) {
+    if (path_type == 11) {
         strncpy(temp_title + offset, "Gov. ", 5);
         offset += 5;
         // Get the purpose of the key
-        // TODO: enter the correct index for new path in constants.h and add a check for it
         uint32_t purpose = G_context.bip32_path[LEGACY_PATH_PURPOSE_INDEX];
         // Change the title of the public key depending on the purpose
         switch (purpose) {

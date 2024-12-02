@@ -160,10 +160,6 @@ int derivation_path_type(uint32_t *bip32_path, size_t bip32_path_len) {
     // Check if it is a new key
     else if (bip32_path_len >= 4 && bip32_path[0] == NEW_PURPOSE) {
         path_type = 2;
-        // Check if it is a governance key
-        if (bip32_path_len == 4) {
-            path_type += 10;
-        }
     }
 
     return path_type;

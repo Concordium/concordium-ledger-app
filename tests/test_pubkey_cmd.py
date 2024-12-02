@@ -26,8 +26,6 @@ from utils import navigate_until_text_and_compare
 #         assert public_key.hex() == ref_public_key
 #         assert chain_code.hex() == ref_chain_code
 
-# TODO: Write the same 2 tests for New derivation path
-
 
 # In this test we check that the GET_PUBLIC_KEY works in confirmation mode
 def test_get_legacy_public_key_confirm_accepted(
@@ -83,6 +81,44 @@ def test_get_signed_legacy_governance_public_key_confirm_accepted(
     assert (
         response.hex()
         == "2091fcf639f03a8e1c00ab0837383728c9a105df9d44c293b2436dddd7213bee1c4062cf20d6c17d1971e66808d325ce1fed188b26b0d543de9f25e5a1c5e46d979cbd2ab98bc4213159883837b9fffa67d43dc5bcbc7b694d164feea777abc4a30d"
+    )
+
+
+# In this test we check that the GET_PUBLIC_KEY works in confirmation mode
+def test_get_legacy_public_key_confirm_accepted(
+    backend, navigator, firmware, default_screenshot_path, test_name
+):
+    client = BoilerplateCommandSender(backend)
+    path = "m/1105/0/0/0/0/2/0/0"
+    with client.get_public_key_with_confirmation(path=path):
+        navigate_until_text_and_compare(
+            firmware, navigator, "Approve", default_screenshot_path, test_name
+        )
+
+    response = client.get_async_response().data
+    print("km------------------|response:", response.hex())
+    assert (
+        response.hex()
+        == "2087e16c8269270b1c75b930224df456d2927b80c760ffa77e57dbd738f6399492"
+    )
+
+
+# In this test we check that the GET_PUBLIC_KEY works in confirmation mode with signing
+def test_get_signed_new_public_key_confirm_accepted(
+    backend, navigator, firmware, default_screenshot_path, test_name
+):
+    client = BoilerplateCommandSender(backend)
+    path = "m/44/919/0/0/0"
+    with client.get_public_key_with_confirmation(path=path, signPublicKey=True):
+        navigate_until_text_and_compare(
+            firmware, navigator, "Approve", default_screenshot_path, test_name
+        )
+
+    response = client.get_async_response().data
+    print("km------------------|response:", response.hex())
+    assert (
+        response.hex()
+        == "20e31d69e500b0f83983fb6080aaa46129cf7c70e27d59b1aae9820b1d03f984024052c415c2552d81fde03a9aef6bba24325711a5924b417d79324f60ef67466a017542c6423387fd0d7679cab784d8178bf15e10eb4cb2eef944d47611682c930c"
     )
 
 
