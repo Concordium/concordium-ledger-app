@@ -147,11 +147,6 @@ int derivation_path_type(uint32_t *bip32_path, size_t bip32_path_len) {
         if (bip32_path_len == 5) {
             path_type += 10;
             uint32_t subtree = bip32_path[LEGACY_PATH_SUBTREE_INDEX];
-            // print path length
-            for (size_t i = 0; i < bip32_path_len; i++) {
-                PRINTF("%x ", bip32_path[i]);
-            }
-            PRINTF("\n");
             if (subtree != 1 && subtree != LEGACY_GOVERNANCE_SUBTREE) {
                 path_type = -1;
             }
