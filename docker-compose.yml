@@ -2,7 +2,7 @@
 
 services:
   nanosp:
-    image: ghcr.io/blooo-io/speculos:latest-aarch64
+    image: ghcr.io/blooo-io/speculos:latest
     volumes:
       - ./bin:/speculos/apps
       - ./src:/speculos/sources
@@ -12,5 +12,5 @@ services:
       - "40000:40000" # apdu
     environment:
       - GDB_DIRECTORY_LIST="/speculos/sources:/speculos/sources/apdu:/speculos/sources/handler:/speculos/sources/helper:/speculos/sources/transaction:/speculos/sources/ui"
-    command: "-d --model nanox build/nanox/bin/app.elf --display headless --apdu-port 40000 "
+    command: "-d --model nanosp build/nanos2/bin/app.elf --display headless --apdu-port 40000"
     # Add `--vnc-password "<password>"` for macos users to use built-in vnc client.
