@@ -12,7 +12,7 @@ project(FuzzTxParser
 
 # guard against bad build-type strings
 if (NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE "Debug")
+  set(CMAKE_BUILD_TYPE "Release")
 endif()
 
 if (NOT CMAKE_C_COMPILER_ID MATCHES "Clang")
@@ -46,3 +46,8 @@ add_executable(fuzz_tx_parser fuzz_tx_parser.c)
 target_compile_options(fuzz_tx_parser PUBLIC ${COMPILATION_FLAGS})
 target_link_options(fuzz_tx_parser PUBLIC ${COMPILATION_FLAGS})
 target_link_libraries(fuzz_tx_parser PUBLIC txparser)
+
+add_compile_definitions(
+  APPNAME="Concordium"
+  FUZZ
+)
