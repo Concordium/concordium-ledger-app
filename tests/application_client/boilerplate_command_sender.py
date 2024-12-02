@@ -27,13 +27,15 @@ class P2(IntEnum):
     P2_LAST = 0x00
     # Parameter 2 for more APDU to receive.
     P2_MORE = 0x80
+    # Parameter 2 for sign public key
+    P2_SIGN_PUBLIC_KEY = 0x01
 
 
 class InsType(IntEnum):
     VERIFY_ADDRESS = 0x00
+    GET_PUBLIC_KEY = 0x01
     GET_VERSION = 0x03
     GET_APP_NAME = 0x04
-    GET_PUBLIC_KEY = 0x05
     SIGN_SIMPLE_TRANSFER = 0x06
 
 
@@ -81,24 +83,24 @@ class BoilerplateCommandSender:
             cla=CLA, ins=InsType.GET_APP_NAME, p1=P1.P1_START, p2=P2.P2_LAST, data=b""
         )
 
-    def get_public_key(self, path: str) -> RAPDU:
+    def get_public_key(self, path: str, signPublicKey: bool = False) -> RAPDU:
         return self.backend.exchange(
             cla=CLA,
             ins=InsType.GET_PUBLIC_KEY,
             p1=P1.P1_START,
-            p2=P2.P2_LAST,
+            p2=P2.P2_SIGN_PUBLIC_KEY if signPublicKey else P2.P2_LAST,
             data=pack_derivation_path(path),
         )
 
     @contextmanager
     def get_public_key_with_confirmation(
-        self, path: str
+        self, path: str, signPublicKey: bool = False
     ) -> Generator[None, None, None]:
         with self.backend.exchange_async(
             cla=CLA,
             ins=InsType.GET_PUBLIC_KEY,
             p1=P1.P1_CONFIRM,
-            p2=P2.P2_LAST,
+            p2=P2.P2_SIGN_PUBLIC_KEY if signPublicKey else P2.P2_LAST,
             data=pack_derivation_path(path),
         ) as response:
             yield response
@@ -124,7 +126,9 @@ class BoilerplateCommandSender:
 
     @contextmanager
     def sign_tx(
-        self, path: str, tx_type_ins: InsType, transaction: bytes) -> Generator[None, None, None]:
+        self, path: str, tx_type_ins: InsType, transaction: bytes
+    ) -> Generator[None, None, None]:
+
         self.backend.exchange(
             cla=CLA,
             ins=tx_type_ins,

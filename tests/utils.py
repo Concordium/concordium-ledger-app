@@ -5,19 +5,73 @@ from ecdsa.curves import SECP256k1
 from ecdsa.keys import VerifyingKey
 from ecdsa.util import sigdecode_der
 
+from ragger.navigator import NavInsID
+
 
 # Check if a signature of a given message is valid
-def check_signature_validity(public_key: bytes, signature: bytes, message: bytes) -> bool:
+def check_signature_validity(
+    public_key: bytes, signature: bytes, message: bytes
+) -> bool:
     pk: VerifyingKey = VerifyingKey.from_string(
-        public_key,
-        curve=SECP256k1,
-        hashfunc=sha256
+        public_key, curve=SECP256k1, hashfunc=sha256
     )
-    return pk.verify(signature=signature,
-                     data=message,
-                     hashfunc=keccak_256,
-                     sigdecode=sigdecode_der)
+    return pk.verify(
+        signature=signature, data=message, hashfunc=keccak_256, sigdecode=sigdecode_der
+    )
 
+
+def instructions_builder(
+    number_of_screens_until_confirm: int, backend
+) -> list[NavInsID]:
+    if backend.firmware.device.startswith(("stax", "flex")):
+        go_right_instruction = NavInsID.SWIPE_CENTER_TO_LEFT
+        confirm_instruction = NavInsID.USE_CASE_REVIEW_CONFIRM
+    else:
+        go_right_instruction = NavInsID.SWIPE_CENTER_TO_LEFT
+        confirm_instruction = NavInsID.USE_CASE_ADDRESS_CONFIRMATION_CONFIRM
+
+    # Add the go right instruction for the number of screens needed
+    instructions = [go_right_instruction] * number_of_screens_until_confirm
+    # Add the confirm instruction
+    instructions.append(confirm_instruction)
+    return instructions
+
+
+def navigate_until_text_and_compare(
+    firmware, navigator, text: str, screenshot_path: str, test_name: str
+):
+    """Navigate through device screens until specified text is found and compare screenshots.
+
+    This function handles navigation through device screens differently based on the device type (Stax/Flex vs others).
+    It will navigate through screens until the specified text is found, taking screenshots for comparison along the way.
+
+    Args:
+        firmware: The firmware object containing device information
+        navigator: The navigator object used to control device navigation
+        text: The text string to search for on device screens
+        screenshot_path: Path where screenshot comparison files will be saved
+        test_name: The name of the test that is being run
+    Returns:
+        None
+
+    Note:
+        For Stax/Flex devices:
+        - Uses swipe left gesture for navigation
+        - Uses review confirm for confirmation
+        For other devices:
+        - Uses right click for navigation
+        - Uses both click for confirmation
+    """
+    if firmware.device.startswith(("stax", "flex")):
+        go_right_instruction = NavInsID.SWIPE_CENTER_TO_LEFT
+        confirm_instructions = [NavInsID.USE_CASE_ADDRESS_CONFIRMATION_CONFIRM]
+    else:
+        go_right_instruction = NavInsID.RIGHT_CLICK
+        confirm_instructions = [NavInsID.BOTH_CLICK]
+
+    navigator.navigate_until_text_and_compare(
+        go_right_instruction, confirm_instructions, text, screenshot_path, test_name
+    )
 
 
 # The following functions might be useful someday, they are not tested, so some of them might not behave as expected
@@ -53,31 +107,31 @@ def check_signature_validity(public_key: bytes, signature: bytes, message: bytes
 # def get_cred_id(bls_private_key: bytes, cred_counter: int) -> bytes:
 #     """
 #     Calculate the credential ID from the PRF key and credential counter.
-    
+
 #     Args:
 #         bls_private_key: 32-byte private key
 #         cred_counter: credential counter as integer
-    
+
 #     Returns:
 #         48-byte compressed point representing the credential ID
 #     """
 #     # Convert inputs to integers
 #     prf = bytes_to_int(bls_private_key)
-    
+
 #     # The base point G is already defined in py_ecc as G1
-    
+
 #     # Calculate (prf + cred_counter)
 #     sum_mod_r = (prf + cred_counter) % curve_order
-    
+
 #     # Calculate inverse modulo curve_order
 #     cred_id_exponent = pow(sum_mod_r, -1, curve_order)
-    
+
 #     # Multiply the base point by the exponent
 #     cred_id_point = multiply(G1, cred_id_exponent)
-    
+
 #     # Compress the resulting point
 #     compressed_cred_id = compress_g1(cred_id_point)
-    
+
 #     return compressed_cred_id
 
 # # TODO: INSPECT IF THIS WORKS
@@ -104,7 +158,7 @@ def check_signature_validity(public_key: bytes, signature: bytes, message: bytes
 
 #     # The order 'r' of the BLS12-381 curve
 #     r = int("0x73eda753299d7d483339d80809a1d80553bd402fffe5bfeffff00000001", 16)
-    
+
 #     while True:
 #         # Hash the salt
 #         salt = hashlib.sha256(salt).digest()

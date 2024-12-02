@@ -13,9 +13,9 @@
  */
 typedef enum {
     VERIFY_ADDRESS = 0x00,       /// verify address
+    GET_PUBLIC_KEY = 0x01,       /// public key of corresponding BIP32 path
     GET_VERSION = 0x03,          /// version of the application
     GET_APP_NAME = 0x04,         /// name of the application
-    GET_PUBLIC_KEY = 0x05,       /// public key of corresponding BIP32 path
     SIGN_SIMPLE_TRANSFER = 0x06  /// sign simple transfer with BIP32 path
 } command_e;
 /**
@@ -31,6 +31,7 @@ typedef enum {
  * Enumeration with user request type.
  */
 typedef enum {
+    CONFIRM_PUBLIC_KEY,  /// confirm public key
     CONFIRM_ADDRESS,     /// confirm address derived from public key
     CONFIRM_TRANSACTION  /// confirm transaction information
 } request_type_e;
@@ -39,8 +40,12 @@ typedef enum {
  * Structure for public key context information.
  */
 typedef struct {
-    uint8_t raw_public_key[65];  /// format (1), x-coordinate (32), y-coodinate (32)
-    uint8_t chain_code[32];      /// for public key derivation
+    // uint8_t raw_public_key[65];  /// format (1), x-coordinate (32), y-coodinate (32)
+    uint8_t public_key[32];              /// public key
+    bool sign_public_key;                /// whether to sign the public key
+    uint8_t signature[MAX_DER_SIG_LEN];  /// transaction signature encoded in DER
+    uint8_t signature_len;               /// length of transaction signature
+    char public_key_title[36];           /// title of the public key
 } pubkey_ctx_t;
 
 /**

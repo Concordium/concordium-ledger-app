@@ -102,3 +102,30 @@ enum new_key_indexes { NEW_SIGN_KEY = 0, NEW_ID_CRED = 1, NEW_PRF_KEY = 2, NEW_M
  * Concordium version byte.
  */
 #define CONCORDIUM_VERSION_BYTE 1
+
+/**
+ * Length of the public key.
+ */
+#define PUBKEY_LEN 32
+
+/**
+ * Maximum length of a string representing a BIP32 derivation path.
+ * Each step is up to 11 characters (10 decimal digits, plus the "hardened" symbol),
+ * and there is 1 separator before each step.
+ */
+#define MAX_SERIALIZED_BIP32_PATH_LENGTH (12 * MAX_BIP32_PATH_SUPPORTED)
+
+/**
+ * Index of the purpose in the legacy derivation path.
+ */
+#define LEGACY_PATH_PURPOSE_INDEX 3
+
+/**
+ * Index of the subtree in the legacy derivation path.
+ */
+#define LEGACY_PATH_SUBTREE_INDEX 2
+
+/**
+ * Subtree value for governance keys in the legacy derivation path.
+ */
+#define LEGACY_GOVERNANCE_SUBTREE 0x80000001

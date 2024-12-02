@@ -32,7 +32,6 @@
 #include "../transaction/types.h"
 #include "../transaction/deserialize.h"
 
-// TODO: FINISH THIS
 int handler_sign_simple_transfer(buffer_t *cdata, uint8_t chunk, bool more) {
     if (chunk == 0) {  // first APDU, parse BIP32 path
         explicit_bzero(&G_context, sizeof(G_context));

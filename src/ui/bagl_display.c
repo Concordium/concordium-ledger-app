@@ -39,10 +39,12 @@
 
 static action_validate_cb g_validate_callback;
 static char g_amount[30];
-static char g_address[43];
 static char g_sender_address[57];
 static char g_verify_address_data[21];
 static char g_recipient_address[57];
+static char g_public_key[65];
+static char g_public_key_title[36];
+static char g_bip32_path_string[MAX_SERIALIZED_BIP32_PATH_LENGTH + 1];
 
 // Validate/Invalidate public key and go back to home
 static void ui_action_validate_pubkey(bool choice) {
@@ -62,15 +64,13 @@ static void ui_action_validate_transaction(bool choice) {
     ui_menu_main();
 }
 
-// Step with icon and text
-UX_STEP_NOCB(ux_display_confirm_addr_step, pn, {&C_icon_eye, "Confirm Address"});
-// Step with title/text for address
-UX_STEP_NOCB(ux_display_address_step,
+// Step with title/text for identity index and credential counter
+UX_STEP_NOCB(ux_verify_address_0_step,
              bnnn_paging,
-             {
-                 .title = "Address",
-                 .text = g_address,
-             });
+             {.title = "Verify Address", .text = g_verify_address_data});
+
+// Step with title/text for address
+UX_STEP_NOCB(ux_verify_address_1_step, bnnn_paging, {.title = "Address", .text = g_sender_address});
 // Step with approve button
 UX_STEP_CB(ux_display_approve_step,
            pb,
@@ -87,58 +87,11 @@ UX_STEP_CB(ux_display_reject_step,
                &C_icon_crossmark,
                "Reject",
            });
-
-// FLOW to display address:
-// #1 screen: eye icon + "Confirm Address"
-// #2 screen: display address
-// #3 screen: approve button
-// #4 screen: reject button
-UX_FLOW(ux_display_pubkey_flow,
-        &ux_display_confirm_addr_step,
-        &ux_display_address_step,
-        &ux_display_approve_step,
-        &ux_display_reject_step);
-
-int ui_display_address() {
-    if (G_context.req_type != CONFIRM_ADDRESS || G_context.state != STATE_NONE) {
-        G_context.state = STATE_NONE;
-        return io_send_sw(SW_BAD_STATE);
-    }
-    memset(g_address, 0, sizeof(g_address));
-    uint8_t address[ADDRESS_LEN] = {0};
-    if (!address_from_pubkey(G_context.pk_info.raw_public_key, address, sizeof(address))) {
-        return io_send_sw(SW_DISPLAY_ADDRESS_FAIL);
-    }
-
-    if (format_hex(address, sizeof(address), g_address, sizeof(g_address)) == -1) {
-        return io_send_sw(SW_DISPLAY_ADDRESS_FAIL);
-    }
-
-    g_validate_callback = &ui_action_validate_pubkey;
-    ux_flow_init(0, ux_display_pubkey_flow, NULL);
-    return 0;
-}
-
-// Step with title/text for identity index and credential counter
-UX_STEP_NOCB(ux_verify_address_0_step,
-             bnnn_paging,
-             {.title = "Verify Address", .text = g_verify_address_data});
-
-// Step with title/text for address
-UX_STEP_NOCB(ux_verify_address_1_step, bnnn_paging, {.title = "Address", .text = g_sender_address});
-UX_STEP_CB(ux_verify_address_approve_step,
-           pb,
-           (*g_validate_callback)(true),
-           {&C_icon_validate_14, "Approve"});
-UX_STEP_CB(ux_verify_address_reject_step,
-           pb,
-           (*g_validate_callback)(false),
-           {&C_icon_crossmark, "Reject"});
 UX_FLOW(ux_display_verify_address_flow,
         &ux_verify_address_0_step,
         &ux_verify_address_1_step,
-        &ux_verify_address_approve_step,
-        &ux_verify_address_reject_step);
+        &ux_display_approve_step,
+        &ux_display_reject_step);
 
 int ui_display_verify_address() {
     if (G_context.req_type != CONFIRM_ADDRESS || G_context.state != STATE_NONE) {
@@ -281,6 +234,57 @@ int ui_display_simple_transfer() {
 
     ux_flow_init(0, ux_display_simple_transfer_flow, NULL);
 
+    return 0;
+}
+
+// Step with icon and text
+UX_STEP_NOCB(ux_display_confirm_public_key_step, bnnn_paging, {"", g_public_key_title});
+// Step with title/text for identity index and credential counter
+UX_STEP_NOCB(ux_display_bip32_path_step,
+             bnnn_paging,
+             {.title = "BIP32 Path", .text = g_bip32_path_string});
+// Step with title/text for address
+UX_STEP_NOCB(ux_display_public_key_step,
+             bnnn_paging,
+             {
+                 .title = "Public Key",
+                 .text = g_public_key,
+             });
+// FLOW to display transaction information:
+// #1 screen : eye icon + "Review Transaction"
+// #2 screen : display amount
+// #3 screen : display recipient address
+// #4 screen : approve button
+// #5 screen : reject button
+UX_FLOW(ux_display_public_key_flow,
+        &ux_display_confirm_public_key_step,
+        &ux_display_bip32_path_step,
+        &ux_display_public_key_step,
+        &ux_display_approve_step,
+        &ux_display_reject_step);
+int ui_display_pubkey() {
+    if (G_context.req_type != CONFIRM_PUBLIC_KEY || G_context.state != STATE_NONE) {
+        G_context.state = STATE_NONE;
+        return io_send_sw(SW_BAD_STATE);
+    }
+    // Copy the public key title to the global variable
+    memset(g_public_key_title, 0, sizeof(g_public_key_title));
+    memmove(g_public_key_title,
+            G_context.pk_info.public_key_title,
+            strlen(G_context.pk_info.public_key_title));
+
+    // Format the public key
+    if (format_hex(G_context.pk_info.public_key, PUBKEY_LEN, g_public_key, sizeof(g_public_key)) ==
+        -1) {
+        return io_send_sw(SW_PUBLIC_KEY_DISPLAY_FAIL);
+    }
+    // Format the BIP32 path
+    bip32_path_format(G_context.bip32_path,
+                      G_context.bip32_path_len,
+                      g_bip32_path_string,
+                      sizeof(g_bip32_path_string));
+    g_validate_callback = &ui_action_validate_pubkey;
+    ux_flow_init(0, ux_display_public_key_flow, NULL);
     return 0;
 }
 #endif

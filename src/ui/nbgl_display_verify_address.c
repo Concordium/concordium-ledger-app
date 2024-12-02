@@ -36,7 +36,6 @@
 #include "../transaction/types.h"
 #include "../menu.h"
 
-// TODO: IMPLEMENT THE WHOLE FLOW
 // Buffer where the transaction amount string is written
 static char g_verify_address_data[21];
 // Buffer where the transaction address string is written

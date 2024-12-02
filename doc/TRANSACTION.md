@@ -1,12 +1,14 @@
+// TODO: EDIT THIS TO MATCH THE CURRENT APP
+
 # BOLOK Transaction Serialization
 
 ## Overview
 
-The custom transaction serialization presented is for the purely fictitious BOLOK *chain* which has been inspired by other popular blockchain (see [Links](#links)).
+The custom transaction serialization presented is for the purely fictitious BOLOK _chain_ which has been inspired by other popular blockchain (see [Links](#links)).
 
 ## Amount units
 
-The base unit in BOLOK *chain* is the CCD and the smallest unit used in raw transaction is the *bolino* or mBOL: 1 CCD = 1000 mCCD.
+The base unit in BOLOK _chain_ is the CCD and the smallest unit used in raw transaction is the _bolino_ or mBOL: 1 CCD = 1000 mCCD.
 
 ## Address format
 
@@ -16,16 +18,16 @@ BOLOK addresses are hexadecimal numbers, identifiers derived from the last 20 by
 
 ### Transaction
 
-| Field | Size (bytes) | Description |
-| --- | :---: | --- |
-| `nonce` | 8 | A sequence number used to prevent message replay |
-| `to` | 20 | The destination address |
-| `value` | 8 | The amount in mBOL to send to the destination address |
-| `memo_len` | 1-9 | length of the memo as [varint](#variablelenghtinteger) |
-| `memo` | var | A text ASCII-encoded of length `memo_len` to show your love |
-| `v` | 1 | 0x01 if y-coordinate of R is odd, 0x00 otherwise |
-| `r` | 32 | x-coordinate of R in ECDSA signature |
-| `s` | 32 | x-coordinate of S in ECDSA signature |
+| Field      | Size (bytes) | Description                                                 |
+| ---------- | :----------: | ----------------------------------------------------------- |
+| `nonce`    |      8       | A sequence number used to prevent message replay            |
+| `to`       |      20      | The destination address                                     |
+| `value`    |      8       | The amount in mBOL to send to the destination address       |
+| `memo_len` |     1-9      | length of the memo as [varint](#variablelenghtinteger)      |
+| `memo`     |     var      | A text ASCII-encoded of length `memo_len` to show your love |
+| `v`        |      1       | 0x01 if y-coordinate of R is odd, 0x00 otherwise            |
+| `r`        |      32      | x-coordinate of R in ECDSA signature                        |
+| `s`        |      32      | x-coordinate of S in ECDSA signature                        |
 
 ### Variable length integer (varint)
 
@@ -33,12 +35,12 @@ Integer can be encoded depending on the represented value to save space.
 Variable length integers always precede an array of a type of data that may vary in length.
 Longer numbers are encoded in little endian.
 
-| Value | Storage length (bytes) | Format |
-| --- | :---: | --- |
-| < 0xFD | 1 | uint8_t |
-| <= 0xFFFF | 3 | 0xFD followed by the length as uint16_t |
-| <= 0xFFFF FFFF | 5 | 0xFE followed by the length as uint32_t |
-| - | 9 | 0xFF followed by the length as uint64_t |
+| Value          | Storage length (bytes) | Format                                  |
+| -------------- | :--------------------: | --------------------------------------- |
+| < 0xFD         |           1            | uint8_t                                 |
+| <= 0xFFFF      |           3            | 0xFD followed by the length as uint16_t |
+| <= 0xFFFF FFFF |           5            | 0xFE followed by the length as uint32_t |
+| -              |           9            | 0xFF followed by the length as uint64_t |
 
 ### Signature
 
@@ -47,7 +49,7 @@ The signed message is `m = Keccak-256(nonce || to || value || memo_len || memo)`
 
 ### Fee
 
-You won't find any fee in the transaction structure because the BOLOK *chain* has constant fees.
+You won't find any fee in the transaction structure because the BOLOK _chain_ has constant fees.
 
 ## Links
 

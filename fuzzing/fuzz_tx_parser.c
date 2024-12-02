@@ -21,24 +21,18 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
 
     if (status == PARSING_OK) {
         // Format recipient address
-        format_hex(tx.transaction.simple_transfer.recipient,
-                  ADDRESS_LEN,
-                  address,
-                  sizeof(address));
+        format_hex(tx.transaction.simple_transfer.recipient, ADDRESS_LEN, address, sizeof(address));
         printf("recipient: %s\n", address);
 
         // Format sender address
-        format_hex(tx.transaction.simple_transfer.sender,
-                  ADDRESS_LEN,
-                  address,
-                  sizeof(address));
+        format_hex(tx.transaction.simple_transfer.sender, ADDRESS_LEN, address, sizeof(address));
         printf("sender: %s\n", address);
 
         // Format amount
         format_fpu64(amount,
-                    sizeof(amount),
-                    tx.transaction.simple_transfer.value,
-                    3);  // exponent of smallest unit is 3
+                     sizeof(amount),
+                     tx.transaction.simple_transfer.value,
+                     3);  // exponent of smallest unit is 3
         printf("amount: %s\n", amount);
     }
 

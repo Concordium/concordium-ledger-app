@@ -90,13 +90,39 @@ int bls_key_gen_from_seed(uint8_t *seed,
 void harden_derivation_path(uint32_t *bip32_path, size_t bip32_path_len);
 
 /**
- * Check the type of the derivation path.
- * @param bip32_path: The BIP32 path.
- * @param bip32_path_len: The length of the BIP32 path.
- * @return 1 if the path is for the legacy address format, 2 if it is for the new address format, 0
- * if it is invalid.
+ * Determines the type of derivation path based on its structure.
+ *
+ * @param[in] bip32_path      Pointer to the derivation path array
+ * @param[in] bip32_path_len  Length of the derivation path array
+ *
+ * @return Path type identifier:
+ *         -1: Invalid legacy governance path
+ *          0: Invalid/unknown path type
+ *          1: Legacy normal key path
+ *          2: New normal key path
+ *         11: Legacy governance key path
+ *         12: New governance key path
  */
 int derivation_path_type(uint32_t *bip32_path, size_t bip32_path_len);
+
+/**
+ * Signs a message hash using EdDSA (Ed25519) with the private key derived from the current BIP32
+ * path.
+ *
+ * @param[in]  m_hash          Pointer to the message hash to be signed
+ * @param[in]  m_hash_len      Length of the message hash
+ * @param[out] signature       Buffer to store the resulting signature
+ * @param[in]  signature_len   Size of the signature buffer
+ *
+ * @return 0 on success
+ *         -1 if private key derivation fails
+ *         -2 if signing operation fails
+ *
+ * @note This function uses the BIP32 path stored in G_context.bip32_path
+ * @note The path is automatically hardened before key derivation
+ * @note The signature length is stored in G_context.tx_info.signature_len
+ */
+int sign(uint8_t *m_hash, size_t m_hash_len, uint8_t *signature, size_t signature_len);
 
 // We must declare the functions for the static analyzer to be happy. Ideally we would have
 // access to the declarations from the Ledger SDK.

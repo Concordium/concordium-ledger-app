@@ -25,17 +25,30 @@
 #include "../constants.h"
 #include "../globals.h"
 #include "../sw.h"
+#include "../helper/util.h"
 
 int helper_send_response_pubkey() {
-    uint8_t resp[1 + PUBKEY_LEN + 1 + CHAINCODE_LEN] = {0};
+    uint8_t resp[1 + PUBKEY_LEN + 1 + MAX_DER_SIG_LEN] = {0};
     size_t offset = 0;
 
+    // Add public key to response
     resp[offset++] = PUBKEY_LEN;
-    memmove(resp + offset, G_context.pk_info.raw_public_key, PUBKEY_LEN);
+    memmove(resp + offset, G_context.pk_info.public_key, PUBKEY_LEN);
     offset += PUBKEY_LEN;
-    resp[offset++] = CHAINCODE_LEN;
-    memmove(resp + offset, G_context.pk_info.chain_code, CHAINCODE_LEN);
-    offset += CHAINCODE_LEN;
+
+    // Sign public key if requested and add to response
+    if (G_context.pk_info.sign_public_key) {
+        if (sign(G_context.pk_info.public_key,
+                 sizeof(G_context.pk_info.public_key),
+                 G_context.pk_info.signature,
+                 MAX_DER_SIG_LEN) != 0) {
+            return io_send_sw(SW_SIGNATURE_FAIL);
+        }
+
+        resp[offset++] = MAX_DER_SIG_LEN;
+        memmove(resp + offset, G_context.pk_info.signature, MAX_DER_SIG_LEN);
+        offset += MAX_DER_SIG_LEN;
+    }
 
     return io_send_response_pointer(resp, offset, SW_OK);
 }
