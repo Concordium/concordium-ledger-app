@@ -7,17 +7,15 @@
 static signTransferToEncrypted_t *ctx = &global.signTransferToEncrypted;
 static tx_state_t *tx_state = &global_tx_state;
 
-UX_STEP_NOCB(
-    ux_sign_transfer_to_encrypted_1_step,
-    bnnn_paging,
-    {.title = "Shield amount", .text = (char *) global.signTransferToEncrypted.amount});
-UX_FLOW(
-    ux_sign_transfer_to_encrypted,
-    &ux_sign_flow_shared_review,
-    &ux_sign_flow_account_sender_view,
-    &ux_sign_transfer_to_encrypted_1_step,
-    &ux_sign_flow_shared_sign,
-    &ux_sign_flow_shared_decline);
+UX_STEP_NOCB(ux_sign_transfer_to_encrypted_1_step,
+             bnnn_paging,
+             {.title = "Shield amount", .text = (char *) global.signTransferToEncrypted.amount});
+UX_FLOW(ux_sign_transfer_to_encrypted,
+        &ux_sign_flow_shared_review,
+        &ux_sign_flow_account_sender_view,
+        &ux_sign_transfer_to_encrypted_1_step,
+        &ux_sign_flow_shared_sign,
+        &ux_sign_flow_shared_decline);
 
 void handleSignTransferToEncrypted(uint8_t *cdata, volatile unsigned int *flags) {
     cdata += parseKeyDerivationPath(cdata);

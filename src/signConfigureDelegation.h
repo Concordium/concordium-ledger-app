@@ -6,7 +6,9 @@
  * that the correct UpdateType is supplied and will fail otherwise.
  * @param cdata please see /doc/ins_configure_delegation.md for details
  */
-void handleSignConfigureDelegation(uint8_t *cdata, uint8_t dataLength, volatile unsigned int *flags);
+void handleSignConfigureDelegation(uint8_t *cdata,
+                                   uint8_t dataLength,
+                                   volatile unsigned int *flags);
 
 typedef struct {
     bool stopDelegation;

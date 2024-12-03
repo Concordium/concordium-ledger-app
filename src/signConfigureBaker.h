@@ -6,12 +6,11 @@
  * that the correct UpdateType is supplied and will fail otherwise.
  * @param cdata please see /doc/ins_configure_delegation.md for details
  */
-void handleSignConfigureBaker(
-    uint8_t *cdata,
-    uint8_t p1,
-    uint8_t dataLength,
-    volatile unsigned int *flags,
-    bool isInitialCall);
+void handleSignConfigureBaker(uint8_t *cdata,
+                              uint8_t p1,
+                              uint8_t dataLength,
+                              volatile unsigned int *flags,
+                              bool isInitialCall);
 
 typedef enum {
     CONFIGURE_BAKER_INITIAL = 60,

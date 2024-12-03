@@ -11,20 +11,20 @@ static tx_state_t *tx_state = &global_tx_state;
 // There will at most be 8 UI steps when all 3 optional fields are available.
 const ux_flow_step_t *ux_sign_configure_delegation[8];
 
-UX_STEP_NOCB(
-    ux_sign_configure_delegation_capital_step,
-    bnnn_paging,
-    {.title = "Amount to delegate", .text = (char *) global.signConfigureDelegation.displayCapital});
+UX_STEP_NOCB(ux_sign_configure_delegation_capital_step,
+             bnnn_paging,
+             {.title = "Amount to delegate",
+              .text = (char *) global.signConfigureDelegation.displayCapital});
 
-UX_STEP_NOCB(
-    ux_sign_configure_delegation_restake_step,
-    bnnn_paging,
-    {.title = "Restake earnings", .text = (char *) global.signConfigureDelegation.displayRestake});
+UX_STEP_NOCB(ux_sign_configure_delegation_restake_step,
+             bnnn_paging,
+             {.title = "Restake earnings",
+              .text = (char *) global.signConfigureDelegation.displayRestake});
 
-UX_STEP_NOCB(
-    ux_sign_configure_delegation_pool_step,
-    bnnn_paging,
-    {.title = "Delegation target", .text = (char *) global.signConfigureDelegation.displayDelegationTarget});
+UX_STEP_NOCB(ux_sign_configure_delegation_pool_step,
+             bnnn_paging,
+             {.title = "Delegation target",
+              .text = (char *) global.signConfigureDelegation.displayDelegationTarget});
 
 UX_STEP_NOCB(ux_sign_configure_delegation_stop_delegation_step, nn, {"Stop", "delegation"});
 
@@ -36,7 +36,8 @@ void startDisplay() {
 
     if (ctx->hasCapital) {
         if (ctx->stopDelegation) {
-            ux_sign_configure_delegation[index++] = &ux_sign_configure_delegation_stop_delegation_step;
+            ux_sign_configure_delegation[index++] =
+                &ux_sign_configure_delegation_stop_delegation_step;
         } else {
             ux_sign_configure_delegation[index++] = &ux_sign_configure_delegation_capital_step;
         }
@@ -58,19 +59,23 @@ void startDisplay() {
     ux_flow_init(0, ux_sign_configure_delegation, NULL);
 }
 
-void handleSignConfigureDelegation(uint8_t *cdata, uint8_t dataLength, volatile unsigned int *flags) {
+void handleSignConfigureDelegation(uint8_t *cdata,
+                                   uint8_t dataLength,
+                                   volatile unsigned int *flags) {
     int keyDerivationPathLength = parseKeyDerivationPath(cdata);
     cdata += keyDerivationPathLength;
 
     cx_sha256_init(&tx_state->hash);
-    int accountTransactionHeaderAndKindLength = hashAccountTransactionHeaderAndKind(cdata, CONFIGURE_DELEGATION);
+    int accountTransactionHeaderAndKindLength =
+        hashAccountTransactionHeaderAndKind(cdata, CONFIGURE_DELEGATION);
     cdata += accountTransactionHeaderAndKindLength;
 
     // The initial 2 bytes tells us the fields we are receiving.
     updateHash((cx_hash_t *) &tx_state->hash, cdata, 2);
     uint16_t bitmap = U2BE(cdata, 0);
     cdata += 2;
-    uint8_t expectedDataLength = keyDerivationPathLength + accountTransactionHeaderAndKindLength + 2;
+    uint8_t expectedDataLength =
+        keyDerivationPathLength + accountTransactionHeaderAndKindLength + 2;
 
     ctx->hasCapital = (bitmap >> 0) & 1;
     ctx->hasRestakeEarnings = (bitmap >> 1) & 1;

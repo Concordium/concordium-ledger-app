@@ -85,14 +85,17 @@ int hashUpdateHeaderAndType(uint8_t *cdata, uint8_t validUpdateType) {
     return hashHeaderAndType(cdata, UPDATE_HEADER_LENGTH, validUpdateType);
 }
 
-int handleHeaderAndToAddress(uint8_t *cdata, uint8_t kind, uint8_t *recipientDst, size_t recipientSize) {
+int handleHeaderAndToAddress(uint8_t *cdata,
+                             uint8_t kind,
+                             uint8_t *recipientDst,
+                             size_t recipientSize) {
     // Parse the key derivation path, which should always be the first thing received
     // in a command to the Ledger application.
     int keyPathLength = parseKeyDerivationPath(cdata);
     cdata += keyPathLength;
 
-    // Initialize the hash that will be the hash of the whole transaction, which is what will be signed
-    // if the user approves.
+    // Initialize the hash that will be the hash of the whole transaction, which is what will be
+    // signed if the user approves.
     cx_sha256_init(&tx_state->hash);
     int headerLength = hashAccountTransactionHeaderAndKind(cdata, kind);
     cdata += headerLength;
@@ -136,7 +139,10 @@ void sendSuccessResultNoIdle(uint8_t tx) {
     io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, tx);
 }
 
-void getIdentityAccountDisplay(uint8_t *dst, size_t dstLength, uint32_t identityIndex, uint32_t accountIndex) {
+void getIdentityAccountDisplay(uint8_t *dst,
+                               size_t dstLength,
+                               uint32_t identityIndex,
+                               uint32_t accountIndex) {
     int offset = numberToText(dst, dstLength, identityIndex);
     memmove(dst + offset, "/", 1);
     offset += 1;
@@ -159,23 +165,28 @@ void ensureNoError(cx_err_t errorCode) {
     }
 }
 
-void getPrivateKey(uint32_t *keyPathInput, uint8_t keyPathLength, cx_ecfp_private_key_t *privateKey) {
+void getPrivateKey(uint32_t *keyPathInput,
+                   uint8_t keyPathLength,
+                   cx_ecfp_private_key_t *privateKey) {
     uint8_t privateKeyData[64];
 
     // Invoke the device methods for generating a private key.
-    // Wrap in try/finally to ensure that private key information is cleaned up, even if a system call fails.
+    // Wrap in try/finally to ensure that private key information is cleaned up, even if a system
+    // call fails.
     BEGIN_TRY {
         TRY {
-            ensureNoError(os_derive_bip32_with_seed_no_throw(
-                HDW_ED25519_SLIP10,
-                CX_CURVE_Ed25519,
-                keyPathInput,
-                keyPathLength,
-                privateKeyData,
-                NULL,
-                (unsigned char *) "ed25519 seed",
-                12));
-            ensureNoError(cx_ecfp_init_private_key_no_throw(CX_CURVE_Ed25519, privateKeyData, 32, privateKey));
+            ensureNoError(os_derive_bip32_with_seed_no_throw(HDW_ED25519_SLIP10,
+                                                             CX_CURVE_Ed25519,
+                                                             keyPathInput,
+                                                             keyPathLength,
+                                                             privateKeyData,
+                                                             NULL,
+                                                             (unsigned char *) "ed25519 seed",
+                                                             12));
+            ensureNoError(cx_ecfp_init_private_key_no_throw(CX_CURVE_Ed25519,
+                                                            privateKeyData,
+                                                            32,
+                                                            privateKey));
         }
         FINALLY {
             // Clean up the private key seed data, so that we cannot leak it.
@@ -189,12 +200,14 @@ void getPublicKey(uint8_t *publicKeyArray) {
     cx_ecfp_private_key_t privateKey;
     cx_ecfp_public_key_t publicKey;
 
-    // Wrap in try/finally to ensure private key information is cleaned up, even if the system call fails.
+    // Wrap in try/finally to ensure private key information is cleaned up, even if the system call
+    // fails.
     BEGIN_TRY {
         TRY {
             getPrivateKey(keyPath->keyDerivationPath, keyPath->pathLength, &privateKey);
             // Invoke the device method for generating a public-key pair.
-            ensureNoError(cx_ecfp_generate_pair_no_throw(CX_CURVE_Ed25519, &publicKey, &privateKey, 1));
+            ensureNoError(
+                cx_ecfp_generate_pair_no_throw(CX_CURVE_Ed25519, &publicKey, &privateKey, 1));
         }
         FINALLY {
             // Clean up the private key as we are done using it, so that we cannot leak it.
@@ -220,7 +233,8 @@ void sign(uint8_t *input, uint8_t *signatureOnInput) {
     BEGIN_TRY {
         TRY {
             getPrivateKey(keyPath->keyDerivationPath, keyPath->pathLength, &privateKey);
-            ensureNoError(cx_eddsa_sign_no_throw(&privateKey, CX_SHA512, input, 32, signatureOnInput, 64));
+            ensureNoError(
+                cx_eddsa_sign_no_throw(&privateKey, CX_SHA512, input, 32, signatureOnInput, 64));
         }
         FINALLY {
             // Clean up the private key, so that we cannot leak it.
@@ -234,13 +248,12 @@ void sign(uint8_t *input, uint8_t *signatureOnInput) {
 #define BLS_KEY_LENGTH 32
 #define SEED_LENGTH    32
 
-void hash(
-    cx_hash_t *hashContext,
-    uint32_t mode,
-    const unsigned char *in,
-    unsigned int len,
-    unsigned char *out,
-    unsigned int out_len) {
+void hash(cx_hash_t *hashContext,
+          uint32_t mode,
+          const unsigned char *in,
+          unsigned int len,
+          unsigned char *out,
+          unsigned int out_len) {
     ensureNoError(cx_hash_no_throw(hashContext, mode, in, len, out, out_len));
 }
 
@@ -250,28 +263,27 @@ void updateHash(cx_hash_t *hashContext, const unsigned char *in, unsigned int le
 
 // We must declare the functions for the static analyzer to be happy. Ideally we would have
 // access to the declarations from the Ledger SDK.
-void cx_hkdf_extract(
-    const cx_md_t hash_id,
-    const unsigned char *ikm,
-    unsigned int ikm_len,
-    unsigned char *salt,
-    unsigned int salt_len,
-    unsigned char *prk);
-void cx_hkdf_expand(
-    const cx_md_t hash_id,
-    const unsigned char *prk,
-    unsigned int prk_len,
-    unsigned char *info,
-    unsigned int info_len,
-    unsigned char *okm,
-    unsigned int okm_len);
+void cx_hkdf_extract(const cx_md_t hash_id,
+                     const unsigned char *ikm,
+                     unsigned int ikm_len,
+                     unsigned char *salt,
+                     unsigned int salt_len,
+                     unsigned char *prk);
+void cx_hkdf_expand(const cx_md_t hash_id,
+                    const unsigned char *prk,
+                    unsigned int prk_len,
+                    unsigned char *info,
+                    unsigned int info_len,
+                    unsigned char *okm,
+                    unsigned int okm_len);
 
 static const uint8_t l_bytes[2] = {0, l_CONST};
 
 /** This implements the bls key generation algorithm specified in
- * https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-2.3, The optional parameter key_info
- * is hardcoded to an empty string. Uses sha256 as the hash function. The generated key has length 32, and dst should
- * have atleast that length, or the function throws an error.
+ * https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-2.3, The optional
+ * parameter key_info is hardcoded to an empty string. Uses sha256 as the hash function. The
+ * generated key has length 32, and dst should have atleast that length, or the function throws an
+ * error.
  */
 void blsKeygen(const uint8_t *seed, size_t seedLength, uint8_t *dst, size_t dstLength) {
     if (dstLength < BLS_KEY_LENGTH) {
@@ -283,9 +295,10 @@ void blsKeygen(const uint8_t *seed, size_t seedLength, uint8_t *dst, size_t dstL
     uint8_t sk[l_CONST];
     uint8_t prk[32];
     uint8_t salt[32] = {
-        66, 76, 83, 45, 83, 73, 71, 45, 75, 69,
-        89, 71, 69, 78, 45, 83, 65, 76, 84, 45};  // Initially set to the byte representation of "BLS-SIG-KEYGEN-SALT-"
-    size_t saltSize = 20;                         // 20 = size of initial salt seed
+        66, 76, 83, 45, 83, 73, 71, 45, 75, 69, 89,
+        71, 69, 78, 45, 83, 65, 76, 84, 45};  // Initially set to the byte representation of
+                                              // "BLS-SIG-KEYGEN-SALT-"
+    size_t saltSize = 20;                     // 20 = size of initial salt seed
     uint8_t ikm[SEED_LENGTH + 1];
 
     memcpy(ikm, seed, SEED_LENGTH);
@@ -295,16 +308,26 @@ void blsKeygen(const uint8_t *seed, size_t seedLength, uint8_t *dst, size_t dstL
         cx_hash_sha256(salt, saltSize, salt, sizeof(salt));
         saltSize = sizeof(salt);
         cx_hkdf_extract(CX_SHA256, ikm, sizeof(ikm), salt, sizeof(salt), prk);
-        cx_hkdf_expand(CX_SHA256, prk, sizeof(prk), (unsigned char *) l_bytes, sizeof(l_bytes), sk, sizeof(sk));
+        cx_hkdf_expand(CX_SHA256,
+                       prk,
+                       sizeof(prk),
+                       (unsigned char *) l_bytes,
+                       sizeof(l_bytes),
+                       sk,
+                       sizeof(sk));
 
         ensureNoError(cx_math_modm_no_throw(sk, sizeof(sk), r, sizeof(r)));
     } while (cx_math_is_zero(sk, sizeof(sk)));
 
-    // Skip the first 16 bytes, because they are 0 due to calculating modulo r, which is 32 bytes (and sk has 48 bytes).
+    // Skip the first 16 bytes, because they are 0 due to calculating modulo r, which is 32 bytes
+    // (and sk has 48 bytes).
     memmove(dst, sk + l_CONST - BLS_KEY_LENGTH, BLS_KEY_LENGTH);
 }
 
-void getBlsPrivateKey(uint32_t *keyPathInput, uint8_t keyPathLength, uint8_t *privateKey, size_t privateKeySize) {
+void getBlsPrivateKey(uint32_t *keyPathInput,
+                      uint8_t keyPathLength,
+                      uint8_t *privateKey,
+                      size_t privateKeySize) {
     cx_ecfp_private_key_t privateKeySeed;
     BEGIN_TRY {
         TRY {

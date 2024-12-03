@@ -15,57 +15,60 @@ const ux_flow_step_t *ux_sign_configure_baker_commission[9];
 
 UX_STEP_NOCB(ux_sign_configure_baker_stop_baking_step, nn, {"Stop", "baking"});
 
-UX_STEP_NOCB(
-    ux_sign_configure_baker_capital_step,
-    bnnn_paging,
-    {.title = "Amount to stake", .text = (char *) global.signConfigureBaker.capitalRestakeDelegation.displayCapital});
+UX_STEP_NOCB(ux_sign_configure_baker_capital_step,
+             bnnn_paging,
+             {.title = "Amount to stake",
+              .text = (char *) global.signConfigureBaker.capitalRestakeDelegation.displayCapital});
 
-UX_STEP_NOCB(
-    ux_sign_configure_baker_restake_step,
-    bn,
-    {"Restake earnings", (char *) global.signConfigureBaker.capitalRestakeDelegation.displayRestake});
+UX_STEP_NOCB(ux_sign_configure_baker_restake_step,
+             bn,
+             {"Restake earnings",
+              (char *) global.signConfigureBaker.capitalRestakeDelegation.displayRestake});
 
 UX_STEP_NOCB(
     ux_sign_configure_baker_open_status_step,
     bn,
-    {"Pool status", (char *) global.signConfigureBaker.capitalRestakeDelegation.displayOpenForDelegation});
+    {"Pool status",
+     (char *) global.signConfigureBaker.capitalRestakeDelegation.displayOpenForDelegation});
 
 UX_STEP_NOCB(ux_sign_configure_baker_keys_step, nn, {"Update baker", "keys"});
 
-UX_STEP_CB(
-    ux_sign_configure_baker_url_cb_step,
-    bnnn_paging,
-    sendSuccessNoIdle(),
-    {.title = "URL", .text = (char *) global.signConfigureBaker.url.urlDisplay});
+UX_STEP_CB(ux_sign_configure_baker_url_cb_step,
+           bnnn_paging,
+           sendSuccessNoIdle(),
+           {.title = "URL", .text = (char *) global.signConfigureBaker.url.urlDisplay});
 
-UX_STEP_NOCB(
-    ux_sign_configure_baker_url_step,
-    bnnn_paging,
-    {.title = "URL", .text = (char *) global.signConfigureBaker.url.urlDisplay});
+UX_STEP_NOCB(ux_sign_configure_baker_url_step,
+             bnnn_paging,
+             {.title = "URL", .text = (char *) global.signConfigureBaker.url.urlDisplay});
 
-UX_STEP_CB(ux_sign_configure_baker_continue, nn, sendSuccessNoIdle(), {"Continue", "with transaction"});
+UX_STEP_CB(ux_sign_configure_baker_continue,
+           nn,
+           sendSuccessNoIdle(),
+           {"Continue", "with transaction"});
 
 UX_STEP_NOCB(ux_sign_configure_baker_empty_url_step, bn, {"Empty URL", ""});
 
 UX_STEP_NOCB(ux_sign_configure_baker_commission_rates_step, nn, {"Commission", "rates"});
 
-UX_STEP_NOCB(
-    ux_sign_configure_baker_commission_transaction_fee_step,
-    bn,
-    {"Transaction fee", (char *) global.signConfigureBaker.commissionRates.transactionFeeCommissionRate});
+UX_STEP_NOCB(ux_sign_configure_baker_commission_transaction_fee_step,
+             bn,
+             {"Transaction fee",
+              (char *) global.signConfigureBaker.commissionRates.transactionFeeCommissionRate});
 
-UX_STEP_NOCB(
-    ux_sign_configure_baker_commission_baking_reward_step,
-    bn,
-    {"Baking reward", (char *) global.signConfigureBaker.commissionRates.bakingRewardCommissionRate});
+UX_STEP_NOCB(ux_sign_configure_baker_commission_baking_reward_step,
+             bn,
+             {"Baking reward",
+              (char *) global.signConfigureBaker.commissionRates.bakingRewardCommissionRate});
 
-UX_STEP_NOCB(
-    ux_sign_configure_baker_commission_finalization_reward_step,
-    bn,
-    {"Finalization reward", (char *) global.signConfigureBaker.commissionRates.finalizationRewardCommissionRate});
+UX_STEP_NOCB(ux_sign_configure_baker_commission_finalization_reward_step,
+             bn,
+             {"Finalization reward",
+              (char *) global.signConfigureBaker.commissionRates.finalizationRewardCommissionRate});
 
 bool hasCommissionRate() {
-    return ctx->hasTransactionFeeCommission || ctx->hasBakingRewardCommission || ctx->hasFinalizationRewardCommission;
+    return ctx->hasTransactionFeeCommission || ctx->hasBakingRewardCommission ||
+           ctx->hasFinalizationRewardCommission;
 }
 
 /**
@@ -126,8 +129,8 @@ void startConfigureBakerDisplay() {
  * - If it is the final part of the URL display and there are no commission rates as part of the
  *   transaction, then it displays the signing / decline screens.
  * - If there are commission rates in the transaction, then it shows a continue screen.
- * - If it is the final part of the URL display, then the URL screen does not have a callback to continue
- *   as additional UI elements are added to guide the user forward.
+ * - If it is the final part of the URL display, then the URL screen does not have a callback to
+ * continue as additional UI elements are added to guide the user forward.
  */
 void startConfigureBakerUrlDisplay(bool lastUrlPage) {
     uint8_t index = 0;
@@ -177,20 +180,25 @@ void startConfigureBakerCommissionDisplay() {
         ctx->firstDisplay = false;
     }
 
-    if (ctx->hasTransactionFeeCommission || ctx->hasBakingRewardCommission || ctx->hasFinalizationRewardCommission) {
-        ux_sign_configure_baker_commission[index++] = &ux_sign_configure_baker_commission_rates_step;
+    if (ctx->hasTransactionFeeCommission || ctx->hasBakingRewardCommission ||
+        ctx->hasFinalizationRewardCommission) {
+        ux_sign_configure_baker_commission[index++] =
+            &ux_sign_configure_baker_commission_rates_step;
     }
 
     if (ctx->hasTransactionFeeCommission) {
-        ux_sign_configure_baker_commission[index++] = &ux_sign_configure_baker_commission_transaction_fee_step;
+        ux_sign_configure_baker_commission[index++] =
+            &ux_sign_configure_baker_commission_transaction_fee_step;
     }
 
     if (ctx->hasBakingRewardCommission) {
-        ux_sign_configure_baker_commission[index++] = &ux_sign_configure_baker_commission_baking_reward_step;
+        ux_sign_configure_baker_commission[index++] =
+            &ux_sign_configure_baker_commission_baking_reward_step;
     }
 
     if (ctx->hasFinalizationRewardCommission) {
-        ux_sign_configure_baker_commission[index++] = &ux_sign_configure_baker_commission_finalization_reward_step;
+        ux_sign_configure_baker_commission[index++] =
+            &ux_sign_configure_baker_commission_finalization_reward_step;
     }
 
     ux_sign_configure_baker_commission[index++] = &ux_sign_flow_shared_sign;
@@ -210,10 +218,9 @@ void startConfigureBakerCommissionDisplay() {
 void handleCommissionRates(uint8_t *cdata, uint8_t dataLength) {
     if (ctx->hasTransactionFeeCommission) {
         uint32_t rate = U4BE(cdata, 0);
-        fractionToPercentageDisplay(
-            ctx->commissionRates.transactionFeeCommissionRate,
-            sizeof(ctx->commissionRates.transactionFeeCommissionRate),
-            rate);
+        fractionToPercentageDisplay(ctx->commissionRates.transactionFeeCommissionRate,
+                                    sizeof(ctx->commissionRates.transactionFeeCommissionRate),
+                                    rate);
         updateHash((cx_hash_t *) &tx_state->hash, cdata, 4);
         cdata += 4;
         dataLength -= 4;
@@ -221,10 +228,9 @@ void handleCommissionRates(uint8_t *cdata, uint8_t dataLength) {
 
     if (ctx->hasBakingRewardCommission) {
         uint32_t rate = U4BE(cdata, 0);
-        fractionToPercentageDisplay(
-            ctx->commissionRates.bakingRewardCommissionRate,
-            sizeof(ctx->commissionRates.bakingRewardCommissionRate),
-            rate);
+        fractionToPercentageDisplay(ctx->commissionRates.bakingRewardCommissionRate,
+                                    sizeof(ctx->commissionRates.bakingRewardCommissionRate),
+                                    rate);
         updateHash((cx_hash_t *) &tx_state->hash, cdata, 4);
         cdata += 4;
         dataLength -= 4;
@@ -232,10 +238,9 @@ void handleCommissionRates(uint8_t *cdata, uint8_t dataLength) {
 
     if (ctx->hasFinalizationRewardCommission) {
         uint32_t rate = U4BE(cdata, 0);
-        fractionToPercentageDisplay(
-            ctx->commissionRates.finalizationRewardCommissionRate,
-            sizeof(ctx->commissionRates.finalizationRewardCommissionRate),
-            rate);
+        fractionToPercentageDisplay(ctx->commissionRates.finalizationRewardCommissionRate,
+                                    sizeof(ctx->commissionRates.finalizationRewardCommissionRate),
+                                    rate);
         updateHash((cx_hash_t *) &tx_state->hash, cdata, 4);
         dataLength -= 4;
     }
@@ -247,12 +252,11 @@ void handleCommissionRates(uint8_t *cdata, uint8_t dataLength) {
     startConfigureBakerCommissionDisplay();
 }
 
-void handleSignConfigureBaker(
-    uint8_t *cdata,
-    uint8_t p1,
-    uint8_t dataLength,
-    volatile unsigned int *flags,
-    bool isInitialCall) {
+void handleSignConfigureBaker(uint8_t *cdata,
+                              uint8_t p1,
+                              uint8_t dataLength,
+                              volatile unsigned int *flags,
+                              bool isInitialCall) {
     if (P1_INITIAL == p1 && isInitialCall) {
         cdata += parseKeyDerivationPath(cdata);
         cx_sha256_init(&tx_state->hash);
@@ -279,7 +283,8 @@ void handleSignConfigureBaker(
         ctx->hasBakingRewardCommission = (bitmap >> 6) & 1;
         ctx->hasFinalizationRewardCommission = (bitmap >> 7) & 1;
 
-        if (ctx->hasCapital || ctx->hasRestakeEarnings || ctx->hasOpenForDelegation || ctx->hasKeys) {
+        if (ctx->hasCapital || ctx->hasRestakeEarnings || ctx->hasOpenForDelegation ||
+            ctx->hasKeys) {
             ctx->state = CONFIGURE_BAKER_FIRST;
         } else if (ctx->hasMetadataUrl) {
             ctx->state = CONFIGURE_BAKER_URL_LENGTH;
@@ -297,10 +302,9 @@ void handleSignConfigureBaker(
                 ctx->capitalRestakeDelegation.stopBaking = true;
             } else {
                 ctx->capitalRestakeDelegation.stopBaking = false;
-                amountToGtuDisplay(
-                    ctx->capitalRestakeDelegation.displayCapital,
-                    sizeof(ctx->capitalRestakeDelegation.displayCapital),
-                    capitalAmount);
+                amountToGtuDisplay(ctx->capitalRestakeDelegation.displayCapital,
+                                   sizeof(ctx->capitalRestakeDelegation.displayCapital),
+                                   capitalAmount);
             }
             updateHash((cx_hash_t *) &tx_state->hash, cdata, 8);
             cdata += 8;
@@ -330,17 +334,21 @@ void handleSignConfigureBaker(
             if (openForDelegation == 0) {
                 memmove(ctx->capitalRestakeDelegation.displayOpenForDelegation, "Open for all", 13);
             } else if (openForDelegation == 1) {
-                memmove(ctx->capitalRestakeDelegation.displayOpenForDelegation, "Closed for new", 15);
+                memmove(ctx->capitalRestakeDelegation.displayOpenForDelegation,
+                        "Closed for new",
+                        15);
             } else if (openForDelegation == 2) {
-                memmove(ctx->capitalRestakeDelegation.displayOpenForDelegation, "Closed for all", 15);
+                memmove(ctx->capitalRestakeDelegation.displayOpenForDelegation,
+                        "Closed for all",
+                        15);
             } else {
                 THROW(ERROR_INVALID_TRANSACTION);
             }
         }
 
         if (ctx->hasKeys) {
-            // We are expecting the signature and election verification keys (each 32 bytes) and their proofs (each 64
-            // bytes).
+            // We are expecting the signature and election verification keys (each 32 bytes) and
+            // their proofs (each 64 bytes).
             if (lengthCheck != 192) {
                 THROW(ERROR_INVALID_TRANSACTION);
             }

@@ -8,13 +8,14 @@ static cborContext_t *ctx = &global.withDataBlob.cborContext;
 
 void handleCborStep(void);
 
-UX_STEP_NOCB(ux_display_memo_step_nocb, bnnn_paging, {"Memo", (char *) global.withDataBlob.cborContext.display});
+UX_STEP_NOCB(ux_display_memo_step_nocb,
+             bnnn_paging,
+             {"Memo", (char *) global.withDataBlob.cborContext.display});
 
-UX_STEP_CB(
-    ux_display_memo_step,
-    bnnn_paging,
-    handleCborStep(),
-    {"Memo", (char *) global.withDataBlob.cborContext.display});
+UX_STEP_CB(ux_display_memo_step,
+           bnnn_paging,
+           handleCborStep(),
+           {"Memo", (char *) global.withDataBlob.cborContext.display});
 
 UX_FLOW(ux_display_memo, &ux_display_memo_step);
 
@@ -30,7 +31,8 @@ void readCborInitial(uint8_t *cdata, uint8_t dataLength) {
     uint8_t header = cdata[0];
     cdata += 1;
     ctx->cborLength -= 1;
-    // the first byte of an cbor encoding contains the type (3 high bits) and the shortCount (5 lower bits);
+    // the first byte of an cbor encoding contains the type (3 high bits) and the shortCount (5
+    // lower bits);
     ctx->majorType = header >> 5;
     uint8_t shortCount = header & 0x1f;
 
@@ -108,7 +110,8 @@ void readCborContent(uint8_t *cdata, uint8_t contentLength) {
             break;
         case 0:
         case 1:
-            // Type 0 and 1 fails, because we don't support integers that can't fit in the initial payload.
+            // Type 0 and 1 fails, because we don't support integers that can't fit in the initial
+            // payload.
             THROW(ERROR_UNSUPPORTED_CBOR);
             break;
         default:

@@ -54,8 +54,9 @@ typedef struct {
     uint8_t identity;
     uint8_t accountIndex;
 
-    // Max length of path is 8. Currently we expect to receive the root, i.e. purpose and cointype as well.
-    // This could be refactored into having those values hardcoded if we determine they will be static.
+    // Max length of path is 8. Currently we expect to receive the root, i.e. purpose and cointype
+    // as well. This could be refactored into having those values hardcoded if we determine they
+    // will be static.
     uint8_t pathLength;
     uint32_t keyDerivationPath[8];
     uint32_t rawKeyDerivationPath[8];

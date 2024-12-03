@@ -30,7 +30,11 @@ size_t numberToText(uint8_t *dst, size_t dstLength, uint64_t number) {
     return len;
 }
 
-size_t numberToTextWithUnit(uint8_t *dst, size_t dstLength, uint64_t number, uint8_t *unit, size_t unitLength) {
+size_t numberToTextWithUnit(uint8_t *dst,
+                            size_t dstLength,
+                            uint64_t number,
+                            uint8_t *unit,
+                            size_t unitLength) {
     size_t len = numberToText(dst, dstLength, number);
 
     if (dstLength - len < unitLength + 2) {
@@ -52,7 +56,10 @@ size_t bin2dec(uint8_t *dst, size_t dstLength, uint64_t number) {
     return characterLength + 1;
 }
 
-size_t decimalDigitsDisplay(uint8_t *dst, size_t dstLength, uint64_t decimalPart, uint8_t decimalDigitsLength) {
+size_t decimalDigitsDisplay(uint8_t *dst,
+                            size_t dstLength,
+                            uint64_t decimalPart,
+                            uint8_t decimalDigitsLength) {
     // Fill with zeroes if the number is less than decimalDigits,
     // so that input like 5304 become 005304 in their display version.
     size_t length = lengthOfNumber(decimalPart);
@@ -78,15 +85,15 @@ size_t decimalDigitsDisplay(uint8_t *dst, size_t dstLength, uint64_t decimalPart
         }
     }
 
-    return numberToText(dst + zeroFillLength, dstLength - zeroFillLength, decimalPart) + zeroFillLength;
+    return numberToText(dst + zeroFillLength, dstLength - zeroFillLength, decimalPart) +
+           zeroFillLength;
 }
 
-size_t decimalNumberToDisplay(
-    uint8_t *dst,
-    size_t dstLength,
-    uint64_t amount,
-    uint32_t resolution,
-    uint8_t decimalDigitsLength) {
+size_t decimalNumberToDisplay(uint8_t *dst,
+                              size_t dstLength,
+                              uint64_t amount,
+                              uint32_t resolution,
+                              uint8_t decimalDigitsLength) {
     // In every case we need to write atleast 2 characters
     if (dstLength < 2) {
         THROW(ERROR_BUFFER_OVERFLOW);
@@ -151,7 +158,10 @@ size_t decimalNumberToDisplay(
     if (decimalPart != 0) {
         dst[offset] = '.';
         offset += 1;
-        offset += decimalDigitsDisplay(dst + offset, dstLength - offset, decimalPart, decimalDigitsLength);
+        offset += decimalDigitsDisplay(dst + offset,
+                                       dstLength - offset,
+                                       decimalPart,
+                                       decimalDigitsLength);
     }
 
     // We check that we can fit the termination character

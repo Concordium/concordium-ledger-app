@@ -21,7 +21,8 @@ static const uint8_t r[32] = {0x73, 0xed, 0xa7, 0x53, 0x29, 0x9d, 0x7d, 0x48, 0x
 /**
  * Converts bytes into uint64_t (big endian).
  */
-#define U8BE(buf, off) (((uint64_t) (U4BE(buf, off)) << 32) | ((uint64_t) (U4BE(buf, off + 4)) & 0xFFFFFFFF))
+#define U8BE(buf, off) \
+    (((uint64_t) (U4BE(buf, off)) << 32) | ((uint64_t) (U4BE(buf, off + 4)) & 0xFFFFFFFF))
 
 /**
  * Send a user rejection back to the caller, which will indicate to
@@ -49,7 +50,8 @@ void sendSuccessResultNoIdle(uint8_t tx);
 /**
  * Sends a success back to the caller, and then returns to the menu screen. The result data
  * should already have been written to the APDU buffer before calling this method, and the caller
- * should provide the correct tx offset, i.e. the number of bytes already written to the APDU buffer.
+ * should provide the correct tx offset, i.e. the number of bytes already written to the APDU
+ * buffer.
  * @param tx number of bytes written to the APDU buffer that should be sent back to the caller
  */
 void sendSuccess(uint8_t tx);
@@ -57,14 +59,16 @@ void sendSuccess(uint8_t tx);
 /**
  * Gets the private-key for the provided key path.
  *
- * Note that any method using this method MUST zero the private key right after use of the private key,
- * as to limit any risk of leaking a private key.
+ * Note that any method using this method MUST zero the private key right after use of the private
+ * key, as to limit any risk of leaking a private key.
  *
  * @param keyPathInput the key derivation path to get the private key for
  * @param keyPathLength length of the key derivation path
  * @param privateKey [out] where to write the derived private key to
  */
-void getPrivateKey(uint32_t *keyPathInput, uint8_t keyPathLength, cx_ecfp_private_key_t *privateKey);
+void getPrivateKey(uint32_t *keyPathInput,
+                   uint8_t keyPathLength,
+                   cx_ecfp_private_key_t *privateKey);
 
 /**
  * Gets the public-key for the keypath that has been loaded into the state. It is a
@@ -98,16 +102,15 @@ void sign(uint8_t *input, uint8_t *signatureOnInput);
  * @param[in] in Data to be hashed
  * @param[in] len Length of the input data
  * @param[out] out Buffer where to store the message digest.
- * @param[out] out_len The size of the output buffer. If the buffer is too small to store the hash, then an exception is
- * thrown.
+ * @param[out] out_len The size of the output buffer. If the buffer is too small to store the hash,
+ * then an exception is thrown.
  */
-void hash(
-    cx_hash_t *hash,
-    uint32_t mode,
-    const unsigned char *in,
-    unsigned int len,
-    unsigned char *out,
-    unsigned int out_len);
+void hash(cx_hash_t *hash,
+          uint32_t mode,
+          const unsigned char *in,
+          unsigned int len,
+          unsigned char *out,
+          unsigned int out_len);
 
 /**
  * Hashes the provided input to the hashing context.
@@ -123,13 +126,17 @@ void updateHash(cx_hash_t *hash, const unsigned char *in, unsigned int len);
  * @param identityIndex
  * @param accountIndex
  */
-void getIdentityAccountDisplay(uint8_t *dst, size_t dstLength, uint32_t identityIndex, uint32_t accountIndex);
+void getIdentityAccountDisplay(uint8_t *dst,
+                               size_t dstLength,
+                               uint32_t identityIndex,
+                               uint32_t accountIndex);
 
 /**
  * Adds the account transaction header and transaction kind to the current
  * transaction hash.
  * @param cdata the incoming command data pointing to the start of the account transaction header
- * @param validTransactionKind the expected transaction kind, used to validate that the transaction is valid
+ * @param validTransactionKind the expected transaction kind, used to validate that the transaction
+ * is valid
  * @return the count of hashed bytes from cdata
  */
 int hashAccountTransactionHeaderAndKind(uint8_t *cdata, uint8_t validTransactionKind);
@@ -145,29 +152,36 @@ int hashUpdateHeaderAndType(uint8_t *cdata, uint8_t validUpdateType);
 /**
  * Adds the account transaction header and the recipient address to the transaction hash, and
  * writes the base58 encoded recipient address for later display.
- * @param cdata the incoming command data pointing to the start of the input, i.e. with the key path at the start
+ * @param cdata the incoming command data pointing to the start of the input, i.e. with the key path
+ * at the start
  * @param kind the transaction type
  * @param recipientDst the destination where to write the base58 encoded recipient address
  * @param recipientSize the size of the recipient destination
  */
-int handleHeaderAndToAddress(uint8_t *cdata, uint8_t kind, uint8_t *recipientDst, size_t recipientSize);
+int handleHeaderAndToAddress(uint8_t *cdata,
+                             uint8_t kind,
+                             uint8_t *recipientDst,
+                             size_t recipientSize);
 
 /**
  * Calculates a BLS12-381 private-key using the seed at the provided key path.
  *
- * Note that any method using this method MUST zero the private key right after use of the private key,
- * as to limit any risk of leaking a private key.
+ * Note that any method using this method MUST zero the private key right after use of the private
+ * key, as to limit any risk of leaking a private key.
  *
  * @param keyPathInput the key derivation path to get the private key seed from
  * @param keyPathLength length of the key derivation path
  * @param privateKey [out] where to write the derived private key to
  * @param privateKeyLength length of privateKey
  */
-void getBlsPrivateKey(uint32_t *keyPathInput, uint8_t keyPathLength, uint8_t *privateKey, size_t privateKeyLength);
+void getBlsPrivateKey(uint32_t *keyPathInput,
+                      uint8_t keyPathLength,
+                      uint8_t *privateKey,
+                      size_t privateKeyLength);
 
 /**
- * Loads a u64 ratio into the destination provided in a displayable format (numerator / denominator). The bytes
- * of the ratio are also added to the hash.
+ * Loads a u64 ratio into the destination provided in a displayable format (numerator /
+ * denominator). The bytes of the ratio are also added to the hash.
  *
  * @param cdata the incoming command data pointing to the start of the input containing the ratio
  * @param dst where to write the displayable u64 ratio

@@ -17,13 +17,16 @@ void buildAndSignTransactionHash();
 UX_STEP_NOCB(ux_sign_flow_shared_review, nn, {"Review", "transaction"});
 
 // Common signature flow for all transactions allowing the user to either sign the transaction hash
-// that is currently being processed, or declining to do so (sending back a user rejection error to the caller).
-UX_STEP_CB(ux_sign_flow_shared_sign, pnn, buildAndSignTransactionHash(), {&C_icon_validate_14, "Sign", "transaction"});
-UX_STEP_CB(
-    ux_sign_flow_shared_decline,
-    pnn,
-    sendUserRejection(),
-    {&C_icon_crossmark, "Decline to", "sign transaction"});
+// that is currently being processed, or declining to do so (sending back a user rejection error to
+// the caller).
+UX_STEP_CB(ux_sign_flow_shared_sign,
+           pnn,
+           buildAndSignTransactionHash(),
+           {&C_icon_validate_14, "Sign", "transaction"});
+UX_STEP_CB(ux_sign_flow_shared_decline,
+           pnn,
+           sendUserRejection(),
+           {&C_icon_crossmark, "Decline to", "sign transaction"});
 UX_FLOW(ux_sign_flow_shared, &ux_sign_flow_shared_sign, &ux_sign_flow_shared_decline);
 
 // Hashes transaction, signs it and sends the signature back to the computer.

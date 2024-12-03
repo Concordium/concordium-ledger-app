@@ -11,15 +11,14 @@ static cborContext_t *memo_ctx = &global.withDataBlob.cborContext;
 static tx_state_t *tx_state = &global_tx_state;
 const ux_flow_step_t *ux_sign_amount_transfer[8];
 
-UX_STEP_NOCB(
-    ux_sign_flow_1_step,
-    bnnn_paging,
-    {"Amount", (char *) global.withDataBlob.signTransferContext.displayAmount});
+UX_STEP_NOCB(ux_sign_flow_1_step,
+             bnnn_paging,
+             {"Amount", (char *) global.withDataBlob.signTransferContext.displayAmount});
 
-UX_STEP_NOCB(
-    ux_sign_flow_2_step,
-    bnnn_paging,
-    {.title = "Recipient", .text = (char *) global.withDataBlob.signTransferContext.displayStr});
+UX_STEP_NOCB(ux_sign_flow_2_step,
+             bnnn_paging,
+             {.title = "Recipient",
+              .text = (char *) global.withDataBlob.signTransferContext.displayStr});
 
 void startTransferDisplay(bool displayMemo) {
     uint8_t index = 0;
@@ -65,18 +64,20 @@ void finishMemo() {
     sendSuccessNoIdle();
 }
 
-void handleSignTransferWithMemo(
-    uint8_t *cdata,
-    uint8_t p1,
-    uint8_t dataLength,
-    volatile unsigned int *flags,
-    bool isInitialCall) {
+void handleSignTransferWithMemo(uint8_t *cdata,
+                                uint8_t p1,
+                                uint8_t dataLength,
+                                volatile unsigned int *flags,
+                                bool isInitialCall) {
     if (isInitialCall) {
         ctx->state = TX_TRANSFER_INITIAL;
     }
 
     if (p1 == P1_INITIAL_WITH_MEMO && ctx->state == TX_TRANSFER_INITIAL) {
-        cdata += handleHeaderAndToAddress(cdata, TRANSFER_WITH_MEMO, ctx->displayStr, sizeof(ctx->displayStr));
+        cdata += handleHeaderAndToAddress(cdata,
+                                          TRANSFER_WITH_MEMO,
+                                          ctx->displayStr,
+                                          sizeof(ctx->displayStr));
 
         // hash the memo length
         memo_ctx->cborLength = U2BE(cdata, 0);
@@ -103,7 +104,8 @@ void handleSignTransferWithMemo(
 
         readCborContent(cdata, dataLength);
         if (memo_ctx->cborLength != 0) {
-            // The memo size is <=256 bytes, so we should always have received the complete memo by this point
+            // The memo size is <=256 bytes, so we should always have received the complete memo by
+            // this point
             THROW(ERROR_INVALID_STATE);
         }
 

@@ -1,7 +1,8 @@
 /*
- *  The code in the function secondsToTm is from the musl project (https://git.musl-libc.org/cgit/musl/),
- *  specifically taken from https://git.musl-libc.org/cgit/musl/tree/src/time/__secs_to_tm.c.
- *  The code has been edited slightly in the following way:
+ *  The code in the function secondsToTm is from the musl project
+ * (https://git.musl-libc.org/cgit/musl/), specifically taken from
+ * https://git.musl-libc.org/cgit/musl/tree/src/time/__secs_to_tm.c. The code has been edited
+ * slightly in the following way:
  *   - renamed the method to 'seconds_to_tm'.
  *   - since we do not have access to <time.h> we use a local version with a copy
  *     of the required 'tm' struct.

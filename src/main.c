@@ -53,10 +53,12 @@ accountSender_t global_account_sender;
 // An INS instruction containing 0x02 means that we should start the transfer signing flow.
 #define INS_SIGN_TRANSFER 0x02
 
-// An INS instruction containing 0x03 means that we should start the scheduled transfer signing flow.
+// An INS instruction containing 0x03 means that we should start the scheduled transfer signing
+// flow.
 #define INS_SIGN_TRANSFER_WITH_SCHEDULE 0x03
 
-// An INS instruction containing 0x04 means that we should start the credential deployment signing flow.
+// An INS instruction containing 0x04 means that we should start the credential deployment signing
+// flow.
 #define INS_CREDENTIAL_DEPLOYMENT 0x04
 
 #define INS_EXPORT_PRIVATE_KEY 0x05
@@ -77,14 +79,13 @@ accountSender_t global_account_sender;
 #define INS_SIGN_TRANSFER_WITH_SCHEDULE_AND_MEMO 0x34
 #define INS_REGISTER_DATA                        0x35
 
-void handler(
-    uint8_t INS,
-    uint8_t *cdata,
-    uint8_t p1,
-    uint8_t p2,
-    uint8_t lc,
-    volatile unsigned int *flags,
-    bool isInitialCall) {
+void handler(uint8_t INS,
+             uint8_t *cdata,
+             uint8_t p1,
+             uint8_t p2,
+             uint8_t lc,
+             volatile unsigned int *flags,
+             bool isInitialCall) {
     switch (INS) {
         case INS_GET_PUBLIC_KEY:
             handleGetPublicKey(cdata, p1, p2, flags);

@@ -11,17 +11,18 @@ static tx_state_t *tx_state = &global_tx_state;
 
 void handleData();
 
-UX_STEP_VALID(ux_register_data_initial_flow_step, nn, sendSuccessNoIdle(), {"Continue", "with transaction"});
-UX_STEP_VALID(
-    ux_register_data_display_data_step,
-    bnnn_paging,
-    handleData(),
-    {"Data", (char *) global.withDataBlob.cborContext.display});
-UX_FLOW(
-    ux_register_data_initial,
-    &ux_sign_flow_shared_review,
-    &ux_sign_flow_account_sender_view,
-    &ux_register_data_initial_flow_step);
+UX_STEP_VALID(ux_register_data_initial_flow_step,
+              nn,
+              sendSuccessNoIdle(),
+              {"Continue", "with transaction"});
+UX_STEP_VALID(ux_register_data_display_data_step,
+              bnnn_paging,
+              handleData(),
+              {"Data", (char *) global.withDataBlob.cborContext.display});
+UX_FLOW(ux_register_data_initial,
+        &ux_sign_flow_shared_review,
+        &ux_sign_flow_account_sender_view,
+        &ux_register_data_initial_flow_step);
 
 UX_FLOW(ux_register_data_payload, &ux_register_data_display_data_step);
 
@@ -36,12 +37,11 @@ void handleData() {
 #define P1_INITIAL 0x00
 #define P1_DATA    0x01
 
-void handleSignRegisterData(
-    uint8_t *cdata,
-    uint8_t p1,
-    uint8_t dataLength,
-    volatile unsigned int *flags,
-    bool isInitialCall) {
+void handleSignRegisterData(uint8_t *cdata,
+                            uint8_t p1,
+                            uint8_t dataLength,
+                            volatile unsigned int *flags,
+                            bool isInitialCall) {
     if (isInitialCall) {
         ctx->state = TX_REGISTER_DATA_INITIAL;
     }
@@ -76,7 +76,8 @@ void handleSignRegisterData(
                 break;
             case TX_REGISTER_DATA_PAYLOAD:
                 if (ctx->dataLength != 0) {
-                    // The data size is <=256 bytes, so we should always have received all the data by this point
+                    // The data size is <=256 bytes, so we should always have received all the data
+                    // by this point
                     THROW(ERROR_INVALID_STATE);
                 }
                 readCborContent(cdata, dataLength);

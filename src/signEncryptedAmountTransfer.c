@@ -15,10 +15,10 @@ const ux_flow_step_t *ux_sign_encrypted_amount_transfer[8];
 // UI for displaying encrypted transfer transaction. It only shows the user the recipient address
 // as the amounts are encrypted and can't be validated by the user.
 UX_STEP_NOCB(ux_sign_encrypted_amount_transfer_1_step, nn, {"Shielded", "transfer"});
-UX_STEP_NOCB(
-    ux_sign_encrypted_amount_transfer_2_step,
-    bnnn_paging,
-    {.title = "Recipient", .text = (char *) global.withDataBlob.signEncryptedAmountToTransfer.to});
+UX_STEP_NOCB(ux_sign_encrypted_amount_transfer_2_step,
+             bnnn_paging,
+             {.title = "Recipient",
+              .text = (char *) global.withDataBlob.signEncryptedAmountToTransfer.to});
 
 void startEncryptedTransferDisplay(bool displayMemo) {
     uint8_t index = 0;
@@ -54,7 +54,8 @@ void handleRemainingAmount(uint8_t *cdata) {
 }
 
 void handleTransferAmountAggIndexProofSize(uint8_t *cdata) {
-    // Hash transfer amount and agg index. Transfer amount is encrypted, and so we cannot display it.
+    // Hash transfer amount and agg index. Transfer amount is encrypted, and so we cannot display
+    // it.
     updateHash((cx_hash_t *) &tx_state->hash, cdata, 200);
     cdata += 200;
 
@@ -66,7 +67,10 @@ void handleTransferAmountAggIndexProofSize(uint8_t *cdata) {
     sendSuccessNoIdle();
 }
 
-void handleProofs(uint8_t *cdata, uint8_t dataLength, volatile unsigned int *flags, bool displayMemo) {
+void handleProofs(uint8_t *cdata,
+                  uint8_t dataLength,
+                  volatile unsigned int *flags,
+                  bool displayMemo) {
     updateHash((cx_hash_t *) &tx_state->hash, cdata, dataLength);
     ctx->proofSize -= dataLength;
 
@@ -88,18 +92,20 @@ void finishMemoEncrypted() {
     sendSuccessNoIdle();
 }
 
-void handleSignEncryptedAmountTransferWithMemo(
-    uint8_t *cdata,
-    uint8_t p1,
-    uint8_t dataLength,
-    volatile unsigned int *flags,
-    bool isInitialCall) {
+void handleSignEncryptedAmountTransferWithMemo(uint8_t *cdata,
+                                               uint8_t p1,
+                                               uint8_t dataLength,
+                                               volatile unsigned int *flags,
+                                               bool isInitialCall) {
     if (isInitialCall) {
         ctx->state = TX_ENCRYPTED_AMOUNT_TRANSFER_INITIAL;
     }
 
     if (p1 == P1_INITIAL_WITH_MEMO && ctx->state == TX_ENCRYPTED_AMOUNT_TRANSFER_INITIAL) {
-        cdata += handleHeaderAndToAddress(cdata, ENCRYPTED_AMOUNT_TRANSFER_WITH_MEMO, ctx->to, sizeof(ctx->to));
+        cdata += handleHeaderAndToAddress(cdata,
+                                          ENCRYPTED_AMOUNT_TRANSFER_WITH_MEMO,
+                                          ctx->to,
+                                          sizeof(ctx->to));
 
         // Hash memo length
         memo_ctx->cborLength = U2BE(cdata, 0);
@@ -130,15 +136,17 @@ void handleSignEncryptedAmountTransferWithMemo(
         readCborContent(cdata, dataLength);
 
         if (memo_ctx->cborLength != 0) {
-            // The memo size is <=256 bytes, so we should always have received the complete memo by this point;
+            // The memo size is <=256 bytes, so we should always have received the complete memo by
+            // this point;
             THROW(ERROR_INVALID_STATE);
         }
 
         finishMemoEncrypted();
-    } else if (p1 == P1_REMAINING_AMOUNT && ctx->state == TX_ENCRYPTED_AMOUNT_TRANSFER_REMAINING_AMOUNT) {
+    } else if (p1 == P1_REMAINING_AMOUNT &&
+               ctx->state == TX_ENCRYPTED_AMOUNT_TRANSFER_REMAINING_AMOUNT) {
         handleRemainingAmount(cdata);
-    } else if (
-        p1 == P1_TRANSFER_AMOUNT_AGG_INDEX_PROOF_SIZE && ctx->state == TX_ENCRYPTED_AMOUNT_TRANSFER_TRANSFER_AMOUNT) {
+    } else if (p1 == P1_TRANSFER_AMOUNT_AGG_INDEX_PROOF_SIZE &&
+               ctx->state == TX_ENCRYPTED_AMOUNT_TRANSFER_TRANSFER_AMOUNT) {
         handleTransferAmountAggIndexProofSize(cdata);
     } else if (p1 == P1_PROOF && ctx->state == TX_ENCRYPTED_AMOUNT_TRANSFER_PROOFS) {
         handleProofs(cdata, dataLength, flags, true);
@@ -147,12 +155,11 @@ void handleSignEncryptedAmountTransferWithMemo(
     }
 }
 
-void handleSignEncryptedAmountTransfer(
-    uint8_t *cdata,
-    uint8_t p1,
-    uint8_t dataLength,
-    volatile unsigned int *flags,
-    bool isInitialCall) {
+void handleSignEncryptedAmountTransfer(uint8_t *cdata,
+                                       uint8_t p1,
+                                       uint8_t dataLength,
+                                       volatile unsigned int *flags,
+                                       bool isInitialCall) {
     if (isInitialCall) {
         ctx->state = TX_ENCRYPTED_AMOUNT_TRANSFER_INITIAL;
     }
@@ -160,10 +167,11 @@ void handleSignEncryptedAmountTransfer(
         handleHeaderAndToAddress(cdata, ENCRYPTED_AMOUNT_TRANSFER, ctx->to, sizeof(ctx->to));
         ctx->state = TX_ENCRYPTED_AMOUNT_TRANSFER_REMAINING_AMOUNT;
         sendSuccessNoIdle();
-    } else if (p1 == P1_REMAINING_AMOUNT && ctx->state == TX_ENCRYPTED_AMOUNT_TRANSFER_REMAINING_AMOUNT) {
+    } else if (p1 == P1_REMAINING_AMOUNT &&
+               ctx->state == TX_ENCRYPTED_AMOUNT_TRANSFER_REMAINING_AMOUNT) {
         handleRemainingAmount(cdata);
-    } else if (
-        p1 == P1_TRANSFER_AMOUNT_AGG_INDEX_PROOF_SIZE && ctx->state == TX_ENCRYPTED_AMOUNT_TRANSFER_TRANSFER_AMOUNT) {
+    } else if (p1 == P1_TRANSFER_AMOUNT_AGG_INDEX_PROOF_SIZE &&
+               ctx->state == TX_ENCRYPTED_AMOUNT_TRANSFER_TRANSFER_AMOUNT) {
         handleTransferAmountAggIndexProofSize(cdata);
     } else if (p1 == P1_PROOF && ctx->state == TX_ENCRYPTED_AMOUNT_TRANSFER_PROOFS) {
         handleProofs(cdata, dataLength, flags, false);
