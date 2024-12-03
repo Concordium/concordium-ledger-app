@@ -94,7 +94,7 @@ size_t decimalNumberToDisplay(uint8_t *dst,
                               uint64_t amount,
                               uint32_t resolution,
                               uint8_t decimalDigitsLength) {
-    // In every case we need to write atleast 2 characters
+    // In every case we need to write at least 2 characters
     if (dstLength < 2) {
         THROW(ERROR_BUFFER_OVERFLOW);
     }

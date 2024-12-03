@@ -282,7 +282,7 @@ static const uint8_t l_bytes[2] = {0, l_CONST};
 /** This implements the bls key generation algorithm specified in
  * https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-04#section-2.3, The optional
  * parameter key_info is hardcoded to an empty string. Uses sha256 as the hash function. The
- * generated key has length 32, and dst should have atleast that length, or the function throws an
+ * generated key has length 32, and dst should have at least that length, or the function throws an
  * error.
  */
 void blsKeygen(const uint8_t *seed, size_t seedLength, uint8_t *dst, size_t dstLength) {

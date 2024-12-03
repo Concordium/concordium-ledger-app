@@ -37,7 +37,7 @@ void sendUserRejection();
 /**
  * Send a success back to the caller without returning the display to the
  * idle menu. This method should be used in instructions that span multiple
- * commands to avoid resetting the display back to the menu inbetween commands.
+ * commands to avoid resetting the display back to the menu between commands.
  */
 void sendSuccessNoIdle();
 

@@ -79,7 +79,7 @@ cx_err_t getCredId(uint8_t *prf,
     CX_CHECK(cx_ecpoint_alloc(&commitmentKey, CX_CURVE_BLS12_381_G1));
     CX_CHECK(cx_ecpoint_init(&commitmentKey, gX, sizeof(gX), gY, sizeof(gY)));
 
-    //  multipy commitmentKey with credIdExponent
+    //  multiply commitmentKey with credIdExponent
     CX_CHECK(cx_ecpoint_scalarmul_bn(&commitmentKey, credIdExponentBn));
     CX_CHECK(cx_bn_destroy(&credIdExponentBn));
 
