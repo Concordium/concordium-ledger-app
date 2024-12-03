@@ -52,7 +52,11 @@ cx_err_t getCredId(uint8_t *prf,
     cx_err_t error = 0;
 
     // get bn lock to allow working with binary numbers and elliptic curves
-    cx_bn_lock(16, 0);
+    error = cx_bn_lock(16, 0);
+    if (error != 0) {
+        return error;
+    }
+
     // Initialize binary numbers
     cx_bn_t credIdExponentBn, tmpBn, rBn, ccBn, prfBn;
     CX_CHECK(cx_bn_alloc(&credIdExponentBn, 32));

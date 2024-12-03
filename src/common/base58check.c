@@ -24,6 +24,7 @@
 
 #include "os.h"
 #include "cx.h"
+#include "base58.h"
 
 #include "responseCodes.h"
 
@@ -138,6 +139,5 @@ int base58check_encode(const unsigned char *in, size_t length, unsigned char *ou
     cx_hash_sha256(hash, sizeof(hash), hash, sizeof(hash));
     memmove(&buffer[1 + ADDRESS_LENGTH], hash, 4);
 
-    // The encoding input is the version + original input + 4 first bytes of double SHA256.
-    return base58_encode(buffer, 1 + ADDRESS_LENGTH + 4, out, outlen);
+    return base58_encode(buffer, 1 + ADDRESS_LENGTH + 4, (char *) out, *outlen);
 }
