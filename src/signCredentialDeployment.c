@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "accountSenderView.h"
+#include "common/ui/display.h"
 #include "base58check.h"
 #include "cx.h"
 #include "menu.h"

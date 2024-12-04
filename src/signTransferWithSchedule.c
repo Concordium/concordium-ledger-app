@@ -1,6 +1,6 @@
 #include <os.h>
 
-#include "accountSenderView.h"
+#include "common/ui/display.h"
 #include "base58check.h"
 #include "responseCodes.h"
 #include "sign.h"

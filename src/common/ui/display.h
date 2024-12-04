@@ -13,14 +13,21 @@ void readCborInitial(uint8_t *cdata, uint8_t dataLength);
  * Read part of a CBOR encoded dataBlob. Should only be used after readCborInitial.
  */
 void readCborContent(uint8_t *cdata, uint8_t dataLength);
-extern const ux_flow_step_t *const ux_display_memo[];
-extern const ux_flow_step_t ux_display_memo_step_nocb;
-
+// extern const ux_flow_step_t *const ux_display_memo[];
 typedef struct {
     uint32_t cborLength;
     uint32_t displayUsed;
     uint8_t display[255];
     uint8_t majorType;
 } cborContext_t;
+
+void handleCborStep(void);
+
+#endif
+
+#ifdef HAVE_BAGL
+
+extern const ux_flow_step_t ux_display_memo_step_nocb;
+extern const ux_flow_step_t ux_sign_flow_account_sender_view;
 
 #endif
