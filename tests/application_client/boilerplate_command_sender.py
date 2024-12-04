@@ -15,13 +15,16 @@ class P1(IntEnum):
     # Parameter 1 for screen confirmation for GET_PUBLIC_KEY.
     P1_CONFIRM = 0x00
     P1_NO_CONFIRM = 0x01
+    # Basic P1 for all instructions
+    P1_NONE = 0x00
 
 
 class P2(IntEnum):
     # Parameter 2 for sign for GET_PUBLIC_KEY.
     P2_SIGN = 0x01
     P2_NO_SIGN = 0x00
-
+    # Basic P2 for all instructions
+    P2_NONE = 0x00
     # # Parameter 2 for last APDU to receive.
     # P2_LAST = 0x00
     # # Parameter 2 for more APDU to receive.
@@ -31,7 +34,6 @@ class P2(IntEnum):
 class InsType(IntEnum):
     VERIFY_ADDRESS = 0x00
     GET_PUBLIC_KEY = 0x01
-    GET_VERSION = 0x36
     GET_APP_NAME = 0x21
     SIGN_TRANSFER = 0x02
     SIGN_TRANSFER_WITH_SCHEDULE = 0x03
@@ -86,13 +88,13 @@ class BoilerplateCommandSender:
 
     # def get_version(self) -> RAPDU:
     #     return self.backend.exchange(
-    #         cla=CLA, ins=InsType.GET_VERSION, p1=P1.P1_START, p2=P2.P2_LAST, data=b""
+    #         cla=CLA, ins=InsType.GET_VERSION, p1=P1.P1_NONE, p2=P2.P2_NONE, data=b""
     #     )
 
-    # def get_app_name(self) -> RAPDU:
-    #     return self.backend.exchange(
-    #         cla=CLA, ins=InsType.GET_APP_NAME, p1=P1.P1_START, p2=P2.P2_LAST, data=b""
-    #     )
+    def get_app_name(self) -> RAPDU:
+        return self.backend.exchange(
+            cla=CLA, ins=InsType.GET_APP_NAME, p1=P1.P1_NONE, p2=P2.P2_NONE, data=b""
+        )
 
     def get_public_key(self, path: str, signPublicKey: bool = False) -> RAPDU:
         return self.backend.exchange(
@@ -109,7 +111,7 @@ class BoilerplateCommandSender:
     ) -> Generator[None, None, None]:
         with self.backend.exchange_async(
             cla=CLA,
-            ins=InsType.INS_GET_PUBLIC_KEY,
+            ins=InsType.GET_PUBLIC_KEY,
             p1=P1.P1_CONFIRM,
             p2=P2.P2_SIGN if signPublicKey else P2.P2_NO_SIGN,
             data=pack_derivation_path(path),
