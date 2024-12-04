@@ -89,3 +89,5 @@ void startTransferDisplay(bool displayMemo, volatile unsigned int *flags);
 
 // Sign Transfer to Encrypted
 void uiSignTransferToEncryptedDisplay(volatile unsigned int *flags);
+// Sign Transfer to Public
+void uiSignTransferToPublicDisplay(volatile unsigned int *flags);

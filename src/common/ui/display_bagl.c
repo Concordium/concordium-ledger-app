@@ -812,4 +812,22 @@ void uiSignTransferToEncryptedDisplay(volatile unsigned int *flags) {
     *flags |= IO_ASYNCH_REPLY;
 }
 
+// Sign Transfer to Public
+
+UX_STEP_NOCB(ux_sign_transfer_to_public_1_step,
+             bnnn_paging,
+             {.title = "Unshield amount", .text = (char *) global.signTransferToPublic.amount});
+UX_FLOW(ux_sign_transfer_to_public,
+        &ux_sign_flow_shared_review,
+        &ux_sign_flow_account_sender_view,
+        &ux_sign_transfer_to_public_1_step,
+        &ux_sign_flow_shared_sign,
+        &ux_sign_flow_shared_decline);
+
+
+void uiSignTransferToPublicDisplay(volatile unsigned int *flags) {
+    ux_flow_init(0, ux_sign_transfer_to_public, NULL);
+    *flags |= IO_ASYNCH_REPLY;
+}
+
 #endif
