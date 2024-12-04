@@ -662,4 +662,73 @@ void startEncryptedTransferDisplay(bool displayMemo) {
     ux_flow_init(0, ux_sign_encrypted_amount_transfer, NULL);
 }
 
+// Public information for IP
+
+UX_STEP_NOCB(ux_sign_public_info_for_ip_display_public_key,
+             bnnn_paging,
+             {.title = "Public key", .text = (char *) global.signPublicInformationForIp.publicKey});
+
+UX_STEP_CB(ux_sign_public_info_for_ip_continue,
+           nn,
+           sendSuccessNoIdle(),
+           {"Continue", "reviewing info"});
+
+UX_STEP_CB(ux_sign_public_info_review,
+           nn,
+           sendSuccessNoIdle(),
+           {"Review identity", "provider info"});
+
+UX_STEP_CB(ux_sign_public_info_for_ip_sign,
+           pnn,
+           buildAndSignTransactionHash(),
+           {&C_icon_validate_14, "Sign identity", "provider info"});
+
+UX_STEP_CB(ux_sign_public_info_for_ip_decline,
+           pnn,
+           sendUserRejection(),
+           {&C_icon_crossmark, "Decline to", "sign info"});
+
+UX_STEP_NOCB(ux_sign_public_info_for_ip_display_threshold,
+             bn,
+             {"Signature threshold", (char *) global.signPublicInformationForIp.threshold});
+
+// Display a public key with continue
+UX_FLOW(ux_sign_public_info_for_ip_public_key,
+        &ux_sign_public_info_for_ip_display_public_key,
+        &ux_sign_public_info_for_ip_continue);
+// Display intro view and a public key with continue
+UX_FLOW(ux_review_public_info_for_ip,
+        &ux_sign_public_info_review,
+        &ux_sign_public_info_for_ip_display_public_key,
+        &ux_sign_public_info_for_ip_continue);
+// Display last public key and threshold and respond with signature / rejection
+UX_FLOW(ux_sign_public_info_for_ip_final,
+        &ux_sign_public_info_for_ip_display_public_key,
+        &ux_sign_public_info_for_ip_display_threshold,
+        &ux_sign_public_info_for_ip_sign,
+        &ux_sign_public_info_for_ip_decline);
+// Display entire flow and respond with signature / rejection
+UX_FLOW(ux_sign_public_info_for_ip_complete,
+        &ux_sign_public_info_review,
+        &ux_sign_public_info_for_ip_display_public_key,
+        &ux_sign_public_info_for_ip_display_threshold,
+        &ux_sign_public_info_for_ip_sign,
+        &ux_sign_public_info_for_ip_decline);
+
+void uiReviewPublicInformationForIpDisplay(void) {
+    ux_flow_init(0, ux_review_public_info_for_ip, NULL);
+}
+
+void uiSignPublicInformationForIpPublicKeyDisplay(void) {
+    ux_flow_init(0, ux_sign_public_info_for_ip_public_key, NULL);
+}
+
+void uiSignPublicInformationForIpCompleteDisplay(void) {
+    ux_flow_init(0, ux_sign_public_info_for_ip_complete, NULL);
+}
+
+void uiSignPublicInformationForIpFinalDisplay(void) {
+    ux_flow_init(0, ux_sign_public_info_for_ip_final, NULL);
+}
+
 #endif

@@ -68,3 +68,9 @@ extern const ux_flow_step_t *ux_sign_encrypted_amount_transfer[8];
 #endif
 
 void startEncryptedTransferDisplay(bool displayMemo);
+
+// Public information for IP
+void uiReviewPublicInformationForIpDisplay(void);
+void uiSignPublicInformationForIpPublicKeyDisplay(void);
+void uiSignPublicInformationForIpCompleteDisplay(void);
+void uiSignPublicInformationForIpFinalDisplay(void);
