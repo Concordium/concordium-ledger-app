@@ -13,6 +13,7 @@ from application_client.boilerplate_response_unpacker import (
 from ragger.bip import calculate_public_key_and_chaincode, CurveChoice
 from ragger.error import ExceptionRAPDU
 from ragger.navigator import NavInsID, NavIns, NavigateWithScenario
+from utils import instructions_builder
 
 
 nbgl_instructions_address_confirmation = [
@@ -69,6 +70,7 @@ def test_verify_address_confirm_legacy_path_accepted(
 
 
 # In this test we check that the VERIFY ADDRESS works in confirmation mode
+@pytest.mark.active_test_scope
 def test_verify_address_confirm_new_path_accepted(
     backend, scenario_navigator, test_name, default_screenshot_path
 ):
@@ -78,7 +80,7 @@ def test_verify_address_confirm_new_path_accepted(
         if backend.firmware.device.startswith(("stax", "flex")):
             instructions.extend(nbgl_instructions_address_confirmation)
         else:
-            instructions.extend(bagl_instructions_address_confirmation)
+            instructions.extend(instructions_builder(2, backend))
 
         scenario_navigator.navigator.navigate_and_compare(
             default_screenshot_path, test_name, instructions

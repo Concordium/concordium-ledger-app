@@ -27,8 +27,8 @@ def instructions_builder(
         go_right_instruction = NavInsID.SWIPE_CENTER_TO_LEFT
         confirm_instruction = NavInsID.USE_CASE_REVIEW_CONFIRM
     else:
-        go_right_instruction = NavInsID.SWIPE_CENTER_TO_LEFT
-        confirm_instruction = NavInsID.USE_CASE_ADDRESS_CONFIRMATION_CONFIRM
+        go_right_instruction = NavInsID.RIGHT_CLICK
+        confirm_instruction = NavInsID.BOTH_CLICK
 
     # Add the go right instruction for the number of screens needed
     instructions = [go_right_instruction] * number_of_screens_until_confirm
