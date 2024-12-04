@@ -1,3 +1,4 @@
+import pytest
 from bip32 import BIP32, HARDENED_INDEX
 from bip_utils import Bip32Slip10Ed25519
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
@@ -42,6 +43,7 @@ bagl_instructions_address_confirmation_reject = [
 
 
 # In this test we check that the VERIFY ADDRESS works in confirmation mode
+@pytest.mark.active_test_scope
 def test_verify_address_confirm_legacy_path_accepted(
     backend,
     scenario_navigator: NavigateWithScenario,
