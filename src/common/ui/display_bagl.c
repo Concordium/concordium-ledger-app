@@ -5,7 +5,12 @@
 #include "responseCodes.h"
 #include "sign.h"
 #include "util.h"
+#include "display.h"
+#include "globals.h"
+#include "menu.h"
+#include "getPublicKey.h"
 
+accountSender_t global_account_sender;
 static cborContext_t *ctx = &global.withDataBlob.cborContext;
 
 UX_STEP_NOCB(ux_display_memo_step_nocb,
@@ -123,4 +128,38 @@ void readCborContent(uint8_t *cdata, uint8_t contentLength) {
     }
 }
 
+// UI definitions for comparison of public-key on the device
+// with the public-key that the caller received.
+UX_STEP_NOCB(ux_sign_compare_public_key_0_step,
+             bnnn_paging,
+             {.title = "Compare", .text = (char *) global.exportPublicKeyContext.publicKey});
+UX_STEP_CB(ux_compare_accept_step, pb, ui_menu_main(), {&C_icon_validate_14, "Accept"});
+UX_STEP_CB(ux_compare_decline_step, pb, ui_menu_main(), {&C_icon_crossmark, "Decline"});
+UX_FLOW(ux_sign_compare_public_key,
+        &ux_sign_compare_public_key_0_step,
+        &ux_compare_accept_step,
+        &ux_compare_decline_step);
+
+void uiComparePubkey(void) {
+    ux_flow_init(0, ux_sign_compare_public_key, NULL);
+}
+
+UX_STEP_VALID(ux_decline_step, pb, sendUserRejection(), {&C_icon_crossmark, "Decline"});
+
+// UI definitions for the approval of the generation of a public-key. This prompts the user to
+// accept that a public-key will be generated and returned to the computer.
+UX_STEP_VALID(ux_generate_public_flow_0_step,
+              pnn,
+              sendPublicKey(true),
+              {&C_icon_validate_14, "Public key", (char *) global.exportPublicKeyContext.display});
+UX_FLOW(ux_generate_public_flow, &ux_generate_public_flow_0_step, &ux_decline_step, FLOW_LOOP);
+
+void uiGeneratePubkey(volatile unsigned int *flags) {
+    // Display the UI for the public-key flow, where the user can validate that the
+    // public-key being generated is the expected one.
+    ux_flow_init(0, ux_generate_public_flow, NULL);
+
+    // Tell the main process to wait for a button press.
+    *flags |= IO_ASYNCH_REPLY;
+}
 #endif
