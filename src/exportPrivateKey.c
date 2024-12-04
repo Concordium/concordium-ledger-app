@@ -123,10 +123,9 @@ void handleExportPrivateKey(uint8_t *dataBuffer,
         (p2 != P2_KEY && p2 != P2_SEED)) {
         THROW(ERROR_INVALID_PARAM);
     }
-
     uint32_t identity = U4BE(dataBuffer, 0);
-    uint32_t keyDerivationPath[5] = {CONCORDIUM_PURPOSE | HARDENED_OFFSET,
-                                     CONCORDIUM_COIN_TYPE | HARDENED_OFFSET,
+    uint32_t keyDerivationPath[5] = {LEGACY_PURPOSE | HARDENED_OFFSET,
+                                     LEGACY_COIN_TYPE | HARDENED_OFFSET,
                                      ACCOUNT_SUBTREE | HARDENED_OFFSET,
                                      NORMAL_ACCOUNTS | HARDENED_OFFSET,
                                      identity | HARDENED_OFFSET};
