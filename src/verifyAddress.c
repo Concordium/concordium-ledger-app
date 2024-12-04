@@ -164,7 +164,6 @@ void handleVerifyAddress(uint8_t *cdata, uint8_t p1, volatile unsigned int *flag
     uint8_t prf[32];
     BEGIN_TRY {
         TRY {
-            // TODO: Find why the new pat address does not match with what we previously had
             getBlsPrivateKey(prfKeyPath, prfKeyPathLen, prf, sizeof(prf));
             cx_err_t error = getCredId(prf, sizeof(prf), credCounter, credId, sizeof(credId));
             if (error != 0) {
