@@ -1,7 +1,7 @@
 #include <os.h>
 #include <ux.h>
 #include "util.h"
-#include "accountSenderView.h"
+#include "common/ui/display.h"
 #include "sign.h"
 #include "responseCodes.h"
 

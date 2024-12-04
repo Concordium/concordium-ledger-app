@@ -1,8 +1,8 @@
 #include <os.h>
 
-#include "accountSenderView.h"
+#include "common/ui/display.h"
 #include "base58check.h"
-#include "displayCbor.h"
+#include "common/ui/display.h"
 #include "responseCodes.h"
 #include "sign.h"
 #include "util.h"

@@ -9,7 +9,7 @@
 #include "verifyAddress.h"
 
 #include "getPublicKey.h"
-#include "displayCbor.h"
+#include "common/ui/display.h"
 #include "signConfigureBaker.h"
 #include "signConfigureDelegation.h"
 #include "signCredentialDeployment.h"

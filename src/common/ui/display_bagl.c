@@ -1,3 +1,5 @@
+#ifdef HAVE_BAGL
+
 #include <os.h>
 
 #include "responseCodes.h"
@@ -5,8 +7,6 @@
 #include "util.h"
 
 static cborContext_t *ctx = &global.withDataBlob.cborContext;
-
-void handleCborStep(void);
 
 UX_STEP_NOCB(ux_display_memo_step_nocb,
              bnnn_paging,
@@ -18,6 +18,10 @@ UX_STEP_CB(ux_display_memo_step,
            {"Memo", (char *) global.withDataBlob.cborContext.display});
 
 UX_FLOW(ux_display_memo, &ux_display_memo_step);
+
+UX_STEP_NOCB(ux_sign_flow_account_sender_view,
+             bnnn_paging,
+             {.title = "Sender", .text = (char *) global_account_sender.sender});
 
 void handleCborStep(void) {
     if (ctx->cborLength < 0) {
@@ -118,3 +122,5 @@ void readCborContent(uint8_t *cdata, uint8_t contentLength) {
             THROW(ERROR_INVALID_STATE);
     }
 }
+
+#endif
