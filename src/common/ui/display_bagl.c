@@ -421,4 +421,57 @@ void startConfigureBakerCommissionDisplay() {
     ux_flow_init(0, ux_sign_configure_baker_commission, NULL);
 }
 
+static signConfigureDelegationContext_t *ctx_conf_delegation = &global.signConfigureDelegation;
+
+// There will at most be 8 UI steps when all 3 optional fields are available.
+const ux_flow_step_t *ux_sign_configure_delegation[8];
+
+UX_STEP_NOCB(ux_sign_configure_delegation_capital_step,
+             bnnn_paging,
+             {.title = "Amount to delegate",
+              .text = (char *) global.signConfigureDelegation.displayCapital});
+
+UX_STEP_NOCB(ux_sign_configure_delegation_restake_step,
+             bnnn_paging,
+             {.title = "Restake earnings",
+              .text = (char *) global.signConfigureDelegation.displayRestake});
+
+UX_STEP_NOCB(ux_sign_configure_delegation_pool_step,
+             bnnn_paging,
+             {.title = "Delegation target",
+              .text = (char *) global.signConfigureDelegation.displayDelegationTarget});
+
+UX_STEP_NOCB(ux_sign_configure_delegation_stop_delegation_step, nn, {"Stop", "delegation"});
+
+void startConfigureDelegationDisplay() {
+    uint8_t index = 0;
+
+    ux_sign_configure_delegation[index++] = &ux_sign_flow_shared_review;
+    ux_sign_configure_delegation[index++] = &ux_sign_flow_account_sender_view;
+
+    if (ctx_conf_delegation->hasCapital) {
+        if (ctx_conf_delegation->stopDelegation) {
+            ux_sign_configure_delegation[index++] =
+                &ux_sign_configure_delegation_stop_delegation_step;
+        } else {
+            ux_sign_configure_delegation[index++] = &ux_sign_configure_delegation_capital_step;
+        }
+    }
+
+    if (ctx_conf_delegation->hasRestakeEarnings) {
+        ux_sign_configure_delegation[index++] = &ux_sign_configure_delegation_restake_step;
+    }
+
+    if (ctx_conf_delegation->hasDelegationTarget) {
+        ux_sign_configure_delegation[index++] = &ux_sign_configure_delegation_pool_step;
+    }
+
+    ux_sign_configure_delegation[index++] = &ux_sign_flow_shared_sign;
+    ux_sign_configure_delegation[index++] = &ux_sign_flow_shared_decline;
+
+    ux_sign_configure_delegation[index++] = FLOW_END_STEP;
+
+    ux_flow_init(0, ux_sign_configure_delegation, NULL);
+}
+
 #endif
