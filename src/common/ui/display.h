@@ -31,3 +31,6 @@ extern const ux_flow_step_t ux_display_memo_step_nocb;
 extern const ux_flow_step_t ux_sign_flow_account_sender_view;
 
 #endif
+
+void uiComparePubkey(void);
+void uiGeneratePubkey(volatile unsigned int *flags);
