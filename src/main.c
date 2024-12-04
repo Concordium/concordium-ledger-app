@@ -79,6 +79,9 @@ accountSender_t global_account_sender;
 #define INS_SIGN_TRANSFER_WITH_SCHEDULE_AND_MEMO 0x34
 #define INS_REGISTER_DATA                        0x35
 
+#define INS_APP_NAME     0x36
+#define INS_GET_APP_NAME 0x21
+
 void handler(uint8_t INS,
              uint8_t *cdata,
              uint8_t p1,
@@ -137,6 +140,9 @@ void handler(uint8_t INS,
             break;
         case INS_SIGN_UPDATE_CREDENTIAL:
             handleSignUpdateCredential(cdata, p1, p2, flags, isInitialCall);
+            break;
+        case INS_GET_APP_NAME:
+            handleGetAppName(flags);
             break;
         default:
             THROW(ERROR_INVALID_INSTRUCTION);
