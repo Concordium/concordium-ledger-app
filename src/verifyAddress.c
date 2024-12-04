@@ -7,7 +7,7 @@
 #include "globals.h"
 #include "base58check.h"
 #include "responseCodes.h"
-
+#include "verifyAddress.h"
 #define ACCOUNT_SUBTREE 0
 #define NORMAL_ACCOUNTS 0
 
@@ -24,21 +24,6 @@ static const uint8_t gY[48] = {
     0x18, 0x6a, 0xf3, 0x21, 0x19, 0x54, 0x39, 0x13, 0xb2, 0x6a, 0x46, 0x2a, 0x02, 0x31, 0xe4, 0xbf,
     0x5f, 0xde, 0xe0, 0xb5, 0x2c, 0x91, 0x6f, 0x68, 0x85, 0x44, 0x87, 0xe8, 0x11, 0x2c, 0x1f, 0x27,
     0x74, 0x35, 0xfc, 0x07, 0x6f, 0x3a, 0xda, 0xd5, 0x6d, 0x18, 0xd8, 0x6a, 0x65, 0x99, 0xb5, 0x42};
-
-UX_STEP_NOCB(ux_verify_address_0_step,
-             bnnn_paging,
-             {.title = "Verify Address", .text = (char *) global.verifyAddressContext.display});
-
-UX_STEP_NOCB(ux_verify_address_1_step,
-             bnnn_paging,
-             {.title = "Address", .text = (char *) global.verifyAddressContext.address});
-UX_STEP_CB(ux_verify_address_approve_step, pb, sendSuccess(0), {&C_icon_validate_14, "Approve"});
-UX_STEP_CB(ux_verify_address_reject_step, pb, sendUserRejection(), {&C_icon_crossmark, "Reject"});
-UX_FLOW(ux_verify_address,
-        &ux_verify_address_0_step,
-        &ux_verify_address_1_step,
-        &ux_verify_address_approve_step,
-        &ux_verify_address_reject_step);
 
 /*
  * Calculates the credId from the given prf key and credential counter.
@@ -158,6 +143,5 @@ void handleVerifyAddress(uint8_t *cdata, volatile unsigned int *flags) {
     base58check_encode(accountAddress, sizeof(accountAddress), ctx->address, &addressLength);
     ctx->address[55] = '\0';
 
-    ux_flow_init(0, ux_verify_address, NULL);
-    *flags |= IO_ASYNCH_REPLY;
+    uiVerifyAddress(flags);
 }

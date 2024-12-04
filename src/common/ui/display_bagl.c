@@ -9,6 +9,7 @@
 #include "globals.h"
 #include "menu.h"
 #include "getPublicKey.h"
+#include "verifyAddress.h"
 
 accountSender_t global_account_sender;
 static cborContext_t *ctx = &global.withDataBlob.cborContext;
@@ -162,4 +163,25 @@ void uiGeneratePubkey(volatile unsigned int *flags) {
     // Tell the main process to wait for a button press.
     *flags |= IO_ASYNCH_REPLY;
 }
+
+UX_STEP_NOCB(ux_verify_address_0_step,
+             bnnn_paging,
+             {.title = "Verify Address", .text = (char *) global.verifyAddressContext.display});
+
+UX_STEP_NOCB(ux_verify_address_1_step,
+             bnnn_paging,
+             {.title = "Address", .text = (char *) global.verifyAddressContext.address});
+UX_STEP_CB(ux_verify_address_approve_step, pb, sendSuccess(0), {&C_icon_validate_14, "Approve"});
+UX_STEP_CB(ux_verify_address_reject_step, pb, sendUserRejection(), {&C_icon_crossmark, "Reject"});
+UX_FLOW(ux_verify_address,
+        &ux_verify_address_0_step,
+        &ux_verify_address_1_step,
+        &ux_verify_address_approve_step,
+        &ux_verify_address_reject_step);
+
+void uiVerifyAddress(volatile unsigned int *flags) {
+    ux_flow_init(0, ux_verify_address, NULL);
+    *flags |= IO_ASYNCH_REPLY;
+}
+
 #endif
