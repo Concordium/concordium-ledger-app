@@ -22,7 +22,7 @@ static const uint8_t r[32] = {0x73, 0xed, 0xa7, 0x53, 0x29, 0x9d, 0x7d, 0x48, 0x
  * Converts bytes into uint64_t (big endian).
  */
 #define U8BE(buf, off) \
-    (((uint64_t)(U4BE(buf, off)) << 32) | ((uint64_t)(U4BE(buf, off + 4)) & 0xFFFFFFFF))
+    (((uint64_t) (U4BE(buf, off)) << 32) | ((uint64_t) (U4BE(buf, off + 4)) & 0xFFFFFFFF))
 
 /**
  * Send a user rejection back to the caller, which will indicate to
@@ -130,6 +130,21 @@ void getIdentityAccountDisplay(uint8_t *dst,
                                size_t dstLength,
                                uint32_t identityIndex,
                                uint32_t accountIndex);
+
+/**
+ * Builds a human-readable representation of the identityProvider/identity/account path for the new
+ * path format.
+ * @param dst [out] where to write the identityProvider/identity/account string
+ * @param dstLength length of dst
+ * @param identityProviderIndex index of the identity provider
+ * @param identityIndex index of the identity
+ * @param accountIndex index of the account
+ */
+void getIdentityAccountDisplayNewPath(uint8_t *dst,
+                                      size_t dstLength,
+                                      uint32_t identityProviderIndex,
+                                      uint32_t identityIndex,
+                                      uint32_t accountIndex);
 
 /**
  * Adds the account transaction header and transaction kind to the current
