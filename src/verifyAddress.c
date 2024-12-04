@@ -8,8 +8,8 @@
 #include "base58check.h"
 #include "responseCodes.h"
 
-#define ACCOUNT_SUBTREE 0
-#define NORMAL_ACCOUNTS 0
+#define LEGACY_ACCOUNT_SUBTREE 0
+#define LEGACY_NORMAL_ACCOUNTS 0
 
 static verifyAddressContext_t *ctx = &global.verifyAddressContext;
 
@@ -120,25 +120,51 @@ end:
     return error;
 }
 
-void handleVerifyAddress(uint8_t *cdata, volatile unsigned int *flags) {
-    uint32_t identity = U4BE(cdata, 0);
-    uint32_t credCounter = U4BE(cdata, 4);
-    getIdentityAccountDisplay(ctx->display, sizeof(ctx->display), identity, credCounter);
+void handleVerifyAddress(uint8_t *cdata, uint8_t p1, volatile unsigned int *flags) {
+    size_t offset = 0;
+    bool is_new_path = p1 == 0x01;
+    uint32_t identityProvider = 0;
+    if (is_new_path) {
+        identityProvider = U4BE(cdata, offset);
+        offset += 4;
+    }
+    uint32_t identity = U4BE(cdata, offset);
+    offset += 4;
+    uint32_t credCounter = U4BE(cdata, offset);
+    offset += 4;
 
-    uint32_t prfKeyPath[6] = {
-        CONCORDIUM_PURPOSE | HARDENED_OFFSET,
-        CONCORDIUM_COIN_TYPE | HARDENED_OFFSET,
-        ACCOUNT_SUBTREE | HARDENED_OFFSET,
-        NORMAL_ACCOUNTS | HARDENED_OFFSET,
-        identity | HARDENED_OFFSET,
-        1 | HARDENED_OFFSET  // prf key
-    };
+    size_t prfKeyPathLen = is_new_path ? 5 : 6;
+    uint32_t *prfKeyPath;
+    if (is_new_path) {
+        prfKeyPath = (uint32_t[5]){NEW_PURPOSE | HARDENED_OFFSET,
+                                   NEW_COIN_TYPE | HARDENED_OFFSET,
+                                   identityProvider | HARDENED_OFFSET,
+                                   identity | HARDENED_OFFSET,
+                                   NEW_PRF_KEY | HARDENED_OFFSET};
+    } else {
+        prfKeyPath = (uint32_t[6]){LEGACY_PURPOSE | HARDENED_OFFSET,
+                                   LEGACY_COIN_TYPE | HARDENED_OFFSET,
+                                   LEGACY_ACCOUNT_SUBTREE | HARDENED_OFFSET,
+                                   LEGACY_NORMAL_ACCOUNTS | HARDENED_OFFSET,
+                                   identity | HARDENED_OFFSET,
+                                   LEGACY_PRF_KEY | HARDENED_OFFSET};
+    }
+
+    if (is_new_path) {
+        getIdentityAccountDisplayNewPath(ctx->display,
+                                         sizeof(ctx->display),
+                                         identityProvider,
+                                         identity,
+                                         credCounter);
+    } else {
+        getIdentityAccountDisplay(ctx->display, sizeof(ctx->display), identity, credCounter);
+    }
 
     uint8_t credId[48];
     uint8_t prf[32];
     BEGIN_TRY {
         TRY {
-            getBlsPrivateKey(prfKeyPath, 6, prf, sizeof(prf));
+            getBlsPrivateKey(prfKeyPath, prfKeyPathLen, prf, sizeof(prf));
             cx_err_t error = getCredId(prf, sizeof(prf), credCounter, credId, sizeof(credId));
             if (error != 0) {
                 THROW(ERROR_INVALID_STATE);

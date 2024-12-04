@@ -23,13 +23,17 @@
 
 #include "ux.h"
 
-#define CONCORDIUM_PURPOSE   1105
-#define CONCORDIUM_COIN_TYPE 0
+#define LEGACY_PURPOSE   1105
+#define LEGACY_COIN_TYPE 0
+#define NEW_PURPOSE      44
+#define NEW_COIN_TYPE    919
 
 #define MAX_CDATA_LENGTH 255
 
 #define ACCOUNT_TRANSACTION_HEADER_LENGTH 60
 #define UPDATE_HEADER_LENGTH              28
+
+typedef enum { LEGACY_PRF_KEY = 1, NEW_PRF_KEY = 3 } derivation_path_keys_t;
 
 typedef enum {
     DEPLOY_MODULE = 0,

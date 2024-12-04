@@ -12,6 +12,9 @@ CLA: int = 0xE0
 
 
 class P1(IntEnum):
+    # Parameter 1 for derivation path type for VERIFY_ADDRESS.
+    P1_VERIFY_ADDRESS_LEGACY_PATH = 0x00
+    P1_VERIFY_ADDRESS_NEW_PATH = 0x01
     # Parameter 1 for screen confirmation for GET_PUBLIC_KEY.
     P1_CONFIRM = 0x00
     P1_NO_CONFIRM = 0x01
@@ -118,24 +121,24 @@ class BoilerplateCommandSender:
         ) as response:
             yield response
 
-    # @contextmanager
-    # def verify_address(
-    #     self, identity_index: int, credential_counter: int, idp_index: int = -1
-    # ) -> Generator[None, None, None]:
-    #     data = b""
-    #     p1 = P1.P1_START
+    @contextmanager
+    def verify_address(
+        self, identity_index: int, credential_counter: int, idp_index: int = -1
+    ) -> Generator[None, None, None]:
+        data = b""
+        p1 = P1.P1_VERIFY_ADDRESS_LEGACY_PATH
 
-    #     if idp_index != -1:
-    #         data += idp_index.to_bytes(4, byteorder="big")
-    #         p1 = P1.P1_VERIFY_ADDRESS_NEW_PATH
+        if idp_index != -1:
+            data += idp_index.to_bytes(4, byteorder="big")
+            p1 = P1.P1_VERIFY_ADDRESS_NEW_PATH
 
-    #     data += identity_index.to_bytes(
-    #         4, byteorder="big"
-    #     ) + credential_counter.to_bytes(4, byteorder="big")
-    #     with self.backend.exchange_async(
-    #         cla=CLA, ins=InsType.VERIFY_ADDRESS, p1=p1, p2=P2.P2_LAST, data=data
-    #     ) as response:
-    #         yield response
+        data += identity_index.to_bytes(
+            4, byteorder="big"
+        ) + credential_counter.to_bytes(4, byteorder="big")
+        with self.backend.exchange_async(
+            cla=CLA, ins=InsType.VERIFY_ADDRESS, p1=p1, p2=P2.P2_NONE, data=data
+        ) as response:
+            yield response
 
     # @contextmanager
     # def sign_tx(
