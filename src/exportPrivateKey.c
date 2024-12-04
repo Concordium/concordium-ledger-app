@@ -7,6 +7,7 @@
 #include "responseCodes.h"
 #include "util.h"
 #include "ux.h"
+#include "exportPrivateKey.h"
 
 // This class allows for the export of a number of very specific private keys. These private keys
 // are made exportable as they are used in computations that are not feasible to carry out on the
@@ -14,25 +15,6 @@
 // possible to export keys that are used for signing.
 static const uint32_t HARDENED_OFFSET = 0x80000000;
 static exportPrivateKeyContext_t *ctx = &global.exportPrivateKeyContext;
-
-void exportPrivateKey(void);
-
-UX_STEP_NOCB(ux_export_private_key_0_step,
-             nn,
-             {(char *) global.exportPrivateKeyContext.displayHeader,
-              (char *) global.exportPrivateKeyContext.display});
-UX_STEP_CB(ux_export_private_key_accept_step,
-           pb,
-           exportPrivateKey(),
-           {&C_icon_validate_14, "Accept"});
-UX_STEP_CB(ux_export_private_key_decline_step,
-           pb,
-           sendUserRejection(),
-           {&C_icon_crossmark, "Decline"});
-UX_FLOW(ux_export_private_key,
-        &ux_export_private_key_0_step,
-        &ux_export_private_key_accept_step,
-        &ux_export_private_key_decline_step);
 
 #define ID_CRED_SEC 0
 #define PRF_KEY     1
@@ -145,6 +127,5 @@ void handleExportPrivateKey(uint8_t *dataBuffer,
         memmove(ctx->displayHeader, "Decrypt", 8);
     }
 
-    ux_flow_init(0, ux_export_private_key, NULL);
-    *flags |= IO_ASYNCH_REPLY;
+    uiExportPrivateKey(flags);
 }

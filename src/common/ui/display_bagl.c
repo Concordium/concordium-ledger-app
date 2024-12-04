@@ -10,6 +10,7 @@
 #include "menu.h"
 #include "getPublicKey.h"
 #include "verifyAddress.h"
+#include "exportPrivateKey.h"
 
 accountSender_t global_account_sender;
 static cborContext_t *ctx = &global.withDataBlob.cborContext;
@@ -181,6 +182,44 @@ UX_FLOW(ux_verify_address,
 
 void uiVerifyAddress(volatile unsigned int *flags) {
     ux_flow_init(0, ux_verify_address, NULL);
+    *flags |= IO_ASYNCH_REPLY;
+}
+
+// Common initial view for signing flows.
+UX_STEP_NOCB(ux_sign_flow_shared_review, nn, {"Review", "transaction"});
+
+// Common signature flow for all transactions allowing the user to either sign the transaction hash
+// that is currently being processed, or declining to do so (sending back a user rejection error to
+// the caller).
+UX_STEP_CB(ux_sign_flow_shared_sign,
+           pnn,
+           buildAndSignTransactionHash(),
+           {&C_icon_validate_14, "Sign", "transaction"});
+UX_STEP_CB(ux_sign_flow_shared_decline,
+           pnn,
+           sendUserRejection(),
+           {&C_icon_crossmark, "Decline to", "sign transaction"});
+UX_FLOW(ux_sign_flow_shared, &ux_sign_flow_shared_sign, &ux_sign_flow_shared_decline);
+
+UX_STEP_NOCB(ux_export_private_key_0_step,
+             nn,
+             {(char *) global.exportPrivateKeyContext.displayHeader,
+              (char *) global.exportPrivateKeyContext.display});
+UX_STEP_CB(ux_export_private_key_accept_step,
+           pb,
+           exportPrivateKey(),
+           {&C_icon_validate_14, "Accept"});
+UX_STEP_CB(ux_export_private_key_decline_step,
+           pb,
+           sendUserRejection(),
+           {&C_icon_crossmark, "Decline"});
+UX_FLOW(ux_export_private_key,
+        &ux_export_private_key_0_step,
+        &ux_export_private_key_accept_step,
+        &ux_export_private_key_decline_step);
+
+void uiExportPrivateKey(volatile unsigned int *flags) {
+    ux_flow_init(0, ux_export_private_key, NULL);
     *flags |= IO_ASYNCH_REPLY;
 }
 

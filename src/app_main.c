@@ -31,6 +31,8 @@
 keyDerivationPath_t path;
 tx_state_t global_tx_state;
 
+const internal_storage_t N_storage_real;
+
 // The expected CLA byte
 #define CLA 0xE0
 
@@ -52,6 +54,15 @@ void app_main() {
     volatile unsigned int rx = 0;
     volatile unsigned int tx = 0;
     volatile unsigned int flags = 0;
+
+    // Initialize the NVM data if required
+    if (N_storage.initialized != 0x01) {
+        internal_storage_t storage;
+        storage.dummy1_allowed = 0x00;
+        storage.dummy2_allowed = 0x00;
+        storage.initialized = 0x01;
+        nvm_write((void *) &N_storage, &storage, sizeof(internal_storage_t));
+    }
 
     for (;;) {
         volatile unsigned short sw = 0;
