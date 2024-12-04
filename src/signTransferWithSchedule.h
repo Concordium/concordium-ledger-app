@@ -1,5 +1,7 @@
-#ifndef _CONCORDIUM_APP_ACCOUNT_TRANSFER_WITH_SCHEDULE_H_
-#define _CONCORDIUM_APP_ACCOUNT_TRANSFER_WITH_SCHEDULE_H_
+#pragma once
+
+#include <stdbool.h>
+#include <stdint.h>
 
 #include "time.h"
 
@@ -46,4 +48,4 @@ typedef struct {
     uint8_t pos;
 } signTransferWithScheduleContext_t;
 
-#endif
+void processNextScheduledAmount(uint8_t *buffer);

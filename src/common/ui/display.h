@@ -91,3 +91,12 @@ void startTransferDisplay(bool displayMemo, volatile unsigned int *flags);
 void uiSignTransferToEncryptedDisplay(volatile unsigned int *flags);
 // Sign Transfer to Public
 void uiSignTransferToPublicDisplay(volatile unsigned int *flags);
+
+// Sign Transfer with Schedule
+#ifdef HAVE_BAGL
+extern const ux_flow_step_t *ux_sign_scheduled_amount_transfer[8];
+#endif
+
+void startInitialScheduledTransferDisplay(bool displayMemo);
+void uiSignScheduledTransferPairFlowSignDisplay(void);
+void uiSignScheduledTransferPairFlowDisplay(void);
