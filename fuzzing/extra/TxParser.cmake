@@ -1,8 +1,8 @@
 # project information
 project(TxParser
-        VERSION 1.0
-        DESCRIPTION "Transaction parser of Concordium app"
-        LANGUAGES C)
+    VERSION 1.0
+    DESCRIPTION "Transaction parser of Concordium app"
+    LANGUAGES C)
 
 # specify C standard
 set(CMAKE_C_STANDARD 11)
@@ -18,8 +18,8 @@ add_library(txparser
     ${BOLOS_SDK}/lib_standard_app/varint.c
     ${BOLOS_SDK}/lib_standard_app/bip32.c
     ${BOLOS_SDK}/lib_standard_app/write.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/../src/transaction/utils.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/../src/transaction/deserialize.c
+    # ${CMAKE_CURRENT_SOURCE_DIR}/../src/transaction/utils.c
+    # ${CMAKE_CURRENT_SOURCE_DIR}/../src/transaction/deserialize.c
 )
 
 set_target_properties(txparser PROPERTIES SOVERSION 1)

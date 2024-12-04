@@ -35,7 +35,7 @@ class InsType(IntEnum):
     VERIFY_ADDRESS = 0x00
     GET_PUBLIC_KEY = 0x01
     GET_VERSION = 0x03
-    GET_APP_NAME = 0x04
+    GET_APP_NAME = 0x21
     SIGN_SIMPLE_TRANSFER = 0x06
 
 
