@@ -171,7 +171,7 @@ __attribute__((section(".boot"))) int main(void) {
 
                 USB_power(0);
                 USB_power(1);
-                ui_idle();
+                ui_menu_main();
 
 #if defined(HAVE_BLE)
                 BLE_power(0, NULL);

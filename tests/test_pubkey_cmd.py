@@ -102,7 +102,7 @@ def test_get_signed_legacy_governance_public_key_confirm_accepted(
 
 
 # In this test we check that the GET_PUBLIC_KEY works in confirmation mode
-def test_get_legacy_public_key_confirm_accepted(
+def test_get_legacy_public_key_confirm_accepted_2(
     backend, navigator, firmware, default_screenshot_path, test_name
 ):
     client = BoilerplateCommandSender(backend)

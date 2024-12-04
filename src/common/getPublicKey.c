@@ -26,8 +26,8 @@ UX_FLOW(ux_generate_public_flow, &ux_generate_public_flow_0_step, &ux_decline_st
 UX_STEP_NOCB(ux_sign_compare_public_key_0_step,
              bnnn_paging,
              {.title = "Compare", .text = (char *) global.exportPublicKeyContext.publicKey});
-UX_STEP_CB(ux_compare_accept_step, pb, ui_idle(), {&C_icon_validate_14, "Accept"});
-UX_STEP_CB(ux_compare_decline_step, pb, ui_idle(), {&C_icon_crossmark, "Decline"});
+UX_STEP_CB(ux_compare_accept_step, pb, ui_menu_main(), {&C_icon_validate_14, "Accept"});
+UX_STEP_CB(ux_compare_decline_step, pb, ui_menu_main(), {&C_icon_crossmark, "Decline"});
 UX_FLOW(ux_sign_compare_public_key,
         &ux_sign_compare_public_key_0_step,
         &ux_compare_accept_step,

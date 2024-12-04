@@ -119,14 +119,14 @@ void sendUserRejection() {
     G_io_apdu_buffer[0] = ERROR_REJECTED_BY_USER >> 8;
     G_io_apdu_buffer[1] = ERROR_REJECTED_BY_USER & 0xFF;
     io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, 2);
-    ui_idle();
+    ui_menu_main();
 }
 
 void sendSuccess(uint8_t tx) {
     G_io_apdu_buffer[tx++] = SUCCESS >> 8;
     G_io_apdu_buffer[tx++] = SUCCESS & 0xFF;
     io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, tx);
-    ui_idle();
+    ui_menu_main();
 }
 
 void sendSuccessNoIdle() {

@@ -1,12 +1,11 @@
-#ifndef _MENU_H_
-#define _MENU_H_
+#pragma once
 
 /**
- * Initialize the Concordium idle menu and display it to the
- * user of the application. This should always be called at the
- * end of a successful command flow to reset the display and state
- * correctly.
+ * Show main menu (ready screen, version, about, quit).
  */
-void ui_idle(void);
+void ui_menu_main(void);
 
-#endif
+/**
+ * Show about submenu (copyright, date).
+ */
+void ui_menu_about(void);
