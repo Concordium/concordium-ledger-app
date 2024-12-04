@@ -84,6 +84,13 @@ typedef struct {
 extern accountSender_t global_account_sender;
 
 typedef struct {
+    uint32_t cborLength;
+    uint32_t displayUsed;
+    uint8_t display[255];
+    uint8_t majorType;
+} cborContext_t;
+
+typedef struct {
     union {
         signTransferContext_t signTransferContext;
         signEncryptedAmountToTransfer_t signEncryptedAmountToTransfer;
