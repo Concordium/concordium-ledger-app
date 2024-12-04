@@ -1,5 +1,7 @@
-#ifndef _CONCORDIUM_APP_CONFIGURE_BAKER_H_
-#define _CONCORDIUM_APP_CONFIGURE_BAKER_H_
+#pragma once
+
+#include <stdbool.h>
+#include <stdint.h>
 
 /**
  * Handles the signing flow for a 'Configure Baker' transaction. It validates
@@ -60,4 +62,4 @@ typedef struct {
     configureBakerState_t state;
 } signConfigureBaker_t;
 
-#endif
+bool hasCommissionRate();

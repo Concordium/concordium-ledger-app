@@ -11,6 +11,7 @@
 #include "getPublicKey.h"
 #include "verifyAddress.h"
 #include "exportPrivateKey.h"
+#include "signConfigureBaker.h"
 
 accountSender_t global_account_sender;
 static cborContext_t *ctx = &global.withDataBlob.cborContext;
@@ -221,6 +222,203 @@ UX_FLOW(ux_export_private_key,
 void uiExportPrivateKey(volatile unsigned int *flags) {
     ux_flow_init(0, ux_export_private_key, NULL);
     *flags |= IO_ASYNCH_REPLY;
+}
+
+static signConfigureBaker_t *ctx_conf_baker = &global.signConfigureBaker;
+
+const ux_flow_step_t *ux_sign_configure_baker_first[8];
+const ux_flow_step_t *ux_sign_configure_baker_url[6];
+const ux_flow_step_t *ux_sign_configure_baker_commission[9];
+
+UX_STEP_NOCB(ux_sign_configure_baker_stop_baking_step, nn, {"Stop", "baking"});
+
+UX_STEP_NOCB(ux_sign_configure_baker_capital_step,
+             bnnn_paging,
+             {.title = "Amount to stake",
+              .text = (char *) global.signConfigureBaker.capitalRestakeDelegation.displayCapital});
+
+UX_STEP_NOCB(ux_sign_configure_baker_restake_step,
+             bn,
+             {"Restake earnings",
+              (char *) global.signConfigureBaker.capitalRestakeDelegation.displayRestake});
+
+UX_STEP_NOCB(
+    ux_sign_configure_baker_open_status_step,
+    bn,
+    {"Pool status",
+     (char *) global.signConfigureBaker.capitalRestakeDelegation.displayOpenForDelegation});
+
+UX_STEP_NOCB(ux_sign_configure_baker_keys_step, nn, {"Update baker", "keys"});
+
+UX_STEP_CB(ux_sign_configure_baker_url_cb_step,
+           bnnn_paging,
+           sendSuccessNoIdle(),
+           {.title = "URL", .text = (char *) global.signConfigureBaker.url.urlDisplay});
+
+UX_STEP_NOCB(ux_sign_configure_baker_url_step,
+             bnnn_paging,
+             {.title = "URL", .text = (char *) global.signConfigureBaker.url.urlDisplay});
+
+UX_STEP_CB(ux_sign_configure_baker_continue,
+           nn,
+           sendSuccessNoIdle(),
+           {"Continue", "with transaction"});
+
+UX_STEP_NOCB(ux_sign_configure_baker_empty_url_step, bn, {"Empty URL", ""});
+
+UX_STEP_NOCB(ux_sign_configure_baker_commission_rates_step, nn, {"Commission", "rates"});
+
+UX_STEP_NOCB(ux_sign_configure_baker_commission_transaction_fee_step,
+             bn,
+             {"Transaction fee",
+              (char *) global.signConfigureBaker.commissionRates.transactionFeeCommissionRate});
+
+UX_STEP_NOCB(ux_sign_configure_baker_commission_baking_reward_step,
+             bn,
+             {"Baking reward",
+              (char *) global.signConfigureBaker.commissionRates.bakingRewardCommissionRate});
+
+UX_STEP_NOCB(ux_sign_configure_baker_commission_finalization_reward_step,
+             bn,
+             {"Finalization reward",
+              (char *) global.signConfigureBaker.commissionRates.finalizationRewardCommissionRate});
+
+/**
+ * Dynamically builds and initializes the capital, restake earnings, pool status and
+ * baker keys display.
+ * - Ensures that the UI starts with the shared review transaction screens.
+ * - Only displays the parts of the transaction that are set in the transaction, and skips
+ *   any optional fields that are not included.
+ * - If either the URL or commission rates are in the transaction, then it shows a continue screen
+ *   at the end.
+ */
+void startConfigureBakerDisplay() {
+    uint8_t index = 0;
+
+    ux_sign_configure_baker_first[index++] = &ux_sign_flow_shared_review;
+    ux_sign_configure_baker_first[index++] = &ux_sign_flow_account_sender_view;
+    ctx_conf_baker->firstDisplay = false;
+
+    if (ctx_conf_baker->hasCapital) {
+        if (ctx_conf_baker->capitalRestakeDelegation.stopBaking) {
+            ux_sign_configure_baker_first[index++] = &ux_sign_configure_baker_stop_baking_step;
+        } else {
+            ux_sign_configure_baker_first[index++] = &ux_sign_configure_baker_capital_step;
+        }
+    }
+
+    if (ctx_conf_baker->hasRestakeEarnings) {
+        ux_sign_configure_baker_first[index++] = &ux_sign_configure_baker_restake_step;
+    }
+
+    if (ctx_conf_baker->hasOpenForDelegation) {
+        ux_sign_configure_baker_first[index++] = &ux_sign_configure_baker_open_status_step;
+    }
+
+    if (ctx_conf_baker->hasKeys) {
+        ux_sign_configure_baker_first[index++] = &ux_sign_configure_baker_keys_step;
+    }
+
+    // If there are additional steps, then show continue screen. If this is the last step,
+    // then show signing screens.
+    if (ctx_conf_baker->hasMetadataUrl || hasCommissionRate()) {
+        ux_sign_configure_baker_first[index++] = &ux_sign_configure_baker_continue;
+    } else {
+        ux_sign_configure_baker_first[index++] = &ux_sign_flow_shared_sign;
+        ux_sign_configure_baker_first[index++] = &ux_sign_flow_shared_decline;
+    }
+
+    ux_sign_configure_baker_first[index++] = FLOW_END_STEP;
+
+    ux_flow_init(0, ux_sign_configure_baker_first, NULL);
+}
+
+/**
+ * Dynamically builds and initializes the URL display.
+ * - If the transaction does not contain any capital, restake earnings, open for delegation or any
+ *   baker keys, then it ensures that the UI starts with the shared review transaction screens. As
+ *   the same method is used for the pagination of the URL, this is only the case the first time it
+ *   is called.
+ * - If it is the final part of the URL display and there are no commission rates as part of the
+ *   transaction, then it displays the signing / decline screens.
+ * - If there are commission rates in the transaction, then it shows a continue screen.
+ * - If it is the final part of the URL display, then the URL screen does not have a callback to
+ * continue as additional UI elements are added to guide the user forward.
+ */
+void startConfigureBakerUrlDisplay(bool lastUrlPage) {
+    uint8_t index = 0;
+
+    if (ctx_conf_baker->firstDisplay) {
+        ux_sign_configure_baker_url[index++] = &ux_sign_flow_shared_review;
+        ux_sign_configure_baker_url[index++] = &ux_sign_flow_account_sender_view;
+        ctx_conf_baker->firstDisplay = false;
+    }
+
+    if (!lastUrlPage) {
+        ux_sign_configure_baker_url[index++] = &ux_sign_configure_baker_url_cb_step;
+    } else {
+        if (ctx_conf_baker->url.urlLength == 0) {
+            ux_sign_configure_baker_url[index++] = &ux_sign_configure_baker_empty_url_step;
+        } else {
+            ux_sign_configure_baker_url[index++] = &ux_sign_configure_baker_url_step;
+        }
+
+        // If there are additional steps show the continue screen, otherwise go
+        // to signing screens.
+        if (hasCommissionRate()) {
+            ux_sign_configure_baker_url[index++] = &ux_sign_configure_baker_continue;
+        } else {
+            ux_sign_configure_baker_url[index++] = &ux_sign_flow_shared_sign;
+            ux_sign_configure_baker_url[index++] = &ux_sign_flow_shared_decline;
+        }
+    }
+
+    ux_sign_configure_baker_url[index++] = FLOW_END_STEP;
+    ux_flow_init(0, ux_sign_configure_baker_url, NULL);
+}
+
+/**
+ * Dynamically builds and initializes the commission display.
+ * - If the transaction only contains commission rates, then it ensures that
+ *   the UI starts with the shared review transaction screens.
+ * - Only shows the commission rates that have been indicated to be part of the transaction.
+ * - Shows the signing / decline screens.
+ */
+void startConfigureBakerCommissionDisplay() {
+    uint8_t index = 0;
+
+    if (ctx_conf_baker->firstDisplay) {
+        ux_sign_configure_baker_commission[index++] = &ux_sign_flow_shared_review;
+        ux_sign_configure_baker_commission[index++] = &ux_sign_flow_account_sender_view;
+        ctx_conf_baker->firstDisplay = false;
+    }
+
+    if (ctx_conf_baker->hasTransactionFeeCommission || ctx_conf_baker->hasBakingRewardCommission ||
+        ctx_conf_baker->hasFinalizationRewardCommission) {
+        ux_sign_configure_baker_commission[index++] =
+            &ux_sign_configure_baker_commission_rates_step;
+    }
+
+    if (ctx_conf_baker->hasTransactionFeeCommission) {
+        ux_sign_configure_baker_commission[index++] =
+            &ux_sign_configure_baker_commission_transaction_fee_step;
+    }
+
+    if (ctx_conf_baker->hasBakingRewardCommission) {
+        ux_sign_configure_baker_commission[index++] =
+            &ux_sign_configure_baker_commission_baking_reward_step;
+    }
+
+    if (ctx_conf_baker->hasFinalizationRewardCommission) {
+        ux_sign_configure_baker_commission[index++] =
+            &ux_sign_configure_baker_commission_finalization_reward_step;
+    }
+
+    ux_sign_configure_baker_commission[index++] = &ux_sign_flow_shared_sign;
+    ux_sign_configure_baker_commission[index++] = &ux_sign_flow_shared_decline;
+
+    ux_sign_configure_baker_commission[index++] = FLOW_END_STEP;
+    ux_flow_init(0, ux_sign_configure_baker_commission, NULL);
 }
 
 #endif
