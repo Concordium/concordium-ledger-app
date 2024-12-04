@@ -1,54 +1,68 @@
-#include "globals.h"
-#include "util.h"
+/*****************************************************************************
+ *   Ledger App Concordium.
+ *   (c) 2024 Concordium.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *****************************************************************************/
+
+#ifdef HAVE_BAGL
+
+#include "os.h"
 #include "ux.h"
+#include "glyphs.h"
+
+#include "../globals.h"
+#include "util.h"
+#include "menu.h"
 
 static tx_state_t *tx_state = &global_tx_state;
-uint8_t appVersion[10];
 
-/**
- * Constructs the version in the format MAJOR.MINOR.PATCH. We only
- * reserve 10 bytes to hold the version, so the maximum version
- * supported is xx.yy.zzz.
- */
-void loadVersion(uint8_t *version) {
-    int majorLength = numberToText(version, 2, APPVERSION_M);
-    version[majorLength] = '.';
-    int minorLength = numberToText(version + majorLength + 1, 2, APPVERSION_N);
-    version[majorLength + minorLength + 1] = '.';
-    numberToText(version + majorLength + minorLength + 2, 3, APPVERSION_P);
-    version[9] = '\0';
-}
+UX_STEP_NOCB(ux_menu_ready_step, pnn, {&C_app_concordium_16px, "Concordium", "is ready"});
+UX_STEP_NOCB(ux_menu_version_step, bn, {"Version", APPVERSION});
+UX_STEP_CB(ux_menu_about_step, pb, ui_menu_about(), {&C_icon_certificate, "About"});
+UX_STEP_CB(ux_menu_exit_step, pb, os_sched_exit(-1), {&C_icon_dashboard_x, "Quit"});
 
-UX_STEP_NOCB(ux_menu_idle_flow_1_step,
-             bn,
-             {
-                 APPNAME,
-                 "is ready",
-             });
-UX_STEP_CB(ux_menu_idle_flow_2_step,
-           pb,
-           os_sched_exit(-1),
-           {
-               &C_icon_dashboard_x,
-               "Quit",
-           });
-UX_STEP_NOCB(ux_menu_idle_flow_3_step,
-             bn,
-             {
-                 "Version",
-                 (char *) appVersion,
-             });
-UX_FLOW(ux_menu_idle_flow,
-        &ux_menu_idle_flow_1_step,
-        &ux_menu_idle_flow_2_step,
-        &ux_menu_idle_flow_3_step,
+// FLOW for the main menu:
+// #1 screen: ready
+// #2 screen: version of the app
+// #3 screen: about submenu
+// #4 screen: quit
+UX_FLOW(ux_menu_main_flow,
+        &ux_menu_ready_step,
+        &ux_menu_version_step,
+        &ux_menu_about_step,
+        &ux_menu_exit_step,
         FLOW_LOOP);
 
-void ui_idle(void) {
+void ui_menu_main() {
     tx_state->currentInstruction = -1;
     if (G_ux.stack_count == 0) {
         ux_stack_push();
     }
-    loadVersion(appVersion);
-    ux_flow_init(0, ux_menu_idle_flow, NULL);
+
+    ux_flow_init(0, ux_menu_main_flow, NULL);
 }
+
+UX_STEP_NOCB(ux_menu_info_step, bn, {"Concordium App", "(c) 2024 Concordium"});
+UX_STEP_CB(ux_menu_back_step, pb, ui_menu_main(), {&C_icon_back, "Back"});
+
+// FLOW for the about submenu:
+// #1 screen: app info
+// #2 screen: back button to main menu
+UX_FLOW(ux_menu_about_flow, &ux_menu_info_step, &ux_menu_back_step, FLOW_LOOP);
+
+void ui_menu_about() {
+    ux_flow_init(0, ux_menu_about_flow, NULL);
+}
+
+#endif
