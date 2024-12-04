@@ -79,3 +79,10 @@ void uiSignPublicInformationForIpFinalDisplay(void);
 void uiSignFlowSharedDisplay(void);
 void uiRegisterDataInitialDisplay(volatile unsigned int *flags);
 void uiRegisterDataPayloadDisplay(volatile unsigned int *flags);
+
+// Sign Transfer
+#ifdef HAVE_BAGL
+extern const ux_flow_step_t *ux_sign_amount_transfer[8];
+#endif
+
+void startTransferDisplay(bool displayMemo, volatile unsigned int *flags);
