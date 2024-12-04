@@ -86,3 +86,6 @@ extern const ux_flow_step_t *ux_sign_amount_transfer[8];
 #endif
 
 void startTransferDisplay(bool displayMemo, volatile unsigned int *flags);
+
+// Sign Transfer to Encrypted
+void uiSignTransferToEncryptedDisplay(volatile unsigned int *flags);
