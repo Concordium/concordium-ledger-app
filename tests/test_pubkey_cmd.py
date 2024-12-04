@@ -26,42 +26,59 @@ from utils import navigate_until_text_and_compare
 #         assert public_key.hex() == ref_public_key
 #         assert chain_code.hex() == ref_chain_code
 
+nano_accept_instructions = [
+    NavInsID.BOTH_CLICK,
+    NavInsID.RIGHT_CLICK,
+    NavInsID.RIGHT_CLICK,
+    NavInsID.BOTH_CLICK,
+]
+
 
 # In this test we check that the GET_PUBLIC_KEY works in confirmation mode
+@pytest.mark.active_test_scope
 def test_get_legacy_public_key_confirm_accepted(
     backend, navigator, firmware, default_screenshot_path, test_name
 ):
     client = BoilerplateCommandSender(backend)
     path = "m/1105/0/0/0/0/2/0/0"
     with client.get_public_key_with_confirmation(path=path):
-        navigate_until_text_and_compare(
-            firmware, navigator, "Approve", default_screenshot_path, test_name
-        )
+        if firmware.is_nano:
+            navigator.navigate_and_compare(
+                default_screenshot_path,
+                test_name,
+                nano_accept_instructions,
+                screen_change_before_first_instruction=False,
+            )
 
     response = client.get_async_response().data
     print("km------------------|response:", response.hex())
     assert (
         response.hex()
-        == "2087e16c8269270b1c75b930224df456d2927b80c760ffa77e57dbd738f6399492"
+        == "87e16c8269270b1c75b930224df456d2927b80c760ffa77e57dbd738f6399492"
     )
 
 
 # In this test we check that the GET_PUBLIC_KEY works in confirmation mode with signing
+@pytest.mark.active_test_scope
 def test_get_signed_legacy_public_key_confirm_accepted(
     backend, navigator, firmware, default_screenshot_path, test_name
 ):
     client = BoilerplateCommandSender(backend)
     path = "m/1105/0/0/0/0/2/0/0"
     with client.get_public_key_with_confirmation(path=path, signPublicKey=True):
-        navigate_until_text_and_compare(
-            firmware, navigator, "Approve", default_screenshot_path, test_name
-        )
+        if firmware.is_nano:
+            navigator.navigate_and_compare(
+                default_screenshot_path,
+                test_name,
+                nano_accept_instructions,
+                screen_change_before_first_instruction=False,
+            )
 
     response = client.get_async_response().data
     print("km------------------|response:", response.hex())
     assert (
         response.hex()
-        == "2087e16c8269270b1c75b930224df456d2927b80c760ffa77e57dbd738f6399492403f499aa9fe41f0b911a3cccde3080143f10d108b2ba72343ad70fa03458333a328c542ce0685632b16636cc579fcfe715743c332eff416589631057eb0e08d04"
+        == "87e16c8269270b1c75b930224df456d2927b80c760ffa77e57dbd738f63994923f499aa9fe41f0b911a3cccde3080143f10d108b2ba72343ad70fa03458333a328c542ce0685632b16636cc579fcfe715743c332eff416589631057eb0e08d04"
     )
 
 

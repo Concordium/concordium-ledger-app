@@ -12,31 +12,44 @@ CLA: int = 0xE0
 
 
 class P1(IntEnum):
-    # Parameter 1 for first APDU number.
-    P1_START = 0x00
-    # Parameter 1 for verify address new derivation path
-    P1_VERIFY_ADDRESS_NEW_PATH = 0x01
-    # Parameter 1 for maximum APDU number.
-    P1_MAX = 0x03
     # Parameter 1 for screen confirmation for GET_PUBLIC_KEY.
-    P1_CONFIRM = 0x01
+    P1_CONFIRM = 0x00
+    P1_NO_CONFIRM = 0x01
+    # Basic P1 for all instructions
+    P1_NONE = 0x00
 
 
 class P2(IntEnum):
-    # Parameter 2 for last APDU to receive.
-    P2_LAST = 0x00
-    # Parameter 2 for more APDU to receive.
-    P2_MORE = 0x80
-    # Parameter 2 for sign public key
-    P2_SIGN_PUBLIC_KEY = 0x01
+    # Parameter 2 for sign for GET_PUBLIC_KEY.
+    P2_SIGN = 0x01
+    P2_NO_SIGN = 0x00
+    # Basic P2 for all instructions
+    P2_NONE = 0x00
+    # # Parameter 2 for last APDU to receive.
+    # P2_LAST = 0x00
+    # # Parameter 2 for more APDU to receive.
+    # P2_MORE = 0x80
 
 
 class InsType(IntEnum):
     VERIFY_ADDRESS = 0x00
     GET_PUBLIC_KEY = 0x01
-    GET_VERSION = 0x03
     GET_APP_NAME = 0x21
-    SIGN_SIMPLE_TRANSFER = 0x06
+    SIGN_TRANSFER = 0x02
+    SIGN_TRANSFER_WITH_SCHEDULE = 0x03
+    CREDENTIAL_DEPLOYMENT = 0x04
+    EXPORT_PRIVATE_KEY = 0x05
+    ENCRYPTED_AMOUNT_TRANSFER = 0x10
+    TRANSFER_TO_ENCRYPTED = 0x11
+    TRANSFER_TO_PUBLIC = 0x12
+    CONFIGURE_DELEGATION = 0x17
+    CONFIGURE_BAKER = 0x18
+    PUBLIC_INFO_FOR_IP = 0x20
+    SIGN_UPDATE_CREDENTIAL = 0x31
+    SIGN_TRANSFER_WITH_MEMO = 0x32
+    ENCRYPTED_AMOUNT_TRANSFER_WITH_MEMO = 0x33
+    SIGN_TRANSFER_WITH_SCHEDULE_AND_MEMO = 0x34
+    REGISTER_DATA = 0x35
 
 
 class Errors(IntEnum):
@@ -64,31 +77,31 @@ class BoilerplateCommandSender:
     def __init__(self, backend: BackendInterface) -> None:
         self.backend = backend
 
-    def get_app_and_version(self) -> RAPDU:
-        return self.backend.exchange(
-            cla=0xB0,  # specific CLA for BOLOS
-            ins=0x01,  # specific INS for get_app_and_version
-            p1=P1.P1_START,
-            p2=P2.P2_LAST,
-            data=b"",
-        )
+    # def get_app_and_version(self) -> RAPDU:
+    #     return self.backend.exchange(
+    #         cla=0xB0,  # specific CLA for BOLOS
+    #         ins=0x01,  # specific INS for get_app_and_version
+    #         p1=P1.P1_START,
+    #         p2=P2.P2_LAST,
+    #         data=b"",
+    #     )
 
-    def get_version(self) -> RAPDU:
-        return self.backend.exchange(
-            cla=CLA, ins=InsType.GET_VERSION, p1=P1.P1_START, p2=P2.P2_LAST, data=b""
-        )
+    # def get_version(self) -> RAPDU:
+    #     return self.backend.exchange(
+    #         cla=CLA, ins=InsType.GET_VERSION, p1=P1.P1_NONE, p2=P2.P2_NONE, data=b""
+    #     )
 
     def get_app_name(self) -> RAPDU:
         return self.backend.exchange(
-            cla=CLA, ins=InsType.GET_APP_NAME, p1=P1.P1_START, p2=P2.P2_LAST, data=b""
+            cla=CLA, ins=InsType.GET_APP_NAME, p1=P1.P1_NONE, p2=P2.P2_NONE, data=b""
         )
 
     def get_public_key(self, path: str, signPublicKey: bool = False) -> RAPDU:
         return self.backend.exchange(
             cla=CLA,
             ins=InsType.GET_PUBLIC_KEY,
-            p1=P1.P1_START,
-            p2=P2.P2_SIGN_PUBLIC_KEY if signPublicKey else P2.P2_LAST,
+            p1=P1.P1_NO_CONFIRM,
+            p2=P2.P2_SIGN if signPublicKey else P2.P2_NO_SIGN,
             data=pack_derivation_path(path),
         )
 
@@ -100,55 +113,55 @@ class BoilerplateCommandSender:
             cla=CLA,
             ins=InsType.GET_PUBLIC_KEY,
             p1=P1.P1_CONFIRM,
-            p2=P2.P2_SIGN_PUBLIC_KEY if signPublicKey else P2.P2_LAST,
+            p2=P2.P2_SIGN if signPublicKey else P2.P2_NO_SIGN,
             data=pack_derivation_path(path),
         ) as response:
             yield response
 
-    @contextmanager
-    def verify_address(
-        self, identity_index: int, credential_counter: int, idp_index: int = -1
-    ) -> Generator[None, None, None]:
-        data = b""
-        p1 = P1.P1_START
+    # @contextmanager
+    # def verify_address(
+    #     self, identity_index: int, credential_counter: int, idp_index: int = -1
+    # ) -> Generator[None, None, None]:
+    #     data = b""
+    #     p1 = P1.P1_START
 
-        if idp_index != -1:
-            data += idp_index.to_bytes(4, byteorder="big")
-            p1 = P1.P1_VERIFY_ADDRESS_NEW_PATH
+    #     if idp_index != -1:
+    #         data += idp_index.to_bytes(4, byteorder="big")
+    #         p1 = P1.P1_VERIFY_ADDRESS_NEW_PATH
 
-        data += identity_index.to_bytes(
-            4, byteorder="big"
-        ) + credential_counter.to_bytes(4, byteorder="big")
-        with self.backend.exchange_async(
-            cla=CLA, ins=InsType.VERIFY_ADDRESS, p1=p1, p2=P2.P2_LAST, data=data
-        ) as response:
-            yield response
+    #     data += identity_index.to_bytes(
+    #         4, byteorder="big"
+    #     ) + credential_counter.to_bytes(4, byteorder="big")
+    #     with self.backend.exchange_async(
+    #         cla=CLA, ins=InsType.VERIFY_ADDRESS, p1=p1, p2=P2.P2_LAST, data=data
+    #     ) as response:
+    #         yield response
 
-    @contextmanager
-    def sign_tx(
-        self, path: str, tx_type_ins: InsType, transaction: bytes
-    ) -> Generator[None, None, None]:
+    # @contextmanager
+    # def sign_tx(
+    #     self, path: str, tx_type_ins: InsType, transaction: bytes
+    # ) -> Generator[None, None, None]:
 
-        self.backend.exchange(
-            cla=CLA,
-            ins=tx_type_ins,
-            p1=P1.P1_START,
-            p2=P2.P2_MORE,
-            data=pack_derivation_path(path),
-        )
-        messages = split_message(transaction, MAX_APDU_LEN)
-        idx: int = P1.P1_START + 1
+    #     self.backend.exchange(
+    #         cla=CLA,
+    #         ins=tx_type_ins,
+    #         p1=P1.P1_START,
+    #         p2=P2.P2_MORE,
+    #         data=pack_derivation_path(path),
+    #     )
+    #     messages = split_message(transaction, MAX_APDU_LEN)
+    #     idx: int = P1.P1_START + 1
 
-        for msg in messages[:-1]:
-            self.backend.exchange(
-                cla=CLA, ins=tx_type_ins, p1=idx, p2=P2.P2_MORE, data=msg
-            )
-            idx += 1
+    #     for msg in messages[:-1]:
+    #         self.backend.exchange(
+    #             cla=CLA, ins=tx_type_ins, p1=idx, p2=P2.P2_MORE, data=msg
+    #         )
+    #         idx += 1
 
-        with self.backend.exchange_async(
-            cla=CLA, ins=tx_type_ins, p1=idx, p2=P2.P2_LAST, data=messages[-1]
-        ) as response:
-            yield response
+    #     with self.backend.exchange_async(
+    #         cla=CLA, ins=tx_type_ins, p1=idx, p2=P2.P2_LAST, data=messages[-1]
+    #     ) as response:
+    #         yield response
 
     def get_async_response(self) -> Optional[RAPDU]:
         return self.backend.last_async_response
