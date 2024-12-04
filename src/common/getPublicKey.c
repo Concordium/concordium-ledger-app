@@ -10,6 +10,8 @@ static exportPublicKeyContext_t *ctx = &global.exportPublicKeyContext;
 static tx_state_t *tx_state = &global_tx_state;
 static const uint32_t HARDENED_OFFSET = 0x80000000;
 
+instructionContext global;
+
 void sendPublicKey(bool compare);
 
 UX_STEP_VALID(ux_decline_step, pb, sendUserRejection(), {&C_icon_crossmark, "Decline"});

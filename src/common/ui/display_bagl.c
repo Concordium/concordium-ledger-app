@@ -5,7 +5,10 @@
 #include "responseCodes.h"
 #include "sign.h"
 #include "util.h"
+#include "display.h"
+#include "globals.h"
 
+accountSender_t global_account_sender;
 static cborContext_t *ctx = &global.withDataBlob.cborContext;
 
 UX_STEP_NOCB(ux_display_memo_step_nocb,
