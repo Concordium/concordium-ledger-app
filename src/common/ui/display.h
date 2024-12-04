@@ -3,8 +3,6 @@
 
 #include "ux.h"
 
-
-
 #endif
 
 #ifdef HAVE_BAGL
