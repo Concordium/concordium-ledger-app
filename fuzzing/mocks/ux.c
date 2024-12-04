@@ -1,3 +1,3 @@
 #include "ux.h"
 
-ux_state_t dummy_ux_state; 
+ux_state_t dummy_ux_state;
