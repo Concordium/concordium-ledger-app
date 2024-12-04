@@ -116,7 +116,7 @@ void handleVerifyAddress(uint8_t *cdata, uint8_t p1, volatile unsigned int *flag
     uint32_t identity = U4BE(cdata, offset);
     offset += 4;
     uint32_t credCounter = U4BE(cdata, offset);
-    
+
     size_t prfKeyPathLen = is_new_path ? 5 : 6;
     uint32_t *prfKeyPath;
     if (is_new_path) {
