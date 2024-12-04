@@ -40,7 +40,7 @@
 #include "signTransferWithSchedule.h"
 #include "ux.h"
 #include "verifyAddress.h"
-
+#include "getAppName.h"
 // Global variable definitions
 instructionContext global;
 accountSender_t global_account_sender;
