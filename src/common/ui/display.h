@@ -60,3 +60,11 @@ void uiSignCredentialDeploymentNewDisplay(void);
 
 void uiSignCredentialDeploymentExistingIntroDisplay(void);
 void uiSignCredentialDeploymentExistingDisplay(void);
+
+// Encrypted amount transfer
+
+#ifdef HAVE_BAGL
+extern const ux_flow_step_t *ux_sign_encrypted_amount_transfer[8];
+#endif
+
+void startEncryptedTransferDisplay(bool displayMemo);

@@ -1,43 +1,15 @@
-#include <os.h>
+#include "os.h"
 
 #include "common/ui/display.h"
 #include "base58check.h"
-#include "common/ui/display.h"
-#include "responseCodes.h"
-#include "sign.h"
-#include "util.h"
+#include "common/responseCodes.h"
+#include "common/sign.h"
+#include "common/util.h"
+#include "globals.h"
 
 static signEncryptedAmountToTransfer_t *ctx = &global.withDataBlob.signEncryptedAmountToTransfer;
 static cborContext_t *memo_ctx = &global.withDataBlob.cborContext;
 static tx_state_t *tx_state = &global_tx_state;
-const ux_flow_step_t *ux_sign_encrypted_amount_transfer[8];
-
-// UI for displaying encrypted transfer transaction. It only shows the user the recipient address
-// as the amounts are encrypted and can't be validated by the user.
-UX_STEP_NOCB(ux_sign_encrypted_amount_transfer_1_step, nn, {"Shielded", "transfer"});
-UX_STEP_NOCB(ux_sign_encrypted_amount_transfer_2_step,
-             bnnn_paging,
-             {.title = "Recipient",
-              .text = (char *) global.withDataBlob.signEncryptedAmountToTransfer.to});
-
-void startEncryptedTransferDisplay(bool displayMemo) {
-    uint8_t index = 0;
-
-    ux_sign_encrypted_amount_transfer[index++] = &ux_sign_flow_shared_review;
-    ux_sign_encrypted_amount_transfer[index++] = &ux_sign_encrypted_amount_transfer_1_step;
-    ux_sign_encrypted_amount_transfer[index++] = &ux_sign_flow_account_sender_view;
-    ux_sign_encrypted_amount_transfer[index++] = &ux_sign_encrypted_amount_transfer_2_step;
-
-    if (displayMemo) {
-        ux_sign_encrypted_amount_transfer[index++] = &ux_display_memo_step_nocb;
-    }
-
-    ux_sign_encrypted_amount_transfer[index++] = &ux_sign_flow_shared_sign;
-    ux_sign_encrypted_amount_transfer[index++] = &ux_sign_flow_shared_decline;
-
-    ux_sign_encrypted_amount_transfer[index++] = FLOW_END_STEP;
-    ux_flow_init(0, ux_sign_encrypted_amount_transfer, NULL);
-}
 
 #define P1_INITIAL                              0x00
 #define P1_REMAINING_AMOUNT                     0x01
