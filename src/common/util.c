@@ -149,6 +149,25 @@ void getIdentityAccountDisplay(uint8_t *dst,
     bin2dec(dst + offset, dstLength - offset, accountIndex);
 }
 
+void getIdentityAccountDisplayNewPath(uint8_t *dst,
+                                      size_t dstLength,
+                                      uint32_t identityProviderIndex,
+                                      uint32_t identityIndex,
+                                      uint32_t accountIndex) {
+    // Convert identityProviderIndex to text and store it in dst
+    int offset = numberToText(dst, dstLength, identityProviderIndex);
+    memmove(dst + offset, "/", 1);
+    offset += 1;
+
+    // Convert identityIndex to text and append it to dst
+    offset += numberToText(dst + offset, dstLength - offset, identityIndex);
+    memmove(dst + offset, "/", 1);
+    offset += 1;
+
+    // Convert accountIndex to text and append it to dst
+    bin2dec(dst + offset, dstLength - offset, accountIndex);
+}
+
 /**
  * Used to validate that an error result code from a Ledger library call
  * is equal CX_OK. If it is not CX_OK, then throw an ERROR_FAILED_CX_OPERATION

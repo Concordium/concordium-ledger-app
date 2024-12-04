@@ -8,6 +8,7 @@
 static keyDerivationPath_t *keyPath = &path;
 static exportPublicKeyContext_t *ctx = &global.exportPublicKeyContext;
 static tx_state_t *tx_state = &global_tx_state;
+static const uint32_t HARDENED_OFFSET = 0x80000000;
 
 void sendPublicKey(bool compare);
 
@@ -86,7 +87,7 @@ void handleGetPublicKey(uint8_t *cdata, uint8_t p1, uint8_t p2, volatile unsigne
     } else {
         // If the key path is of length 5, then it is a request for a governance key.
         // Also it has to be in the governance subtree, which starts with 1.
-        if (keyPath->pathLength == 5) {
+        if (keyPath->pathLength == 5 && keyPath->rawKeyDerivationPath[0] == 1105) {
             if (keyPath->rawKeyDerivationPath[2] != 1) {
                 THROW(ERROR_INVALID_PATH);
             }
@@ -107,12 +108,24 @@ void handleGetPublicKey(uint8_t *cdata, uint8_t p1, uint8_t p2, volatile unsigne
                     THROW(ERROR_INVALID_PATH);
             }
         } else {
-            uint32_t identityIndex = keyPath->rawKeyDerivationPath[4];
-            uint32_t accountIndex = keyPath->rawKeyDerivationPath[6];
-            getIdentityAccountDisplay(ctx->display,
-                                      sizeof(ctx->display),
-                                      identityIndex,
-                                      accountIndex);
+            if (keyPath->rawKeyDerivationPath[0] == 44 ||
+                keyPath->rawKeyDerivationPath[0] == (44 | HARDENED_OFFSET)) {
+                uint32_t identityProviderIndex = keyPath->rawKeyDerivationPath[2];
+                uint32_t identityIndex = keyPath->rawKeyDerivationPath[3];
+                uint32_t accountIndex = keyPath->rawKeyDerivationPath[5];
+                getIdentityAccountDisplayNewPath(ctx->display,
+                                                 sizeof(ctx->display),
+                                                 identityProviderIndex,
+                                                 identityIndex,
+                                                 accountIndex);
+            } else {
+                uint32_t identityIndex = keyPath->rawKeyDerivationPath[4];
+                uint32_t accountIndex = keyPath->rawKeyDerivationPath[6];
+                getIdentityAccountDisplay(ctx->display,
+                                          sizeof(ctx->display),
+                                          identityIndex,
+                                          accountIndex);
+            }
         }
 
         // Display the UI for the public-key flow, where the user can validate that the
