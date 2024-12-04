@@ -49,3 +49,14 @@ void startConfigureBakerUrlDisplay(bool lastUrlPage);
 void startConfigureBakerDisplay(void);
 
 void startConfigureDelegationDisplay();
+
+void uiSignUpdateCredentialInitialDisplay(volatile unsigned int *flags);
+void uiSignUpdateCredentialIdDisplay(volatile unsigned int *flags);
+void uiSignUpdateCredentialThresholdDisplay(volatile unsigned int *flags);
+void uiSignCredentialDeploymentVerificationKeyDisplay(volatile unsigned int *flags);
+void uiSignCredentialDeploymentVerificationKeyFlowDisplay(volatile unsigned int *flags);
+void uiSignCredentialDeploymentNewIntroDisplay(void);
+void uiSignCredentialDeploymentNewDisplay(void);
+
+void uiSignCredentialDeploymentExistingIntroDisplay(void);
+void uiSignCredentialDeploymentExistingDisplay(void);
