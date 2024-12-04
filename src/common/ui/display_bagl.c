@@ -731,4 +731,35 @@ void uiSignPublicInformationForIpFinalDisplay(void) {
     ux_flow_init(0, ux_sign_public_info_for_ip_final, NULL);
 }
 
+// Register data
+
+UX_STEP_VALID(ux_register_data_initial_flow_step,
+              nn,
+              sendSuccessNoIdle(),
+              {"Continue", "with transaction"});
+UX_STEP_VALID(ux_register_data_display_data_step,
+              bnnn_paging,
+              handleData(),
+              {"Data", (char *) global.withDataBlob.cborContext.display});
+UX_FLOW(ux_register_data_initial,
+        &ux_sign_flow_shared_review,
+        &ux_sign_flow_account_sender_view,
+        &ux_register_data_initial_flow_step);
+
+UX_FLOW(ux_register_data_payload, &ux_register_data_display_data_step);
+
+void uiSignFlowSharedDisplay(void) {
+    ux_flow_init(0, ux_sign_flow_shared, NULL);
+}
+
+void uiRegisterDataInitialDisplay(volatile unsigned int *flags) {
+    ux_flow_init(0, ux_register_data_initial, NULL);
+    *flags |= IO_ASYNCH_REPLY;
+}
+
+void uiRegisterDataPayloadDisplay(volatile unsigned int *flags) {
+    ux_flow_init(0, ux_register_data_payload, NULL);
+    *flags |= IO_ASYNCH_REPLY;
+}
+
 #endif

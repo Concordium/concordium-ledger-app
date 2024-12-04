@@ -74,3 +74,8 @@ void uiReviewPublicInformationForIpDisplay(void);
 void uiSignPublicInformationForIpPublicKeyDisplay(void);
 void uiSignPublicInformationForIpCompleteDisplay(void);
 void uiSignPublicInformationForIpFinalDisplay(void);
+
+// Register data
+void uiSignFlowSharedDisplay(void);
+void uiRegisterDataInitialDisplay(volatile unsigned int *flags);
+void uiRegisterDataPayloadDisplay(volatile unsigned int *flags);
