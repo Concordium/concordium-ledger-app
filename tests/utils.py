@@ -1,11 +1,16 @@
 from hashlib import sha256
-from sha3 import keccak_256
+from sha3 import keccak_256  # type: ignore
+from typing import List
 
-from ecdsa.curves import SECP256k1
-from ecdsa.keys import VerifyingKey
-from ecdsa.util import sigdecode_der
+from ecdsa.curves import SECP256k1  # type: ignore
+from ecdsa.keys import VerifyingKey  # type: ignore
+from ecdsa.util import sigdecode_der  # type: ignore
 
 from ragger.navigator import NavInsID
+
+
+def split_message(message: bytes, max_size: int) -> List[bytes]:
+    return [message[x : x + max_size] for x in range(0, len(message), max_size)]
 
 
 # Check if a signature of a given message is valid
@@ -38,7 +43,13 @@ def instructions_builder(
 
 
 def navigate_until_text_and_compare(
-    firmware, navigator, text: str, screenshot_path: str, test_name: str
+    firmware,
+    navigator,
+    text: str,
+    screenshot_path: str,
+    test_name: str,
+    screen_change_before_first_instruction: bool = True,
+    screen_change_after_last_instruction: bool = True,
 ):
     """Navigate through device screens until specified text is found and compare screenshots.
 
