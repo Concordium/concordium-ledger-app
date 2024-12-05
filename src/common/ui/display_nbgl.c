@@ -5,13 +5,40 @@
 
 #include "display.h"
 #include "globals.h"
+#include "glyphs.h"
+#include "menu.h"
+#include "getPublicKey.h"
+
+#include "nbgl_use_case.h"
 accountSender_t global_account_sender;
 
+static void review_choice(bool confirm) {
+    // Answer, display a status page and go back to main
+    if (confirm) {
+        nbgl_useCaseReviewStatus(STATUS_TYPE_ADDRESS_VERIFIED, ui_menu_main);
+    } else {
+        nbgl_useCaseReviewStatus(STATUS_TYPE_ADDRESS_REJECTED, ui_menu_main);
+    }
+}
 void uiComparePubkey(void) {
     // TODO: Implement this
+    nbgl_useCaseAddressReview(global.exportPublicKeyContext.publicKey,
+                              NULL,
+                              &C_app_concordium_64px,
+                              "Compare",
+                              NULL,
+                              review_choice);
 }
 
 void uiGeneratePubkey(volatile unsigned int *flags) {
+    nbgl_useCaseAddressReview(
+        (char *) global.exportPublicKeyContext.display,   // Address to display
+        NULL,                                             // No additional tag-value list
+        &C_app_concordium_64px,                              // Icon to display
+        "Public Key",                                     // Review title
+        NULL,                                             // No review subtitle
+        sendPublicKey                                     // Callback function
+    );
     *flags |= IO_ASYNCH_REPLY;
     // TODO: Implement this
 }
