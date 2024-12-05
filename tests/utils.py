@@ -1,11 +1,10 @@
 from hashlib import sha256
-from sha3 import keccak_256
+from sha3 import keccak_256  # type: ignore
 from typing import List
 
-
-from ecdsa.curves import SECP256k1
-from ecdsa.keys import VerifyingKey
-from ecdsa.util import sigdecode_der
+from ecdsa.curves import SECP256k1  # type: ignore
+from ecdsa.keys import VerifyingKey  # type: ignore
+from ecdsa.util import sigdecode_der  # type: ignore
 
 from ragger.navigator import NavInsID
 

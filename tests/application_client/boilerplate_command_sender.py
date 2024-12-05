@@ -1,5 +1,5 @@
 from enum import IntEnum
-from typing import Generator, List, Optional
+from typing import Generator, Optional
 from contextlib import contextmanager
 
 from ragger.backend.interface import BackendInterface, RAPDU
