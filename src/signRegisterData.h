@@ -24,4 +24,6 @@ typedef struct {
     registerDataState_t state;
 } signRegisterData_t;
 
+void handleData(void);
+
 #endif

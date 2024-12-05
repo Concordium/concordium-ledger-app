@@ -1,5 +1,7 @@
-#ifndef _CONCORDIUM_APP_CONFIGURE_DELEGATION_H_
-#define _CONCORDIUM_APP_CONFIGURE_DELEGATION_H_
+#pragma once
+
+#include <stdbool.h>
+#include <stdint.h>
 
 /**
  * Handles the signing flow for a 'Configure Delegation' transaction. It validates
@@ -19,5 +21,3 @@ typedef struct {
     bool hasRestakeEarnings;
     bool hasDelegationTarget;
 } signConfigureDelegationContext_t;
-
-#endif

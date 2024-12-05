@@ -1,6 +1,4 @@
-#ifndef _CONCORDIUM_APP_EXPORT_PRIVATE_KEY_H_
-#define _CONCORDIUM_APP_EXPORT_PRIVATE_KEY_H_
-
+#pragma once
 /**
  * Handles the export of private keys that are allowed to leave the device.
  * The export paths are restricted so that the method cannot access any account paths.
@@ -24,4 +22,5 @@ typedef struct {
     uint8_t pathLength;
 } exportPrivateKeyContext_t;
 
-#endif
+void uiExportPrivateKey(volatile unsigned int *flags);
+void exportPrivateKey(void);

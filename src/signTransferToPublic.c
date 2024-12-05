@@ -1,22 +1,14 @@
-#include <os.h>
+#include "os.h"
 
 #include "common/ui/display.h"
-#include "responseCodes.h"
-#include "sign.h"
-#include "util.h"
+#include "common/responseCodes.h"
+#include "common/sign.h"
+#include "common/util.h"
+#include "signTransferToPublic.h"
+#include "globals.h"
 
 static signTransferToPublic_t *ctx = &global.signTransferToPublic;
 static tx_state_t *tx_state = &global_tx_state;
-
-UX_STEP_NOCB(ux_sign_transfer_to_public_1_step,
-             bnnn_paging,
-             {.title = "Unshield amount", .text = (char *) global.signTransferToPublic.amount});
-UX_FLOW(ux_sign_transfer_to_public,
-        &ux_sign_flow_shared_review,
-        &ux_sign_flow_account_sender_view,
-        &ux_sign_transfer_to_public_1_step,
-        &ux_sign_flow_shared_sign,
-        &ux_sign_flow_shared_decline);
 
 #define P1_INITIAL          0x00
 #define P1_REMAINING_AMOUNT 0x01
@@ -65,8 +57,7 @@ void handleSignTransferToPublic(uint8_t *cdata,
 
         if (ctx->proofSize == 0) {
             // We have received all proof bytes, continue to signing flow.
-            ux_flow_init(0, ux_sign_transfer_to_public, NULL);
-            *flags |= IO_ASYNCH_REPLY;
+            uiSignTransferToPublicDisplay(flags);
         } else if (ctx->proofSize < 0) {
             // We received more proof bytes than expected, and so the received
             // transaction is invalid.

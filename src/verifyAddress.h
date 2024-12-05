@@ -8,4 +8,6 @@ typedef struct {
     unsigned char address[57];
 } verifyAddressContext_t;
 
+void uiVerifyAddress(volatile unsigned int *flags);
+
 #endif

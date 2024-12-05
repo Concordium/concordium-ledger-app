@@ -1,62 +1,14 @@
-#include <os.h>
+#include "os.h"
 
-#include "responseCodes.h"
-#include "sign.h"
-#include "util.h"
+#include "common/responseCodes.h"
+#include "common/sign.h"
+#include "common/util.h"
+#include "globals.h"
+#include "common/ui/display.h"
+#include "signPublicInformationForIp.h"
 
 static signPublicInformationForIp_t *ctx = &global.signPublicInformationForIp;
 static tx_state_t *tx_state = &global_tx_state;
-
-UX_STEP_NOCB(ux_sign_public_info_for_ip_display_public_key,
-             bnnn_paging,
-             {.title = "Public key", .text = (char *) global.signPublicInformationForIp.publicKey});
-
-UX_STEP_CB(ux_sign_public_info_for_ip_continue,
-           nn,
-           sendSuccessNoIdle(),
-           {"Continue", "reviewing info"});
-
-UX_STEP_CB(ux_sign_public_info_review,
-           nn,
-           sendSuccessNoIdle(),
-           {"Review identity", "provider info"});
-
-UX_STEP_CB(ux_sign_public_info_for_ip_sign,
-           pnn,
-           buildAndSignTransactionHash(),
-           {&C_icon_validate_14, "Sign identity", "provider info"});
-
-UX_STEP_CB(ux_sign_public_info_for_ip_decline,
-           pnn,
-           sendUserRejection(),
-           {&C_icon_crossmark, "Decline to", "sign info"});
-
-UX_STEP_NOCB(ux_sign_public_info_for_ip_display_threshold,
-             bn,
-             {"Signature threshold", (char *) global.signPublicInformationForIp.threshold});
-
-// Display a public key with continue
-UX_FLOW(ux_sign_public_info_for_ip_public_key,
-        &ux_sign_public_info_for_ip_display_public_key,
-        &ux_sign_public_info_for_ip_continue);
-// Display intro view and a public key with continue
-UX_FLOW(ux_review_public_info_for_ip,
-        &ux_sign_public_info_review,
-        &ux_sign_public_info_for_ip_display_public_key,
-        &ux_sign_public_info_for_ip_continue);
-// Display last public key and threshold and respond with signature / rejection
-UX_FLOW(ux_sign_public_info_for_ip_final,
-        &ux_sign_public_info_for_ip_display_public_key,
-        &ux_sign_public_info_for_ip_display_threshold,
-        &ux_sign_public_info_for_ip_sign,
-        &ux_sign_public_info_for_ip_decline);
-// Display entire flow and respond with signature / rejection
-UX_FLOW(ux_sign_public_info_for_ip_complete,
-        &ux_sign_public_info_review,
-        &ux_sign_public_info_for_ip_display_public_key,
-        &ux_sign_public_info_for_ip_display_threshold,
-        &ux_sign_public_info_for_ip_sign,
-        &ux_sign_public_info_for_ip_decline);
 
 #define P1_INITIAL          0x00
 #define P1_VERIFICATION_KEY 0x01
@@ -114,9 +66,9 @@ void handleSignPublicInformationForIp(uint8_t *cdata,
             if (ctx->showIntro) {
                 // For the first key, we also display the initial view
                 ctx->showIntro = false;
-                ux_flow_init(0, ux_review_public_info_for_ip, NULL);
+                uiReviewPublicInformationForIpDisplay();
             } else {
-                ux_flow_init(0, ux_sign_public_info_for_ip_public_key, NULL);
+                uiSignPublicInformationForIpPublicKeyDisplay();
             }
             *flags |= IO_ASYNCH_REPLY;
         } else {
@@ -131,9 +83,9 @@ void handleSignPublicInformationForIp(uint8_t *cdata,
 
         if (ctx->showIntro) {
             // If the initial view has not been displayed yet, we display the entire flow
-            ux_flow_init(0, ux_sign_public_info_for_ip_complete, NULL);
+            uiSignPublicInformationForIpCompleteDisplay();
         } else {
-            ux_flow_init(0, ux_sign_public_info_for_ip_final, NULL);
+            uiSignPublicInformationForIpFinalDisplay();
         }
         *flags |= IO_ASYNCH_REPLY;
     } else {

@@ -1,21 +1,13 @@
-#include <os.h>
+#include "os.h"
 
 #include "common/ui/display.h"
-#include "sign.h"
-#include "util.h"
+#include "common/sign.h"
+#include "common/util.h"
+#include "signTransferToEncrypted.h"
+#include "globals.h"
 
 static signTransferToEncrypted_t *ctx = &global.signTransferToEncrypted;
 static tx_state_t *tx_state = &global_tx_state;
-
-UX_STEP_NOCB(ux_sign_transfer_to_encrypted_1_step,
-             bnnn_paging,
-             {.title = "Shield amount", .text = (char *) global.signTransferToEncrypted.amount});
-UX_FLOW(ux_sign_transfer_to_encrypted,
-        &ux_sign_flow_shared_review,
-        &ux_sign_flow_account_sender_view,
-        &ux_sign_transfer_to_encrypted_1_step,
-        &ux_sign_flow_shared_sign,
-        &ux_sign_flow_shared_decline);
 
 void handleSignTransferToEncrypted(uint8_t *cdata, volatile unsigned int *flags) {
     cdata += parseKeyDerivationPath(cdata);
@@ -27,6 +19,5 @@ void handleSignTransferToEncrypted(uint8_t *cdata, volatile unsigned int *flags)
     amountToGtuDisplay(ctx->amount, sizeof(ctx->amount), amountToEncrypted);
     updateHash((cx_hash_t *) &tx_state->hash, cdata, 8);
 
-    ux_flow_init(0, ux_sign_transfer_to_encrypted, NULL);
-    *flags |= IO_ASYNCH_REPLY;
+    uiSignTransferToEncryptedDisplay(flags);
 }

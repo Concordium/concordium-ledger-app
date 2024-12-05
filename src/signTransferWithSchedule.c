@@ -1,72 +1,18 @@
-#include <os.h>
+#include "os.h"
 
 #include "common/ui/display.h"
-#include "base58check.h"
-#include "responseCodes.h"
-#include "sign.h"
-#include "time.h"
-#include "util.h"
+#include "common/base58check.h"
+#include "common/responseCodes.h"
+#include "common/sign.h"
+#include "common/time.h"
+#include "common/util.h"
+#include "globals.h"
+#include "signTransferWithSchedule.h"
 
 static signTransferWithScheduleContext_t *ctx =
     &global.withDataBlob.signTransferWithScheduleContext;
 static cborContext_t *memo_ctx = &global.withDataBlob.cborContext;
 static tx_state_t *tx_state = &global_tx_state;
-const ux_flow_step_t *ux_sign_scheduled_amount_transfer[8];
-
-void processNextScheduledAmount(uint8_t *buffer);
-
-// UI definitions for displaying the transaction contents of the first packet for verification
-// before continuing to process the scheduled amount pairs that will be received in separate
-// packets.
-UX_STEP_NOCB(ux_scheduled_transfer_initial_flow_1_step,
-             bnnn_paging,
-             {.title = "Recipient",
-              .text = (char *) global.withDataBlob.signTransferWithScheduleContext.displayStr});
-UX_STEP_VALID(ux_scheduled_transfer_initial_flow_2_step,
-              nn,
-              sendSuccessNoIdle(),
-              {"Continue", "with transaction"});
-
-// UI definitions for displaying a timestamp and an amount of a scheduled transfer.
-UX_STEP_NOCB(ux_sign_scheduled_transfer_pair_flow_0_step,
-             bnnn_paging,
-             {"Release time (UTC)",
-              (char *) global.withDataBlob.signTransferWithScheduleContext.displayTimestamp});
-UX_STEP_NOCB(ux_sign_scheduled_transfer_pair_flow_1_step,
-             bnnn_paging,
-             {"Amount",
-              (char *) global.withDataBlob.signTransferWithScheduleContext.displayAmount});
-UX_STEP_CB(ux_sign_scheduled_transfer_pair_flow_2_step,
-           nn,
-           processNextScheduledAmount(ctx->buffer),
-           {"Show", "next release"});
-UX_FLOW(ux_sign_scheduled_transfer_pair_flow,
-        &ux_sign_scheduled_transfer_pair_flow_0_step,
-        &ux_sign_scheduled_transfer_pair_flow_1_step,
-        &ux_sign_scheduled_transfer_pair_flow_2_step);
-
-UX_FLOW(ux_sign_scheduled_transfer_pair_flow_sign,
-        &ux_sign_scheduled_transfer_pair_flow_0_step,
-        &ux_sign_scheduled_transfer_pair_flow_1_step,
-        &ux_sign_flow_shared_sign,
-        &ux_sign_flow_shared_decline);
-
-void startInitialScheduledTransferDisplay(bool displayMemo) {
-    uint8_t index = 0;
-
-    ux_sign_scheduled_amount_transfer[index++] = &ux_sign_flow_shared_review;
-    ux_sign_scheduled_amount_transfer[index++] = &ux_sign_flow_account_sender_view;
-    ux_sign_scheduled_amount_transfer[index++] = &ux_scheduled_transfer_initial_flow_1_step;
-
-    if (displayMemo) {
-        ux_sign_scheduled_amount_transfer[index++] = &ux_display_memo_step_nocb;
-    }
-
-    ux_sign_scheduled_amount_transfer[index++] = &ux_scheduled_transfer_initial_flow_2_step;
-
-    ux_sign_scheduled_amount_transfer[index++] = FLOW_END_STEP;
-    ux_flow_init(0, ux_sign_scheduled_amount_transfer, NULL);
-}
 
 void processNextScheduledAmount(uint8_t *buffer) {
     if (ctx->scheduledAmountsInCurrentPacket == 0) {
@@ -103,10 +49,10 @@ void processNextScheduledAmount(uint8_t *buffer) {
         // transaction.
         if (ctx->remainingNumberOfScheduledAmounts == 0 &&
             ctx->scheduledAmountsInCurrentPacket == 0) {
-            ux_flow_init(0, ux_sign_scheduled_transfer_pair_flow_sign, NULL);
+            uiSignScheduledTransferPairFlowSignDisplay();
         } else {
             // Display the timestamp and amount for the user to validate it.
-            ux_flow_init(0, ux_sign_scheduled_transfer_pair_flow, NULL);
+            uiSignScheduledTransferPairFlowDisplay();
         }
     }
 }

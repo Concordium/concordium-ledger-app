@@ -1,5 +1,7 @@
-#ifndef _CONCORDIUM_APP_ACCOUNT_TRANSFER_TO_PUBLIC_H_
-#define _CONCORDIUM_APP_ACCOUNT_TRANSFER_TO_PUBLIC_H_
+#pragma once
+
+#include <stdbool.h>
+#include <stdint.h>
 
 /**
  * Handles the signing flow, including updating the display, for the 'transfer to public'
@@ -23,5 +25,3 @@ typedef struct {
     uint16_t proofSize;
     transferToPublicState_t state;
 } signTransferToPublic_t;
-
-#endif

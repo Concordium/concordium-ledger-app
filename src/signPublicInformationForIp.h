@@ -1,5 +1,4 @@
-#ifndef _CONCORDIUM_APP_PUBLIC_INFO_FOR_IP_H_
-#define _CONCORDIUM_APP_PUBLIC_INFO_FOR_IP_H_
+#pragma once
 
 /**
  * Handles the signing flow, including updating the display, for the signing
@@ -25,5 +24,3 @@ typedef struct {
     uint8_t threshold[4];
     publicInfoForIpState_t state;
 } signPublicInformationForIp_t;
-
-#endif

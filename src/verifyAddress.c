@@ -25,21 +25,6 @@ static const uint8_t gY[48] = {
     0x5f, 0xde, 0xe0, 0xb5, 0x2c, 0x91, 0x6f, 0x68, 0x85, 0x44, 0x87, 0xe8, 0x11, 0x2c, 0x1f, 0x27,
     0x74, 0x35, 0xfc, 0x07, 0x6f, 0x3a, 0xda, 0xd5, 0x6d, 0x18, 0xd8, 0x6a, 0x65, 0x99, 0xb5, 0x42};
 
-UX_STEP_NOCB(ux_verify_address_0_step,
-             bnnn_paging,
-             {.title = "Verify Address", .text = (char *) global.verifyAddressContext.display});
-
-UX_STEP_NOCB(ux_verify_address_1_step,
-             bnnn_paging,
-             {.title = "Address", .text = (char *) global.verifyAddressContext.address});
-UX_STEP_CB(ux_verify_address_approve_step, pb, sendSuccess(0), {&C_icon_validate_14, "Approve"});
-UX_STEP_CB(ux_verify_address_reject_step, pb, sendUserRejection(), {&C_icon_crossmark, "Reject"});
-UX_FLOW(ux_verify_address,
-        &ux_verify_address_0_step,
-        &ux_verify_address_1_step,
-        &ux_verify_address_approve_step,
-        &ux_verify_address_reject_step);
-
 /*
  * Calculates the credId from the given prf key and credential counter.
  * The size of the computed credId is 48 bytes.
@@ -131,7 +116,6 @@ void handleVerifyAddress(uint8_t *cdata, uint8_t p1, volatile unsigned int *flag
     uint32_t identity = U4BE(cdata, offset);
     offset += 4;
     uint32_t credCounter = U4BE(cdata, offset);
-    offset += 4;
 
     size_t prfKeyPathLen = is_new_path ? 5 : 6;
     uint32_t *prfKeyPath;
@@ -184,6 +168,5 @@ void handleVerifyAddress(uint8_t *cdata, uint8_t p1, volatile unsigned int *flag
     base58check_encode(accountAddress, sizeof(accountAddress), ctx->address, &addressLength);
     ctx->address[55] = '\0';
 
-    ux_flow_init(0, ux_verify_address, NULL);
-    *flags |= IO_ASYNCH_REPLY;
+    uiVerifyAddress(flags);
 }
