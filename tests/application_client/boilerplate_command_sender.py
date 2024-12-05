@@ -140,6 +140,66 @@ class BoilerplateCommandSender:
         ) as response:
             yield response
 
+    @contextmanager
+    def sign_simple_transfer(
+        self, path: str, transaction: bytes
+    ) -> Generator[None, None, None]:
+        data = pack_derivation_path(path)
+        data += transaction
+
+        index = P1.P1_NONE + 1
+        with self.backend.exchange_async(
+            cla=CLA,
+            ins=InsType.SIGN_TRANSFER,
+            p1=index,
+            p2=P2.P2_NONE,
+            data=data,
+        ) as response:
+            yield response
+
+    @contextmanager
+    def sign_simple_transfer_with_memo(
+        self, path: str, header_and_to_address: bytes, memo: bytes, amount: bytes
+    ) -> Generator[None, None, None]:
+        data = pack_derivation_path(path)
+        data += header_and_to_address
+        print("km------------data", data.hex())
+        index = P1.P1_NONE + 1
+        # Get memo length in bytes
+        memo_length = len(memo)
+        print("km------------memo_length", memo_length)
+        # memo length has to take 2 bytes
+        memo_length_bytes = memo_length.to_bytes(2, byteorder="big")
+        print("km------------memo_length_bytes", memo_length_bytes.hex())
+        data += memo_length_bytes
+        print("km------------data", data.hex())
+        self.backend.exchange(
+            cla=CLA,
+            ins=InsType.SIGN_TRANSFER_WITH_MEMO,
+            p1=index,
+            p2=P2.P2_NONE,
+            data=data,
+        )
+        index += 1
+        memo_chunk = split_message(memo, MAX_APDU_LEN)
+        for chunk in memo_chunk:
+            self.backend.exchange(
+                cla=CLA,
+                ins=InsType.SIGN_TRANSFER_WITH_MEMO,
+                p1=index,
+                p2=P2.P2_NONE,
+                data=chunk,
+            )
+            index += 1
+        with self.backend.exchange_async(
+            cla=CLA,
+            ins=InsType.SIGN_TRANSFER_WITH_MEMO,
+            p1=index,
+            p2=P2.P2_NONE,
+            data=amount,
+        ) as response:
+            yield response
+
     # @contextmanager
     # def sign_tx(
     #     self, path: str, tx_type_ins: InsType, transaction: bytes
@@ -147,7 +207,7 @@ class BoilerplateCommandSender:
 
     #     self.backend.exchange(
     #         cla=CLA,
-    #         ins=tx_type_ins,
+    #         ins=InsType.SIGN_TRANSFER,
     #         p1=P1.P1_START,
     #         p2=P2.P2_MORE,
     #         data=pack_derivation_path(path),

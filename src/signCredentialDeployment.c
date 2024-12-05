@@ -367,7 +367,7 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer,
             if (base58check_encode(accountAddress,
                                    sizeof(accountAddress),
                                    ctx->accountAddress,
-                                   &outputSize) != 0) {
+                                   &outputSize) == -1) {
                 // The received address bytes are not a valid base58 encoding.
                 THROW(ERROR_INVALID_TRANSACTION);
             }
