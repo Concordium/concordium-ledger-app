@@ -20,7 +20,7 @@ enum {
     ERROR_INVALID_INSTRUCTION = 0x6D00,
 
     // Error codes from the Ledger firmware
-    ERROR_DEVICE_LOCKED = 0x530C
+    ERROR_DEVICE_LOCKED = 0x530C,
+    SW_WRONG_DATA_LENGTH = 0x6A87
 };
-
 #endif

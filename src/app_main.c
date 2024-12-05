@@ -16,6 +16,7 @@
  ********************************************************************************/
 
 #include <stdbool.h>
+#include <stdint.h>  // uint*_t
 #include <string.h>
 
 #include "os.h"
@@ -26,7 +27,11 @@
 #include "mainHelpers.h"
 
 #include "responseCodes.h"
-#include "handler.h"
+#include "common/handler.h"
+#include "parser.h"  // command_t
+#include "common/responseCodes.h"
+#include "io.h"              // io_init(), io_recv_command(), io_send_sw()
+#include "common/ui/menu.h"  // ui_menu_main()
 
 keyDerivationPath_t path;
 tx_state_t global_tx_state;
@@ -51,9 +56,18 @@ void *global_state;
 // Main entry of application that listens for APDU commands that will be received from the
 // computer. The APDU commands control what flow is activated, i.e. which control flow is initiated.
 void app_main() {
-    volatile unsigned int rx = 0;
-    volatile unsigned int tx = 0;
+    // Length of APDU command received in G_io_apdu_buffer
+    int input_len = 0;
     volatile unsigned int flags = 0;
+
+    // Structured APDU command
+    command_t cmd;
+
+    io_init();
+
+    ui_menu_main();
+
+    explicit_bzero(&global_tx_state, sizeof(global_tx_state));
 
     // Initialize the NVM data if required
     if (N_storage.initialized != 0x01) {
@@ -65,76 +79,54 @@ void app_main() {
     }
 
     for (;;) {
-        volatile unsigned short sw = 0;
-
-        BEGIN_TRY {
-            TRY {
-                rx = tx;
-                tx = 0;  // ensure no race in catch_other if io_exchange throws
-                         // an error
-                rx = io_exchange(CHANNEL_APDU | flags, rx);
-                flags = 0;
-
-                // no apdu received, well, reset the session, and reset the
-                // bootloader configuration
-                if (rx == 0) {
-                    THROW(ERROR_NO_APDU_RECEIVED);
-                }
-
-                if (G_io_apdu_buffer[OFFSET_CLA] != CLA) {
-                    THROW(ERROR_INVALID_CLA);
-                }
-
-                uint8_t INS = G_io_apdu_buffer[OFFSET_INS];
-                uint8_t p1 = G_io_apdu_buffer[OFFSET_P1];
-                uint8_t p2 = G_io_apdu_buffer[OFFSET_P2];
-                uint8_t lc = G_io_apdu_buffer[OFFSET_LC];
-                uint8_t *cdata = G_io_apdu_buffer + OFFSET_CDATA;
-
-                bool isInitialCall = false;
-                if (global_tx_state.currentInstruction == -1) {
-                    memset(&global_state, 0, sizeof(global_state));
-                    global_tx_state.currentInstruction = INS;
-                    isInitialCall = true;
-                } else if (global_tx_state.currentInstruction != INS) {
-                    // Caller attempted to switch instruction in the middle
-                    // of a multi command flow. This is not allowed, as in the
-                    // worst case, an attacker could trick a user to sign a mixed
-                    // transaction.
-                    THROW(ERROR_INVALID_STATE);
-                }
-
-                handler(INS, cdata, p1, p2, lc, &flags, isInitialCall);
-            }
-
-            CATCH_OTHER(e) {
-                switch (e) {
-                    case ERROR_NO_APDU_RECEIVED:
-                    case ERROR_REJECTED_BY_USER:
-                    case ERROR_INVALID_STATE:
-                    case ERROR_INVALID_PATH:
-                    case ERROR_INVALID_PARAM:
-                    case ERROR_INVALID_TRANSACTION:
-                    case ERROR_INVALID_INSTRUCTION:
-                    case ERROR_FAILED_CX_OPERATION:
-                    case ERROR_INVALID_CLA:
-                    case ERROR_DEVICE_LOCKED:
-                        global_tx_state.currentInstruction = -1;
-                        sw = e;
-                        G_io_apdu_buffer[tx] = sw >> 8;
-                        G_io_apdu_buffer[tx + 1] = sw;
-                        tx += 2;
-                        break;
-                    default:
-                        // An unknown error was thrown. Reset the device if
-                        // this happens.
-                        io_seproxyhal_se_reset();
-                        break;
-                }
-            }
-            FINALLY {
-            }
+        // Receive command bytes in G_io_apdu_buffer
+        if ((input_len = io_recv_command()) < 0) {
+            PRINTF("=> io_recv_command failure\n");
+            return;
         }
-        END_TRY;
+
+        // Parse APDU command from G_io_apdu_buffer
+        if (!apdu_parser(&cmd, G_io_apdu_buffer, input_len)) {
+            PRINTF("=> /!\\ BAD LENGTH: %.*H\n", input_len, G_io_apdu_buffer);
+            io_send_sw(SW_WRONG_DATA_LENGTH);
+            continue;
+        }
+
+        PRINTF("=> CLA=%02X | INS=%02X | P1=%02X | P2=%02X | Lc=%02X | CData=%.*H\n",
+               cmd.cla,
+               cmd.ins,
+               cmd.p1,
+               cmd.p2,
+               cmd.lc,
+               cmd.lc,
+               cmd.data);
+
+        // uint8_t INS = G_io_apdu_buffer[OFFSET_INS];
+        // uint8_t p1 = G_io_apdu_buffer[OFFSET_P1];
+        // uint8_t p2 = G_io_apdu_buffer[OFFSET_P2];
+        // uint8_t lc = G_io_apdu_buffer[OFFSET_LC];
+        // uint8_t *cdata = G_io_apdu_buffer + OFFSET_CDATA;
+
+        bool isInitialCall = false;
+        if (global_tx_state.currentInstruction == -1) {
+            explicit_bzero(&global_tx_state, sizeof(global_tx_state));
+            global_tx_state.currentInstruction = (int) cmd.ins;
+            isInitialCall = true;
+        }
+
+        // else if (global_tx_state.currentInstruction != cmd.ins) {
+        //     // Caller attempted to switch instruction in the middle
+        //     // of a multi command flow. This is not allowed, as in the
+        //     // worst case, an attacker could trick a user to sign a mixed
+        //     // transaction.
+        //     io_send_sw(ERROR_INVALID_INSTRUCTION);
+        //     // THROW(ERROR_INVALID_STATE);
+        // }
+
+        // Dispatch structured APDU command to handler
+        if (handler(cmd.ins, cmd.data, cmd.p1, cmd.p2, cmd.lc, &flags, isInitialCall) < 0) {
+            PRINTF("=> handler failure\n");
+            return;
+        }
     }
 }
