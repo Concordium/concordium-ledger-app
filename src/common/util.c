@@ -67,7 +67,7 @@ int hashHeaderAndType(uint8_t *cdata, uint8_t headerLength, uint8_t validType) {
 int hashAccountTransactionHeaderAndKind(uint8_t *cdata, uint8_t validTransactionKind) {
     // Parse the account sender address from the transaction header, so it can be shown.
     size_t outputSize = sizeof(accountSender->sender);
-    if (base58check_encode(cdata, 32, accountSender->sender, &outputSize) != 0) {
+    if (base58check_encode(cdata, 32, accountSender->sender, &outputSize) == -1) {
         // The received address bytes are not a valid base58 encoding.
         THROW(ERROR_INVALID_TRANSACTION);
     }
@@ -107,7 +107,7 @@ int handleHeaderAndToAddress(uint8_t *cdata,
 
     // The recipient address is in a base58 format, so we need to encode it to be
     // able to display in a human-readable way.
-    if (base58check_encode(toAddress, sizeof(toAddress), recipientDst, &recipientSize) != 0) {
+    if (base58check_encode(toAddress, sizeof(toAddress), recipientDst, &recipientSize) == -1) {
         // The received address bytes are not a valid base58 encoding.
         THROW(ERROR_INVALID_TRANSACTION);
     }
