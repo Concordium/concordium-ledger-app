@@ -12,7 +12,9 @@ from application_client.boilerplate_response_unpacker import (
 )
 from ragger.error import ExceptionRAPDU
 from ragger.navigator import NavInsID
-from utils import navigate_until_text_and_compare
+from utils import navigate_until_text_and_compare, instructions_builder, split_message
+
+MAX_SCHEDULE_PAIRS_IN_ONE_APDU: int = (250 // 16) * 16
 
 
 # In this test we send to the device a transaction to sign and validate it on screen
@@ -130,3 +132,83 @@ def test_sign_tx_simple_transfer_with_memo_legacy_path(
         == "a588094eef4ed6053df2ab4b851bc5ec09b311c204d2fa94a9c7d7c8feebf74de26d2d2a547f18c4e959b24388394305ebd3dca99653de1cb1aa689bb6674207"
     )
     # assert check_signature_validity(public_key, der_sig, transaction)
+
+
+@pytest.mark.active_test_scope
+def test_sign_tx_transfer_with_schedule_legacy_path(
+    backend, firmware, navigator, default_screenshot_path, test_name
+):
+    # Initialize the command sender client
+    client = BoilerplateCommandSender(backend)
+    # Define the path for the transaction
+    path = "m/1105/0/0/0/0/2/0/0"
+
+    # Create the transaction that will be sent to the device for signing
+    header_and_to_address = "20a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7000000000000000a0000000000000064000000290000000063de5da71320a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7"
+    header_and_to_address = bytes.fromhex(header_and_to_address)
+
+    # Define the schedule pairs
+    pairs = [
+        "0000017a396883d90000000005f5e100",
+        "0000017a396883d90000000005f5e100",
+        "0000017a396883d90000000005f5e100",
+        "0000017a396883d90000000005f5e100",
+        "0000017a396883d90000000005f5e100",
+    ]
+    joined_pairs = bytes.fromhex("".join(pairs))
+
+    # Ensure pairs are a multiple of 16 bytes
+    if len(joined_pairs) % 16 != 0:
+        raise ValueError("Pairs must be a multiple of 16 bytes")
+
+    # Split the pairs into chunks for APDU transmission
+    pairs_chunk = split_message(joined_pairs, MAX_SCHEDULE_PAIRS_IN_ONE_APDU)
+
+    # Send the first part of the transaction signing request
+    with client.sign_tx_with_schedule_part_1(
+        path=path,
+        header_and_to_address=header_and_to_address,
+        num_pairs=len(pairs),
+    ):
+        # Navigate and compare screenshots for validation
+        navigator.navigate_and_compare(
+            default_screenshot_path,
+            test_name,
+            instructions_builder(5, backend),
+            10,
+            True,
+            False,
+        )
+
+    # Process each chunk of pairs
+    screenshots_so_far = 6
+    for chunk in pairs_chunk:
+        number_of_pairs_in_chunk = len(chunk) // 16
+        # Create the instructions to validate each pair
+        instructions = []
+        for _ in range(number_of_pairs_in_chunk):
+            instructions.extend(instructions_builder(2, backend))
+
+        # Send the second part of the transaction signing request
+        with client.sign_tx_with_schedule_part_2(data=chunk):
+            # Navigate and compare screenshots for validation
+            navigator.navigate_and_compare(
+                default_screenshot_path,
+                test_name,
+                instructions,
+                10,
+                False,
+                False,
+                screenshots_so_far,
+            )
+        screenshots_so_far += number_of_pairs_in_chunk * 3
+
+    # The device as yielded the result, parse it and ensure that the signature is correct
+    response = client.get_async_response().data
+    response_hex = response.hex()
+    print("km------------response", response_hex)
+    # TODO: verify the signature
+    assert (
+        response_hex
+        == "e22fa38f78a79db71e84376c4eec2382166cdc412994207e7631b0ba3828f069b17b6f30351a64c50e5efacec3fe25161e9f7131e0235cd740739b24e0b06308"
+    )

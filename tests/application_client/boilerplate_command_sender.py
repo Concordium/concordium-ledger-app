@@ -4,7 +4,7 @@ from contextlib import contextmanager
 
 from ragger.backend.interface import BackendInterface, RAPDU
 from ragger.bip import pack_derivation_path
-
+from utils import split_message
 
 MAX_APDU_LEN: int = 255
 
@@ -18,6 +18,8 @@ class P1(IntEnum):
     # Parameter 1 for screen confirmation for GET_PUBLIC_KEY.
     P1_CONFIRM = 0x00
     P1_NO_CONFIRM = 0x01
+    # Parameter 1 for the scheduled amounts
+    P1_SCHEDULED_AMOUNTS = 0x01
     # Basic P1 for all instructions
     P1_NONE = 0x00
 
@@ -70,10 +72,6 @@ class Errors(IntEnum):
     SW_TX_HASH_FAIL = 0xB006
     SW_BAD_STATE = 0xB007
     SW_SIGNATURE_FAIL = 0xB008
-
-
-def split_message(message: bytes, max_size: int) -> List[bytes]:
-    return [message[x : x + max_size] for x in range(0, len(message), max_size)]
 
 
 class BoilerplateCommandSender:
@@ -197,6 +195,35 @@ class BoilerplateCommandSender:
             p1=index,
             p2=P2.P2_NONE,
             data=amount,
+        ) as response:
+            yield response
+
+    @contextmanager
+    def sign_tx_with_schedule_part_1(
+        self, path: str, header_and_to_address: bytes, num_pairs: int
+    ) -> Generator[None, None, None]:
+        # Send the derivation path, the header, the to address and the number of pairs
+        data = pack_derivation_path(path)
+        data += header_and_to_address
+        data += num_pairs.to_bytes(1, byteorder="big")
+        print("km------------data", data.hex())
+        with self.backend.exchange_async(
+            cla=CLA,
+            ins=InsType.SIGN_TRANSFER_WITH_SCHEDULE,
+            p1=P1.P1_NONE,
+            p2=P2.P2_NONE,
+            data=data,
+        ) as response:
+            yield response
+
+    @contextmanager
+    def sign_tx_with_schedule_part_2(self, data: bytes) -> Generator[None, None, None]:
+        with self.backend.exchange_async(
+            cla=CLA,
+            ins=InsType.SIGN_TRANSFER_WITH_SCHEDULE,
+            p1=P1.P1_SCHEDULED_AMOUNTS,
+            p2=P2.P2_NONE,
+            data=data,
         ) as response:
             yield response
 
