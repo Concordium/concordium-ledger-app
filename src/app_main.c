@@ -62,12 +62,9 @@ void app_main() {
 
     // Structured APDU command
     command_t cmd;
-
     io_init();
-
-    ui_menu_main();
-
     explicit_bzero(&global_tx_state, sizeof(global_tx_state));
+    ui_menu_main();
 
     // Initialize the NVM data if required
     if (N_storage.initialized != 0x01) {
@@ -101,19 +98,12 @@ void app_main() {
                cmd.lc,
                cmd.data);
 
-        // uint8_t INS = G_io_apdu_buffer[OFFSET_INS];
-        // uint8_t p1 = G_io_apdu_buffer[OFFSET_P1];
-        // uint8_t p2 = G_io_apdu_buffer[OFFSET_P2];
-        // uint8_t lc = G_io_apdu_buffer[OFFSET_LC];
-        // uint8_t *cdata = G_io_apdu_buffer + OFFSET_CDATA;
-
         bool isInitialCall = false;
         if (global_tx_state.currentInstruction == -1) {
-            explicit_bzero(&global_tx_state, sizeof(global_tx_state));
-            global_tx_state.currentInstruction = (int) cmd.ins;
+            explicit_bzero(&global, sizeof(global));
+            global_tx_state.currentInstruction = cmd.ins;
             isInitialCall = true;
         }
-
         // else if (global_tx_state.currentInstruction != cmd.ins) {
         //     // Caller attempted to switch instruction in the middle
         //     // of a multi command flow. This is not allowed, as in the
