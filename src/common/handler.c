@@ -10,13 +10,13 @@
 #include "handler.h"
 #include "getAppName.h"
 
-void handler(uint8_t INS,
-             uint8_t *cdata,
-             uint8_t p1,
-             uint8_t p2,
-             uint8_t lc,
-             volatile unsigned int *flags,
-             bool isInitialCall) {
+int handler(uint8_t INS,
+            uint8_t *cdata,
+            uint8_t p1,
+            uint8_t p2,
+            uint8_t lc,
+            volatile unsigned int *flags,
+            bool isInitialCall) {
     switch (INS) {
         case INS_GET_PUBLIC_KEY:
             handleGetPublicKey(cdata, p1, p2, flags);
@@ -70,12 +70,13 @@ void handler(uint8_t INS,
             handleSignUpdateCredential(cdata, p1, p2, flags, isInitialCall);
             break;
         case INS_GET_APP_NAME:
-            handleGetAppName(flags);
+            return handleGetAppName();
             break;
         default:
             THROW(ERROR_INVALID_INSTRUCTION);
             break;
     }
+    return 0;
 }
 
 #endif

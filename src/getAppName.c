@@ -3,21 +3,11 @@
 #include "io.h"
 #include "os.h"
 #include "globals.h"
-#include "responseCodes.h"
+#include "common/responseCodes.h"
+#include "constants.h"
 
-void handleGetAppName(volatile unsigned int *flags) {
-    // The APPNAME is defined in the Makefile
-    uint8_t appName[] = APPNAME;
-    uint8_t appNameLength = strlen((char *) appName);
+int handleGetAppName() {
+    _Static_assert(APPNAME_LEN < MAX_APPNAME_LEN, "APPNAME must be at most 64 characters!");
 
-    // Copy app name to response buffer
-    memmove(G_io_apdu_buffer, appName, appNameLength);
-
-    // Add success status word at the end
-    G_io_apdu_buffer[appNameLength] = SUCCESS >> 8;
-    G_io_apdu_buffer[appNameLength + 1] = SUCCESS & 0xFF;
-
-    // Send response using io_exchange with total length including status word
-    io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, appNameLength + 2);
-    *flags |= IO_RETURN_AFTER_TX;
+    return io_send_response_pointer(PIC(APPNAME), APPNAME_LEN, SUCCESS);
 }

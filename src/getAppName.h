@@ -12,4 +12,4 @@
  * @return zero or positive integer if success, negative integer otherwise.
  *
  */
-void handleGetAppName(volatile unsigned int *flags);
+int handleGetAppName();
