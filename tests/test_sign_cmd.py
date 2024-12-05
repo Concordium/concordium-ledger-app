@@ -1,11 +1,18 @@
 import pytest
 
 from application_client.boilerplate_transaction import Transaction
-from application_client.boilerplate_command_sender import BoilerplateCommandSender, Errors, InsType
-from application_client.boilerplate_response_unpacker import unpack_get_public_key_response, unpack_sign_tx_response
+from application_client.boilerplate_command_sender import (
+    BoilerplateCommandSender,
+    Errors,
+    InsType,
+)
+from application_client.boilerplate_response_unpacker import (
+    unpack_get_public_key_response,
+    unpack_sign_tx_response,
+)
 from ragger.error import ExceptionRAPDU
 from ragger.navigator import NavInsID
-from utils import check_signature_validity
+from utils import navigate_until_text_and_compare
 
 # In this tests we check the behavior of the device when asked to sign a transaction
 
@@ -13,7 +20,10 @@ from utils import check_signature_validity
 # In this test we send to the device a transaction to sign and validate it on screen
 # The transaction is short and will be sent in one chunk
 # We will ensure that the displayed information is correct by using screenshots comparison
-def test_sign_tx_simple_transfer(backend, scenario_navigator):
+@pytest.mark.active_test_scope
+def test_sign_tx_simple_transfer_legacy_path(
+    backend, firmware, navigator, default_screenshot_path, test_name
+):
     # Use the app interface instead of raw interface
     client = BoilerplateCommandSender(backend)
     # The path used for this entire test
@@ -24,23 +34,66 @@ def test_sign_tx_simple_transfer(backend, scenario_navigator):
     # _, public_key, _, _ = unpack_get_public_key_response(rapdu.data)
 
     # Create the transaction that will be sent to the device for signing
-    transaction = '20a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7000000000000000a0000000000000064000000290000000063de5da70320a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7ffffffffffffffff'
+    transaction = "20a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7000000000000000a0000000000000064000000290000000063de5da70320a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7ffffffffffffffff"
     transaction = bytes.fromhex(transaction)
 
     # Send the sign device instruction.
     # As it requires on-screen validation, the function is asynchronous.
     # It will yield the result when the navigation is done
-    ins_type = InsType.SIGN_SIMPLE_TRANSFER
-    with client.sign_tx(path=path, tx_type_ins=ins_type, transaction=transaction):
+    with client.sign_simple_transfer(path=path, transaction=transaction):
         # Validate the on-screen request by performing the navigation appropriate for this device
-        scenario_navigator.review_approve()
+        navigate_until_text_and_compare(
+            firmware, navigator, "Sign", default_screenshot_path, test_name
+        )
 
     # The device as yielded the result, parse it and ensure that the signature is correct
     response = client.get_async_response().data
     response_hex = response.hex()
-    print('response', response_hex)
-    assert response_hex == "d1617ee706805c0bc6a43260ece93a7ceba37aaefa303251cf19bdcbbe88c0a3d3878dcb965cdb88ff380fdb1aa4b321671f365d7258e878d18fa1b398a1a10f"
+    print("response", response_hex)
+    assert (
+        response_hex
+        == "d1617ee706805c0bc6a43260ece93a7ceba37aaefa303251cf19bdcbbe88c0a3d3878dcb965cdb88ff380fdb1aa4b321671f365d7258e878d18fa1b398a1a10f"
+    )
     # assert check_signature_validity(public_key, der_sig, transaction)
+
+
+# In this test we send to the device a transaction to sign and validate it on screen
+# The transaction is short and will be sent in one chunk
+# We will ensure that the displayed information is correct by using screenshots comparison
+@pytest.mark.active_test_scope
+def test_sign_tx_simple_transfer_new_path(
+    backend, firmware, navigator, default_screenshot_path, test_name
+):
+    # Use the app interface instead of raw interface
+    client = BoilerplateCommandSender(backend)
+    # The path used for this entire test
+    path: str = "m/44/919/0/0/0/0"
+
+    # First we need to get the public key of the device in order to build the transaction
+    # rapdu = client.get_public_key(path=path)
+    # _, public_key, _, _ = unpack_get_public_key_response(rapdu.data)
+
+    # Create the transaction that will be sent to the device for signing
+    transaction = "20a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7000000000000000a0000000000000064000000290000000063de5da70320a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7ffffffffffffffff"
+    transaction = bytes.fromhex(transaction)
+
+    # Send the sign device instruction.
+    # As it requires on-screen validation, the function is asynchronous.
+    # It will yield the result when the navigation is done
+    with client.sign_simple_transfer(path=path, transaction=transaction):
+        # Validate the on-screen request by performing the navigation appropriate for this device
+        navigate_until_text_and_compare(
+            firmware, navigator, "Sign", default_screenshot_path, test_name
+        )
+
+    # The device as yielded the result, parse it and ensure that the signature is correct
+    response = client.get_async_response().data
+    response_hex = response.hex()
+    print("response", response_hex)
+    assert (
+        response_hex
+        == "e5f112237d58f908c44385827e71048869db7e8f513e2ceb5da6a6370e2088f4371f93d6e08f9f6c1dd92c74fe565727b8f81600541e817d35cfeec4cc3bc408"
+    )
 
 
 # # In this test we send to the device a transaction to trig a blind-signing flow

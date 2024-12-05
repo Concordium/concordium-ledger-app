@@ -140,6 +140,23 @@ class BoilerplateCommandSender:
         ) as response:
             yield response
 
+    @contextmanager
+    def sign_simple_transfer(
+        self, path: str, transaction: bytes, hasMemo: bool = False
+    ) -> Generator[None, None, None]:
+        data = pack_derivation_path(path)
+        data += transaction
+
+        index = P1.P1_NONE + 1
+        with self.backend.exchange_async(
+            cla=CLA,
+            ins=InsType.SIGN_TRANSFER,
+            p1=index,
+            p2=P2.P2_NONE,
+            data=data,
+        ) as response:
+            yield response
+
     # @contextmanager
     # def sign_tx(
     #     self, path: str, tx_type_ins: InsType, transaction: bytes
@@ -147,7 +164,7 @@ class BoilerplateCommandSender:
 
     #     self.backend.exchange(
     #         cla=CLA,
-    #         ins=tx_type_ins,
+    #         ins=InsType.SIGN_TRANSFER,
     #         p1=P1.P1_START,
     #         p2=P2.P2_MORE,
     #         data=pack_derivation_path(path),
