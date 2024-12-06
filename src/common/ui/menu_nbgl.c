@@ -25,6 +25,8 @@
 #include "../globals.h"
 #include "menu.h"
 
+static tx_state_t* tx_state = &global_tx_state;
+
 //  -----------------------------------------------------------
 //  ----------------------- HOME PAGE -------------------------
 //  -----------------------------------------------------------
@@ -129,6 +131,8 @@ static void controls_callback(int token, uint8_t index, int page) {
 
 // home page definition
 void ui_menu_main(void) {
+    tx_state->currentInstruction = -1;
+
     // Initialize switches data
     switches[DUMMY_SWITCH_1_ID].initState = (nbgl_state_t) N_storage.dummy1_allowed;
     switches[DUMMY_SWITCH_1_ID].text = "Dummy 1";
