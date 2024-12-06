@@ -10,6 +10,7 @@ from application_client.boilerplate_response_unpacker import (
 from ragger.bip import calculate_public_key_and_chaincode, CurveChoice
 from ragger.error import ExceptionRAPDU
 from ragger.navigator import NavInsID, NavIns
+from ragger.firmware import Firmware
 from utils import navigate_until_text_and_compare
 
 
@@ -33,6 +34,15 @@ nano_accept_instructions = [
     NavInsID.BOTH_CLICK,
 ]
 
+flex_stax_accept_instructions = [
+    NavInsID.WAIT_FOR_SCREEN_CHANGE,
+    NavInsID.SWIPE_CENTER_TO_LEFT,
+    NavInsID.USE_CASE_CHOICE_CONFIRM,
+    NavInsID.SWIPE_CENTER_TO_LEFT,
+    NavInsID.USE_CASE_CHOICE_CONFIRM,
+    NavInsID.WAIT_FOR_HOME_SCREEN,
+]
+
 
 # In this test we check that the GET_PUBLIC_KEY works in confirmation mode
 @pytest.mark.active_test_scope
@@ -41,14 +51,19 @@ def test_get_legacy_public_key_confirm_accepted(
 ):
     client = BoilerplateCommandSender(backend)
     path = "m/1105/0/0/0/0/2/0/0"
+    if firmware.is_nano:
+        instructions = nano_accept_instructions
+    else:
+        instructions = flex_stax_accept_instructions
+
     with client.get_public_key_with_confirmation(path=path):
-        if firmware.is_nano:
-            navigator.navigate_and_compare(
-                default_screenshot_path,
-                test_name,
-                nano_accept_instructions,
-                screen_change_before_first_instruction=False,
-            )
+
+        navigator.navigate_and_compare(
+            default_screenshot_path,
+            test_name,
+            instructions,
+            screen_change_before_first_instruction=False,
+        )
 
     response = client.get_async_response().data
     print("km------------------|response:", response.hex())
