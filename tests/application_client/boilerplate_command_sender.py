@@ -325,7 +325,8 @@ class BoilerplateCommandSender:
             data += idp_index.to_bytes(4, byteorder="big")
         else:
             data += bytes.fromhex("00")
-            data += identity_index.to_bytes(4, byteorder="big")
+
+        data += identity_index.to_bytes(4, byteorder="big")
         print("km------------data", data.hex())
         with self.backend.exchange_async(
             cla=CLA,
