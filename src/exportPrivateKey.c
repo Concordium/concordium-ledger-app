@@ -16,25 +16,34 @@
 static const uint32_t HARDENED_OFFSET = 0x80000000;
 static exportPrivateKeyContext_t *ctx = &global.exportPrivateKeyContext;
 
-#define ID_CRED_SEC 0
-#define PRF_KEY     1
-
-#define pathLength 6
-
 void exportPrivateKeySeed(void) {
     cx_ecfp_private_key_t privateKey;
     BEGIN_TRY {
         TRY {
-            ctx->path[5] = PRF_KEY | HARDENED_OFFSET;
-            getPrivateKey(ctx->path, pathLength, &privateKey);
+            uint8_t lastSubPath;
+            uint8_t lastSubPathIndex;
+            if (ctx->isNewPath) {
+                lastSubPath = NEW_PRF_KEY;
+                lastSubPathIndex = 4;
+            } else {
+                lastSubPath = LEGACY_PRF_KEY;
+                lastSubPathIndex = 5;
+            }
+            ctx->path[lastSubPathIndex] = lastSubPath | HARDENED_OFFSET;
+            getPrivateKey(ctx->path, lastSubPathIndex + 1, &privateKey);
             uint8_t tx = 0;
             for (int i = 0; i < 32; i++) {
                 G_io_apdu_buffer[tx++] = privateKey.d[i];
             }
 
             if (ctx->exportBoth) {
-                ctx->path[5] = ID_CRED_SEC | HARDENED_OFFSET;
-                getPrivateKey(ctx->path, pathLength, &privateKey);
+                if (ctx->isNewPath) {
+                    lastSubPath = NEW_ID_CRED_SEC;
+                } else {
+                    lastSubPath = LEGACY_ID_CRED_SEC;
+                }
+                ctx->path[lastSubPathIndex] = lastSubPath | HARDENED_OFFSET;
+                getPrivateKey(ctx->path, lastSubPathIndex + 1, &privateKey);
                 for (int i = 0; i < 32; i++) {
                     G_io_apdu_buffer[tx++] = privateKey.d[i];
                 }
@@ -53,15 +62,29 @@ void exportPrivateKeyBls(void) {
     uint8_t privateKey[32];
     BEGIN_TRY {
         TRY {
-            ctx->path[5] = PRF_KEY | HARDENED_OFFSET;
-            getBlsPrivateKey(ctx->path, pathLength, privateKey, sizeof(privateKey));
+            uint8_t lastSubPath;
+            uint8_t lastSubPathIndex;
+            if (ctx->isNewPath) {
+                lastSubPath = NEW_PRF_KEY;
+                lastSubPathIndex = 4;
+            } else {
+                lastSubPath = LEGACY_PRF_KEY;
+                lastSubPathIndex = 5;
+            }
+            ctx->path[lastSubPathIndex] = lastSubPath | HARDENED_OFFSET;
+            getBlsPrivateKey(ctx->path, lastSubPathIndex + 1, privateKey, sizeof(privateKey));
             uint8_t tx = 0;
             memmove(G_io_apdu_buffer, privateKey, sizeof(privateKey));
             tx += sizeof(privateKey);
 
             if (ctx->exportBoth) {
-                ctx->path[5] = ID_CRED_SEC | HARDENED_OFFSET;
-                getBlsPrivateKey(ctx->path, pathLength, privateKey, sizeof(privateKey));
+                if (ctx->isNewPath) {
+                    lastSubPath = NEW_ID_CRED_SEC;
+                } else {
+                    lastSubPath = LEGACY_ID_CRED_SEC;
+                }
+                ctx->path[lastSubPathIndex] = lastSubPath | HARDENED_OFFSET;
+                getBlsPrivateKey(ctx->path, lastSubPathIndex + 1, privateKey, sizeof(privateKey));
                 memmove(G_io_apdu_buffer + tx, privateKey, sizeof(privateKey));
                 tx += sizeof(privateKey);
             }
@@ -105,19 +128,55 @@ void handleExportPrivateKey(uint8_t *dataBuffer,
         (p2 != P2_KEY && p2 != P2_SEED)) {
         THROW(ERROR_INVALID_PARAM);
     }
-    uint32_t identity = U4BE(dataBuffer, 0);
-    uint32_t keyDerivationPath[5] = {LEGACY_PURPOSE | HARDENED_OFFSET,
-                                     LEGACY_COIN_TYPE | HARDENED_OFFSET,
-                                     ACCOUNT_SUBTREE | HARDENED_OFFSET,
-                                     NORMAL_ACCOUNTS | HARDENED_OFFSET,
-                                     identity | HARDENED_OFFSET};
-    memmove(ctx->path, keyDerivationPath, sizeof(keyDerivationPath));
+    size_t offset = 0;
+    PRINTF("km------------------------dataBuffer: %s\n", dataBuffer[offset]);
+
+    ctx->isNewPath = (bool) dataBuffer[offset];
+    PRINTF("km------------------------dataBuffer: %s\n", dataBuffer[offset]);
+    offset += 1;
+
+    uint32_t identity_provider;
+    uint32_t identity;
+    if (ctx->isNewPath) {
+        identity_provider = U4BE(dataBuffer, offset);
+        offset += 4;
+    }
+    identity = U4BE(dataBuffer, offset);
+    offset += 4;
+    uint32_t *keyDerivationPath;
+    size_t pathLength;
+    if (ctx->isNewPath) {
+        keyDerivationPath = (uint32_t[4]){NEW_PURPOSE | HARDENED_OFFSET,
+                                          NEW_COIN_TYPE | HARDENED_OFFSET,
+                                          identity_provider | HARDENED_OFFSET,
+                                          identity | HARDENED_OFFSET};
+        pathLength = 4;
+    } else {
+        keyDerivationPath = (uint32_t[5]){LEGACY_PURPOSE | HARDENED_OFFSET,
+                                          LEGACY_COIN_TYPE | HARDENED_OFFSET,
+                                          ACCOUNT_SUBTREE | HARDENED_OFFSET,
+                                          NORMAL_ACCOUNTS | HARDENED_OFFSET,
+                                          identity | HARDENED_OFFSET};
+        pathLength = 5;
+    }
+    memmove(ctx->path, keyDerivationPath, pathLength * sizeof(uint32_t));
+    ctx->pathLength = pathLength * sizeof(uint32_t);
 
     ctx->exportBoth = p1 == P1_BOTH;
     ctx->exportSeed = p2 == P2_SEED;
 
-    memmove(ctx->display, "ID #", 4);
-    bin2dec(ctx->display + 4, sizeof(ctx->display) - 4, identity);
+    // Reset the offset to 0
+    offset = 0;
+    if (ctx->isNewPath) {
+        memmove(ctx->display, "IDP#", 4);
+        offset += 4;
+        bin2dec(ctx->display + offset, sizeof(ctx->display) - offset, identity_provider);
+        offset += 4;
+    }
+
+    memmove(ctx->display + offset, "ID #", 4);
+    offset += 4;
+    bin2dec(ctx->display + offset, sizeof(ctx->display) - offset, identity);
 
     if (p1 == P1_BOTH) {
         memmove(ctx->displayHeader, "Create credential", 18);

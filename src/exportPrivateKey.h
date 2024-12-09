@@ -15,11 +15,12 @@ void handleExportPrivateKey(uint8_t *dataBuffer,
 
 typedef struct {
     uint8_t displayHeader[20];
-    uint8_t display[15];
+    uint8_t display[22];
     bool exportBoth;
     bool exportSeed;
     uint32_t path[6];
     uint8_t pathLength;
+    bool isNewPath;
 } exportPrivateKeyContext_t;
 
 void uiExportPrivateKey(volatile unsigned int *flags);
