@@ -129,10 +129,8 @@ void handleExportPrivateKey(uint8_t *dataBuffer,
         THROW(ERROR_INVALID_PARAM);
     }
     size_t offset = 0;
-    PRINTF("km------------------------dataBuffer: %s\n", dataBuffer[offset]);
 
     ctx->isNewPath = (bool) dataBuffer[offset];
-    PRINTF("km------------------------dataBuffer: %s\n", dataBuffer[offset]);
     offset += 1;
 
     uint32_t identity_provider;
