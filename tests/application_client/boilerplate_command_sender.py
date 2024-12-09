@@ -1,5 +1,5 @@
 from enum import IntEnum
-from typing import Generator, Optional
+from typing import Generator, Literal, Optional
 from contextlib import contextmanager
 
 from ragger.backend.interface import BackendInterface, RAPDU
@@ -23,6 +23,10 @@ class P1(IntEnum):
     # Parameter 1 for scheduled transfer with memo
     P1_MEMO_SCHEDULED_TRANSFER = 0x03
     P1_INITIAL_SCHEDULED_TRANSFER_WITH_MEMO = 0x02
+    # Parameter 1 for export private key
+    P1_EXPORT_PRIVATE_KEY = 0x00
+    P1_EXPORT_WITH_ALTERNATIVE_DISPLAY = 0x01
+    P1_EXPORT_PRFKEY_AND_IDCREDSEC = 0x02
     # Basic P1 for all instructions
     P1_NONE = 0x00
 
@@ -31,6 +35,8 @@ class P2(IntEnum):
     # Parameter 2 for sign for GET_PUBLIC_KEY.
     P2_SIGN = 0x01
     P2_NO_SIGN = 0x00
+    # Parameter 2 for export private key
+    P2_EXPORT_BLS_KEY = 0x02
     # Basic P2 for all instructions
     P2_NONE = 0x00
     # # Parameter 2 for last APDU to receive.
@@ -297,6 +303,38 @@ class BoilerplateCommandSender:
     #         cla=CLA, ins=tx_type_ins, p1=idx, p2=P2.P2_LAST, data=messages[-1]
     #     ) as response:
     #         yield response
+
+    @contextmanager
+    def export_private_key(
+        self,
+        export_type: Literal["standard", "recovery", "prfkey_and_idcredsec"],
+        identity_index: int,
+        idp_index: int = -1,
+    ) -> RAPDU:
+        data = b""
+        if export_type == "standard":
+            p1 = P1.P1_EXPORT_PRIVATE_KEY
+        elif export_type == "recovery":
+            p1 = P1.P1_EXPORT_WITH_ALTERNATIVE_DISPLAY
+        elif export_type == "prfkey_and_idcredsec":
+            p1 = P1.P1_EXPORT_PRFKEY_AND_IDCREDSEC
+        else:
+            raise ValueError(f"Invalid export type: {export_type}")
+        if idp_index != -1:
+            data += bytes.fromhex("01")
+            data += idp_index.to_bytes(4, byteorder="big")
+        else:
+            data += bytes.fromhex("00")
+            data += identity_index.to_bytes(4, byteorder="big")
+        print("km------------data", data.hex())
+        with self.backend.exchange_async(
+            cla=CLA,
+            ins=InsType.EXPORT_PRIVATE_KEY,
+            p1=p1,
+            p2=P2.P2_EXPORT_BLS_KEY,
+            data=data,
+        ) as response:
+            yield response
 
     def get_async_response(self) -> Optional[RAPDU]:
         return self.backend.last_async_response
