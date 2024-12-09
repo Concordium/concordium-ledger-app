@@ -20,6 +20,9 @@ class P1(IntEnum):
     P1_NO_CONFIRM = 0x01
     # Parameter 1 for the scheduled amounts
     P1_SCHEDULED_AMOUNTS = 0x01
+    # Parameter 1 for scheduled transfer with memo
+    P1_MEMO_SCHEDULED_TRANSFER = 0x03
+    P1_INITIAL_SCHEDULED_TRANSFER_WITH_MEMO = 0x02
     # Basic P1 for all instructions
     P1_NONE = 0x00
 
@@ -179,8 +182,8 @@ class BoilerplateCommandSender:
             data=data,
         )
         index += 1
-        memo_chunk = split_message(memo, MAX_APDU_LEN)
-        for chunk in memo_chunk:
+        memo_chunks = split_message(memo, MAX_APDU_LEN)
+        for chunk in memo_chunks:
             self.backend.exchange(
                 cla=CLA,
                 ins=InsType.SIGN_TRANSFER_WITH_MEMO,
@@ -221,6 +224,48 @@ class BoilerplateCommandSender:
         with self.backend.exchange_async(
             cla=CLA,
             ins=InsType.SIGN_TRANSFER_WITH_SCHEDULE,
+            p1=P1.P1_SCHEDULED_AMOUNTS,
+            p2=P2.P2_NONE,
+            data=data,
+        ) as response:
+            yield response
+
+    def sign_tx_with_schedule_and_memo_part_1(
+        self, path: str, header_and_to_address: bytes, num_pairs: int, memo_length: int
+    ) -> RAPDU:
+        data = pack_derivation_path(path)
+        data += header_and_to_address
+        data += num_pairs.to_bytes(1, byteorder="big")
+        memo_length_bytes = memo_length.to_bytes(2, byteorder="big")
+        data += memo_length_bytes
+        return self.backend.exchange(
+            cla=CLA,
+            ins=InsType.SIGN_TRANSFER_WITH_SCHEDULE_AND_MEMO,
+            p1=P1.P1_INITIAL_SCHEDULED_TRANSFER_WITH_MEMO,
+            p2=P2.P2_NONE,
+            data=data,
+        )
+
+    @contextmanager
+    def sign_tx_with_schedule_and_memo_part_2(
+        self, memo_chunk: bytes
+    ) -> Generator[None, None, None]:
+        with self.backend.exchange_async(
+            cla=CLA,
+            ins=InsType.SIGN_TRANSFER_WITH_SCHEDULE_AND_MEMO,
+            p1=P1.P1_MEMO_SCHEDULED_TRANSFER,
+            p2=P2.P2_NONE,
+            data=memo_chunk,
+        ) as response:
+            yield response
+
+    @contextmanager
+    def sign_tx_with_schedule_and_memo_part_3(
+        self, data: bytes
+    ) -> Generator[None, None, None]:
+        with self.backend.exchange_async(
+            cla=CLA,
+            ins=InsType.SIGN_TRANSFER_WITH_SCHEDULE_AND_MEMO,
             p1=P1.P1_SCHEDULED_AMOUNTS,
             p2=P2.P2_NONE,
             data=data,
