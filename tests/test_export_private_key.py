@@ -14,7 +14,8 @@ from ragger.firmware import Firmware
 from utils import navigate_until_text_and_compare
 
 
-def test_export_private_key(
+@pytest.mark.active_test_scope
+def test_export_private_key_legacy_path(
     backend, firmware, navigator, test_name, default_screenshot_path
 ):
     client = BoilerplateCommandSender(backend)
@@ -22,9 +23,36 @@ def test_export_private_key(
         navigate_until_text_and_compare(
             firmware,
             navigator,
-            "Approve",
+            "Accept",
             default_screenshot_path,
             test_name,
             screen_change_before_first_instruction=False,
-            screen_change_after_last_instruction=False,
+            screen_change_after_last_instruction=True,
         )
+    result = client.get_async_response()
+    print("km------------result", result)
+    assert result.data == bytes.fromhex(
+        "48235b90248b6e552d59bf8b533292d25c5afd1f8e1ad5d1e00478794642ba38"
+    )
+
+
+@pytest.mark.active_test_scope
+def test_export_private_key_new_path(
+    backend, firmware, navigator, test_name, default_screenshot_path
+):
+    client = BoilerplateCommandSender(backend)
+    with client.export_private_key(
+        export_type="standard", identity_index=0, idp_index=0
+    ):
+        navigate_until_text_and_compare(
+            firmware,
+            navigator,
+            "Accept",
+            default_screenshot_path,
+            test_name,
+            screen_change_before_first_instruction=False,
+            screen_change_after_last_instruction=True,
+        )
+    result = client.get_async_response()
+    print("km------------result", result)
+    assert result.data == bytes.fromhex("ENTER VALID SIGNATURE HERE")
