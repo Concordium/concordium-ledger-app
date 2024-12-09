@@ -55,4 +55,6 @@ def test_export_private_key_new_path(
         )
     result = client.get_async_response()
     print("km------------result", result)
-    assert result.data == bytes.fromhex("ENTER VALID SIGNATURE HERE")
+    assert result.data == bytes.fromhex(
+        "00beb8ab5d68b55f39dacc0d0847bb9cd62a327549d41a4dfe7c5845f70c5562"
+    )
