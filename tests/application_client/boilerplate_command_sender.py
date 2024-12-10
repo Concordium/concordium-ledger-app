@@ -108,6 +108,7 @@ class Errors(IntEnum):
     SW_SIGNATURE_FAIL = 0xB008
 
 
+# pylint: disable=too-many-public-methods
 class BoilerplateCommandSender:
     def __init__(self, backend: BackendInterface) -> None:
         self.backend = backend
@@ -398,7 +399,11 @@ class BoilerplateCommandSender:
     #     ) as response:
     #         yield response
 
-    CONFIGURE_BAKER_HEADER = "08000004510000000000000000000000000000000000000002000000000000000020a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7000000000000000a0000000000000064000000290000000063de5da719"
+    CONFIGURE_BAKER_HEADER = (
+        "08000004510000000000000000000000000000000000000002000000000000000020"
+        "a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7000000"
+        "000000000a0000000000000064000000290000000063de5da719"
+    )
 
     @contextmanager
     def sign_configure_baker(
@@ -408,7 +413,7 @@ class BoilerplateCommandSender:
         aggregation_key: bytes = b"",
     ) -> Generator[None, None, None]:
 
-        self.configure_baker_part_0(bitmap)
+        self._configure_baker_part_0(bitmap)
 
         if aggregation_key:
             # Second exchange - using with to wait for completion
@@ -447,14 +452,14 @@ class BoilerplateCommandSender:
     ) -> Generator[None, None, None]:
         def encode_word16(value: int) -> bytes:
             # Ensure the value fits in 16 bits
-            if not (0 <= value <= 0xFFFF):
+            if not 0 <= value <= 0xFFFF:
                 raise ValueError("Value must be between 0 and 65535 (inclusive)")
 
             # Convert the integer to a 2-byte big-endian representation
             return value.to_bytes(2, byteorder="big")
 
         if is_called_first:
-            self.configure_baker_part_0(bitmap)
+            self._configure_baker_part_0(bitmap)
 
         # Send the URL length first
         url_length = encode_word16(len(url))
@@ -495,7 +500,7 @@ class BoilerplateCommandSender:
         serialized_commission_rates = b""
 
         if is_called_first:
-            self.configure_baker_part_0(bitmap)
+            self._configure_baker_part_0(bitmap)
 
         if transaction_fee:
             serialized_commission_rates += bytes.fromhex("0000B0C1")
@@ -518,7 +523,7 @@ class BoilerplateCommandSender:
             yield response
 
     @contextmanager
-    def configure_baker_part_0(
+    def _configure_baker_part_0(
         self,
         bitmap: bytes,
     ) -> Generator[None, None, None]:
