@@ -27,6 +27,10 @@ class P1(IntEnum):
     P1_EXPORT_PRIVATE_KEY = 0x00
     P1_EXPORT_WITH_ALTERNATIVE_DISPLAY = 0x01
     P1_EXPORT_PRFKEY_AND_IDCREDSEC = 0x02
+    # Parameter 1 for transfer to public
+    P1_INITIAL_TRANSFER_TO_PUBLIC = 0x00
+    P1_REMAINING_AMOUNT_TRANSFER_TO_PUBLIC = 0x01
+    P1_PROOF_TRANSFER_TO_PUBLIC = 0x02
     # Basic P1 for all instructions
     P1_NONE = 0x00
 
@@ -291,6 +295,59 @@ class BoilerplateCommandSender:
             p1=P1.P1_NONE,
             p2=P2.P2_NONE,
             data=data,
+        ) as response:
+            yield response
+
+    @contextmanager
+    def sign_transfer_to_public(
+        self, path: str, header_and_type: bytes, data: bytes, proof: bytes
+    ) -> Generator[None, None, None]:
+        temp_data = pack_derivation_path(path)
+        temp_data += header_and_type
+        # send the header and type (no display)
+        response = self.backend.exchange(
+            cla=CLA,
+            ins=InsType.TRANSFER_TO_PUBLIC,
+            p1=P1.P1_INITIAL_TRANSFER_TO_PUBLIC,
+            p2=P2.P2_NONE,
+            data=temp_data,
+        )
+
+        if response.status != 0x9000:
+            raise Exception(response.status)
+        # send remaining ammount [192] + transaction amount [8]
+        #          + ammount index [1] + proof size [1] (no display)
+        response = self.backend.exchange(
+            cla=CLA,
+            ins=InsType.TRANSFER_TO_PUBLIC,
+            p1=P1.P1_REMAINING_AMOUNT_TRANSFER_TO_PUBLIC,
+            p2=P2.P2_NONE,
+            data=data,
+        )
+        print("km------------response 2", response)
+        if response.status != 0x9000:
+            raise Exception(response.status)
+
+        # send proof in chunks
+        proof_chunks = split_message(proof, MAX_APDU_LEN)
+        last_chunk = proof_chunks.pop()
+        for chunk in proof_chunks:
+            response = self.backend.exchange(
+                cla=CLA,
+                ins=InsType.TRANSFER_TO_PUBLIC,
+                p1=P1.P1_PROOF_TRANSFER_TO_PUBLIC,
+                p2=P2.P2_NONE,
+                data=chunk,
+            )
+            print("km------------response 3", response)
+            if response.status != 0x9000:
+                raise Exception(response.status)
+        with self.backend.exchange_async(
+            cla=CLA,
+            ins=InsType.TRANSFER_TO_PUBLIC,
+            p1=P1.P1_PROOF_TRANSFER_TO_PUBLIC,
+            p2=P2.P2_NONE,
+            data=last_chunk,
         ) as response:
             yield response
 
