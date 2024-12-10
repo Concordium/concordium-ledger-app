@@ -179,10 +179,6 @@ void handleExportPrivateKey(uint8_t *dataBuffer,
     memcpy(display_copy, ctx->display, sizeof(ctx->display));
     // Using strlen to get length of display string for demonstration
     size_t len = strlen(display_copy);
-    PRINTF("km------------display copy length: %d\n", len);
-
-    PRINTF("km------------ctx->display: %s", ctx->display);
-    PRINTF("km------------offset: %d", offset);
 
     if (p1 == P1_BOTH) {
         memmove(ctx->displayHeader, "Create credential", 18);
