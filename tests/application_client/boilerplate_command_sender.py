@@ -3,6 +3,7 @@ from typing import Generator, Literal, Optional
 from contextlib import contextmanager
 
 from ragger.backend.interface import BackendInterface, RAPDU
+from ragger.error import ExceptionRAPDU
 from ragger.bip import pack_derivation_path
 from utils import split_message
 
@@ -314,7 +315,7 @@ class BoilerplateCommandSender:
         )
 
         if response.status != 0x9000:
-            raise Exception(response.status)
+            raise ExceptionRAPDU(response.status)
         # send remaining ammount [192] + transaction amount [8]
         #          + ammount index [1] + proof size [1] (no display)
         response = self.backend.exchange(
@@ -326,7 +327,7 @@ class BoilerplateCommandSender:
         )
         print("km------------response 2", response)
         if response.status != 0x9000:
-            raise Exception(response.status)
+            raise ExceptionRAPDU(response.status)
 
         # send proof in chunks
         proof_chunks = split_message(proof, MAX_APDU_LEN)
@@ -341,7 +342,7 @@ class BoilerplateCommandSender:
             )
             print("km------------response 3", response)
             if response.status != 0x9000:
-                raise Exception(response.status)
+                raise ExceptionRAPDU(response.status)
         with self.backend.exchange_async(
             cla=CLA,
             ins=InsType.TRANSFER_TO_PUBLIC,
