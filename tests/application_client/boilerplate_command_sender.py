@@ -600,6 +600,7 @@ class BoilerplateCommandSender:
             print("km--------sent new or existing", response)
             yield response
 
+    @contextmanager
     def deploy_module(
         self,
         path: str,

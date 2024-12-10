@@ -15,7 +15,7 @@ from utils import navigate_until_text_and_compare, instructions_builder
 
 
 @pytest.mark.active_test_scope
-def test_credential_deployment(
+def test_deploy_module(
     backend, firmware, navigator, test_name, default_screenshot_path
 ):
     client = BoilerplateCommandSender(backend)
@@ -26,7 +26,7 @@ def test_credential_deployment(
     version = 1
     source = b"source"
 
-    with client.credential_deployment(
+    with client.deploy_module(
         path=path, header_and_type=header_and_type, version=version, source=source
     ):
         navigate_until_text_and_compare(
