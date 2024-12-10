@@ -15,7 +15,7 @@ from utils import navigate_until_text_and_compare
 
 
 @pytest.mark.active_test_scope
-def test_export_private_key_legacy_path(
+def test_export_standard_private_key_legacy_path(
     backend, firmware, navigator, test_name, default_screenshot_path
 ):
     client = BoilerplateCommandSender(backend)
@@ -37,7 +37,51 @@ def test_export_private_key_legacy_path(
 
 
 @pytest.mark.active_test_scope
-def test_export_private_key_new_path(
+def test_export_recovery_private_key_legacy_path(
+    backend, firmware, navigator, test_name, default_screenshot_path
+):
+    client = BoilerplateCommandSender(backend)
+    with client.export_private_key(export_type="recovery", identity_index=0):
+        navigate_until_text_and_compare(
+            firmware,
+            navigator,
+            "Accept",
+            default_screenshot_path,
+            test_name,
+            screen_change_before_first_instruction=False,
+            screen_change_after_last_instruction=True,
+        )
+    result = client.get_async_response()
+    print("km------------result", result)
+    assert result.data == bytes.fromhex(
+        "48235b90248b6e552d59bf8b533292d25c5afd1f8e1ad5d1e00478794642ba38"
+    )
+
+
+@pytest.mark.active_test_scope
+def test_export_prfkey_and_idcredsed_private_key_legacy_path(
+    backend, firmware, navigator, test_name, default_screenshot_path
+):
+    client = BoilerplateCommandSender(backend)
+    with client.export_private_key(export_type="recovery", identity_index=0):
+        navigate_until_text_and_compare(
+            firmware,
+            navigator,
+            "Accept",
+            default_screenshot_path,
+            test_name,
+            screen_change_before_first_instruction=False,
+            screen_change_after_last_instruction=True,
+        )
+    result = client.get_async_response()
+    print("km------------result", result)
+    assert result.data == bytes.fromhex(
+        "48235b90248b6e552d59bf8b533292d25c5afd1f8e1ad5d1e00478794642ba3802a5a44c0b2e0abcaf313c77fa05f6449c092ad449a081098bd48515bf95e947"
+    )
+
+
+@pytest.mark.active_test_scope
+def test_export_standard_private_key_new_path(
     backend, firmware, navigator, test_name, default_screenshot_path
 ):
     client = BoilerplateCommandSender(backend)
