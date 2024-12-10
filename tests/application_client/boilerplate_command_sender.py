@@ -540,7 +540,6 @@ class BoilerplateCommandSender:
             data=data_p1,
         ):
             pass
-        yield None
 
     @contextmanager
     def export_private_key(
