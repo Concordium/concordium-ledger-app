@@ -62,6 +62,8 @@ def navigate_until_text_and_compare(
         text: The text string to search for on device screens
         screenshot_path: Path where screenshot comparison files will be saved
         test_name: The name of the test that is being run
+        screen_change_before_first_instruction: Whether to wait for screen change before first instruction
+        screen_change_after_last_instruction: Whether to wait for screen change after last instruction
     Returns:
         None
 
@@ -81,7 +83,14 @@ def navigate_until_text_and_compare(
         confirm_instructions = [NavInsID.BOTH_CLICK]
 
     navigator.navigate_until_text_and_compare(
-        go_right_instruction, confirm_instructions, text, screenshot_path, test_name
+        go_right_instruction,
+        confirm_instructions,
+        text,
+        screenshot_path,
+        test_name,
+        300,
+        screen_change_before_first_instruction,
+        screen_change_after_last_instruction,
     )
 
 

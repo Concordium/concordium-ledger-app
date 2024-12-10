@@ -33,7 +33,13 @@
 #define ACCOUNT_TRANSACTION_HEADER_LENGTH 60
 #define UPDATE_HEADER_LENGTH              28
 
-typedef enum { LEGACY_PRF_KEY = 1, NEW_PRF_KEY = 3 } derivation_path_keys_t;
+typedef enum {
+    LEGACY_ID_CRED_SEC = 0,
+    LEGACY_PRF_KEY = 1,
+    // New path
+    NEW_ID_CRED_SEC = 2,
+    NEW_PRF_KEY = 3
+} derivation_path_keys_t;
 
 typedef enum {
     DEPLOY_MODULE = 0,
