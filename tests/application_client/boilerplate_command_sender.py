@@ -489,8 +489,8 @@ class BoilerplateCommandSender:
         transaction: bytes,
     ) -> Generator[None, None, None]:
         ## send last key (display ?)
-        key_index = 0
-        data = key_index.to_bytes(1, byteorder="big") + last_key
+
+        data = (0).to_bytes(1, byteorder="big") + last_key
         temp_response = self.backend.exchange(
             cla=CLA,
             ins=InsType.CREDENTIAL_DEPLOYMENT,
