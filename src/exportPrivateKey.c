@@ -140,7 +140,6 @@ void handleExportPrivateKey(uint8_t *dataBuffer,
         offset += 4;
     }
     identity = U4BE(dataBuffer, offset);
-    offset += 4;
     uint32_t *keyDerivationPath;
     size_t pathLength;
     if (ctx->isNewPath) {
