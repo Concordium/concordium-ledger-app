@@ -18,6 +18,7 @@ aggregationVerifyKeyProof = "957aec4b2b7ed979ba2079d62246d135aefd61e7f46690c452f
 # The transactions are short and will be sent in one chunk
 # We will ensure that the displayed information is correct by using screenshots comparison
 
+
 @pytest.mark.active_test_scope
 def test_sign_configure_baker_capital_restake_open_status_and_keys(
     backend, firmware, navigator, default_screenshot_path, test_name
@@ -90,6 +91,7 @@ def test_sign_configure_baker_stop_baking(
         == "3ca6549799f2f6ba3edcb66c1fc50330bdfe3b1f3df999178a040cf2ae4a68f88630808a4458b72e7aa4ace625e12c087530e976d1941acdaa8a719c4b034401"
     )
 
+
 @pytest.mark.active_test_scope
 def test_sign_configure_baker_capital_restake_open_status_without_keys(
     backend, firmware, navigator, default_screenshot_path, test_name
@@ -134,7 +136,9 @@ def test_sign_configure_baker_only_keys(
     client = BoilerplateCommandSender(backend)
 
     # Create the transaction that will be sent to the device for signing
-    transaction = signVerifyKey + signVerifyKeyProof + electionVerifyKey + electionVerifyKeyProof
+    transaction = (
+        signVerifyKey + signVerifyKeyProof + electionVerifyKey + electionVerifyKeyProof
+    )
     transaction = bytes.fromhex(transaction)
 
     bitmap = "0008"
@@ -162,6 +166,7 @@ def test_sign_configure_baker_only_keys(
         == "9f38c0162cd68b61ba74f6b421b2d11970fa9c3de712d604387a340f289d17783d9832e9863ac916ad5a0c6cead51f0902e9d2fb7486d0f7988b148f56afb100"
     )
 
+
 @pytest.mark.active_test_scope
 def test_sign_configure_baker_url_only(
     backend, firmware, navigator, default_screenshot_path, test_name
@@ -170,7 +175,7 @@ def test_sign_configure_baker_url_only(
     client = BoilerplateCommandSender(backend)
 
     # Create the transaction that will be sent to the device for signing
-    url_bytes = url.encode('utf-8')
+    url_bytes = url.encode("utf-8")
 
     bitmap = "0010"
     bitmap = bytes.fromhex(bitmap)
@@ -196,6 +201,7 @@ def test_sign_configure_baker_url_only(
         == "d9582b9f03d31562024145b37f536942dcd6111c553630a74ea5c38a379fd16289de8cbf7523731a1207c74362f09ea5804d601b1a472de109c576c431f75707"
     )
 
+
 @pytest.mark.active_test_scope
 def test_sign_configure_baker_commission_rate_only(
     backend, firmware, navigator, default_screenshot_path, test_name
@@ -204,7 +210,7 @@ def test_sign_configure_baker_commission_rate_only(
     client = BoilerplateCommandSender(backend)
 
     # Create the transaction that will be sent to the device for signing
-    url_bytes = url.encode('utf-8')
+    url_bytes = url.encode("utf-8")
 
     bitmap = "00E0"
     bitmap = bytes.fromhex(bitmap)
@@ -216,7 +222,7 @@ def test_sign_configure_baker_commission_rate_only(
         bitmap=bitmap,
         transaction_fee=True,
         baking_reward=True,
-        finalization_reward=True
+        finalization_reward=True,
     ):
         # Validate the on-screen request by performing the navigation appropriate for this device
         navigate_until_text_and_compare(
@@ -231,6 +237,7 @@ def test_sign_configure_baker_commission_rate_only(
         response_hex
         == "2a6f49a786b62514d89bfc0e354689e1af2f3d3194b18b93433abd032e518fb72c55501fb5605402bf5a84b88f74d30a46ccb6a05907cb78144e93363b133205"
     )
+
 
 @pytest.mark.active_test_scope
 def test_sign_configure_baker_all_parameters(
@@ -259,48 +266,46 @@ def test_sign_configure_baker_all_parameters(
 
     # Create the transaction with all keys
     transaction = "0000FFFFFFFFFFFF01027873cd57848d7aea7be03fbb3f1e8b9e69987fc73f13e473356776a16f26c96ba47cdf9133572e9ad5c02c3a7ffd1d05db7bb98860d918092454146153d62788f224c0157c65853ed4a0245ab3e0a593a3f85fa81cc4cb99eeaa643bfc793eab32f892fb3d0dc6138976b6848259cf730e37fa4a61a659c782ec6def978c082801fc695a8c51d4599cbe032a39832ad49bab900d88105b01d025b760b0d0d555b8c828f2d8fe29cc78c6307d979e6358b8bba9cf4d8200f272cc85b2a3813eff"
-    
+
     # URL from the existing test
-    url_bytes = url.encode('utf-8')
-    
+    url_bytes = url.encode("utf-8")
+
     # Bitmap indicating all features are enabled (keys, url, and commission rates)
     bitmap = "00FF"
 
     with client.sign_configure_baker(
         transaction=bytes.fromhex(transaction),
         bitmap=bytes.fromhex(bitmap),
-        aggregation_key=bytes.fromhex(aggregationVerifyKey + aggregationVerifyKeyProof)
+        aggregation_key=bytes.fromhex(aggregationVerifyKey + aggregationVerifyKeyProof),
     ):
         if firmware.is_nano:
             navigator.navigate_and_compare(
                 default_screenshot_path,
-                test_name+ "_1",
+                test_name + "_1",
                 nano_continue_1_instructions,
                 screen_change_before_first_instruction=False,
-                screen_change_after_last_instruction=False
+                screen_change_after_last_instruction=False,
             )
     with client.sign_configure_baker_url(
-        url=url_bytes,
-        bitmap=bitmap,
-        is_called_first=False
+        url=url_bytes, bitmap=bitmap, is_called_first=False
     ):
         if firmware.is_nano:
             navigator.navigate_and_compare(
                 default_screenshot_path,
-                test_name+ "_2",
+                test_name + "_2",
                 nano_continue_2_instructions,
                 screen_change_before_first_instruction=False,
-                screen_change_after_last_instruction=False
+                screen_change_after_last_instruction=False,
             )
     with client.sign_configure_baker_commission_rate(
         bitmap=bitmap,
         transaction_fee=True,
         baking_reward=True,
         finalization_reward=True,
-        is_called_first=False
+        is_called_first=False,
     ):
         navigate_until_text_and_compare(
-            firmware, navigator, "Sign", default_screenshot_path, test_name+ "_3"
+            firmware, navigator, "Sign", default_screenshot_path, test_name + "_3"
         )
 
     response = client.get_async_response().data
