@@ -316,8 +316,8 @@ class BoilerplateCommandSender:
 
         if temp_response.status != 0x9000:
             raise ExceptionRAPDU(temp_response.status)
-        # send remaining ammount [192] + transaction amount [8]
-        #          + ammount index [1] + proof size [1] (no display)
+        # send remaining amount [192] + transaction amount [8]
+        #          + amount index [1] + proof size [1] (no display)
         temp_response = self.backend.exchange(
             cla=CLA,
             ins=InsType.TRANSFER_TO_PUBLIC,
