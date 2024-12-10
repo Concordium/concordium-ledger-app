@@ -8,6 +8,8 @@
 #include "glyphs.h"
 #include "menu.h"
 #include "getPublicKey.h"
+#include "util.h"
+#include "sign.h"
 
 #include "nbgl_use_case.h"
 accountSender_t global_account_sender;
@@ -60,8 +62,64 @@ void startConfigureBakerUrlDisplay(bool lastUrlPage) {
     // TODO: Implement this
 }
 
+// TODO: To fix
 void startConfigureDelegationDisplay(void) {
-    // TODO: Implement this
+    // Get context from global state
+    signConfigureDelegationContext_t *ctx = &global.signConfigureDelegation;
+
+    // Create tag-value pairs for the content
+    nbgl_layoutTagValue_t pairs[4];  // Maximum possible pairs
+    uint8_t pairIndex = 0;
+
+    // Add sender address
+    pairs[pairIndex].item = "Sender";
+    pairs[pairIndex].value = (char *) global_account_sender.sender;
+    pairIndex++;
+
+    // Add capital amount if present
+    if (ctx->hasCapital) {
+        if (ctx->stopDelegation) {
+            pairs[pairIndex].item = "Action";
+            pairs[pairIndex].value = "Stop delegation";
+        } else {
+            pairs[pairIndex].item = "Amount to delegate";
+            pairs[pairIndex].value = (char *) ctx->displayCapital;
+        }
+        pairIndex++;
+    }
+
+    // Add restake earnings if present
+    if (ctx->hasRestakeEarnings) {
+        pairs[pairIndex].item = "Restake earnings";
+        pairs[pairIndex].value = (char *) ctx->displayRestake;
+        pairIndex++;
+    }
+
+    // Add delegation target if present
+    if (ctx->hasDelegationTarget) {
+        pairs[pairIndex].item = "Delegation target";
+        pairs[pairIndex].value = (char *) ctx->displayDelegationTarget;
+        pairIndex++;
+    }
+
+    // Create the page content
+    nbgl_pageContent_t content;
+    content.type = TAG_VALUE_LIST;
+    content.title = "Review Transaction";
+    content.isTouchableTitle = true;
+    content.topRightIcon = NULL;
+    content.tagValueList.nbPairs = pairIndex;
+    content.tagValueList.pairs = pairs;
+    content.tagValueList.smallCaseForValue = false;
+    content.tagValueList.nbMaxLinesForValue = 0;
+
+    // Setup the review screen
+    nbgl_useCaseReviewStart(&C_app_concordium_64px,
+                            "Review Transaction",
+                            NULL,  // No subtitle
+                            "Reject transaction",
+                            buildAndSignTransactionHash,
+                            sendUserRejection);
 }
 
 void uiSignUpdateCredentialThresholdDisplay(volatile unsigned int *flags) {

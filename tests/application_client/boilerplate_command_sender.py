@@ -278,6 +278,22 @@ class BoilerplateCommandSender:
         ) as response:
             yield response
 
+    @contextmanager
+    def sign_configure_delegation(
+        self, path: str, transaction: bytes
+    ) -> Generator[None, None, None]:
+        data = pack_derivation_path(path)
+        data += transaction
+
+        with self.backend.exchange_async(
+            cla=CLA,
+            ins=InsType.CONFIGURE_DELEGATION,
+            p1=P1.P1_NONE,
+            p2=P2.P2_NONE,
+            data=data,
+        ) as response:
+            yield response
+
     # @contextmanager
     # def sign_tx(
     #     self, path: str, tx_type_ins: InsType, transaction: bytes
