@@ -437,53 +437,37 @@ class BoilerplateCommandSender:
             yield response
 
     @contextmanager
-    def credential_deployment(
+    def credential_deployment_part_1(
         self,
         path: str,
-        header_and_type: bytes,
-        version: int,
-        source: bytes,
-    ) -> Generator[None, None, None]:
-
-        if version > 0xFFFFFFFF:
-            raise ValueError("Version must be less than 4294967296")
-        if len(source) > 0xFFFFFFFF:
-            raise ValueError("Source length must be less than 4294967296")
-
+        number_of_keys: int,
+    ) -> bool:
+        # send derivation path (no display)
         data = pack_derivation_path(path)
-        data += header_and_type
-        data += version.to_bytes(4, byteorder="big")
-        data += len(source).to_bytes(4, byteorder="big")
         temp_response = self.backend.exchange(
             cla=CLA,
-            ins=InsType.DEPLOY_MODULE,
-            p1=P1.P1_DEPLOY_MODULE_INITIAL,
+            ins=InsType.CREDENTIAL_DEPLOYMENT,
+            p1=P1.P1_INITIAL_PACKET,
             p2=P2.P2_NONE,
             data=data,
         )
+        print("km--------sent derivation path", temp_response)
         if temp_response.status != 0x9000:
             raise ExceptionRAPDU(temp_response.status)
-
-        source_chunks = split_message(source, MAX_APDU_LEN)
-        last_chunk = source_chunks.pop()
-        for chunk in source_chunks:
-            temp_response = self.backend.exchange(
-                cla=CLA,
-                ins=InsType.DEPLOY_MODULE,
-                p1=P1.P1_DEPLOY_MODULE_SOURCE,
-                p2=P2.P2_NONE,
-                data=chunk,
-            )
-            if temp_response.status != 0x9000:
-                raise ExceptionRAPDU(temp_response.status)
-        with self.backend.exchange_async(
+        # handle credential deployment keys
+        ## send number of keys
+        data = number_of_keys.to_bytes(1, byteorder="big")
+        temp_response = self.backend.exchange(
             cla=CLA,
-            ins=InsType.DEPLOY_MODULE,
-            p1=P1.P1_DEPLOY_MODULE_SOURCE,
+            ins=InsType.CREDENTIAL_DEPLOYMENT,
+            p1=P1.P1_VERIFICATION_KEY_LENGTH,
             p2=P2.P2_NONE,
-            data=last_chunk,
-        ) as response:
-            yield response
+            data=data,
+        )
+        print("km--------sent number of keys", temp_response)
+        if temp_response.status != 0x9000:
+            raise ExceptionRAPDU(temp_response.status)
+        return True
 
     @contextmanager
     def credential_deployment_part_2(self, key_index: int, key: bytes):
@@ -614,6 +598,54 @@ class BoilerplateCommandSender:
             data=transaction,
         ) as response:
             print("km--------sent new or existing", response)
+            yield response
+
+    def deploy_module(
+        self,
+        path: str,
+        header_and_type: bytes,
+        version: int,
+        source: bytes,
+    ) -> Generator[None, None, None]:
+
+        if version > 0xFFFFFFFF:
+            raise ValueError("Version must be less than 4294967296")
+        if len(source) > 0xFFFFFFFF:
+            raise ValueError("Source length must be less than 4294967296")
+
+        data = pack_derivation_path(path)
+        data += header_and_type
+        data += version.to_bytes(4, byteorder="big")
+        data += len(source).to_bytes(4, byteorder="big")
+        temp_response = self.backend.exchange(
+            cla=CLA,
+            ins=InsType.DEPLOY_MODULE,
+            p1=P1.P1_DEPLOY_MODULE_INITIAL,
+            p2=P2.P2_NONE,
+            data=data,
+        )
+        if temp_response.status != 0x9000:
+            raise ExceptionRAPDU(temp_response.status)
+
+        source_chunks = split_message(source, MAX_APDU_LEN)
+        last_chunk = source_chunks.pop()
+        for chunk in source_chunks:
+            temp_response = self.backend.exchange(
+                cla=CLA,
+                ins=InsType.DEPLOY_MODULE,
+                p1=P1.P1_DEPLOY_MODULE_SOURCE,
+                p2=P2.P2_NONE,
+                data=chunk,
+            )
+            if temp_response.status != 0x9000:
+                raise ExceptionRAPDU(temp_response.status)
+        with self.backend.exchange_async(
+            cla=CLA,
+            ins=InsType.DEPLOY_MODULE,
+            p1=P1.P1_DEPLOY_MODULE_SOURCE,
+            p2=P2.P2_NONE,
+            data=last_chunk,
+        ) as response:
             yield response
 
     def get_async_response(self) -> Optional[RAPDU]:
