@@ -310,7 +310,7 @@ class BoilerplateCommandSender:
         export_type: Literal["standard", "recovery", "prfkey_and_idcredsec"],
         identity_index: int,
         idp_index: int = -1,
-    ) -> RAPDU:
+    ) -> Generator[None, None, None]:
         data = b""
         if export_type == "standard":
             p1 = P1.P1_EXPORT_PRIVATE_KEY
