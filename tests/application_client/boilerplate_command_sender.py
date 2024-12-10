@@ -436,7 +436,6 @@ class BoilerplateCommandSender:
         ) as response:
             yield response
 
-    @contextmanager
     def credential_deployment_part_1(
         self,
         path: str,
