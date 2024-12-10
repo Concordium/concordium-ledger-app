@@ -174,7 +174,7 @@ void handleExportPrivateKey(uint8_t *dataBuffer,
 
     memmove(ctx->display + offset, " ID#", 4);
     offset += 4;
-    offset += bin2dec(ctx->display + offset, sizeof(ctx->display) - offset, identity);
+    bin2dec(ctx->display + offset, sizeof(ctx->display) - offset, identity);
 
     if (p1 == P1_BOTH) {
         memmove(ctx->displayHeader, "Create credential", 18);
