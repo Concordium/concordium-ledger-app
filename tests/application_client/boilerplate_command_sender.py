@@ -402,12 +402,12 @@ class BoilerplateCommandSender:
 
     @contextmanager
     def sign_configure_baker(
-        self, 
-        transaction: bytes, 
+        self,
+        transaction: bytes,
         bitmap: bytes,
         aggregation_key: bytes = b"",
     ) -> Generator[None, None, None]:
-        
+
         self.configure_baker_part_0(bitmap)
 
         if aggregation_key:
@@ -440,13 +440,10 @@ class BoilerplateCommandSender:
                 data=transaction,
             ) as response:
                 yield response
-    
+
     @contextmanager
     def sign_configure_baker_url(
-        self, 
-        url: bytes,
-        bitmap: bytes,
-        is_called_first: bool = True
+        self, url: bytes, bitmap: bytes, is_called_first: bool = True
     ) -> Generator[None, None, None]:
         def encode_word16(value: int) -> bytes:
             # Ensure the value fits in 16 bits
@@ -454,8 +451,8 @@ class BoilerplateCommandSender:
                 raise ValueError("Value must be between 0 and 65535 (inclusive)")
 
             # Convert the integer to a 2-byte big-endian representation
-            return value.to_bytes(2, byteorder='big')
-        
+            return value.to_bytes(2, byteorder="big")
+
         if is_called_first:
             self.configure_baker_part_0(bitmap)
 
@@ -493,20 +490,20 @@ class BoilerplateCommandSender:
         transaction_fee: bool = False,
         baking_reward: bool = False,
         finalization_reward: bool = False,
-        is_called_first: bool = True
+        is_called_first: bool = True,
     ) -> Generator[None, None, None]:
         serialized_commission_rates = b""
 
         if is_called_first:
             self.configure_baker_part_0(bitmap)
-        
+
         if transaction_fee:
             serialized_commission_rates += bytes.fromhex("0000B0C1")
-            
+
         if baking_reward:
             baking_reward_commission = bytes.fromhex("0000C001")
             serialized_commission_rates += baking_reward_commission
-            
+
         if finalization_reward:
             finalization_reward_commission = bytes.fromhex("00000B11")
             serialized_commission_rates += finalization_reward_commission
@@ -538,7 +535,6 @@ class BoilerplateCommandSender:
             data=data_p1,
         ):
             pass
-
 
     @contextmanager
     def export_private_key(
