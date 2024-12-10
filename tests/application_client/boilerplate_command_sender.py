@@ -108,6 +108,7 @@ class Errors(IntEnum):
     SW_SIGNATURE_FAIL = 0xB008
 
 
+# pylint: disable=too-many-public-methods
 class BoilerplateCommandSender:
     def __init__(self, backend: BackendInterface) -> None:
         self.backend = backend
@@ -397,6 +398,148 @@ class BoilerplateCommandSender:
     #         cla=CLA, ins=tx_type_ins, p1=idx, p2=P2.P2_LAST, data=messages[-1]
     #     ) as response:
     #         yield response
+
+    CONFIGURE_BAKER_HEADER = (
+        "08000004510000000000000000000000000000000000000002000000000000000020"
+        "a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7000000"
+        "000000000a0000000000000064000000290000000063de5da719"
+    )
+
+    @contextmanager
+    def sign_configure_baker(
+        self,
+        transaction: bytes,
+        bitmap: bytes,
+        aggregation_key: bytes = b"",
+    ) -> Generator[None, None, None]:
+
+        self._configure_baker_part_0(bitmap)
+
+        if aggregation_key:
+            # Second exchange - using with to wait for completion
+            with self.backend.exchange_async(
+                cla=CLA,
+                ins=InsType.CONFIGURE_BAKER,
+                p1=0x01,
+                p2=P2.P2_NONE,
+                data=transaction,
+            ):
+                pass
+
+            # Final exchange with response yielded to caller
+            with self.backend.exchange_async(
+                cla=CLA,
+                ins=InsType.CONFIGURE_BAKER,
+                p1=0x02,
+                p2=P2.P2_NONE,
+                data=aggregation_key,
+            ) as response:
+                yield response
+        else:
+            # If no aggregation key, yield response from second exchange
+            with self.backend.exchange_async(
+                cla=CLA,
+                ins=InsType.CONFIGURE_BAKER,
+                p1=0x01,
+                p2=P2.P2_NONE,
+                data=transaction,
+            ) as response:
+                yield response
+
+    @contextmanager
+    def sign_configure_baker_url(
+        self, url: bytes, bitmap: bytes, is_called_first: bool = True
+    ) -> Generator[None, None, None]:
+        def encode_word16(value: int) -> bytes:
+            # Ensure the value fits in 16 bits
+            if not 0 <= value <= 0xFFFF:
+                raise ValueError("Value must be between 0 and 65535 (inclusive)")
+
+            # Convert the integer to a 2-byte big-endian representation
+            return value.to_bytes(2, byteorder="big")
+
+        if is_called_first:
+            self._configure_baker_part_0(bitmap)
+
+        # Send the URL length first
+        url_length = encode_word16(len(url))
+        with self.backend.exchange_async(
+            cla=CLA,
+            ins=InsType.CONFIGURE_BAKER,
+            p1=0x03,
+            p2=P2.P2_NONE,
+            data=url_length,
+        ):
+            pass
+
+        # Batch the URL into at most 255 byte chunks
+        chunked_url = split_message(url, 255)
+        for serialized_url_chunk in chunked_url:
+            # Send each chunk and yield the last response
+            with self.backend.exchange_async(
+                cla=CLA,
+                ins=InsType.CONFIGURE_BAKER,
+                p1=0x04,
+                p2=P2.P2_NONE,
+                data=serialized_url_chunk,
+            ) as response:
+                if serialized_url_chunk == chunked_url[-1]:  # If this is the last chunk
+                    yield response
+                else:
+                    pass
+
+    @contextmanager
+    def sign_configure_baker_commission_rate(
+        self,
+        bitmap: bytes,
+        transaction_fee: bool = False,
+        baking_reward: bool = False,
+        finalization_reward: bool = False,
+        is_called_first: bool = True,
+    ) -> Generator[None, None, None]:
+        serialized_commission_rates = b""
+
+        if is_called_first:
+            self._configure_baker_part_0(bitmap)
+
+        if transaction_fee:
+            serialized_commission_rates += bytes.fromhex("0000B0C1")
+
+        if baking_reward:
+            baking_reward_commission = bytes.fromhex("0000C001")
+            serialized_commission_rates += baking_reward_commission
+
+        if finalization_reward:
+            finalization_reward_commission = bytes.fromhex("00000B11")
+            serialized_commission_rates += finalization_reward_commission
+
+        with self.backend.exchange_async(
+            cla=CLA,
+            ins=InsType.CONFIGURE_BAKER,
+            p1=0x05,  # Special P1 value for commission rates
+            p2=P2.P2_NONE,
+            data=serialized_commission_rates,
+        ) as response:
+            yield response
+
+    @contextmanager
+    def _configure_baker_part_0(
+        self,
+        bitmap: bytes,
+    ) -> Generator[None, None, None]:
+
+        data_p1 = bytes.fromhex(self.CONFIGURE_BAKER_HEADER)
+        data_p1 += bitmap
+
+        # First exchange - using with to wait for completion
+        with self.backend.exchange_async(
+            cla=CLA,
+            ins=InsType.CONFIGURE_BAKER,
+            p1=P1.P1_NONE,
+            p2=P2.P2_NONE,
+            data=data_p1,
+        ):
+            pass
 
     @contextmanager
     def export_private_key(
