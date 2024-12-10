@@ -37,7 +37,7 @@ class P1(IntEnum):
 
     # Parameter 1 for credential deployment
     P1_INITIAL_PACKET = 0x00  # Sent for 1st packet of the transfer
-    P1_VERIFICATION_KEY_LENGTH = 0x0A  # TODO: Move to 0x02
+    P1_VERIFICATION_KEY_LENGTH = 0x0A
     P1_VERIFICATION_KEY = 0x01  # Sent for packets containing a verification key
     P1_SIGNATURE_THRESHOLD = 0x02  # Sent for packet with signature threshold etc
     P1_AR_IDENTITY = 0x03  # Sent for aridentity/encidcredpubshares pair
