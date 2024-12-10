@@ -175,10 +175,6 @@ void handleExportPrivateKey(uint8_t *dataBuffer,
     memmove(ctx->display + offset, " ID#", 4);
     offset += 4;
     offset += bin2dec(ctx->display + offset, sizeof(ctx->display) - offset, identity);
-    char display_copy[sizeof(ctx->display)];
-    memcpy(display_copy, ctx->display, sizeof(ctx->display));
-    // Using strlen to get length of display string for demonstration
-    size_t len = strlen(display_copy);
 
     if (p1 == P1_BOTH) {
         memmove(ctx->displayHeader, "Create credential", 18);
