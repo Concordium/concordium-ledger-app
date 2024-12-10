@@ -63,7 +63,9 @@ def test_export_prfkey_and_idcredsed_private_key_legacy_path(
     backend, firmware, navigator, test_name, default_screenshot_path
 ):
     client = BoilerplateCommandSender(backend)
-    with client.export_private_key(export_type="recovery", identity_index=0):
+    with client.export_private_key(
+        export_type="prfkey_and_idcredsec", identity_index=0
+    ):
         navigate_until_text_and_compare(
             firmware,
             navigator,
@@ -102,6 +104,3 @@ def test_export_standard_private_key_new_path(
     assert result.data == bytes.fromhex(
         "00beb8ab5d68b55f39dacc0d0847bb9cd62a327549d41a4dfe7c5845f70c5562"
     )
-
-
-# TODO: Add test case for other export types

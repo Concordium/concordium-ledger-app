@@ -168,13 +168,22 @@ void handleExportPrivateKey(uint8_t *dataBuffer,
     if (ctx->isNewPath) {
         memmove(ctx->display, "IDP#", 4);
         offset += 4;
-        bin2dec(ctx->display + offset, sizeof(ctx->display) - offset, identity_provider);
-        offset += 4;
+        offset += bin2dec(ctx->display + offset, sizeof(ctx->display) - offset, identity_provider);
+        // Remove the null terminator
+        offset -= 1;
     }
 
-    memmove(ctx->display + offset, "ID #", 4);
+    memmove(ctx->display + offset, " ID#", 4);
     offset += 4;
-    bin2dec(ctx->display + offset, sizeof(ctx->display) - offset, identity);
+    offset += bin2dec(ctx->display + offset, sizeof(ctx->display) - offset, identity);
+    char display_copy[sizeof(ctx->display)];
+    memcpy(display_copy, ctx->display, sizeof(ctx->display));
+    // Using strlen to get length of display string for demonstration
+    size_t len = strlen(display_copy);
+    PRINTF("km------------display copy length: %d\n", len);
+
+    PRINTF("km------------ctx->display: %s", ctx->display);
+    PRINTF("km------------offset: %d", offset);
 
     if (p1 == P1_BOTH) {
         memmove(ctx->displayHeader, "Create credential", 18);
