@@ -23,7 +23,7 @@ def test_init_contract(
     header_and_type = bytes.fromhex(
         "20a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7000000000000000a0000000000000064000000290000000063de5da701"
     )
-    amount = 0xFFFFFFFFFFFFFFFF
+    amount = 10000000
     module_ref = bytes.fromhex(
         "a00000000000000000000000000000000000000000000000000000000000000a"
     )
