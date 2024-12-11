@@ -21,6 +21,7 @@
 #include "signTransferWithSchedule.h"
 #include "signRegisterData.h"
 #include "deployModule.h"
+#include "initContract.h"
 #include "ux.h"
 
 #define LEGACY_PURPOSE   1105
@@ -125,6 +126,7 @@ typedef union {
     signConfigureBaker_t signConfigureBaker;
     signConfigureDelegationContext_t signConfigureDelegation;
     deployModule_t deployModule;
+    initContract_t initContract;
     transactionWithDataBlob_t withDataBlob;
 } instructionContext;
 extern instructionContext global;
