@@ -838,7 +838,7 @@ class BoilerplateCommandSender:
             if i == 0:
                 data += chunk
             else:
-                data == chunk
+                data = chunk
             print(f"km-------- Sending name chunk: {data.hex()}")
             temp_response = self.backend.exchange(
                 cla=CLA,
@@ -858,7 +858,7 @@ class BoilerplateCommandSender:
             if i == 0:
                 data += chunk
             else:
-                data == chunk
+                data = chunk
             print(f"km-------- Sending params chunk: {data.hex()}")
             temp_response = self.backend.exchange(
                 cla=CLA,
