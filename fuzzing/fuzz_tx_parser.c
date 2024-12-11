@@ -2,38 +2,49 @@
 #include <stdint.h>
 #include <string.h>
 #include <sys/types.h>
+#include "buffer.h"
+#include "signTransfer.h"
 
-#include "transaction/deserialize.h"
-#include "transaction/utils.h"
-#include "transaction/types.h"
-#include "format.h"
+#define ADDRESS_LEN 20
+void format_hex(const uint8_t* data, size_t dataLen, char* dst, size_t dstLen);
+void format_fpu64(char* dst, size_t dstLen, uint64_t value, uint8_t decimals);
 
-int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
+typedef enum {
+    PARSING_OK = 1,
+    MEMO_PARSING_ERROR = -1,
+    WRONG_LENGTH_ERROR = -7,
+    TYPE_PARSING_ERROR = -8,
+    SENDER_PARSING_ERROR = -9,
+    RECIPIENT_PARSING_ERROR = -10,
+    AMOUNT_PARSING_ERROR = -11,
+    PARSING_ERROR = -12
+} parser_status_e;
+
+// #include "transaction/deserialize.h"
+// #include "transaction/utils.h"
+// #include "transaction/types.h"
+// #include "format.h"
+
+int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     buffer_t buf = {.ptr = data, .size = size, .offset = 0};
-    transaction_ctx_t tx;
+    signTransferContext_t tx;
     parser_status_e status;
-    char address[21] = {0};
-    char amount[21] = {0};
 
     memset(&tx, 0, sizeof(tx));
 
-    status = simple_transfer_deserialize(&buf, &tx);
+    volatile unsigned int flags = 0;
+    handleSignTransfer((uint8_t*) data, &flags);
+    status = (parser_status_e) flags;
 
     if (status == PARSING_OK) {
-        // Format recipient address
-        format_hex(tx.transaction.simple_transfer.recipient, ADDRESS_LEN, address, sizeof(address));
-        printf("recipient: %s\n", address);
+        // Print the display string which should contain formatted transaction info
+        printf("Display string: %s\n", tx.displayStr);
 
-        // Format sender address
-        format_hex(tx.transaction.simple_transfer.sender, ADDRESS_LEN, address, sizeof(address));
-        printf("sender: %s\n", address);
+        // Print the amount
+        printf("Display amount: %s\n", tx.displayAmount);
 
-        // Format amount
-        format_fpu64(amount,
-                     sizeof(amount),
-                     tx.transaction.simple_transfer.value,
-                     3);  // exponent of smallest unit is 3
-        printf("amount: %s\n", amount);
+        // Print the state
+        printf("State: %d\n", tx.state);
     }
 
     return 0;
