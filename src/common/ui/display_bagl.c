@@ -813,4 +813,23 @@ void uiDeployModuleDisplay() {
     ux_flow_init(0, ux_deploy_module, NULL);
 }
 
+// Init Contract
+UX_STEP_NOCB(ux_init_contract_1_step,
+             bnnn_paging,
+             {.title = "Amount", .text = (char *) global.initContract.amountDisplay});
+UX_STEP_NOCB(ux_init_contract_2_step,
+             bnnn_paging,
+             {.title = "Module ref", .text = (char *) global.initContract.moduleRefDisplay});
+UX_FLOW(ux_init_contract,
+        &ux_sign_flow_shared_review,
+        &ux_sign_flow_account_sender_view,
+        &ux_init_contract_1_step,
+        &ux_init_contract_2_step,
+        &ux_sign_flow_shared_sign,
+        &ux_sign_flow_shared_decline);
+
+void uiInitContractDisplay() {
+    ux_flow_init(0, ux_init_contract, NULL);
+}
+
 #endif

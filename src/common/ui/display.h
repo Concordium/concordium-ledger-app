@@ -82,3 +82,4 @@ void uiSignScheduledTransferPairFlowSignDisplay(void);
 void uiSignScheduledTransferPairFlowDisplay(void);
 
 void uiDeployModuleDisplay(void);
+void uiInitContractDisplay(void);
