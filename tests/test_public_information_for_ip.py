@@ -43,7 +43,7 @@ def test_sign_public_information_for_ip(
     # Send the sign device instruction.
     # As it requires on-screen validation, the function is asynchronous.
     # It will yield the result when the navigation is done
-    with client.sign_public_information_for_ip_part_1(datas=[data_1, data_2]):
+    with client.sign_public_information_for_ip_part_1(chunks=[data_1, data_2]):
         if firmware.is_nano:
             navigator.navigate_and_compare(
                 default_screenshot_path,
@@ -52,7 +52,7 @@ def test_sign_public_information_for_ip(
                 screen_change_before_first_instruction=False,
                 screen_change_after_last_instruction=False,
             )
-    with client.sign_public_information_for_ip_part_2(datas=[data_3]):
+    with client.sign_public_information_for_ip_part_2(chunks=[data_3]):
         if firmware.is_nano:
             navigator.navigate_and_compare(
                 default_screenshot_path,
@@ -62,7 +62,7 @@ def test_sign_public_information_for_ip(
                 screen_change_after_last_instruction=False,
             )
 
-    with client.sign_public_information_for_ip_part_3(datas=[data_4, data_5]):
+    with client.sign_public_information_for_ip_part_3(chunks=[data_4, data_5]):
         navigate_until_text_and_compare(
             firmware,
             navigator,

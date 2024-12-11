@@ -743,66 +743,66 @@ class BoilerplateCommandSender:
 
     @contextmanager
     def sign_public_information_for_ip_part_1(
-        self, datas: List[bytes]
+        self, chunks: List[bytes]
     ) -> Generator[None, None, None]:
         # Handle first chunk
-        if len(datas) > 0:
+        if len(chunks) > 0:
             with self.backend.exchange_async(
                 cla=CLA,
                 ins=InsType.PUBLIC_INFO_FOR_IP,
                 p1=P1.P1_NONE,
                 p2=P2.P2_NONE,
-                data=datas[0],
+                data=chunks[0],
             ):
                 pass
 
         # Handle middle chunks
-        for i in range(1, len(datas)):
+        for i in range(1, len(chunks)):
             with self.backend.exchange_async(
                 cla=CLA,
                 ins=InsType.PUBLIC_INFO_FOR_IP,
                 p1=0x01,
                 p2=P2.P2_NONE,
-                data=datas[i],
+                data=chunks[i],
             ) as response:
                 yield response
 
     @contextmanager
     def sign_public_information_for_ip_part_2(
-        self, datas: List[bytes]
+        self, chunks: List[bytes]
     ) -> Generator[None, None, None]:
         # Handle all chunks
-        for i in range(len(datas)):
+        for i, data in enumerate(chunks):
             with self.backend.exchange_async(
                 cla=CLA,
                 ins=InsType.PUBLIC_INFO_FOR_IP,
                 p1=0x01,
                 p2=P2.P2_NONE,
-                data=datas[i],
+                data=data,
             ) as response:
-                if i == len(datas) - 1:
+                if i == len(chunks) - 1:
                     yield response
 
     @contextmanager
     def sign_public_information_for_ip_part_3(
-        self, datas: List[bytes]
+        self, chunks: List[bytes]
     ) -> Generator[None, None, None]:
         with self.backend.exchange_async(
             cla=CLA,
             ins=InsType.PUBLIC_INFO_FOR_IP,
             p1=0x01,
             p2=P2.P2_NONE,
-            data=datas[0],
+            data=chunks[0],
         ):
             pass
         # Handle last chunk
-        if len(datas) > 1:
+        if len(chunks) > 1:
             with self.backend.exchange_async(
                 cla=CLA,
                 ins=InsType.PUBLIC_INFO_FOR_IP,
                 p1=0x02,
                 p2=P2.P2_NONE,
-                data=datas[-1],
+                data=chunks[-1],
             ) as response:
                 yield response
 
