@@ -24,7 +24,7 @@ void handleInitContract(uint8_t *cdata, uint8_t p1, uint8_t lc);
 typedef struct {
     uint64_t amount;
     uint8_t moduleRef[32];
-    char amountDisplay[21];
+    char amountDisplay[30];
     char moduleRefDisplay[65];
     uint32_t nameLength;
     uint32_t remainingNameLength;

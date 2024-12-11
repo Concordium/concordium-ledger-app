@@ -23,7 +23,7 @@ def test_init_contract(
     header_and_type = bytes.fromhex(
         "20a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7000000000000000a0000000000000064000000290000000063de5da701"
     )
-    amount = 10000000
+    amount = 0xFFFFFFFFFFFFFFFF
     module_ref = bytes.fromhex(
         "a00000000000000000000000000000000000000000000000000000000000000a"
     )
@@ -45,5 +45,5 @@ def test_init_contract(
     print(response.data.hex())
     assert response.status == 0x9000
     assert response.data == bytes.fromhex(
-        "ca0e947d521063cc40c3bf8a65dd05a6bb66c799957417f94123c0642162020fed8dd80cd9aadd51f24d697bb9bcce26b72115dbd80bfe893a8395b54f8bb10c"
+        "64e166bcc41320198c6fa76ee70f2da8ff9fc365b284d57252635146446028ce5e06791ff422d89e2f73bff4a52b3d587f7ce8ee40ffd590ff37d71f20527809"
     )
