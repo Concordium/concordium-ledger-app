@@ -1,5 +1,5 @@
 from enum import IntEnum
-from typing import Generator, Literal, Optional
+from typing import Generator, List, Literal, Optional
 from contextlib import contextmanager
 
 from ragger.backend.interface import BackendInterface, RAPDU
@@ -745,6 +745,71 @@ class BoilerplateCommandSender:
         ) as response:
             print("km--------sent new or existing", response)
             yield response
+
+    @contextmanager
+    def sign_public_information_for_ip_part_1(
+        self, chunks: List[bytes]
+    ) -> Generator[None, None, None]:
+        # Handle first chunk
+        if len(chunks) > 0:
+            with self.backend.exchange_async(
+                cla=CLA,
+                ins=InsType.PUBLIC_INFO_FOR_IP,
+                p1=P1.P1_NONE,
+                p2=P2.P2_NONE,
+                data=chunks[0],
+            ):
+                pass
+
+        # Handle middle chunks
+        for i in range(1, len(chunks)):
+            with self.backend.exchange_async(
+                cla=CLA,
+                ins=InsType.PUBLIC_INFO_FOR_IP,
+                p1=0x01,
+                p2=P2.P2_NONE,
+                data=chunks[i],
+            ) as response:
+                yield response
+
+    @contextmanager
+    def sign_public_information_for_ip_part_2(
+        self, chunks: List[bytes]
+    ) -> Generator[None, None, None]:
+        # Handle all chunks
+        for i, data in enumerate(chunks):
+            with self.backend.exchange_async(
+                cla=CLA,
+                ins=InsType.PUBLIC_INFO_FOR_IP,
+                p1=0x01,
+                p2=P2.P2_NONE,
+                data=data,
+            ) as response:
+                if i == len(chunks) - 1:
+                    yield response
+
+    @contextmanager
+    def sign_public_information_for_ip_part_3(
+        self, chunks: List[bytes]
+    ) -> Generator[None, None, None]:
+        with self.backend.exchange_async(
+            cla=CLA,
+            ins=InsType.PUBLIC_INFO_FOR_IP,
+            p1=0x01,
+            p2=P2.P2_NONE,
+            data=chunks[0],
+        ):
+            pass
+        # Handle last chunk
+        if len(chunks) > 1:
+            with self.backend.exchange_async(
+                cla=CLA,
+                ins=InsType.PUBLIC_INFO_FOR_IP,
+                p1=0x02,
+                p2=P2.P2_NONE,
+                data=chunks[-1],
+            ) as response:
+                yield response
 
     @contextmanager
     def deploy_module(
