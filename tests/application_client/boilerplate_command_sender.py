@@ -825,7 +825,7 @@ class BoilerplateCommandSender:
             raise ExceptionRAPDU(temp_response.status)
         # Send the name
         data = len(name).to_bytes(2, byteorder="big")
-        name_chunks = split_message(name, MAX_APDU_LEN)
+        name_chunks = split_message(name, MAX_APDU_LEN - len(data))
         for i, chunk in enumerate(name_chunks):
             if i == 0:
                 data += chunk
@@ -842,7 +842,7 @@ class BoilerplateCommandSender:
                 raise ExceptionRAPDU(temp_response.status)
         # Send the params
         data = len(params).to_bytes(2, byteorder="big")
-        params_chunks = split_message(params, MAX_APDU_LEN)
+        params_chunks = split_message(params, MAX_APDU_LEN - len(data))
         last_chunk = params_chunks.pop()
         for i, chunk in enumerate(params_chunks):
             if i == 0:
