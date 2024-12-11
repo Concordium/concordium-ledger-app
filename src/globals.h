@@ -22,6 +22,7 @@
 #include "signRegisterData.h"
 #include "deployModule.h"
 #include "initContract.h"
+#include "updateContract.h"
 #include "ux.h"
 
 #define LEGACY_PURPOSE   1105
@@ -45,7 +46,7 @@ typedef enum {
 typedef enum {
     DEPLOY_MODULE = 0,
     INIT_CONTRACT = 1,
-    UPDATE = 2,
+    UPDATE_CONTRACT = 2,
     TRANSFER = 3,
     UPDATE_CREDENTIAL_KEYS = 13,
     ENCRYPTED_AMOUNT_TRANSFER = 16,
@@ -127,6 +128,7 @@ typedef union {
     signConfigureDelegationContext_t signConfigureDelegation;
     deployModule_t deployModule;
     initContract_t initContract;
+    updateContract_t updateContract;
     transactionWithDataBlob_t withDataBlob;
 } instructionContext;
 extern instructionContext global;

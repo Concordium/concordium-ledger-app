@@ -832,4 +832,27 @@ void uiInitContractDisplay() {
     ux_flow_init(0, ux_init_contract, NULL);
 }
 
+// Update Contract
+UX_STEP_NOCB(ux_update_contract_1_step,
+             bnnn_paging,
+             {.title = "Amount", .text = (char *) global.updateContract.amountDisplay});
+UX_STEP_NOCB(ux_update_contract_2_step,
+             bnnn_paging,
+             {.title = "Index", .text = (char *) global.updateContract.indexDisplay});
+UX_STEP_NOCB(ux_update_contract_3_step,
+             bnnn_paging,
+             {.title = "Sub index", .text = (char *) global.updateContract.subIndexDisplay});
+UX_FLOW(ux_update_contract,
+        &ux_sign_flow_shared_review,
+        &ux_sign_flow_account_sender_view,
+        &ux_update_contract_1_step,
+        &ux_update_contract_2_step,
+        &ux_update_contract_3_step,
+        &ux_sign_flow_shared_sign,
+        &ux_sign_flow_shared_decline);
+
+void uiUpdateContractDisplay() {
+    ux_flow_init(0, ux_update_contract, NULL);
+}
+
 #endif
