@@ -51,6 +51,10 @@ class P1(IntEnum):
     # Parameter 1 for deploy module
     P1_DEPLOY_MODULE_INITIAL = 0x00
     P1_DEPLOY_MODULE_SOURCE = 0x01
+    # Parameter 1 for init contract
+    P1_INIT_CONTRACT_INITIAL = 0x00
+    P1_INIT_CONTRACT_NAME = 0x01
+    P1_INIT_CONTRACT_PARAMS = 0x02
 
 
 class P2(IntEnum):
@@ -83,6 +87,7 @@ class InsType(IntEnum):
     CREDENTIAL_DEPLOYMENT = 0x04
     EXPORT_PRIVATE_KEY = 0x05
     DEPLOY_MODULE = 0x06
+    INIT_CONTRACT = 0x07
     ENCRYPTED_AMOUNT_TRANSFER = 0x10
     TRANSFER_TO_ENCRYPTED = 0x11
     TRANSFER_TO_PUBLIC = 0x12
@@ -786,6 +791,68 @@ class BoilerplateCommandSender:
             cla=CLA,
             ins=InsType.DEPLOY_MODULE,
             p1=P1.P1_DEPLOY_MODULE_SOURCE,
+            p2=P2.P2_NONE,
+            data=last_chunk,
+        ) as response:
+            yield response
+
+    @contextmanager
+    def init_contract(
+        self,
+        path: str,
+        header_and_type: bytes,
+        amount: int,
+        module_ref: bytes,
+        name: bytes,
+        params: bytes,
+    ) -> Generator[None, None, None]:
+        if amount > 0xFFFFFFFFFFFFFFFF:
+            raise ValueError("Amount must be less than 18446744073709551615")
+        # Send the initial data
+        data = pack_derivation_path(path)
+        data += header_and_type
+        data += amount.to_bytes(8, byteorder="big")
+        data += module_ref
+        temp_response = self.backend.exchange(
+            cla=CLA,
+            ins=InsType.INIT_CONTRACT,
+            p1=P1.P1_INIT_CONTRACT_INITIAL,
+            p2=P2.P2_NONE,
+            data=data,
+        )
+        if temp_response.status != 0x9000:
+            raise ExceptionRAPDU(temp_response.status)
+        # Send the name
+        data = len(name).to_bytes(2, byteorder="big")
+        name_chunks = split_message(name, MAX_APDU_LEN)
+        for chunk in name_chunks:
+            temp_response = self.backend.exchange(
+                cla=CLA,
+                ins=InsType.INIT_CONTRACT,
+                p1=P1.P1_INIT_CONTRACT_NAME,
+                p2=P2.P2_NONE,
+                data=chunk,
+            )
+            if temp_response.status != 0x9000:
+                raise ExceptionRAPDU(temp_response.status)
+        # Send the params
+        data = len(params).to_bytes(2, byteorder="big")
+        params_chunks = split_message(params, MAX_APDU_LEN)
+        last_chunk = params_chunks.pop()
+        for chunk in params_chunks:
+            temp_response = self.backend.exchange(
+                cla=CLA,
+                ins=InsType.INIT_CONTRACT,
+                p1=P1.P1_INIT_CONTRACT_PARAMS,
+                p2=P2.P2_NONE,
+                data=chunk,
+            )
+            if temp_response.status != 0x9000:
+                raise ExceptionRAPDU(temp_response.status)
+        with self.backend.exchange_async(
+            cla=CLA,
+            ins=InsType.INIT_CONTRACT,
+            p1=P1.P1_INIT_CONTRACT_PARAMS,
             p2=P2.P2_NONE,
             data=last_chunk,
         ) as response:
