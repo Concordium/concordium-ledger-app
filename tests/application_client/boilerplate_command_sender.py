@@ -124,23 +124,10 @@ class Errors(IntEnum):
 
 
 # pylint: disable=too-many-public-methods
+# pylint: disable=too-many-locals
 class BoilerplateCommandSender:
     def __init__(self, backend: BackendInterface) -> None:
         self.backend = backend
-
-    # def get_app_and_version(self) -> RAPDU:
-    #     return self.backend.exchange(
-    #         cla=0xB0,  # specific CLA for BOLOS
-    #         ins=0x01,  # specific INS for get_app_and_version
-    #         p1=P1.P1_START,
-    #         p2=P2.P2_LAST,
-    #         data=b"",
-    #     )
-
-    # def get_version(self) -> RAPDU:
-    #     return self.backend.exchange(
-    #         cla=CLA, ins=InsType.GET_VERSION, p1=P1.P1_NONE, p2=P2.P2_NONE, data=b""
-    #     )
 
     def get_app_name(self) -> RAPDU:
         return self.backend.exchange(
@@ -387,32 +374,6 @@ class BoilerplateCommandSender:
             data=last_chunk,
         ) as response:
             yield response
-
-    # @contextmanager
-    # def sign_tx(
-    #     self, path: str, tx_type_ins: InsType, transaction: bytes
-    # ) -> Generator[None, None, None]:
-
-    #     self.backend.exchange(
-    #         cla=CLA,
-    #         ins=InsType.SIGN_TRANSFER,
-    #         p1=P1.P1_START,
-    #         p2=P2.P2_MORE,
-    #         data=pack_derivation_path(path),
-    #     )
-    #     messages = split_message(transaction, MAX_APDU_LEN)
-    #     idx: int = P1.P1_START + 1
-
-    #     for msg in messages[:-1]:
-    #         self.backend.exchange(
-    #             cla=CLA, ins=tx_type_ins, p1=idx, p2=P2.P2_MORE, data=msg
-    #         )
-    #         idx += 1
-
-    #     with self.backend.exchange_async(
-    #         cla=CLA, ins=tx_type_ins, p1=idx, p2=P2.P2_LAST, data=messages[-1]
-    #     ) as response:
-    #         yield response
 
     CONFIGURE_BAKER_HEADER = (
         "08000004510000000000000000000000000000000000000002000000000000000020"
