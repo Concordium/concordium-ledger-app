@@ -72,6 +72,9 @@ int handler(uint8_t INS,
         case INS_GET_APP_NAME:
             return handleGetAppName();
             break;
+        case INS_DEPLOY_MODULE:
+            handleDeployModule(cdata, p1, lc);
+            break;
         default:
             THROW(ERROR_INVALID_INSTRUCTION);
             break;

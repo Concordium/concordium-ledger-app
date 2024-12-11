@@ -80,3 +80,5 @@ extern const ux_flow_step_t *ux_sign_scheduled_amount_transfer[8];
 void startInitialScheduledTransferDisplay(bool displayMemo);
 void uiSignScheduledTransferPairFlowSignDisplay(void);
 void uiSignScheduledTransferPairFlowDisplay(void);
+
+void uiDeployModuleDisplay(void);
