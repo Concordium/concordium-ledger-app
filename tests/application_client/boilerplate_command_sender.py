@@ -806,12 +806,6 @@ class BoilerplateCommandSender:
         name: bytes,
         params: bytes,
     ) -> Generator[None, None, None]:
-        print("km-------- Starting init_contract")
-        print(f"km-------- Path: {path}")
-        print(f"km-------- Amount: {amount}")
-        print(f"km-------- Module ref: {module_ref.hex()}")
-        print(f"km-------- Name: {name}")
-        print(f"km-------- Params: {params.hex()}")
 
         if amount > 0xFFFFFFFFFFFFFFFF:
             raise ValueError("Amount must be less than 18446744073709551615")
@@ -820,7 +814,6 @@ class BoilerplateCommandSender:
         data += header_and_type
         data += amount.to_bytes(8, byteorder="big")
         data += module_ref
-        print(f"km-------- Initial data: {data.hex()}")
         temp_response = self.backend.exchange(
             cla=CLA,
             ins=InsType.INIT_CONTRACT,
@@ -833,13 +826,11 @@ class BoilerplateCommandSender:
         # Send the name
         data = len(name).to_bytes(2, byteorder="big")
         name_chunks = split_message(name, MAX_APDU_LEN)
-        print(f"km-------- Name chunks: {len(name_chunks)}")
         for i, chunk in enumerate(name_chunks):
             if i == 0:
                 data += chunk
             else:
                 data = chunk
-            print(f"km-------- Sending name chunk: {data.hex()}")
             temp_response = self.backend.exchange(
                 cla=CLA,
                 ins=InsType.INIT_CONTRACT,
@@ -853,13 +844,11 @@ class BoilerplateCommandSender:
         data = len(params).to_bytes(2, byteorder="big")
         params_chunks = split_message(params, MAX_APDU_LEN)
         last_chunk = params_chunks.pop()
-        print(f"km-------- Params chunks: {len(params_chunks) + 1}")
         for i, chunk in enumerate(params_chunks):
             if i == 0:
                 data += chunk
             else:
                 data = chunk
-            print(f"km-------- Sending params chunk: {data.hex()}")
             temp_response = self.backend.exchange(
                 cla=CLA,
                 ins=InsType.INIT_CONTRACT,
@@ -873,7 +862,6 @@ class BoilerplateCommandSender:
             data = len(last_chunk).to_bytes(2, byteorder="big") + last_chunk
         else:
             data = last_chunk
-        print(f"km-------- Sending final params chunk: {data.hex()}")
         with self.backend.exchange_async(
             cla=CLA,
             ins=InsType.INIT_CONTRACT,
