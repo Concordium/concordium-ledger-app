@@ -794,4 +794,23 @@ void uiSignScheduledTransferPairFlowDisplay(void) {
     ux_flow_init(0, ux_sign_scheduled_transfer_pair_flow, NULL);
 }
 
+// Deploy Module
+UX_STEP_NOCB(ux_deploy_module_1_step,
+             bnnn_paging,
+             {.title = "Version", .text = (char *) global.deployModule.versionDisplay});
+UX_STEP_NOCB(ux_deploy_module_2_step,
+             bnnn_paging,
+             {.title = "TX hash", .text = (char *) global.deployModule.sourceHashDisplay});
+UX_FLOW(ux_deploy_module,
+        &ux_sign_flow_shared_review,
+        &ux_sign_flow_account_sender_view,
+        &ux_deploy_module_1_step,
+        // &ux_deploy_module_2_step,
+        &ux_sign_flow_shared_sign,
+        &ux_sign_flow_shared_decline);
+
+void uiDeployModuleDisplay() {
+    ux_flow_init(0, ux_deploy_module, NULL);
+}
+
 #endif
