@@ -527,11 +527,10 @@ class BoilerplateCommandSender:
         ) as response:
             yield response
 
-    @contextmanager
     def _configure_baker_part_0(
         self,
         bitmap: bytes,
-    ) -> Generator[None, None, None]:
+    ) -> None:
 
         data_p1 = bytes.fromhex(self.CONFIGURE_BAKER_HEADER)
         data_p1 += bitmap
