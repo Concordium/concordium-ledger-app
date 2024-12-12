@@ -24,6 +24,15 @@ static void review_choice(bool confirm) {
     }
 }
 
+static void review_public_key_choice(bool confirm) {
+    // Answer, display a status page and go back to main
+    if (confirm) {
+        sendPublicKey(true);
+    } else {
+        sendUserRejection();
+    }
+}
+
 static void review_export_private_key(bool confirm) {
     // Answer, display a status page and go back to main
     if (confirm) {
@@ -43,7 +52,6 @@ static void review_choice_sign(bool confirm) {
 }
 
 void uiComparePubkey(void) {
-    // TODO: Implement this
     nbgl_useCaseAddressReview(global.exportPublicKeyContext.publicKey,
                               NULL,
                               &C_app_concordium_64px,
@@ -58,10 +66,9 @@ void uiGeneratePubkey(volatile unsigned int *flags) {
                               &C_app_concordium_64px,  // Icon to display
                               "Public Key",            // Review title
                               NULL,                    // No review subtitle
-                              sendPublicKey            // Callback function
+                              review_public_key_choice // Callback function
     );
     *flags |= IO_ASYNCH_REPLY;
-    // TODO: Implement this
 }
 
 void uiExportPrivateKey(volatile unsigned int *flags) {
@@ -301,7 +308,6 @@ void startConfigureBakerUrlDisplay(bool lastUrlPage) {
     }
 }
 
-// TODO: To fix
 void startConfigureDelegationDisplay(void) {
     // Get context from global state
     signConfigureDelegationContext_t *ctx = &global.signConfigureDelegation;
@@ -550,7 +556,6 @@ void startTransferDisplay(bool displayMemo, volatile unsigned int *flags) {
 
     *flags |= IO_ASYNCH_REPLY;
     displayMemo = false;
-    // TODO: Implement this
 }
 
 void uiSignTransferToEncryptedDisplay(volatile unsigned int *flags) {
