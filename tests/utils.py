@@ -50,6 +50,7 @@ def navigate_until_text_and_compare(
     test_name: str,
     screen_change_before_first_instruction: bool = True,
     screen_change_after_last_instruction: bool = True,
+    nav_ins_confirm_instruction: NavInsID = NavInsID.USE_CASE_REVIEW_CONFIRM,
 ):
     """Navigate through device screens until specified text is found and compare screenshots.
 
@@ -77,7 +78,7 @@ def navigate_until_text_and_compare(
     """
     if firmware.device.startswith(("stax", "flex")):
         go_right_instruction = NavInsID.SWIPE_CENTER_TO_LEFT
-        confirm_instructions = [NavInsID.USE_CASE_REVIEW_CONFIRM]
+        confirm_instructions = [nav_ins_confirm_instruction]
     else:
         go_right_instruction = NavInsID.RIGHT_CLICK
         confirm_instructions = [NavInsID.BOTH_CLICK]

@@ -393,15 +393,15 @@ class BoilerplateCommandSender:
 
         if aggregation_key:
             # Second exchange - using with to wait for completion
-            with self.backend.exchange_async(
+            print("km------------transaction", transaction.hex())
+            self.backend.exchange(
                 cla=CLA,
                 ins=InsType.CONFIGURE_BAKER,
                 p1=0x01,
                 p2=P2.P2_NONE,
                 data=transaction,
-            ):
-                pass
-
+            )
+            print("km------------transaction 2", transaction.hex())
             # Final exchange with response yielded to caller
             with self.backend.exchange_async(
                 cla=CLA,

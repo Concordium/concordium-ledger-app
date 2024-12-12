@@ -60,15 +60,217 @@ void uiExportPrivateKey(volatile unsigned int *flags) {
 }
 
 void startConfigureBakerCommissionDisplay(void) {
-    // TODO: Implement this
+    // Get context from global state
+    signConfigureBaker_t *ctx = &global.signConfigureBaker;
+    // Create tag-value pairs for the content
+    uint8_t pairIndex = 0;
+
+    if (ctx->firstDisplay) {
+        // Add sender address
+        pairs[pairIndex].item = "Sender";
+        pairs[pairIndex].value = (char *) global_account_sender.sender;
+        pairIndex++;
+        ctx->firstDisplay = false;
+    }
+
+    if (ctx->hasTransactionFeeCommission || ctx->hasBakingRewardCommission ||
+        ctx->hasFinalizationRewardCommission) {
+        pairs[pairIndex].item = "Commission";
+        pairs[pairIndex].value = "rates";
+        pairIndex++;
+    }
+
+    if (ctx->hasTransactionFeeCommission) {
+        pairs[pairIndex].item = "Transaction fee";
+        pairs[pairIndex].value = (char *) global.signConfigureBaker.commissionRates.transactionFeeCommissionRate;
+        pairIndex++;
+    }
+
+    if (ctx->hasBakingRewardCommission) {
+        pairs[pairIndex].item = "Baking reward";
+        pairs[pairIndex].value = (char *) global.signConfigureBaker.commissionRates.bakingRewardCommissionRate;
+        pairIndex++;
+    }
+
+    if (ctx->hasFinalizationRewardCommission) {
+        pairs[pairIndex].item = "Finalization reward";
+        pairs[pairIndex].value = (char *) global.signConfigureBaker.commissionRates.finalizationRewardCommissionRate;
+        pairIndex++;
+    }
+
+    // Create the page content
+    nbgl_contentTagValueList_t content;
+    content.nbPairs = pairIndex;
+    content.pairs = pairs;
+    content.smallCaseForValue = false;
+    content.nbMaxLinesForValue = 0;
+    content.startIndex = 0;
+
+    // Setup the review screen
+    nbgl_useCaseReview(TYPE_TRANSACTION,
+                        &content,
+                        &C_app_concordium_64px,
+                        "Review Transaction",
+                        NULL,  // No subtitle
+                        "Sign Transaction",
+                        review_choice_sign);
+
+    // ux_sign_configure_baker_commission[index++] = FLOW_END_STEP;    // TODO: Implement this
 }
 
 void startConfigureBakerDisplay(void) {
+    // Get context from global state
+    signConfigureBaker_t *ctx = &global.signConfigureBaker;
+
+    // Create tag-value pairs for the content
+    uint8_t pairIndex = 0;
+    // Add sender address
+    pairs[pairIndex].item = "Sender";
+    pairs[pairIndex].value = (char *) global_account_sender.sender;
+    pairIndex++;
+
+    ctx->firstDisplay = false;
+
+    if (ctx->hasCapital) {
+        if (ctx->capitalRestakeDelegation.stopBaking) {
+            pairs[pairIndex].item = "Stop";
+            pairs[pairIndex].value = "Baking";
+        } else {
+            pairs[pairIndex].item = "Amount to stake";
+            pairs[pairIndex].value = (char *) global.signConfigureBaker.capitalRestakeDelegation.displayCapital;
+        }
+        pairIndex++;
+    }
+
+    if (ctx->hasRestakeEarnings) {
+        pairs[pairIndex].item = "Restake earnings";
+        pairs[pairIndex].value = (char *) global.signConfigureBaker.capitalRestakeDelegation.displayRestake;
+        pairIndex++;
+    }
+
+    if (ctx->hasOpenForDelegation) {
+        pairs[pairIndex].item = "Pool status";
+        pairs[pairIndex].value = (char *) global.signConfigureBaker.capitalRestakeDelegation.displayOpenForDelegation;
+        pairIndex++;
+    }
+
+    if (ctx->hasKeys) {
+        pairs[pairIndex].item = "Update baker";
+        pairs[pairIndex].value = "keys";
+        pairIndex++;
+    }
+
+    PRINTF("GUI: pairIndex: %d\n", pairIndex);
+    // If there are additional steps, then show continue screen. If this is the last step,
+    // then show signing screens.
+    if (ctx->hasMetadataUrl || hasCommissionRate()) {
+        // Create the page content
+        nbgl_contentTagValueList_t content;
+        content.nbPairs = pairIndex;
+        content.pairs = pairs;
+        content.smallCaseForValue = false;
+        content.nbMaxLinesForValue = 0;
+        content.startIndex = 0;
+        // Setup the review screen
+        nbgl_useCaseReviewLight(TYPE_OPERATION,
+                                &content,
+                                &C_app_concordium_64px,
+                                "Review Transaction",
+                                NULL,  // No subtitle
+                                "Continue with transaction",
+                                sendSuccessNoIdle);    // TODO: sendSuccessNoIdle()
+    } else {
+        // Create the page content
+        PRINTF("GUI: Sign transaction:");
+        nbgl_contentTagValueList_t content;
+        content.nbPairs = pairIndex;
+        content.pairs = pairs;
+        content.smallCaseForValue = false;
+        content.nbMaxLinesForValue = 0;
+        content.startIndex = 0;
+
+        // Setup the review screen
+        nbgl_useCaseReview(TYPE_TRANSACTION,
+                           &content,
+                           &C_app_concordium_64px,
+                           "Review Transaction",
+                           NULL,  // No subtitle
+                           "Sign transaction",
+                           review_choice_sign);
+    }
+
+    // ux_sign_configure_baker_first[index++] = FLOW_END_STEP;
     // TODO: Implement this
 }
 
 void startConfigureBakerUrlDisplay(bool lastUrlPage) {
-    lastUrlPage = false;
+    // Get context from global state
+    signConfigureBaker_t *ctx = &global.signConfigureBaker;
+
+    // Create tag-value pairs for the content
+    uint8_t pairIndex = 0;
+
+    if (ctx->firstDisplay) {
+        // Add sender address
+        pairs[pairIndex].item = "Sender";
+        pairs[pairIndex].value = (char *) global_account_sender.sender;
+        pairIndex++;
+        ctx->firstDisplay = false;
+    }
+
+    if (!lastUrlPage) {
+        pairs[pairIndex].item = "URL";
+        pairs[pairIndex].value = (char *) global.signConfigureBaker.url.urlDisplay;
+        pairIndex++;
+    } else {
+        if (ctx->url.urlLength == 0) {
+            pairs[pairIndex].item = "Empty URL";
+            pairs[pairIndex].value = "";
+        } else {
+            pairs[pairIndex].item = "URL";
+            pairs[pairIndex].value = (char *) global.signConfigureBaker.url.urlDisplay;
+        }
+        pairIndex++;
+    }
+
+    // If there are additional steps show the continue screen, otherwise go
+    // to signing screens.
+    if (hasCommissionRate()) {
+        // Create the page content
+        nbgl_contentTagValueList_t content;
+        content.nbPairs = pairIndex;
+        content.pairs = pairs;
+        content.smallCaseForValue = false;
+        content.nbMaxLinesForValue = 0;
+        content.startIndex = 0;
+        // Setup the review screen
+        nbgl_useCaseReviewLight(TYPE_OPERATION,
+                                &content,
+                                &C_app_concordium_64px,
+                                "Review Transaction",
+                                NULL,  // No subtitle
+                                "Continue with transaction",
+                                sendSuccessNoIdle);
+    } else {
+        // Create the page content
+        nbgl_contentTagValueList_t content;
+        content.nbPairs = pairIndex;
+        content.pairs = pairs;
+        content.smallCaseForValue = false;
+        content.nbMaxLinesForValue = 0;
+        content.startIndex = 0;
+
+        // Setup the review screen
+        nbgl_useCaseReview(TYPE_TRANSACTION,
+                           &content,
+                           &C_app_concordium_64px,
+                           "Review Transaction",
+                           NULL,  // No subtitle
+                           "Sign transaction",
+                           review_choice_sign);
+    }
+
+    // ux_sign_configure_baker_url[index++] = FLOW_END_STEP;
     // TODO: Implement this
 }
 
