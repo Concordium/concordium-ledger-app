@@ -233,14 +233,13 @@ void uiSignTransferToPublicDisplay(volatile unsigned int *flags) {
     content.nbMaxLinesForValue = 0;
     content.startIndex = 0;
     // Setup the review screen
-    nbgl_useCaseReview(
-        TYPE_TRANSACTION,
-        &content,
-        &C_app_concordium_64px,
-        "Review Transaction",
-        NULL,  // No subtitle
-        "Sign transaction",
-        review_choice_sign);
+    nbgl_useCaseReview(TYPE_TRANSACTION,
+                       &content,
+                       &C_app_concordium_64px,
+                       "Review Transaction",
+                       NULL,  // No subtitle
+                       "Sign transaction",
+                       review_choice_sign);
     *flags |= IO_ASYNCH_REPLY;
 }
 
