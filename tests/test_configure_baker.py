@@ -289,7 +289,7 @@ def test_sign_configure_baker_all_parameters(
             )
         else:
             navigate_until_text_and_compare(
-                firmware, navigator, "Continue", default_screenshot_path, test_name + "_1", False, False, NavInsID.USE_CASE_CHOICE_CONFIRM
+                firmware, navigator, "Continue", default_screenshot_path, test_name + "_1", True, False, NavInsID.USE_CASE_CHOICE_CONFIRM
             )
     with client.sign_configure_baker_url(
         url=url_bytes, bitmap=bitmap, is_called_first=False
@@ -304,7 +304,7 @@ def test_sign_configure_baker_all_parameters(
             )
         else:
             navigate_until_text_and_compare(
-                firmware, navigator, "Continue", default_screenshot_path, test_name + "_2", False, False, NavInsID.USE_CASE_CHOICE_CONFIRM
+                firmware, navigator, "Continue", default_screenshot_path, test_name + "_2", True, False, NavInsID.USE_CASE_CHOICE_CONFIRM
             )
     with client.sign_configure_baker_commission_rate(
         bitmap=bitmap,

@@ -114,8 +114,6 @@ void startConfigureBakerCommissionDisplay(void) {
                         NULL,  // No subtitle
                         "Sign Transaction",
                         review_choice_sign);
-
-    // ux_sign_configure_baker_commission[index++] = FLOW_END_STEP;    // TODO: Implement this
 }
 
 void startConfigureBakerDisplay(void) {
@@ -178,7 +176,7 @@ void startConfigureBakerDisplay(void) {
                                 "Review Transaction",
                                 NULL,  // No subtitle
                                 "Continue with transaction",
-                                sendSuccessNoIdle);    // TODO: sendSuccessNoIdle()
+                                sendSuccessNoIdle);
     } else {
         // Create the page content
         PRINTF("GUI: Sign transaction:");
@@ -198,9 +196,6 @@ void startConfigureBakerDisplay(void) {
                            "Sign transaction",
                            review_choice_sign);
     }
-
-    // ux_sign_configure_baker_first[index++] = FLOW_END_STEP;
-    // TODO: Implement this
 }
 
 void startConfigureBakerUrlDisplay(bool lastUrlPage) {
@@ -269,9 +264,6 @@ void startConfigureBakerUrlDisplay(bool lastUrlPage) {
                            "Sign transaction",
                            review_choice_sign);
     }
-
-    // ux_sign_configure_baker_url[index++] = FLOW_END_STEP;
-    // TODO: Implement this
 }
 
 // TODO: To fix
