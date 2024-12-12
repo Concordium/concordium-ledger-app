@@ -1,5 +1,4 @@
-#ifndef _CONCORDIUM_APP_ACCOUNT_REGISTER_DATA_H_
-#define _CONCORDIUM_APP_ACCOUNT_REGISTER_DATA_H_
+#pragma once
 
 /**
  * Handles the signing flow, including updating the display, for the 'register data'
@@ -25,5 +24,3 @@ typedef struct {
 } signRegisterData_t;
 
 void handleData(void);
-
-#endif

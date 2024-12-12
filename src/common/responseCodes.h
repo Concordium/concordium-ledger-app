@@ -1,5 +1,4 @@
-#ifndef _CONCORDIUM_APP_ERROR_CODES_H_
-#define _CONCORDIUM_APP_ERROR_CODES_H_
+#pragma once
 
 enum {
     // Successful codes
@@ -26,4 +25,3 @@ enum {
     ERROR_DEVICE_LOCKED = 0x530C,
     SW_WRONG_DATA_LENGTH = 0x6A87
 };
-#endif

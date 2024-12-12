@@ -1,9 +1,6 @@
-#ifndef _CBOR_H_
-#define _CBOR_H_
+#pragma once
 
 #include "ux.h"
-
-#endif
 
 #ifdef HAVE_BAGL
 

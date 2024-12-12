@@ -1,5 +1,4 @@
-#ifndef MAIN_HELPERS_H
-#define MAIN_HELPERS_H
+#pragma once
 
 #include "os.h"
 
@@ -8,5 +7,3 @@ void concordium_main(
     void *global_state);
 
 // void app_exit(void);
-
-#endif

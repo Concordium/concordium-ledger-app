@@ -1,5 +1,4 @@
-#ifndef _CONCORDIUM_APP_ACCOUNT_TRANSFER_H_
-#define _CONCORDIUM_APP_ACCOUNT_TRANSFER_H_
+#pragma once
 
 /**
  * Handles the signing flow, including updating the display, for the 'simple transfer'
@@ -31,5 +30,3 @@ typedef struct {
     uint8_t displayAmount[30];
     simpleTransferState_t state;
 } signTransferContext_t;
-
-#endif

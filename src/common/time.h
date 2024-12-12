@@ -1,5 +1,4 @@
-#ifndef _CONCORDIUM_APP_TIME_H_
-#define _CONCORDIUM_APP_TIME_H_
+#pragma once
 
 #include <os.h>
 
@@ -24,5 +23,3 @@ int secondsToTm(long long, tm *);
  * the format yyyy-mm-dd hh:mm:ss.
  */
 int timeToDisplayText(tm time, uint8_t *dst, size_t dstLength);
-
-#endif

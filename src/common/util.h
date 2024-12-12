@@ -1,5 +1,4 @@
-#ifndef _CONCORDIUM_APP_UTIL_H_
-#define _CONCORDIUM_APP_UTIL_H_
+#pragma once
 
 #include <stdbool.h>
 #include <string.h>
@@ -22,7 +21,7 @@ static const uint8_t r[32] = {0x73, 0xed, 0xa7, 0x53, 0x29, 0x9d, 0x7d, 0x48, 0x
  * Converts bytes into uint64_t (big endian).
  */
 #define U8BE(buf, off) \
-    (((uint64_t)(U4BE(buf, off)) << 32) | ((uint64_t)(U4BE(buf, off + 4)) & 0xFFFFFFFF))
+    (((uint64_t) (U4BE(buf, off)) << 32) | ((uint64_t) (U4BE(buf, off + 4)) & 0xFFFFFFFF))
 
 /**
  * Send a user rejection back to the caller, which will indicate to
@@ -203,5 +202,3 @@ void getBlsPrivateKey(uint32_t *keyPathInput,
  * @param sizeOfDst the size of dst
  */
 size_t hashAndLoadU64Ratio(uint8_t *cdata, uint8_t *dst, uint8_t sizeOfDst);
-
-#endif

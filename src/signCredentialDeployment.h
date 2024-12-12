@@ -1,5 +1,4 @@
-#ifndef _CONCORDIUM_APP_SIGN_CREDENTIAL_DEPLOYMENT_H_
-#define _CONCORDIUM_APP_SIGN_CREDENTIAL_DEPLOYMENT_H_
+#pragma once
 
 #include "cx.h"
 #include "os.h"
@@ -71,5 +70,3 @@ typedef struct {
     protocolState_t state;
     bool showIntro;
 } signCredentialDeploymentContext_t;
-
-#endif
