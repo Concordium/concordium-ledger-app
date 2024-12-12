@@ -82,19 +82,22 @@ void startConfigureBakerCommissionDisplay(void) {
 
     if (ctx->hasTransactionFeeCommission) {
         pairs[pairIndex].item = "Transaction fee";
-        pairs[pairIndex].value = (char *) global.signConfigureBaker.commissionRates.transactionFeeCommissionRate;
+        pairs[pairIndex].value =
+            (char *) global.signConfigureBaker.commissionRates.transactionFeeCommissionRate;
         pairIndex++;
     }
 
     if (ctx->hasBakingRewardCommission) {
         pairs[pairIndex].item = "Baking reward";
-        pairs[pairIndex].value = (char *) global.signConfigureBaker.commissionRates.bakingRewardCommissionRate;
+        pairs[pairIndex].value =
+            (char *) global.signConfigureBaker.commissionRates.bakingRewardCommissionRate;
         pairIndex++;
     }
 
     if (ctx->hasFinalizationRewardCommission) {
         pairs[pairIndex].item = "Finalization reward";
-        pairs[pairIndex].value = (char *) global.signConfigureBaker.commissionRates.finalizationRewardCommissionRate;
+        pairs[pairIndex].value =
+            (char *) global.signConfigureBaker.commissionRates.finalizationRewardCommissionRate;
         pairIndex++;
     }
 
@@ -108,12 +111,12 @@ void startConfigureBakerCommissionDisplay(void) {
 
     // Setup the review screen
     nbgl_useCaseReview(TYPE_TRANSACTION,
-                        &content,
-                        &C_app_concordium_64px,
-                        "Review Transaction",
-                        NULL,  // No subtitle
-                        "Sign Transaction",
-                        review_choice_sign);
+                       &content,
+                       &C_app_concordium_64px,
+                       "Review Transaction",
+                       NULL,  // No subtitle
+                       "Sign Transaction",
+                       review_choice_sign);
 }
 
 void startConfigureBakerDisplay(void) {
@@ -135,20 +138,23 @@ void startConfigureBakerDisplay(void) {
             pairs[pairIndex].value = "Baking";
         } else {
             pairs[pairIndex].item = "Amount to stake";
-            pairs[pairIndex].value = (char *) global.signConfigureBaker.capitalRestakeDelegation.displayCapital;
+            pairs[pairIndex].value =
+                (char *) global.signConfigureBaker.capitalRestakeDelegation.displayCapital;
         }
         pairIndex++;
     }
 
     if (ctx->hasRestakeEarnings) {
         pairs[pairIndex].item = "Restake earnings";
-        pairs[pairIndex].value = (char *) global.signConfigureBaker.capitalRestakeDelegation.displayRestake;
+        pairs[pairIndex].value =
+            (char *) global.signConfigureBaker.capitalRestakeDelegation.displayRestake;
         pairIndex++;
     }
 
     if (ctx->hasOpenForDelegation) {
         pairs[pairIndex].item = "Pool status";
-        pairs[pairIndex].value = (char *) global.signConfigureBaker.capitalRestakeDelegation.displayOpenForDelegation;
+        pairs[pairIndex].value =
+            (char *) global.signConfigureBaker.capitalRestakeDelegation.displayOpenForDelegation;
         pairIndex++;
     }
 
