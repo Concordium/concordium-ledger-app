@@ -10,6 +10,7 @@ AlignConsecutiveMacros: true
 AllowAllParametersOfDeclarationOnNextLine: false
 SortIncludes: false
 SpaceAfterCStyleCast: false
+SpacesInCStyleCastParentheses: false
 AllowShortCaseLabelsOnASingleLine: false
 AllowAllArgumentsOnNextLine: false
 AllowShortBlocksOnASingleLine: Never
