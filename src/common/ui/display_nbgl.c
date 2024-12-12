@@ -62,11 +62,11 @@ void uiComparePubkey(void) {
 
 void uiGeneratePubkey(volatile unsigned int *flags) {
     nbgl_useCaseAddressReview((char *) global.exportPublicKeyContext.display,  // Address to display
-                              NULL,                    // No additional tag-value list
-                              &C_app_concordium_64px,  // Icon to display
-                              "Public Key",            // Review title
-                              NULL,                    // No review subtitle
-                              review_public_key_choice // Callback function
+                              NULL,                     // No additional tag-value list
+                              &C_app_concordium_64px,   // Icon to display
+                              "Public Key",             // Review title
+                              NULL,                     // No review subtitle
+                              review_public_key_choice  // Callback function
     );
     *flags |= IO_ASYNCH_REPLY;
 }
