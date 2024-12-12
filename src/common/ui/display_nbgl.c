@@ -273,7 +273,31 @@ void uiUpdateContractDisplay(void) {
 }
 
 void uiInitContractDisplay(void) {
-    // TODO: Implement this
+    uint8_t pairIndex = 0;
+    pairs[pairIndex].item = "Sender";
+    pairs[pairIndex].value = (char *) global_account_sender.sender;
+    pairIndex++;
+    pairs[pairIndex].item = "Amount";
+    pairs[pairIndex].value = (char *) global.initContract.amountDisplay;
+    pairIndex++;
+    pairs[pairIndex].item = "Module ref";
+    pairs[pairIndex].value = (char *) global.initContract.moduleRefDisplay;
+    pairIndex++;
+    // Create the page content
+    nbgl_contentTagValueList_t content;
+    content.nbPairs = 3;
+    content.pairs = pairs;
+    content.smallCaseForValue = false;
+    content.nbMaxLinesForValue = 0;
+    content.startIndex = 0;
+    // Setup the review screen
+    nbgl_useCaseReview(TYPE_TRANSACTION,
+                       &content,
+                       &C_app_concordium_64px,
+                       "Review Transaction \nto update contract",
+                       NULL,  // No subtitle
+                       "Sign transaction\nto update contract",
+                       review_choice_sign);
 }
 
 #endif
