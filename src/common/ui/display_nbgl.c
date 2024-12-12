@@ -15,8 +15,6 @@
 accountSender_t global_account_sender;
 static nbgl_contentTagValue_t pairs[10];
 
-static nbgl_contentTagValue_t pairs[10];
-
 static void review_choice(bool confirm) {
     // Answer, display a status page and go back to main
     if (confirm) {
