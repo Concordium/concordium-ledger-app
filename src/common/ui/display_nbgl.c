@@ -40,6 +40,11 @@ static void review_choice_sign(bool confirm) {
     }
 }
 
+static void sendSuccessNoIdleCallback(bool confirm) {
+    (void)confirm;  // Suppress unused parameter warning
+    sendSuccessNoIdle();
+}
+
 void uiComparePubkey(void) {
     nbgl_useCaseAddressReview(global.exportPublicKeyContext.publicKey,
                               NULL,
@@ -208,7 +213,7 @@ void startConfigureBakerDisplay(void) {
                                 "Review Transaction",
                                 NULL,  // No subtitle
                                 "Continue with transaction",
-                                sendSuccessNoIdle);
+                                sendSuccessNoIdleCallback);
     } else {
         // Create the page content
         nbgl_contentTagValueList_t content;
@@ -276,7 +281,7 @@ void startConfigureBakerUrlDisplay(bool lastUrlPage) {
                                 "Review Transaction",
                                 NULL,  // No subtitle
                                 "Continue with transaction",
-                                sendSuccessNoIdle);
+                                sendSuccessNoIdleCallback);
     } else {
         // Create the page content
         nbgl_contentTagValueList_t content;
@@ -353,42 +358,51 @@ void startConfigureDelegationDisplay(void) {
 }
 
 void uiSignUpdateCredentialThresholdDisplay(volatile unsigned int *flags) {
+    return;
     *flags |= IO_ASYNCH_REPLY;
     // TODO: Implement this
 }
 
 void uiSignUpdateCredentialInitialDisplay(volatile unsigned int *flags) {
+    return;
     *flags |= IO_ASYNCH_REPLY;
     // TODO: Implement this
 }
 
 void uiSignUpdateCredentialIdDisplay(volatile unsigned int *flags) {
+    return;
     *flags |= IO_ASYNCH_REPLY;
     // TODO: Implement this
 }
 
 void uiSignCredentialDeploymentVerificationKeyDisplay(volatile unsigned int *flags) {
+    return;
     *flags |= IO_ASYNCH_REPLY;
     // TODO: Implement this
 }
 
 void uiSignCredentialDeploymentNewIntroDisplay(void) {
+    return;
     // TODO: Implement this
 }
 
 void uiSignCredentialDeploymentExistingIntroDisplay(void) {
+    return;
     // TODO: Implement this
 }
 
 void uiSignCredentialDeploymentNewDisplay(void) {
+    return;
     // TODO: Implement this
 }
 
 void uiSignCredentialDeploymentExistingDisplay(void) {
+    return;
     // TODO: Implement this
 }
 
 void uiSignCredentialDeploymentVerificationKeyFlowDisplay(volatile unsigned int *flags) {
+    return;
     *flags |= IO_ASYNCH_REPLY;
     // TODO: Implement this
 }
@@ -446,7 +460,7 @@ void uiReviewPublicInformationForIpDisplay(void) {
                             "Review identity",
                             "provider info",
                             "Continue reviewing info",
-                            sendSuccessNoIdle);
+                            sendSuccessNoIdleCallback);
 }
 
 void uiSignPublicInformationForIpFinalDisplay(void) {
@@ -497,15 +511,17 @@ void uiSignPublicInformationForIpPublicKeyDisplay(void) {
                             "Review identity",
                             NULL,  // No subtitle
                             "Continue reviewing info",
-                            sendSuccessNoIdle);
+                            sendSuccessNoIdleCallback);
 }
 
 void uiRegisterDataInitialDisplay(volatile unsigned int *flags) {
+    return;
     *flags |= IO_ASYNCH_REPLY;
     // TODO: Implement this
 }
 
 void uiRegisterDataPayloadDisplay(volatile unsigned int *flags) {
+    return;
     *flags |= IO_ASYNCH_REPLY;
     // TODO: Implement this
 }
@@ -548,6 +564,7 @@ void startTransferDisplay(bool displayMemo, volatile unsigned int *flags) {
 }
 
 void uiSignTransferToEncryptedDisplay(volatile unsigned int *flags) {
+    return;
     *flags |= IO_ASYNCH_REPLY;
     // TODO: Implement this
 }
@@ -581,18 +598,22 @@ void uiSignTransferToPublicDisplay(volatile unsigned int *flags) {
 }
 
 void uiSignScheduledTransferPairFlowDisplay(void) {
+    return;
     // TODO: Implement this
 }
 
 void uiSignScheduledTransferPairFlowSignDisplay(void) {
+    return;
     // TODO: Implement this
 }
 
 void uiSignScheduledTransferPairFlowFinalDisplay(void) {
+    return;
     // TODO: Implement this
 }
 
 void uiVerifyAddress(volatile unsigned int *flags) {
+    return;
     *flags |= IO_ASYNCH_REPLY;
     // TODO: Implement this
 }
