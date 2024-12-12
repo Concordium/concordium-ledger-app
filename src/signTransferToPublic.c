@@ -1,10 +1,3 @@
-#include "os.h"
-
-#include "common/ui/display.h"
-#include "common/responseCodes.h"
-#include "common/sign.h"
-#include "common/util.h"
-#include "signTransferToPublic.h"
 #include "globals.h"
 
 static signTransferToPublic_t *ctx = &global.signTransferToPublic;

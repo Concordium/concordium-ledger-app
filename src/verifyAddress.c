@@ -1,12 +1,4 @@
-#include <os.h>
-#include "cx.h"
-#include "ux.h"
-#include <stdlib.h>
-#include <string.h>
-#include "util.h"
 #include "globals.h"
-#include "base58check.h"
-#include "responseCodes.h"
 
 #define LEGACY_ACCOUNT_SUBTREE 0
 #define LEGACY_NORMAL_ACCOUNTS 0
@@ -120,18 +112,18 @@ void handleVerifyAddress(uint8_t *cdata, uint8_t p1, volatile unsigned int *flag
     size_t prfKeyPathLen = is_new_path ? 5 : 6;
     uint32_t *prfKeyPath;
     if (is_new_path) {
-        prfKeyPath = (uint32_t[5]){NEW_PURPOSE | HARDENED_OFFSET,
-                                   NEW_COIN_TYPE | HARDENED_OFFSET,
-                                   identityProvider | HARDENED_OFFSET,
-                                   identity | HARDENED_OFFSET,
-                                   NEW_PRF_KEY | HARDENED_OFFSET};
+        prfKeyPath = (uint32_t[5]) {NEW_PURPOSE | HARDENED_OFFSET,
+                                    NEW_COIN_TYPE | HARDENED_OFFSET,
+                                    identityProvider | HARDENED_OFFSET,
+                                    identity | HARDENED_OFFSET,
+                                    NEW_PRF_KEY | HARDENED_OFFSET};
     } else {
-        prfKeyPath = (uint32_t[6]){LEGACY_PURPOSE | HARDENED_OFFSET,
-                                   LEGACY_COIN_TYPE | HARDENED_OFFSET,
-                                   LEGACY_ACCOUNT_SUBTREE | HARDENED_OFFSET,
-                                   LEGACY_NORMAL_ACCOUNTS | HARDENED_OFFSET,
-                                   identity | HARDENED_OFFSET,
-                                   LEGACY_PRF_KEY | HARDENED_OFFSET};
+        prfKeyPath = (uint32_t[6]) {LEGACY_PURPOSE | HARDENED_OFFSET,
+                                    LEGACY_COIN_TYPE | HARDENED_OFFSET,
+                                    LEGACY_ACCOUNT_SUBTREE | HARDENED_OFFSET,
+                                    LEGACY_NORMAL_ACCOUNTS | HARDENED_OFFSET,
+                                    identity | HARDENED_OFFSET,
+                                    LEGACY_PRF_KEY | HARDENED_OFFSET};
     }
 
     if (is_new_path) {

@@ -1,10 +1,4 @@
-#include "os.h"
-#include "ux.h"
-#include "common/util.h"
-#include "common/ui/display.h"
-#include "common/sign.h"
-#include "common/responseCodes.h"
-#include "signRegisterData.h"
+#include "globals.h"
 
 static signRegisterData_t *ctx = &global.withDataBlob.signRegisterData;
 static cborContext_t *data_ctx = &global.withDataBlob.cborContext;

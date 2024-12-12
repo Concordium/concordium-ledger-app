@@ -1,17 +1,3 @@
-#include "os.h"
-#include "os_io_seproxyhal.h"
-#include <stdint.h>
-#include <stdio.h>
-#include <string.h>
-
-#include "common/ui/display.h"
-#include "base58check.h"
-#include "cx.h"
-#include "common/ui/menu.h"
-#include "common/responseCodes.h"
-#include "common/sign.h"
-#include "util.h"
-#include "signCredentialDeployment.h"
 #include "globals.h"
 
 static signCredentialDeploymentContext_t *ctx = &global.signCredentialDeploymentContext;

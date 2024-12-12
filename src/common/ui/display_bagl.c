@@ -1,14 +1,6 @@
 #ifdef HAVE_BAGL
-
-#include "os.h"
-#include "ux.h"
-
-#include "common/responseCodes.h"
-#include "common/sign.h"
-#include "common/util.h"
-#include "display.h"
 #include "globals.h"
-#include "menu.h"
+
 #include "getPublicKey.h"
 #include "verifyAddress.h"
 #include "exportPrivateKey.h"

@@ -1,15 +1,4 @@
-#include "util.h"
-
-#include <stdbool.h>
-#include <stdlib.h>
-#include <string.h>
-
-#include "base58check.h"
-#include "cx.h"
-#include "menu.h"
-#include "numberHelpers.h"
-#include "os.h"
-#include "responseCodes.h"
+#include "globals.h"
 
 static tx_state_t *tx_state = &global_tx_state;
 static keyDerivationPath_t *keyPath = &path;

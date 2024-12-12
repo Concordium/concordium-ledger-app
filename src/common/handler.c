@@ -1,7 +1,3 @@
-#include <stdbool.h>
-#include <string.h>
-
-#include "responseCodes.h"
 #include "globals.h"
 #include "handler.h"
 #include "getAppName.h"

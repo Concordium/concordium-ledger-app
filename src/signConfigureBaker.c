@@ -1,10 +1,4 @@
-#include <os.h>
-
-#include "common/ui/display.h"
-#include "responseCodes.h"
-#include "sign.h"
-#include "util.h"
-#include "signConfigureBaker.h"
+#include "globals.h"
 
 static signConfigureBaker_t *ctx_conf_baker = &global.signConfigureBaker;
 static tx_state_t *tx_state = &global_tx_state;

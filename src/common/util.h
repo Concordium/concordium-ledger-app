@@ -5,7 +5,6 @@
 
 #include "globals.h"
 #include "numberHelpers.h"
-#include "os.h"
 
 #define MAX_MEMO_SIZE 256
 #define MAX_DATA_SIZE (MAX_MEMO_SIZE)
@@ -21,7 +20,7 @@ static const uint8_t r[32] = {0x73, 0xed, 0xa7, 0x53, 0x29, 0x9d, 0x7d, 0x48, 0x
  * Converts bytes into uint64_t (big endian).
  */
 #define U8BE(buf, off) \
-    (((uint64_t)(U4BE(buf, off)) << 32) | ((uint64_t)(U4BE(buf, off + 4)) & 0xFFFFFFFF))
+    (((uint64_t) (U4BE(buf, off)) << 32) | ((uint64_t) (U4BE(buf, off + 4)) & 0xFFFFFFFF))
 
 /**
  * Send a user rejection back to the caller, which will indicate to

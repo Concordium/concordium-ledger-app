@@ -6,15 +6,27 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 #include <os.h>
 #include <cx.h>
 #include <ux.h>
+#include <io.h>
+#include <format.h>
+#include <os_io_seproxyhal.h>
+#include <lcx_hash.h>
+
+#include "display.h"
+#include "menu.h"
+#include "util.h"
+#include "sign.h"
+#include "numberHelpers.h"
+#include "base58check.h"
+#include "time.h"
 
 #include "exportPrivateKey.h"
 #include "verifyAddress.h"
 #include "getPublicKey.h"
-#include "display.h"
 #include "signConfigureBaker.h"
 #include "signConfigureDelegation.h"
 #include "signCredentialDeployment.h"
@@ -38,6 +50,26 @@
 
 #define ACCOUNT_TRANSACTION_HEADER_LENGTH 60
 #define UPDATE_HEADER_LENGTH              28
+
+/**
+ * Instruction class of the Concordium application.
+ */
+#define CLA 0xE0
+
+/**
+ * Length of APPNAME variable in the Makefile.
+ */
+#define APPNAME_LEN (sizeof(APPNAME) - 1)
+
+/**
+ * Maximum length of MAJOR_VERSION || MINOR_VERSION || PATCH_VERSION.
+ */
+#define APPVERSION_LEN 3
+
+/**
+ * Maximum length of application name.
+ */
+#define MAX_APPNAME_LEN 64
 
 typedef enum {
     LEGACY_ID_CRED_SEC = 0,

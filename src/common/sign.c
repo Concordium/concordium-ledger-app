@@ -1,16 +1,4 @@
-#include "sign.h"
-
-#include <os_io_seproxyhal.h>
-#include <stdint.h>
-#include <stdio.h>
-
-#include "cx.h"
-#include "os.h"
-#include "util.h"
-#include "ux.h"
-#include "sign.h"
-#include "display.h"
-#include "responseCodes.h"
+#include "globals.h"
 
 static tx_state_t *tx_state = &global_tx_state;
 static cborContext_t *ctx = &global.withDataBlob.cborContext;

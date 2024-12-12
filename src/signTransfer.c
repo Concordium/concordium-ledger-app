@@ -1,10 +1,4 @@
-#include "os.h"
-
-#include "common/ui/display.h"
-#include "common/responseCodes.h"
-#include "common/sign.h"
-#include "common/util.h"
-#include "signTransfer.h"
+#include "globals.h"
 
 static signTransferContext_t *ctx = &global.withDataBlob.signTransferContext;
 static cborContext_t *memo_ctx = &global.withDataBlob.cborContext;

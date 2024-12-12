@@ -1,13 +1,4 @@
-#include "os.h"
-
-#include "common/ui/display.h"
-#include "common/base58check.h"
-#include "common/responseCodes.h"
-#include "common/sign.h"
-#include "common/time.h"
-#include "common/util.h"
 #include "globals.h"
-#include "signTransferWithSchedule.h"
 
 static signTransferWithScheduleContext_t *ctx =
     &global.withDataBlob.signTransferWithScheduleContext;

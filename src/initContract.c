@@ -1,9 +1,4 @@
-#include "os.h"
-#include "format.h"
-#include "common/ui/display.h"
-#include "common/responseCodes.h"
-#include "common/sign.h"
-#include "common/util.h"
+#include "globals.h"
 #include "initContract.h"
 
 // TODO: ADAPT THIS TO THE NEW INSTRUCTION

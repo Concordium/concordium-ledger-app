@@ -1,12 +1,4 @@
-#include "os.h"
-#include "format.h"
-#include "common/ui/display.h"
-#include "common/responseCodes.h"
-#include "common/sign.h"
-#include "common/util.h"
-#include "updateContract.h"
-
-// TODO: ADAPT THIS TO THE NEW INSTRUCTION
+#include "globals.h"
 
 static updateContract_t *ctx_update_contract = &global.updateContract;
 static tx_state_t *tx_state = &global_tx_state;

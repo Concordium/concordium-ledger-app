@@ -1,10 +1,3 @@
-#include <os.h>
-
-#include "common/ui/display.h"
-#include "responseCodes.h"
-#include "sign.h"
-#include "util.h"
-#include "signConfigureDelegation.h"
 #include "globals.h"
 
 static signConfigureDelegationContext_t *ctx = &global.signConfigureDelegation;

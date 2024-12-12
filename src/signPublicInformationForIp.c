@@ -1,11 +1,4 @@
-#include "os.h"
-
-#include "common/responseCodes.h"
-#include "common/sign.h"
-#include "common/util.h"
 #include "globals.h"
-#include "common/ui/display.h"
-#include "signPublicInformationForIp.h"
 
 static signPublicInformationForIp_t *ctx = &global.signPublicInformationForIp;
 static tx_state_t *tx_state = &global_tx_state;

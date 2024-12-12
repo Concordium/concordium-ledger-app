@@ -1,10 +1,3 @@
-#include "os.h"
-
-#include "common/ui/display.h"
-#include "base58check.h"
-#include "common/responseCodes.h"
-#include "common/sign.h"
-#include "common/util.h"
 #include "globals.h"
 
 static signEncryptedAmountToTransfer_t *ctx = &global.withDataBlob.signEncryptedAmountToTransfer;
