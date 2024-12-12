@@ -15,6 +15,8 @@
 accountSender_t global_account_sender;
 static nbgl_contentTagValue_t pairs[10];
 
+static nbgl_contentTagValue_t pairs[10];
+
 static void review_choice(bool confirm) {
     // Answer, display a status page and go back to main
     if (confirm) {
@@ -23,13 +25,15 @@ static void review_choice(bool confirm) {
         nbgl_useCaseReviewStatus(STATUS_TYPE_ADDRESS_REJECTED, ui_menu_main);
     }
 }
-
 static void review_choice_sign(bool confirm) {
     // Answer, display a status page and go back to main
+    // validate_transaction(confirm);
     if (confirm) {
         buildAndSignTransactionHash();
+        // nbgl_useCaseReviewStatus(STATUS_TYPE_TRANSACTION_SIGNED, ui_menu_main);
     } else {
         sendUserRejection();
+        // nbgl_useCaseReviewStatus(STATUS_TYPE_TRANSACTION_REJECTED, ui_menu_main);
     }
 }
 
@@ -75,61 +79,62 @@ void startConfigureBakerUrlDisplay(bool lastUrlPage) {
 
 // TODO: To fix
 void startConfigureDelegationDisplay(void) {
-    // Get context from global state
-    signConfigureDelegationContext_t *ctx = &global.signConfigureDelegation;
+    // // Get context from global state
+    // signConfigureDelegationContext_t *ctx = &global.signConfigureDelegation;
 
-    // Create tag-value pairs for the content
-    uint8_t pairIndex = 0;
+    // // Create tag-value pairs for the content
+    // nbgl_layoutTagValue_t pairs[4];  // Maximum possible pairs
+    // uint8_t pairIndex = 0;
 
-    // Add sender address
-    pairs[pairIndex].item = "Sender";
-    pairs[pairIndex].value = (char *) global_account_sender.sender;
-    pairIndex++;
+    // // Add sender address
+    // pairs[pairIndex].item = "Sender";
+    // pairs[pairIndex].value = (char *) global_account_sender.sender;
+    // pairIndex++;
 
-    // Add capital amount if present
-    if (ctx->hasCapital) {
-        if (ctx->stopDelegation) {
-            pairs[pairIndex].item = "Action";
-            pairs[pairIndex].value = "Stop delegation";
-        } else {
-            pairs[pairIndex].item = "Amount to delegate";
-            pairs[pairIndex].value = (char *) ctx->displayCapital;
-        }
-        pairIndex++;
-    }
+    // // Add capital amount if present
+    // if (ctx->hasCapital) {
+    //     if (ctx->stopDelegation) {
+    //         pairs[pairIndex].item = "Action";
+    //         pairs[pairIndex].value = "Stop delegation";
+    //     } else {
+    //         pairs[pairIndex].item = "Amount to delegate";
+    //         pairs[pairIndex].value = (char *) ctx->displayCapital;
+    //     }
+    //     pairIndex++;
+    // }
 
-    // Add restake earnings if present
-    if (ctx->hasRestakeEarnings) {
-        pairs[pairIndex].item = "Restake earnings";
-        pairs[pairIndex].value = (char *) ctx->displayRestake;
-        pairIndex++;
-    }
+    // // Add restake earnings if present
+    // if (ctx->hasRestakeEarnings) {
+    //     pairs[pairIndex].item = "Restake earnings";
+    //     pairs[pairIndex].value = (char *) ctx->displayRestake;
+    //     pairIndex++;
+    // }
 
-    // Add delegation target if present
-    if (ctx->hasDelegationTarget) {
-        pairs[pairIndex].item = "Delegation target";
-        pairs[pairIndex].value = (char *) ctx->displayDelegationTarget;
-        pairIndex++;
-    }
+    // // Add delegation target if present
+    // if (ctx->hasDelegationTarget) {
+    //     pairs[pairIndex].item = "Delegation target";
+    //     pairs[pairIndex].value = (char *) ctx->displayDelegationTarget;
+    //     pairIndex++;
+    // }
 
-    // Create the page content
-    nbgl_pageContent_t content;
-    content.type = TAG_VALUE_LIST;
-    content.title = "Review Transaction";
-    content.isTouchableTitle = true;
-    content.topRightIcon = NULL;
-    content.tagValueList.nbPairs = pairIndex;
-    content.tagValueList.pairs = pairs;
-    content.tagValueList.smallCaseForValue = false;
-    content.tagValueList.nbMaxLinesForValue = 0;
+    // // Create the page content
+    // nbgl_pageContent_t content;
+    // content.type = TAG_VALUE_LIST;
+    // content.title = "Review Transaction";
+    // content.isTouchableTitle = true;
+    // content.topRightIcon = NULL;
+    // content.tagValueList.nbPairs = pairIndex;
+    // content.tagValueList.pairs = pairs;
+    // content.tagValueList.smallCaseForValue = false;
+    // content.tagValueList.nbMaxLinesForValue = 0;
 
-    // Setup the review screen
-    nbgl_useCaseReviewStart(&C_app_concordium_64px,
-                            "Review Transaction",
-                            NULL,  // No subtitle
-                            "Reject transaction",
-                            buildAndSignTransactionHash,
-                            sendUserRejection);
+    // // Setup the review screen
+    // nbgl_useCaseReviewStart(&C_app_concordium_64px,
+    //                         "Review Transaction",
+    //                         NULL,  // No subtitle
+    //                         "Reject transaction",
+    //                         buildAndSignTransactionHash,
+    //                         sendUserRejection);
 }
 
 void uiSignUpdateCredentialThresholdDisplay(volatile unsigned int *flags) {
@@ -265,15 +270,34 @@ void startInitialScheduledTransferDisplay(bool displayMemo) {
     // TODO: Implement this
 }
 
-void uiDeployModuleDisplay() {
+void uiDeployModuleDisplay(void) {
+    pairs[0].item = "Sender";
+    pairs[0].value = (char *) global_account_sender.sender;
+    pairs[1].item = "Version";
+    pairs[1].value = (char *) global.deployModule.versionDisplay;
+
+    // Create the page content
+    nbgl_contentTagValueList_t content;
+    content.nbPairs = 2;
+    content.pairs = pairs;
+    content.smallCaseForValue = false;
+    content.nbMaxLinesForValue = 0;
+    content.startIndex = 0;
+    // Setup the review screen
+    nbgl_useCaseReview(TYPE_TRANSACTION,
+                       &content,
+                       &C_app_concordium_64px,
+                       "Review Transaction \nto deploy module",
+                       NULL,  // No subtitle
+                       "Sign transaction\nto deploy module",
+                       review_choice_sign);
+}
+
+void uiUpdateContractDisplay(void) {
     // TODO: Implement this
 }
 
-void uiInitContractDisplay() {
-    // TODO: Implement this
-}
-
-void uiUpdateContractDisplay() {
+void uiInitContractDisplay(void) {
     // TODO: Implement this
 }
 
