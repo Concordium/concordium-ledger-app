@@ -18,15 +18,8 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  ********************************************************************************/
-
-#include <stdlib.h>
-#include <string.h>
-
-#include "os.h"
-#include "cx.h"
-#include "base58.h"
-
-#include "responseCodes.h"
+#include "globals.h"
+#include <base58.h>
 
 #define MAX_ENC_INPUT_SIZE 120
 

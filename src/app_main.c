@@ -26,10 +26,8 @@
 #include "globals.h"
 #include "mainHelpers.h"
 
-#include "responseCodes.h"
 #include "common/handler.h"
-#include "parser.h"  // command_t
-#include "common/responseCodes.h"
+#include "parser.h"          // command_t
 #include "io.h"              // io_init(), io_recv_command(), io_send_sw()
 #include "common/ui/menu.h"  // ui_menu_main()
 

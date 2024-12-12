@@ -1,8 +1,6 @@
 #include "numberHelpers.h"
 
-#include "os.h"
-#include "responseCodes.h"
-#include <string.h>
+#include "globals.h"
 
 size_t lengthOfNumber(uint64_t number) {
     if (number == 0) {

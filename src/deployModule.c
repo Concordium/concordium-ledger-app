@@ -1,8 +1,7 @@
-#include "os.h"
-#include "common/ui/display.h"
-#include "common/responseCodes.h"
-#include "common/sign.h"
-#include "common/util.h"
+#include "globals.h"
+#include "display.h"
+#include "sign.h"
+#include "util.h"
 #include "deployModule.h"
 
 static deployModule_t *ctx_deploy_module = &global.deployModule;

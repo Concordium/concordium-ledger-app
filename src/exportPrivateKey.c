@@ -1,12 +1,6 @@
-#include <os.h>
-#include <stdint.h>
-#include <string.h>
-
-#include "cx.h"
 #include "globals.h"
-#include "responseCodes.h"
+
 #include "util.h"
-#include "ux.h"
 #include "exportPrivateKey.h"
 
 // This class allows for the export of a number of very specific private keys. These private keys
@@ -143,17 +137,17 @@ void handleExportPrivateKey(uint8_t *dataBuffer,
     uint32_t *keyDerivationPath;
     size_t pathLength;
     if (ctx->isNewPath) {
-        keyDerivationPath = (uint32_t[4]){NEW_PURPOSE | HARDENED_OFFSET,
-                                          NEW_COIN_TYPE | HARDENED_OFFSET,
-                                          identity_provider | HARDENED_OFFSET,
-                                          identity | HARDENED_OFFSET};
+        keyDerivationPath = (uint32_t[4]) {NEW_PURPOSE | HARDENED_OFFSET,
+                                           NEW_COIN_TYPE | HARDENED_OFFSET,
+                                           identity_provider | HARDENED_OFFSET,
+                                           identity | HARDENED_OFFSET};
         pathLength = 4;
     } else {
-        keyDerivationPath = (uint32_t[5]){LEGACY_PURPOSE | HARDENED_OFFSET,
-                                          LEGACY_COIN_TYPE | HARDENED_OFFSET,
-                                          ACCOUNT_SUBTREE | HARDENED_OFFSET,
-                                          NORMAL_ACCOUNTS | HARDENED_OFFSET,
-                                          identity | HARDENED_OFFSET};
+        keyDerivationPath = (uint32_t[5]) {LEGACY_PURPOSE | HARDENED_OFFSET,
+                                           LEGACY_COIN_TYPE | HARDENED_OFFSET,
+                                           ACCOUNT_SUBTREE | HARDENED_OFFSET,
+                                           NORMAL_ACCOUNTS | HARDENED_OFFSET,
+                                           identity | HARDENED_OFFSET};
         pathLength = 5;
     }
     memmove(ctx->path, keyDerivationPath, pathLength * sizeof(uint32_t));
