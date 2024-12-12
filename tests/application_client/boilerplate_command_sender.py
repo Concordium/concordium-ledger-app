@@ -128,6 +128,7 @@ class Errors(IntEnum):
 
 # pylint: disable=too-many-public-methods
 # pylint: disable=too-many-locals
+# pylint: disable=too-many-lines
 class BoilerplateCommandSender:
     def __init__(self, backend: BackendInterface) -> None:
         self.backend = backend
