@@ -88,14 +88,6 @@ void app_main() {
             global_tx_state.currentInstruction = cmd.ins;
             isInitialCall = true;
         }
-        // else if (global_tx_state.currentInstruction != cmd.ins) {
-        //     // Caller attempted to switch instruction in the middle
-        //     // of a multi command flow. This is not allowed, as in the
-        //     // worst case, an attacker could trick a user to sign a mixed
-        //     // transaction.
-        //     io_send_sw(ERROR_INVALID_INSTRUCTION);
-        //     // THROW(ERROR_INVALID_STATE);
-        // }
 
         // Dispatch structured APDU command to handler
         if (handler(cmd.ins, cmd.data, cmd.p1, cmd.p2, cmd.lc, &flags, isInitialCall) < 0) {

@@ -28,8 +28,3 @@ typedef struct {
     uint32_t remainingParamsLength;
     updateContractState_t state;
 } updateContract_t;
-
-// typedef struct {
-//     uint8_t version[32];
-//     uint8_t sourceLength[32];
-// } deployModuleBlob_t;

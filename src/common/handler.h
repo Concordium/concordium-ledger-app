@@ -43,9 +43,6 @@
 #define INS_APP_NAME     0x36
 #define INS_GET_APP_NAME 0x21
 
-// instructionContext global;
-// accountSender_t global_account_sender;
-
 int handler(uint8_t INS,
             uint8_t *cdata,
             uint8_t p1,
