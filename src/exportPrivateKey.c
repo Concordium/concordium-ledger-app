@@ -124,7 +124,7 @@ void handleExportPrivateKey(uint8_t *dataBuffer,
     }
     size_t offset = 0;
 
-    ctx->isNewPath = (bool) dataBuffer[offset];
+    ctx->isNewPath = (bool)dataBuffer[offset];
     offset += 1;
 
     uint32_t identity_provider;
@@ -137,17 +137,17 @@ void handleExportPrivateKey(uint8_t *dataBuffer,
     uint32_t *keyDerivationPath;
     size_t pathLength;
     if (ctx->isNewPath) {
-        keyDerivationPath = (uint32_t[4]) {NEW_PURPOSE | HARDENED_OFFSET,
-                                           NEW_COIN_TYPE | HARDENED_OFFSET,
-                                           identity_provider | HARDENED_OFFSET,
-                                           identity | HARDENED_OFFSET};
+        keyDerivationPath = (uint32_t[4]){NEW_PURPOSE | HARDENED_OFFSET,
+                                          NEW_COIN_TYPE | HARDENED_OFFSET,
+                                          identity_provider | HARDENED_OFFSET,
+                                          identity | HARDENED_OFFSET};
         pathLength = 4;
     } else {
-        keyDerivationPath = (uint32_t[5]) {LEGACY_PURPOSE | HARDENED_OFFSET,
-                                           LEGACY_COIN_TYPE | HARDENED_OFFSET,
-                                           ACCOUNT_SUBTREE | HARDENED_OFFSET,
-                                           NORMAL_ACCOUNTS | HARDENED_OFFSET,
-                                           identity | HARDENED_OFFSET};
+        keyDerivationPath = (uint32_t[5]){LEGACY_PURPOSE | HARDENED_OFFSET,
+                                          LEGACY_COIN_TYPE | HARDENED_OFFSET,
+                                          ACCOUNT_SUBTREE | HARDENED_OFFSET,
+                                          NORMAL_ACCOUNTS | HARDENED_OFFSET,
+                                          identity | HARDENED_OFFSET};
         pathLength = 5;
     }
     memmove(ctx->path, keyDerivationPath, pathLength * sizeof(uint32_t));

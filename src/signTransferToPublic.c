@@ -26,17 +26,17 @@ void handleSignTransferToPublic(uint8_t *cdata,
         sendSuccessNoIdle();
     } else if (p1 == P1_REMAINING_AMOUNT && ctx->state == TX_TRANSFER_TO_PUBLIC_REMAINING_AMOUNT) {
         // Hash remaining amount. Remaining amount is encrypted, and so we cannot display it.
-        updateHash((cx_hash_t *) &tx_state->hash, cdata, 192);
+        updateHash((cx_hash_t *)&tx_state->hash, cdata, 192);
         cdata += 192;
 
         // Parse transaction amount so it can be displayed.
         uint64_t amountToPublic = U8BE(cdata, 0);
         amountToGtuDisplay(ctx->amount, sizeof(ctx->amount), amountToPublic);
-        updateHash((cx_hash_t *) &tx_state->hash, cdata, 8);
+        updateHash((cx_hash_t *)&tx_state->hash, cdata, 8);
         cdata += 8;
 
         // Hash amount index
-        updateHash((cx_hash_t *) &tx_state->hash, cdata, 8);
+        updateHash((cx_hash_t *)&tx_state->hash, cdata, 8);
         cdata += 8;
 
         // Parse size of incoming proofs.
@@ -45,7 +45,7 @@ void handleSignTransferToPublic(uint8_t *cdata,
         ctx->state = TX_TRANSFER_TO_PUBLIC_PROOF;
         sendSuccessNoIdle();
     } else if (p1 == P1_PROOF && ctx->state == TX_TRANSFER_TO_PUBLIC_PROOF) {
-        updateHash((cx_hash_t *) &tx_state->hash, cdata, dataLength);
+        updateHash((cx_hash_t *)&tx_state->hash, cdata, dataLength);
         ctx->proofSize -= dataLength;
 
         if (ctx->proofSize == 0) {
