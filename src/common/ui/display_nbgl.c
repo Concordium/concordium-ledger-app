@@ -14,6 +14,8 @@
 #include "nbgl_use_case.h"
 accountSender_t global_account_sender;
 static nbgl_contentTagValue_t pairs[10];
+static signTransferWithScheduleContext_t *ctx_sign_transfer_with_schedule =
+    &global.withDataBlob.signTransferWithScheduleContext;
 
 static void review_choice(bool confirm) {
     // Answer, display a status page and go back to main
@@ -27,6 +29,14 @@ static void review_choice_sign(bool confirm) {
     // Answer, display a status page and go back to main
     if (confirm) {
         buildAndSignTransactionHash();
+    } else {
+        sendUserRejection();
+    }
+}
+
+static void keep_going_with_transaction(bool confirm) {
+    if (confirm) {
+        sendSuccessNoIdle();
     } else {
         sendUserRejection();
     }
@@ -181,7 +191,7 @@ void startConfigureBakerDisplay(void) {
                                 "Review Transaction",
                                 NULL,  // No subtitle
                                 "Continue with transaction",
-                                sendSuccessNoIdle);
+                                keep_going_with_transaction);
     } else {
         // Create the page content
         nbgl_contentTagValueList_t content;
@@ -249,7 +259,7 @@ void startConfigureBakerUrlDisplay(bool lastUrlPage) {
                                 "Review Transaction",
                                 NULL,  // No subtitle
                                 "Continue with transaction",
-                                sendSuccessNoIdle);
+                                keep_going_with_transaction);
     } else {
         // Create the page content
         nbgl_contentTagValueList_t content;
@@ -420,7 +430,7 @@ void uiReviewPublicInformationForIpDisplay(void) {
                             "Review identity",
                             "provider info",
                             "Continue reviewing info",
-                            sendSuccessNoIdle);
+                            keep_going_with_transaction);
 }
 
 void uiSignPublicInformationForIpFinalDisplay(void) {
@@ -471,7 +481,7 @@ void uiSignPublicInformationForIpPublicKeyDisplay(void) {
                             "Review identity",
                             NULL,  // No subtitle
                             "Continue reviewing info",
-                            sendSuccessNoIdle);
+                            keep_going_with_transaction);
 }
 
 void uiRegisterDataInitialDisplay(volatile unsigned int *flags) {
@@ -555,12 +565,71 @@ void uiSignTransferToPublicDisplay(volatile unsigned int *flags) {
     *flags |= IO_ASYNCH_REPLY;
 }
 
+// Add this wrapper function before uiSignScheduledTransferPairFlowDisplay
+static void processNextScheduledAmountWrapper(bool choice) {
+    if (choice) {
+        processNextScheduledAmount(ctx_sign_transfer_with_schedule->buffer);
+    } else {
+        sendUserRejection();
+    }
+}
+
 void uiSignScheduledTransferPairFlowDisplay(void) {
-    // TODO: Implement this
+    // Setup data to display
+    uint8_t pairIndex = 0;
+    pairs[pairIndex].item = "Release time (UTC)";
+    pairs[pairIndex].value =
+        (char *) global.withDataBlob.signTransferWithScheduleContext.displayTimestamp;
+    pairIndex++;
+    pairs[pairIndex].item = "Amount";
+    pairs[pairIndex].value =
+        (char *) global.withDataBlob.signTransferWithScheduleContext.displayStr;
+    pairIndex++;
+
+    // Create the page content
+    nbgl_contentTagValueList_t content;
+    content.nbPairs = pairIndex;
+    content.pairs = pairs;
+    content.smallCaseForValue = false;
+    content.nbMaxLinesForValue = 0;
+    content.startIndex = 0;
+    // Setup the review screen
+    nbgl_useCaseReviewLight(TYPE_TRANSACTION,
+                            &content,
+                            &C_app_concordium_64px,
+                            "Review Scheduled release",
+                            NULL,  // No subtitle
+                            "Show next release",
+                            processNextScheduledAmountWrapper);
 }
 
 void uiSignScheduledTransferPairFlowSignDisplay(void) {
-    // TODO: Implement this
+    // Setup data to display
+    uint8_t pairIndex = 0;
+    pairs[pairIndex].item = "Release time (UTC)";
+    pairs[pairIndex].value =
+        (char *) global.withDataBlob.signTransferWithScheduleContext.displayTimestamp;
+    pairIndex++;
+    pairs[pairIndex].item = "Amount";
+    pairs[pairIndex].value =
+        (char *) global.withDataBlob.signTransferWithScheduleContext.displayStr;
+    pairIndex++;
+
+    // Create the page content
+    nbgl_contentTagValueList_t content;
+    content.nbPairs = pairIndex;
+    content.pairs = pairs;
+    content.smallCaseForValue = false;
+    content.nbMaxLinesForValue = 0;
+    content.startIndex = 0;
+    // Setup the review screen
+    nbgl_useCaseReview(TYPE_TRANSACTION,
+                       &content,
+                       &C_app_concordium_64px,
+                       "Review Scheduled release",
+                       NULL,  // No subtitle
+                       "Sign transaction",
+                       review_choice_sign);
 }
 
 void uiSignScheduledTransferPairFlowFinalDisplay(void) {
@@ -573,8 +642,33 @@ void uiVerifyAddress(volatile unsigned int *flags) {
 }
 
 void startInitialScheduledTransferDisplay(bool displayMemo) {
-    displayMemo = false;
-    // TODO: Implement this
+    uint8_t index = 0;
+    pairs[index].item = "Sender";
+    pairs[index].value = (char *) global_account_sender.sender;
+    index++;
+    pairs[index].item = "Recipient";
+    pairs[index].value = (char *) global.withDataBlob.signTransferWithScheduleContext.displayStr;
+    index++;
+    if (displayMemo) {
+        pairs[index].item = "Memo";
+        pairs[index].value = (char *) global.withDataBlob.cborContext.display;
+        index++;
+    }
+    // Create the page content
+    nbgl_contentTagValueList_t content;
+    content.nbPairs = index;
+    content.pairs = pairs;
+    content.smallCaseForValue = false;
+    content.nbMaxLinesForValue = 0;
+    content.startIndex = 0;
+    // Setup the review screen
+    nbgl_useCaseReviewLight(TYPE_TRANSACTION,
+                            &content,
+                            &C_app_concordium_64px,
+                            "Review Transfer with schedule",
+                            NULL,  // No subtitle
+                            "Continue with transfer",
+                            keep_going_with_transaction);
 }
 
 void uiDeployModuleDisplay(void) {
