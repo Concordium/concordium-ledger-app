@@ -233,7 +233,7 @@ def test_sign_tx_transfer_with_schedule_legacy_path(
     )
 
 
-# @pytest.mark.active_test_scope
+@pytest.mark.active_test_scope
 def test_sign_tx_transfer_with_schedule_and_memo_legacy_path(
     backend, firmware, navigator, default_screenshot_path, test_name
 ):
@@ -282,23 +282,40 @@ def test_sign_tx_transfer_with_schedule_and_memo_legacy_path(
     for chunk in memo_chunks:
         with client.sign_tx_with_schedule_and_memo_part_2(memo_chunk=chunk):
             # Navigate and compare screenshots for validation
-            navigator.navigate_and_compare(
-                default_screenshot_path,
-                test_name,
-                instructions_builder(6, backend),
-                10,
-                True,
-                False,
-            )
+            if firmware.is_nano:
+                navigator.navigate_and_compare(
+                    default_screenshot_path,
+                    test_name,
+                    instructions_builder(6, backend),
+                    10,
+                    True,
+                    False,
+                )
+            else:
+                navigate_until_text_and_compare(
+                    firmware,
+                    navigator,
+                    "Continue",
+                    default_screenshot_path,
+                    test_name,
+                    True,
+                    False,
+                    NavInsID.USE_CASE_CHOICE_CONFIRM,
+                )
 
     # Process each chunk of pairs
-    screenshots_so_far = 7
+    screenshots_so_far = 7 if firmware.is_nano else 3
     for chunk in pairs_chunk:
+        nbgl_confirm_instruction = NavInsID.USE_CASE_CHOICE_CONFIRM
         number_of_pairs_in_chunk = len(chunk) // 16
         # Create the instructions to validate each pair
         instructions = []
         for _ in range(number_of_pairs_in_chunk):
-            instructions.extend(instructions_builder(2, backend))
+            if _ == number_of_pairs_in_chunk - 1:
+                nbgl_confirm_instruction = NavInsID.USE_CASE_REVIEW_CONFIRM
+            instructions.extend(
+                instructions_builder(2, backend, nbgl_confirm_instruction)
+            )
 
         # Send the second part of the transaction signing request
         with client.sign_tx_with_schedule_part_2(data=chunk):
@@ -309,7 +326,7 @@ def test_sign_tx_transfer_with_schedule_and_memo_legacy_path(
                 instructions,
                 10,
                 False,
-                False,
+                True,
                 screenshots_so_far,
             )
         screenshots_so_far += number_of_pairs_in_chunk * 3
