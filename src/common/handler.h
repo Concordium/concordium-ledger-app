@@ -1,5 +1,4 @@
-#ifndef _HANDLER_H_
-#define _HANDLER_H_
+#pragma once
 
 #include "../globals.h"
 
@@ -56,5 +55,3 @@ int handler(uint8_t INS,
             uint8_t lc,
             volatile unsigned int *flags,
             bool isInitialCall);
-
-#endif

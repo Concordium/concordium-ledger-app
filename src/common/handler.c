@@ -1,7 +1,3 @@
-
-#ifndef _HANDLER_C_
-#define _HANDLER_C_
-
 #include <stdbool.h>
 #include <string.h>
 
@@ -87,5 +83,3 @@ int handler(uint8_t INS,
     }
     return 0;
 }
-
-#endif

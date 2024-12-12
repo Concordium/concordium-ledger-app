@@ -1,5 +1,4 @@
-#ifndef _CONCORDIUM_APP_UTIL_H_
-#define _CONCORDIUM_APP_UTIL_H_
+#pragma once
 
 #include <stdbool.h>
 #include <string.h>
@@ -203,5 +202,3 @@ void getBlsPrivateKey(uint32_t *keyPathInput,
  * @param sizeOfDst the size of dst
  */
 size_t hashAndLoadU64Ratio(uint8_t *cdata, uint8_t *dst, uint8_t sizeOfDst);
-
-#endif

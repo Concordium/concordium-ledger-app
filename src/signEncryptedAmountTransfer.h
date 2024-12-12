@@ -1,6 +1,4 @@
-#ifndef _CONCORDIUM_APP_ACCOUNT_ENCRYPTED_AMOUNT_TRANSFER_H_
-#define _CONCORDIUM_APP_ACCOUNT_ENCRYPTED_AMOUNT_TRANSFER_H_
-
+#pragma once
 /**
  * Handles the signing flow, including updating the display, for the 'encrypted amount transfer'
  * account transaction.
@@ -32,5 +30,3 @@ typedef struct {
     uint16_t proofSize;
     encryptedAmountTransferState_t state;
 } signEncryptedAmountToTransfer_t;
-
-#endif

@@ -7,10 +7,7 @@
         {
             "name": "Nano S+",
             "includePath": [
-                "/usr/include",
-                "${workspaceFolder}/src",
-                "${env:BOLOS_SDK}/include/*",
-                "${env:BOLOS_SDK}/lib_ux/include/*"
+                "${workspaceFolder}/src"
             ],
             "defines": [
                 "TARGET_NANOS2",

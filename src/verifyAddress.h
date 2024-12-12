@@ -1,5 +1,4 @@
-#ifndef _CONCORDIUM_APP_VERIFY_ADDRESS_H_
-#define _CONCORDIUM_APP_VERIFY_ADDRESS_H_
+#pragma once
 
 void handleVerifyAddress(uint8_t *cdata, uint8_t p1, volatile unsigned int *flags);
 
@@ -9,5 +8,3 @@ typedef struct {
 } verifyAddressContext_t;
 
 void uiVerifyAddress(volatile unsigned int *flags);
-
-#endif
