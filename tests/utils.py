@@ -77,7 +77,7 @@ def navigate_until_text_and_compare(
     """
     if firmware.device.startswith(("stax", "flex")):
         go_right_instruction = NavInsID.SWIPE_CENTER_TO_LEFT
-        confirm_instructions = [NavInsID.USE_CASE_ADDRESS_CONFIRMATION_CONFIRM]
+        confirm_instructions = [NavInsID.USE_CASE_REVIEW_CONFIRM]
     else:
         go_right_instruction = NavInsID.RIGHT_CLICK
         confirm_instructions = [NavInsID.BOTH_CLICK]

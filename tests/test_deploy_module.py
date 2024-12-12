@@ -32,3 +32,10 @@ def test_deploy_module(
         navigate_until_text_and_compare(
             firmware, navigator, "Sign", default_screenshot_path, test_name
         )
+
+    response = client.get_async_response()
+    print(response.data.hex())
+    assert response.status == 0x9000
+    assert response.data == bytes.fromhex(
+        "dbf31688385e1dcf05520acb4dada4a139dd18c17a77645a0ffee5b3d3a1c5ad581286c0e6c82584c245cc9f21281b7244994e9ea5a07e4ac8fe8957144c2e0a"
+    )
