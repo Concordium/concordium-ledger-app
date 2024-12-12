@@ -26,7 +26,7 @@ def test_export_standard_private_key_legacy_path(
             "Accept",
             default_screenshot_path,
             test_name,
-            screen_change_before_first_instruction=False,
+            screen_change_before_first_instruction=True,
             screen_change_after_last_instruction=True,
         )
     result = client.get_async_response()
@@ -48,7 +48,7 @@ def test_export_recovery_private_key_legacy_path(
             "Accept",
             default_screenshot_path,
             test_name,
-            screen_change_before_first_instruction=False,
+            screen_change_before_first_instruction=True,
             screen_change_after_last_instruction=True,
         )
     result = client.get_async_response()
@@ -72,7 +72,7 @@ def test_export_prfkey_and_idcredsed_private_key_legacy_path(
             "Accept",
             default_screenshot_path,
             test_name,
-            screen_change_before_first_instruction=False,
+            screen_change_before_first_instruction=True,
             screen_change_after_last_instruction=True,
         )
     result = client.get_async_response()
@@ -96,7 +96,7 @@ def test_export_standard_private_key_new_path(
             "Accept",
             default_screenshot_path,
             test_name,
-            screen_change_before_first_instruction=False,
+            screen_change_before_first_instruction=True,
             screen_change_after_last_instruction=True,
         )
     result = client.get_async_response()
