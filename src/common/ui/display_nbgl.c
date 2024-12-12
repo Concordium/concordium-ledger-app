@@ -13,6 +13,7 @@
 
 #include "nbgl_use_case.h"
 accountSender_t global_account_sender;
+static nbgl_contentTagValue_t pairs[10];
 
 static void review_choice(bool confirm) {
     // Answer, display a status page and go back to main
@@ -22,6 +23,16 @@ static void review_choice(bool confirm) {
         nbgl_useCaseReviewStatus(STATUS_TYPE_ADDRESS_REJECTED, ui_menu_main);
     }
 }
+
+static void review_choice_sign(bool confirm) {
+    // Answer, display a status page and go back to main
+    if (confirm) {
+        buildAndSignTransactionHash();
+    } else {
+        sendUserRejection();
+    }
+}
+
 void uiComparePubkey(void) {
     // TODO: Implement this
     nbgl_useCaseAddressReview(global.exportPublicKeyContext.publicKey,
@@ -68,7 +79,6 @@ void startConfigureDelegationDisplay(void) {
     signConfigureDelegationContext_t *ctx = &global.signConfigureDelegation;
 
     // Create tag-value pairs for the content
-    nbgl_layoutTagValue_t pairs[4];  // Maximum possible pairs
     uint8_t pairIndex = 0;
 
     // Add sender address
@@ -206,8 +216,32 @@ void uiSignTransferToEncryptedDisplay(volatile unsigned int *flags) {
 }
 
 void uiSignTransferToPublicDisplay(volatile unsigned int *flags) {
+    // Setup data to display
+    uint8_t pairIndex = 0;
+    pairs[pairIndex].item = "Sender";
+    pairs[pairIndex].value = (char *) global_account_sender.sender;
+    pairIndex++;
+    pairs[pairIndex].item = "Unshield amount";
+    pairs[pairIndex].value = (char *) global.signTransferToPublic.amount;
+    pairIndex++;
+
+    // Create the page content
+    nbgl_contentTagValueList_t content;
+    content.nbPairs = pairIndex;
+    content.pairs = pairs;
+    content.smallCaseForValue = false;
+    content.nbMaxLinesForValue = 0;
+    content.startIndex = 0;
+    // Setup the review screen
+    nbgl_useCaseReview(
+        TYPE_TRANSACTION,
+        &content,
+        &C_app_concordium_64px,
+        "Review Transaction",
+        NULL,  // No subtitle
+        "Sign transaction",
+        review_choice_sign);
     *flags |= IO_ASYNCH_REPLY;
-    // TODO: Implement this
 }
 
 void uiSignScheduledTransferPairFlowDisplay(void) {
@@ -229,6 +263,18 @@ void uiVerifyAddress(volatile unsigned int *flags) {
 
 void startInitialScheduledTransferDisplay(bool displayMemo) {
     displayMemo = false;
+    // TODO: Implement this
+}
+
+void uiDeployModuleDisplay() {
+    // TODO: Implement this
+}
+
+void uiInitContractDisplay() {
+    // TODO: Implement this
+}
+
+void uiUpdateContractDisplay() {
     // TODO: Implement this
 }
 
