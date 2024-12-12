@@ -12,6 +12,16 @@ static void review_choice(bool confirm) {
         nbgl_useCaseReviewStatus(STATUS_TYPE_ADDRESS_REJECTED, ui_menu_main);
     }
 }
+
+static void review_export_private_key(bool confirm) {
+    // Answer, display a status page and go back to main
+    if (confirm) {
+        exportPrivateKey();
+    } else {
+        sendUserRejection();
+    }
+}
+
 static void review_choice_sign(bool confirm) {
     // Answer, display a status page and go back to main
     if (confirm) {
@@ -44,8 +54,29 @@ void uiGeneratePubkey(volatile unsigned int *flags) {
 }
 
 void uiExportPrivateKey(volatile unsigned int *flags) {
+    // Create tag-value pairs for the content
+    uint8_t pairIndex = 0;
+    pairs[pairIndex].item = (char *) global.exportPrivateKeyContext.displayHeader;
+    pairs[pairIndex].value = (char *) global.exportPrivateKeyContext.display;
+    pairIndex++;
+
+    // Create the page content
+    nbgl_contentTagValueList_t content;
+    content.nbPairs = pairIndex;
+    content.pairs = pairs;
+    content.smallCaseForValue = false;
+    content.nbMaxLinesForValue = 0;
+    content.startIndex = 0;
+
+    // Setup the review screen
+    nbgl_useCaseReview(TYPE_OPERATION,
+                       &content,
+                       &C_app_concordium_64px,
+                       "Export Private Key",
+                       NULL,
+                       "Accept",
+                       review_export_private_key);
     *flags |= IO_ASYNCH_REPLY;
-    // TODO: Implement this
 }
 
 void startConfigureBakerCommissionDisplay(void) {
