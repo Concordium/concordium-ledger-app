@@ -164,7 +164,6 @@ void startConfigureBakerDisplay(void) {
         pairIndex++;
     }
 
-    PRINTF("GUI: pairIndex: %d\n", pairIndex);
     // If there are additional steps, then show continue screen. If this is the last step,
     // then show signing screens.
     if (ctx->hasMetadataUrl || hasCommissionRate()) {
@@ -185,7 +184,6 @@ void startConfigureBakerDisplay(void) {
                                 sendSuccessNoIdle);
     } else {
         // Create the page content
-        PRINTF("GUI: Sign transaction:");
         nbgl_contentTagValueList_t content;
         content.nbPairs = pairIndex;
         content.pairs = pairs;
@@ -375,19 +373,105 @@ void startEncryptedTransferDisplay(bool displayMemo) {
 }
 
 void uiSignPublicInformationForIpCompleteDisplay(void) {
-    // TODO: Implement this
+    // Setup data to display
+    uint8_t pairIndex = 0;
+    pairs[pairIndex].item = "Public key";
+    pairs[pairIndex].value = (char *) global.signPublicInformationForIp.publicKey;
+    pairIndex++;
+    pairs[pairIndex].item = "Signature threshold";
+    pairs[pairIndex].value = (char *) global.signPublicInformationForIp.threshold;
+    pairIndex++;
+
+    // Create the page content
+    nbgl_contentTagValueList_t content;
+    content.nbPairs = pairIndex;
+    content.pairs = pairs;
+    content.smallCaseForValue = false;
+    content.nbMaxLinesForValue = 0;
+    content.startIndex = 0;
+    // Setup the review screen
+    nbgl_useCaseReview(TYPE_TRANSACTION,
+                       &content,
+                       &C_app_concordium_64px,
+                       "Review identity",
+                       "provider info",
+                       "Sign identity",
+                       review_choice_sign);
 }
 
 void uiReviewPublicInformationForIpDisplay(void) {
-    // TODO: Implement this
+    // Setup data to display
+    uint8_t pairIndex = 0;
+    pairs[pairIndex].item = "Public key";
+    pairs[pairIndex].value = global.signPublicInformationForIp.publicKey;
+    pairIndex++;
+
+    // Create the page content
+    nbgl_contentTagValueList_t content;
+    content.nbPairs = pairIndex;
+    content.pairs = pairs;
+    content.smallCaseForValue = false;
+    content.nbMaxLinesForValue = 0;
+    content.startIndex = 0;
+    // Setup the review screen
+    nbgl_useCaseReviewLight(TYPE_OPERATION,
+                            &content,
+                            &C_app_concordium_64px,
+                            "Review identity",
+                            "provider info",
+                            "Continue reviewing info",
+                            sendSuccessNoIdle);
 }
 
 void uiSignPublicInformationForIpFinalDisplay(void) {
-    // TODO: Implement this
+    // Setup data to display
+    uint8_t pairIndex = 0;
+    pairs[pairIndex].item = "Public key";
+    pairs[pairIndex].value = (char *) global.signPublicInformationForIp.publicKey;
+    pairIndex++;
+    pairs[pairIndex].item = "Signature threshold";
+    pairs[pairIndex].value = (char *) global.signPublicInformationForIp.threshold;
+    pairIndex++;
+
+    // Create the page content
+    nbgl_contentTagValueList_t content;
+    content.nbPairs = pairIndex;
+    content.pairs = pairs;
+    content.smallCaseForValue = false;
+    content.nbMaxLinesForValue = 0;
+    content.startIndex = 0;
+    // Setup the review screen
+    nbgl_useCaseReview(TYPE_TRANSACTION,
+                       &content,
+                       &C_app_concordium_64px,
+                       "Review identity",
+                       NULL,  // No subtitle
+                       "Sign identity",
+                       review_choice_sign);
 }
 
 void uiSignPublicInformationForIpPublicKeyDisplay(void) {
-    // TODO: Implement this
+    // Setup data to display
+    uint8_t pairIndex = 0;
+    pairs[pairIndex].item = "Public key";
+    pairs[pairIndex].value = global.signPublicInformationForIp.publicKey;
+    pairIndex++;
+
+    // Create the page content
+    nbgl_contentTagValueList_t content;
+    content.nbPairs = pairIndex;
+    content.pairs = pairs;
+    content.smallCaseForValue = false;
+    content.nbMaxLinesForValue = 0;
+    content.startIndex = 0;
+    // Setup the review screen
+    nbgl_useCaseReviewLight(TYPE_OPERATION,
+                            &content,
+                            &C_app_concordium_64px,
+                            "Review identity",
+                            NULL,  // No subtitle
+                            "Continue reviewing info",
+                            sendSuccessNoIdle);
 }
 
 void uiRegisterDataInitialDisplay(volatile unsigned int *flags) {
