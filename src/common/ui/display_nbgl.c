@@ -126,7 +126,6 @@ void startConfigureDelegationDisplay(void) {
                        NULL,  // No subtitle
                        "Sign transaction",
                        review_choice_sign);
-
 }
 
 void uiSignUpdateCredentialThresholdDisplay(volatile unsigned int *flags) {
