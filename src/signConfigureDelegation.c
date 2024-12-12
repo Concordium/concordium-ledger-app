@@ -15,7 +15,7 @@ void handleSignConfigureDelegation(uint8_t *cdata,
     cdata += accountTransactionHeaderAndKindLength;
 
     // The initial 2 bytes tells us the fields we are receiving.
-    updateHash((cx_hash_t *) &tx_state->hash, cdata, 2);
+    updateHash((cx_hash_t *)&tx_state->hash, cdata, 2);
     uint16_t bitmap = U2BE(cdata, 0);
     cdata += 2;
     uint8_t expectedDataLength =
@@ -38,14 +38,14 @@ void handleSignConfigureDelegation(uint8_t *cdata,
             ctx->stopDelegation = false;
             amountToGtuDisplay(ctx->displayCapital, sizeof(ctx->displayCapital), capitalAmount);
         }
-        updateHash((cx_hash_t *) &tx_state->hash, cdata, 8);
+        updateHash((cx_hash_t *)&tx_state->hash, cdata, 8);
         expectedDataLength += 8;
         cdata += 8;
     }
 
     if (ctx->hasRestakeEarnings) {
         uint8_t restake = cdata[0];
-        updateHash((cx_hash_t *) &tx_state->hash, cdata, 1);
+        updateHash((cx_hash_t *)&tx_state->hash, cdata, 1);
         expectedDataLength += 1;
         cdata += 1;
         if (restake == 0) {
@@ -59,7 +59,7 @@ void handleSignConfigureDelegation(uint8_t *cdata,
 
     if (ctx->hasDelegationTarget) {
         uint8_t delegationType = cdata[0];
-        updateHash((cx_hash_t *) &tx_state->hash, cdata, 1);
+        updateHash((cx_hash_t *)&tx_state->hash, cdata, 1);
         expectedDataLength += 1;
         cdata += 1;
 
@@ -70,7 +70,7 @@ void handleSignConfigureDelegation(uint8_t *cdata,
             expectedDataLength += 8;
             memmove(ctx->displayDelegationTarget, "Baker ID ", 9);
             bin2dec(ctx->displayDelegationTarget + 9, 21, bakerId);
-            updateHash((cx_hash_t *) &tx_state->hash, cdata, 8);
+            updateHash((cx_hash_t *)&tx_state->hash, cdata, 8);
         } else {
             THROW(ERROR_INVALID_TRANSACTION);
         }

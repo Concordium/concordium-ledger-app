@@ -14,16 +14,16 @@ void processNextVerificationKey(void) {
 
 void parseVerificationKey(uint8_t *buffer) {
     // Hash key index
-    updateHash((cx_hash_t *) &tx_state->hash, buffer, 1);
+    updateHash((cx_hash_t *)&tx_state->hash, buffer, 1);
     buffer += 1;
 
     // Hash schemeId
-    updateHash((cx_hash_t *) &tx_state->hash, buffer, 1);
+    updateHash((cx_hash_t *)&tx_state->hash, buffer, 1);
     buffer += 1;
 
     uint8_t verificationKey[32];
     memmove(verificationKey, buffer, 32);
-    updateHash((cx_hash_t *) &tx_state->hash, verificationKey, 32);
+    updateHash((cx_hash_t *)&tx_state->hash, verificationKey, 32);
 
     // Convert to a human-readable format.
     toPaginatedHex(verificationKey,
@@ -77,7 +77,7 @@ void handleSignUpdateCredential(uint8_t *dataBuffer,
         dataBuffer += hashAccountTransactionHeaderAndKind(dataBuffer, UPDATE_CREDENTIALS);
 
         ctx->credentialDeploymentCount = dataBuffer[0];
-        updateHash((cx_hash_t *) &tx_state->hash, dataBuffer, 1);
+        updateHash((cx_hash_t *)&tx_state->hash, dataBuffer, 1);
         if (ctx->credentialDeploymentCount == 0) {
             ctx->updateCredentialState = TX_UPDATE_CREDENTIAL_ID_COUNT;
         } else {
@@ -90,7 +90,7 @@ void handleSignUpdateCredential(uint8_t *dataBuffer,
                ctx->updateCredentialState == TX_UPDATE_CREDENTIAL_CREDENTIAL_INDEX &&
                ctx->credentialDeploymentCount > 0) {
         // Add the credential index to the hash
-        updateHash((cx_hash_t *) &tx_state->hash, dataBuffer, 1);
+        updateHash((cx_hash_t *)&tx_state->hash, dataBuffer, 1);
         ctx->updateCredentialState = TX_UPDATE_CREDENTIAL_CREDENTIAL;
         sendSuccessNoIdle();
     } else if (p2 == P2_CREDENTIAL_CREDENTIAL &&
@@ -100,7 +100,7 @@ void handleSignUpdateCredential(uint8_t *dataBuffer,
     } else if (p2 == P2_CREDENTIAL_ID_COUNT &&
                ctx->updateCredentialState == TX_UPDATE_CREDENTIAL_ID_COUNT) {
         ctx->credentialIdCount = dataBuffer[0];
-        updateHash((cx_hash_t *) &tx_state->hash, dataBuffer, 1);
+        updateHash((cx_hash_t *)&tx_state->hash, dataBuffer, 1);
 
         if (ctx->credentialIdCount == 0) {
             ctx->updateCredentialState = TX_UPDATE_CREDENTIAL_THRESHOLD;
@@ -109,7 +109,7 @@ void handleSignUpdateCredential(uint8_t *dataBuffer,
         }
         sendSuccessNoIdle();
     } else if (p2 == P2_CREDENTIAL_ID && ctx->updateCredentialState == TX_UPDATE_CREDENTIAL_ID) {
-        updateHash((cx_hash_t *) &tx_state->hash, dataBuffer, 48);
+        updateHash((cx_hash_t *)&tx_state->hash, dataBuffer, 48);
         toPaginatedHex(dataBuffer, 48, ctx->credentialId, sizeof(ctx->credentialId));
 
         ctx->credentialIdCount -= 1;
@@ -122,7 +122,7 @@ void handleSignUpdateCredential(uint8_t *dataBuffer,
     } else if (p2 == P2_THRESHOLD && ctx->updateCredentialState == TX_UPDATE_CREDENTIAL_THRESHOLD) {
         uint8_t threshold = dataBuffer[0];
         bin2dec(ctx->threshold, sizeof(ctx->threshold), threshold);
-        updateHash((cx_hash_t *) &tx_state->hash, dataBuffer, 1);
+        updateHash((cx_hash_t *)&tx_state->hash, dataBuffer, 1);
 
         uiSignUpdateCredentialThresholdDisplay(flags);
 
@@ -152,7 +152,7 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer,
     } else if (p1 == P1_VERIFICATION_KEY_LENGTH &&
                ctx->state == TX_CREDENTIAL_DEPLOYMENT_VERIFICATION_KEYS_LENGTH) {
         ctx->numberOfVerificationKeys = dataBuffer[0];
-        updateHash((cx_hash_t *) &tx_state->hash, dataBuffer, 1);
+        updateHash((cx_hash_t *)&tx_state->hash, dataBuffer, 1);
         ctx->state = TX_CREDENTIAL_DEPLOYMENT_VERIFICATION_KEY;
         sendSuccessNoIdle();
     } else if (p1 == P1_VERIFICATION_KEY) {
@@ -188,17 +188,17 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer,
 
         // Parse signature threshold.
         bin2dec(ctx->signatureThreshold, sizeof(ctx->signatureThreshold), dataBuffer[0]);
-        updateHash((cx_hash_t *) &tx_state->hash, dataBuffer, 1);
+        updateHash((cx_hash_t *)&tx_state->hash, dataBuffer, 1);
         dataBuffer += 1;
 
         // Parse the RegIdCred, but do not display it, as the user cannot feasibly verify it.
-        updateHash((cx_hash_t *) &tx_state->hash, dataBuffer, 48);
+        updateHash((cx_hash_t *)&tx_state->hash, dataBuffer, 48);
         dataBuffer += 48;
 
         // Parse identity provider index.
         // We do not show the identity provider id, because it is infeasible for the user to
         // validate it, and there are no known reasonable attacks made possible by replacing this.
-        updateHash((cx_hash_t *) &tx_state->hash, dataBuffer, 4);
+        updateHash((cx_hash_t *)&tx_state->hash, dataBuffer, 4);
         dataBuffer += 4;
 
         // Parse anonymity revocation threshold.
@@ -207,12 +207,12 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer,
                                   dataBuffer[0]);
         memmove(ctx->anonymityRevocationThreshold + offset, " out of ", 8);
         offset += 8;
-        updateHash((cx_hash_t *) &tx_state->hash, dataBuffer, 1);
+        updateHash((cx_hash_t *)&tx_state->hash, dataBuffer, 1);
         dataBuffer += 1;
 
         // Parse the length of the following list of anonymity revokers.
         ctx->anonymityRevocationListLength = U2BE(dataBuffer, 0);
-        updateHash((cx_hash_t *) &tx_state->hash, dataBuffer, 2);
+        updateHash((cx_hash_t *)&tx_state->hash, dataBuffer, 2);
         // Add the total amount of revokers to the display of threshold to get "x out of y"
         bin2dec(ctx->anonymityRevocationThreshold + offset,
                 sizeof(ctx->anonymityRevocationThreshold) - offset,
@@ -230,7 +230,7 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer,
         // Parse ArIdentity
         // We do not show the AR identity id, because it is infeasible for the user to validate it,
         // and there are no known reasonable attacks made possible by replacing this.
-        updateHash((cx_hash_t *) &tx_state->hash, dataBuffer, 4);
+        updateHash((cx_hash_t *)&tx_state->hash, dataBuffer, 4);
         dataBuffer += 4;
 
         // Parse enc_id_cred_pub_share
@@ -238,7 +238,7 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer,
         // to validate.
         uint8_t encIdCredPubShare[96];
         memmove(encIdCredPubShare, dataBuffer, 96);
-        updateHash((cx_hash_t *) &tx_state->hash, encIdCredPubShare, 96);
+        updateHash((cx_hash_t *)&tx_state->hash, encIdCredPubShare, 96);
 
         if (ctx->anonymityRevocationListLength == 1) {
             ctx->state = TX_CREDENTIAL_DEPLOYMENT_CREDENTIAL_DATES;
@@ -250,12 +250,12 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer,
         // hash valid to and created at
         // We don't show these values, because only the dates on the identity object can be accepted
         // by the chain.
-        updateHash((cx_hash_t *) &tx_state->hash, dataBuffer, 6);
+        updateHash((cx_hash_t *)&tx_state->hash, dataBuffer, 6);
         dataBuffer += 6;
 
         // Read attribute list length
         ctx->attributeListLength = U2BE(dataBuffer, 0);
-        updateHash((cx_hash_t *) &tx_state->hash, dataBuffer, 2);
+        updateHash((cx_hash_t *)&tx_state->hash, dataBuffer, 2);
 
         if (ctx->attributeListLength == 0) {
             ctx->state = TX_CREDENTIAL_DEPLOYMENT_LENGTH_OF_PROOFS;
@@ -273,20 +273,20 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer,
         uint8_t attributeTag[1];
         memmove(attributeTag, dataBuffer, 1);
         dataBuffer += 1;
-        updateHash((cx_hash_t *) &tx_state->hash, attributeTag, 1);
+        updateHash((cx_hash_t *)&tx_state->hash, attributeTag, 1);
 
         // Parse attribute length, so we know how much to parse in next packet.
         uint8_t attributeValueLength[1];
         memmove(attributeValueLength, dataBuffer, 1);
         ctx->attributeValueLength = attributeValueLength[0];
-        updateHash((cx_hash_t *) &tx_state->hash, attributeValueLength, 1);
+        updateHash((cx_hash_t *)&tx_state->hash, attributeValueLength, 1);
 
         ctx->state = TX_CREDENTIAL_DEPLOYMENT_ATTRIBUTE_VALUE;
         // Ask computer for the attribute value.
         sendSuccessNoIdle();
     } else if (p1 == P1_ATTRIBUTE_VALUE && ctx->state == TX_CREDENTIAL_DEPLOYMENT_ATTRIBUTE_VALUE) {
         // Add attribute value to the hash.
-        updateHash((cx_hash_t *) &tx_state->hash, dataBuffer, ctx->attributeValueLength);
+        updateHash((cx_hash_t *)&tx_state->hash, dataBuffer, ctx->attributeValueLength);
         ctx->attributeListLength -= 1;
 
         // We have processed all attributes
@@ -302,17 +302,17 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer,
                ctx->state == TX_CREDENTIAL_DEPLOYMENT_LENGTH_OF_PROOFS) {
         ctx->proofLength = U4BE(dataBuffer, 0);
         if (p2 == P2_CREDENTIAL_CREDENTIAL) {
-            updateHash((cx_hash_t *) &tx_state->hash, dataBuffer, 4);
+            updateHash((cx_hash_t *)&tx_state->hash, dataBuffer, 4);
         }
         ctx->state = TX_CREDENTIAL_DEPLOYMENT_PROOFS;
         sendSuccessNoIdle();
     } else if (p1 == P1_PROOFS && ctx->state == TX_CREDENTIAL_DEPLOYMENT_PROOFS) {
         if (ctx->proofLength > MAX_CDATA_LENGTH) {
-            updateHash((cx_hash_t *) &tx_state->hash, dataBuffer, MAX_CDATA_LENGTH);
+            updateHash((cx_hash_t *)&tx_state->hash, dataBuffer, MAX_CDATA_LENGTH);
             ctx->proofLength -= MAX_CDATA_LENGTH;
             sendSuccessNoIdle();
         } else {
-            updateHash((cx_hash_t *) &tx_state->hash, dataBuffer, ctx->proofLength);
+            updateHash((cx_hash_t *)&tx_state->hash, dataBuffer, ctx->proofLength);
 
             // If an update credential transaction, then update state to next step.
             if (p2 == P2_CREDENTIAL_CREDENTIAL &&
@@ -334,11 +334,11 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer,
     } else if (p1 == P1_NEW_OR_EXISTING && ctx->state == TX_CREDENTIAL_DEPLOYMENT_NEW_OR_EXISTING) {
         // 0 indicates new, 1 indicates existing
         uint8_t newOrExisting = dataBuffer[0];
-        updateHash((cx_hash_t *) &tx_state->hash, dataBuffer, 1);
+        updateHash((cx_hash_t *)&tx_state->hash, dataBuffer, 1);
         dataBuffer += 1;
 
         if (newOrExisting == 0) {
-            updateHash((cx_hash_t *) &tx_state->hash, dataBuffer, 8);
+            updateHash((cx_hash_t *)&tx_state->hash, dataBuffer, 8);
             if (ctx->showIntro) {
                 uiSignCredentialDeploymentNewIntroDisplay();
             } else {
@@ -358,7 +358,7 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer,
                 THROW(ERROR_INVALID_TRANSACTION);
             }
             ctx->accountAddress[55] = '\0';
-            updateHash((cx_hash_t *) &tx_state->hash, dataBuffer, 32);
+            updateHash((cx_hash_t *)&tx_state->hash, dataBuffer, 32);
 
             if (ctx->showIntro) {
                 uiSignCredentialDeploymentExistingIntroDisplay();
