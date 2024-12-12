@@ -13,7 +13,13 @@
         "string_view": "c",
         "unordered_map": "c",
         "vector": "c",
-        "locale": "c"
+        "locale": "c",
+        "__bit_reference": "c",
+        "__node_handle": "c",
+        "limits": "c",
+        "optional": "c",
+        "ratio": "c",
+        "tuple": "c"
     },
     "C_Cpp.clang_format_path": "/usr/bin/clang-format",
     "editor.formatOnSave": true,
