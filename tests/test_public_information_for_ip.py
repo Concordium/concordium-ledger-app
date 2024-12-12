@@ -52,6 +52,10 @@ def test_sign_public_information_for_ip(
                 screen_change_before_first_instruction=False,
                 screen_change_after_last_instruction=False,
             )
+        else:
+            navigate_until_text_and_compare(
+                firmware, navigator, "Continue", default_screenshot_path, test_name + "_1", True, False, NavInsID.USE_CASE_CHOICE_CONFIRM
+            )
     with client.sign_public_information_for_ip_part_2(chunks=[data_3]):
         if firmware.is_nano:
             navigator.navigate_and_compare(
@@ -61,6 +65,10 @@ def test_sign_public_information_for_ip(
                 screen_change_before_first_instruction=False,
                 screen_change_after_last_instruction=False,
             )
+        else:
+            navigate_until_text_and_compare(
+                firmware, navigator, "Continue", default_screenshot_path, test_name + "_2", True, False, NavInsID.USE_CASE_CHOICE_CONFIRM
+            )
 
     with client.sign_public_information_for_ip_part_3(chunks=[data_4, data_5]):
         navigate_until_text_and_compare(
@@ -69,7 +77,7 @@ def test_sign_public_information_for_ip(
             "Sign identity",
             default_screenshot_path,
             test_name + "_3",
-            screen_change_before_first_instruction=False,
+            screen_change_before_first_instruction=True,
             screen_change_after_last_instruction=False,
         )
 
