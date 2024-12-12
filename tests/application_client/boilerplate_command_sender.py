@@ -32,6 +32,9 @@ class P1(IntEnum):
     P1_INITIAL_TRANSFER_TO_PUBLIC = 0x00
     P1_REMAINING_AMOUNT_TRANSFER_TO_PUBLIC = 0x01
     P1_PROOF_TRANSFER_TO_PUBLIC = 0x02
+    # Parameter 1 for register data
+    P1_REGISTER_DATA_INITIAL = 0x00
+    P1_REGISTER_DATA_PAYLOAD = 0x01
     # Basic P1 for all instructions
     P1_NONE = 0x00
 
@@ -125,6 +128,7 @@ class Errors(IntEnum):
 
 # pylint: disable=too-many-public-methods
 # pylint: disable=too-many-locals
+# pylint: disable=too-many-lines
 class BoilerplateCommandSender:
     def __init__(self, backend: BackendInterface) -> None:
         self.backend = backend
@@ -974,6 +978,51 @@ class BoilerplateCommandSender:
             p1=P1.P1_UPDATE_CONTRACT_PARAMS,
             p2=P2.P2_NONE,
             data=data,
+        ) as response:
+            yield response
+
+    @contextmanager
+    def register_data_part_1(
+        self,
+        path: str,
+        header_and_type: bytes,
+        data_length: int,
+    ) -> Generator[None, None, None]:
+        temp_data = pack_derivation_path(path)
+        temp_data += header_and_type
+        temp_data += data_length.to_bytes(2, byteorder="big")
+        with self.backend.exchange_async(
+            cla=CLA,
+            ins=InsType.REGISTER_DATA,
+            p1=P1.P1_REGISTER_DATA_INITIAL,
+            p2=P2.P2_NONE,
+            data=temp_data,
+        ) as response:
+            yield response
+
+    @contextmanager
+    def register_data_part_2(
+        self,
+        data: bytes,
+    ) -> Generator[None, None, None]:
+        data_chunks = split_message(data, MAX_APDU_LEN)
+        last_chunk = data_chunks.pop()
+        for chunk in data_chunks:
+            temp_response = self.backend.exchange(
+                cla=CLA,
+                ins=InsType.REGISTER_DATA,
+                p1=P1.P1_REGISTER_DATA_PAYLOAD,
+                p2=P2.P2_NONE,
+                data=chunk,
+            )
+            if temp_response.status != 0x9000:
+                raise ExceptionRAPDU(temp_response.status)
+        with self.backend.exchange_async(
+            cla=CLA,
+            ins=InsType.REGISTER_DATA,
+            p1=P1.P1_REGISTER_DATA_PAYLOAD,
+            p2=P2.P2_NONE,
+            data=last_chunk,
         ) as response:
             yield response
 
