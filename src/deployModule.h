@@ -1,8 +1,5 @@
 #pragma once
 
-#include <stdint.h>
-#include <stdbool.h>
-
 /**
  * Handles the DEPLOY_MODULE instruction, which deploys a module
  *
@@ -18,8 +15,3 @@ typedef struct {
     char sourceHashDisplay[65];
     char versionDisplay[11];
 } deployModule_t;
-
-// typedef struct {
-//     uint8_t version[32];
-//     uint8_t sourceLength[32];
-// } deployModuleBlob_t;

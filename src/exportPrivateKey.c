@@ -1,8 +1,5 @@
 #include "globals.h"
 
-#include "util.h"
-#include "exportPrivateKey.h"
-
 // This class allows for the export of a number of very specific private keys. These private keys
 // are made exportable as they are used in computations that are not feasible to carry out on the
 // Ledger device. The key derivation paths that are allowed are restricted so that it is not

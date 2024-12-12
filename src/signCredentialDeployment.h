@@ -1,8 +1,5 @@
 #pragma once
 
-#include "cx.h"
-#include "os.h"
-
 void processNextVerificationKey(void);
 
 void handleSignCredentialDeployment(uint8_t *dataBuffer,

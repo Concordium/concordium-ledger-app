@@ -1,7 +1,5 @@
 #pragma once
 
-#include "../globals.h"
-
 #define INS_VERIFY_ADDRESS 0x00
 
 // An INS instruction containing 0x01 means that we should start the public-key flow.

@@ -19,7 +19,6 @@
  *  limitations under the License.
  ********************************************************************************/
 #include "globals.h"
-#include <base58.h>
 
 #define MAX_ENC_INPUT_SIZE 120
 
@@ -132,5 +131,5 @@ int base58check_encode(const unsigned char *in, size_t length, unsigned char *ou
     cx_hash_sha256(hash, sizeof(hash), hash, sizeof(hash));
     memmove(&buffer[1 + ADDRESS_LENGTH], hash, 4);
 
-    return base58_encode(buffer, 1 + ADDRESS_LENGTH + 4, (char *) out, *outlen);
+    return base58_encode(buffer, 1 + ADDRESS_LENGTH + 4, (char *)out, *outlen);
 }

@@ -1,5 +1,4 @@
 #pragma once
-#include <stdint.h>
 
 /**
  * Handles the signing flow, including updating the display, for the 'transfer to encrypted'

@@ -15,21 +15,7 @@
  *  limitations under the License.
  ********************************************************************************/
 
-#include <stdbool.h>
-#include <stdint.h>  // uint*_t
-#include <string.h>
-
-#include "os.h"
-#include "cx.h"
-#include "ux.h"
-#include "os_io_seproxyhal.h"
 #include "globals.h"
-#include "mainHelpers.h"
-
-#include "common/handler.h"
-#include "parser.h"          // command_t
-#include "io.h"              // io_init(), io_recv_command(), io_send_sw()
-#include "common/ui/menu.h"  // ui_menu_main()
 
 keyDerivationPath_t path;
 tx_state_t global_tx_state;
@@ -70,7 +56,7 @@ void app_main() {
         storage.dummy1_allowed = 0x00;
         storage.dummy2_allowed = 0x00;
         storage.initialized = 0x01;
-        nvm_write((void *) &N_storage, &storage, sizeof(internal_storage_t));
+        nvm_write((void *)&N_storage, &storage, sizeof(internal_storage_t));
     }
 
     for (;;) {

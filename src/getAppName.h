@@ -1,8 +1,5 @@
 #pragma once
 
-#include <stdint.h>
-#include <stdbool.h>
-
 /**
  * Handles the GET_APP_NAME instruction, which returns the application name
  *

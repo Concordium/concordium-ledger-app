@@ -1,5 +1,3 @@
-#include "numberHelpers.h"
-
 #include "globals.h"
 
 size_t lengthOfNumber(uint64_t number) {

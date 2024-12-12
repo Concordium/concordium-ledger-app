@@ -15,8 +15,17 @@
 #include <format.h>
 #include <os_io_seproxyhal.h>
 #include <lcx_hash.h>
+#include <parser.h>
+#include <base58.h>
+#include <glyphs.h>
+#include <limits.h>
+
+#ifdef HAVE_NBGL
+#include <nbgl_use_case.h>
+#endif
 
 #include "display.h"
+#include "handler.h"
 #include "menu.h"
 #include "util.h"
 #include "sign.h"
@@ -177,7 +186,7 @@ typedef struct internal_storage_t {
 
 extern const internal_storage_t N_storage_real;
 
-#define N_storage (*(volatile internal_storage_t *) PIC(&N_storage_real))
+#define N_storage (*(volatile internal_storage_t *)PIC(&N_storage_real))
 
 enum {
     // Successful codes

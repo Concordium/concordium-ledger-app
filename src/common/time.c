@@ -8,12 +8,7 @@
  *     of the required 'tm' struct.
  *  The musl LICENSE is provided in licenses/musl-MIT.txt
  */
-#include "time.h"
-
-#include <limits.h>
-#include <string.h>
-
-#include "numberHelpers.h"
+#include "globals.h"
 
 /* 2000-03-01 (mod 400 year, immediately after feb29 */
 #define LEAPOCH (946684800LL + 86400 * (31 + 29))

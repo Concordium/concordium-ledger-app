@@ -1,10 +1,4 @@
 #pragma once
-
-#include <stdint.h>
-#include <stdbool.h>
-
-// TODO: ADAPT THIS TO THE NEW INSTRUCTION
-
 typedef enum {
     INIT_CONTRACT_INITIAL = 60,
     INIT_CONTRACT_NAME_FIRST = 61,

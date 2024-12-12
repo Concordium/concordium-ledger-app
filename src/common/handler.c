@@ -1,5 +1,4 @@
 #include "globals.h"
-#include "handler.h"
 #include "getAppName.h"
 
 int handler(uint8_t INS,

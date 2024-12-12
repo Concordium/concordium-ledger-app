@@ -1,7 +1,4 @@
 #include "globals.h"
-#include "initContract.h"
-
-// TODO: ADAPT THIS TO THE NEW INSTRUCTION
 
 static initContract_t *ctx_init_contract = &global.initContract;
 static tx_state_t *tx_state = &global_tx_state;
@@ -16,16 +13,16 @@ void handleInitContract(uint8_t *cdata, uint8_t p1, uint8_t lc) {
         cdata += parseKeyDerivationPath(cdata);
         cdata += hashAccountTransactionHeaderAndKind(cdata, INIT_CONTRACT);
         // hash the amount
-        updateHash((cx_hash_t *) &tx_state->hash, cdata, 8);
+        updateHash((cx_hash_t *)&tx_state->hash, cdata, 8);
         // extract the amount
         ctx_init_contract->amount = U8BE(cdata, 0);
         // Format the amount
-        amountToGtuDisplay((uint8_t *) ctx_init_contract->amountDisplay,
+        amountToGtuDisplay((uint8_t *)ctx_init_contract->amountDisplay,
                            sizeof(ctx_init_contract->amountDisplay),
                            ctx_init_contract->amount);
         cdata += 8;
         // hash the module ref
-        updateHash((cx_hash_t *) &tx_state->hash, cdata, 32);
+        updateHash((cx_hash_t *)&tx_state->hash, cdata, 32);
         // extract the module ref
         memmove(ctx_init_contract->moduleRef, cdata, 32);
         // Format the module ref
@@ -50,7 +47,7 @@ void handleInitContract(uint8_t *cdata, uint8_t p1, uint8_t lc) {
             THROW(ERROR_INVALID_NAME_LENGTH);
         }
         // hash the whole chunk
-        updateHash((cx_hash_t *) &tx_state->hash, cdata, lc);
+        updateHash((cx_hash_t *)&tx_state->hash, cdata, lc);
         // subtract the length of the chunk from the remaining name length
         ctx_init_contract->remainingNameLength -= lc;
         if (ctx_init_contract->remainingNameLength > 0) {
@@ -73,7 +70,7 @@ void handleInitContract(uint8_t *cdata, uint8_t p1, uint8_t lc) {
             THROW(ERROR_INVALID_PARAMS_LENGTH);
         }
         // hash the whole chunk
-        updateHash((cx_hash_t *) &tx_state->hash, cdata, lc);
+        updateHash((cx_hash_t *)&tx_state->hash, cdata, lc);
         // subtract the length of the chunk from the remaining params length
         ctx_init_contract->remainingParamsLength -= lc;
         if (ctx_init_contract->remainingParamsLength > 0) {

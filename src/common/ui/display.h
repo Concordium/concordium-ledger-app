@@ -1,7 +1,5 @@
 #pragma once
 
-#include "ux.h"
-
 #ifdef HAVE_BAGL
 
 extern const ux_flow_step_t ux_display_memo_step_nocb;
