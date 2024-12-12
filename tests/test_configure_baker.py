@@ -262,6 +262,7 @@ def test_sign_configure_baker_all_parameters(
         NavInsID.RIGHT_CLICK,
         NavInsID.BOTH_CLICK,
     ]
+
     client = BoilerplateCommandSender(backend)
 
     # Create the transaction with all keys
@@ -286,6 +287,10 @@ def test_sign_configure_baker_all_parameters(
                 screen_change_before_first_instruction=False,
                 screen_change_after_last_instruction=False,
             )
+        else:
+            navigate_until_text_and_compare(
+                firmware, navigator, "Continue", default_screenshot_path, test_name + "_1", True, False, NavInsID.USE_CASE_CHOICE_CONFIRM
+            )
     with client.sign_configure_baker_url(
         url=url_bytes, bitmap=bitmap, is_called_first=False
     ):
@@ -296,6 +301,10 @@ def test_sign_configure_baker_all_parameters(
                 nano_continue_2_instructions,
                 screen_change_before_first_instruction=False,
                 screen_change_after_last_instruction=False,
+            )
+        else:
+            navigate_until_text_and_compare(
+                firmware, navigator, "Continue", default_screenshot_path, test_name + "_2", True, False, NavInsID.USE_CASE_CHOICE_CONFIRM
             )
     with client.sign_configure_baker_commission_rate(
         bitmap=bitmap,
