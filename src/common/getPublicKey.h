@@ -1,8 +1,5 @@
 #pragma once
 
-#include <stdbool.h>
-#include <stdint.h>
-
 /**
  * Handles the derivation and export of account and governance public keys.
  * @param cdata please see /doc/ins_public_key.md for details

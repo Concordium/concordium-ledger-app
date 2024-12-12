@@ -1,11 +1,6 @@
 #pragma once
 
-#include <stdbool.h>
-#include <string.h>
-
 #include "globals.h"
-#include "numberHelpers.h"
-#include "os.h"
 
 #define MAX_MEMO_SIZE 256
 #define MAX_DATA_SIZE (MAX_MEMO_SIZE)

@@ -1,15 +1,4 @@
-#include "util.h"
-
-#include <stdbool.h>
-#include <stdlib.h>
-#include <string.h>
-
-#include "base58check.h"
-#include "cx.h"
-#include "menu.h"
-#include "numberHelpers.h"
-#include "os.h"
-#include "responseCodes.h"
+#include "globals.h"
 
 static tx_state_t *tx_state = &global_tx_state;
 static keyDerivationPath_t *keyPath = &path;
@@ -43,14 +32,14 @@ int parseKeyDerivationPath(uint8_t *cdata) {
  * instead of using this method directly.
  */
 int hashHeaderAndType(uint8_t *cdata, uint8_t headerLength, uint8_t validType) {
-    updateHash((cx_hash_t *) &tx_state->hash, cdata, headerLength);
+    updateHash((cx_hash_t *)&tx_state->hash, cdata, headerLength);
     cdata += headerLength;
 
     uint8_t type = cdata[0];
     if (type != validType) {
         THROW(ERROR_INVALID_TRANSACTION);
     }
-    updateHash((cx_hash_t *) &tx_state->hash, cdata, 1);
+    updateHash((cx_hash_t *)&tx_state->hash, cdata, 1);
 
     return headerLength + 1;
 }
@@ -103,7 +92,7 @@ int handleHeaderAndToAddress(uint8_t *cdata,
     // Extract the recipient address and add to the hash.
     uint8_t toAddress[32];
     memmove(toAddress, cdata, 32);
-    updateHash((cx_hash_t *) &tx_state->hash, toAddress, 32);
+    updateHash((cx_hash_t *)&tx_state->hash, toAddress, 32);
 
     // The recipient address is in a base58 format, so we need to encode it to be
     // able to display in a human-readable way.
@@ -200,7 +189,7 @@ void getPrivateKey(uint32_t *keyPathInput,
                                                              keyPathLength,
                                                              privateKeyData,
                                                              NULL,
-                                                             (unsigned char *) "ed25519 seed",
+                                                             (unsigned char *)"ed25519 seed",
                                                              12));
             ensureNoError(cx_ecfp_init_private_key_no_throw(CX_CURVE_Ed25519,
                                                             privateKeyData,
@@ -330,7 +319,7 @@ void blsKeygen(const uint8_t *seed, size_t seedLength, uint8_t *dst, size_t dstL
         cx_hkdf_expand(CX_SHA256,
                        prk,
                        sizeof(prk),
-                       (unsigned char *) l_bytes,
+                       (unsigned char *)l_bytes,
                        sizeof(l_bytes),
                        sk,
                        sizeof(sk));
@@ -363,7 +352,7 @@ void getBlsPrivateKey(uint32_t *keyPathInput,
 size_t hashAndLoadU64Ratio(uint8_t *cdata, uint8_t *dst, uint8_t sizeOfDst) {
     uint64_t numerator = U8BE(cdata, 0);
     uint64_t denominator = U8BE(cdata, 8);
-    updateHash((cx_hash_t *) &tx_state->hash, cdata, 16);
+    updateHash((cx_hash_t *)&tx_state->hash, cdata, 16);
     int numLength = numberToText(dst, sizeOfDst, numerator);
     memmove(dst + numLength, " / ", 3);
     numberToText(dst + numLength + 3, sizeOfDst - (numLength + 3), denominator);

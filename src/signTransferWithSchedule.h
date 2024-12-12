@@ -1,10 +1,5 @@
 #pragma once
 
-#include <stdbool.h>
-#include <stdint.h>
-
-#include "time.h"
-
 /**
  * Handles the signing flow for the transfer with schedule account transaction.
  * @param cdata please see /doc/ins_transfer_with_schedule.md for details

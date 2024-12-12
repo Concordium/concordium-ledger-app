@@ -1,10 +1,4 @@
 #pragma once
-
-#include <stdint.h>
-#include <stdbool.h>
-
-// TODO: ADAPT THIS TO THE NEW INSTRUCTION
-
 typedef enum {
     INIT_CONTRACT_INITIAL = 60,
     INIT_CONTRACT_NAME_FIRST = 61,
@@ -32,8 +26,3 @@ typedef struct {
     uint32_t remainingParamsLength;
     initContractState_t state;
 } initContract_t;
-
-// typedef struct {
-//     uint8_t version[32];
-//     uint8_t sourceLength[32];
-// } deployModuleBlob_t;

@@ -18,12 +18,7 @@
 
 #ifdef HAVE_NBGL
 
-#include "os.h"
-#include "glyphs.h"
-#include "nbgl_use_case.h"
-
-#include "../globals.h"
-#include "menu.h"
+#include "globals.h"
 
 static tx_state_t* tx_state = &global_tx_state;
 
@@ -77,9 +72,9 @@ static void review_warning_choice(bool confirm) {
     if (confirm) {
         // toggle the switch value
         switch_value = !N_storage.dummy2_allowed;
-        switches[DUMMY_SWITCH_2_ID].initState = (nbgl_state_t) switch_value;
+        switches[DUMMY_SWITCH_2_ID].initState = (nbgl_state_t)switch_value;
         // store the new setting value in NVM
-        nvm_write((void*) &N_storage.dummy2_allowed, &switch_value, 1);
+        nvm_write((void*)&N_storage.dummy2_allowed, &switch_value, 1);
     }
 
     // Reset setting menu to the right page
@@ -103,9 +98,9 @@ static void controls_callback(int token, uint8_t index, int page) {
         // Dummy 1 switch touched
         // toggle the switch value
         switch_value = !N_storage.dummy1_allowed;
-        switches[DUMMY_SWITCH_1_ID].initState = (nbgl_state_t) switch_value;
+        switches[DUMMY_SWITCH_1_ID].initState = (nbgl_state_t)switch_value;
         // store the new setting value in NVM
-        nvm_write((void*) &N_storage.dummy1_allowed, &switch_value, 1);
+        nvm_write((void*)&N_storage.dummy1_allowed, &switch_value, 1);
     } else if (token == DUMMY_SWITCH_2_TOKEN) {
         // Dummy 2 switch touched
 
@@ -122,9 +117,9 @@ static void controls_callback(int token, uint8_t index, int page) {
         } else {
             // toggle the switch value
             switch_value = !N_storage.dummy2_allowed;
-            switches[DUMMY_SWITCH_2_ID].initState = (nbgl_state_t) switch_value;
+            switches[DUMMY_SWITCH_2_ID].initState = (nbgl_state_t)switch_value;
             // store the new setting value in NVM
-            nvm_write((void*) &N_storage.dummy2_allowed, &switch_value, 1);
+            nvm_write((void*)&N_storage.dummy2_allowed, &switch_value, 1);
         }
     }
 }
@@ -134,13 +129,13 @@ void ui_menu_main(void) {
     tx_state->currentInstruction = -1;
 
     // Initialize switches data
-    switches[DUMMY_SWITCH_1_ID].initState = (nbgl_state_t) N_storage.dummy1_allowed;
+    switches[DUMMY_SWITCH_1_ID].initState = (nbgl_state_t)N_storage.dummy1_allowed;
     switches[DUMMY_SWITCH_1_ID].text = "Dummy 1";
     switches[DUMMY_SWITCH_1_ID].subText = "Allow dummy 1\nin transactions";
     switches[DUMMY_SWITCH_1_ID].token = DUMMY_SWITCH_1_TOKEN;
     switches[DUMMY_SWITCH_1_ID].tuneId = TUNE_TAP_CASUAL;
 
-    switches[DUMMY_SWITCH_2_ID].initState = (nbgl_state_t) N_storage.dummy2_allowed;
+    switches[DUMMY_SWITCH_2_ID].initState = (nbgl_state_t)N_storage.dummy2_allowed;
     switches[DUMMY_SWITCH_2_ID].text = "Dummy 2";
     switches[DUMMY_SWITCH_2_ID].subText = "Allow dummy 2\nin transactions";
     switches[DUMMY_SWITCH_2_ID].token = DUMMY_SWITCH_2_TOKEN;

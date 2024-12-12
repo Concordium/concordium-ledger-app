@@ -1,7 +1,5 @@
 #pragma once
 
-#include "../globals.h"
-
 #define INS_VERIFY_ADDRESS 0x00
 
 // An INS instruction containing 0x01 means that we should start the public-key flow.
@@ -44,9 +42,6 @@
 
 #define INS_APP_NAME     0x36
 #define INS_GET_APP_NAME 0x21
-
-// instructionContext global;
-// accountSender_t global_account_sender;
 
 int handler(uint8_t INS,
             uint8_t *cdata,

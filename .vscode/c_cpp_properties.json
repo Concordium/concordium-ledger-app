@@ -7,7 +7,17 @@
         {
             "name": "Nano S+",
             "includePath": [
-                "${workspaceFolder}/src"
+                "${workspaceFolder}/src",
+                "${workspaceFolder}/ledger-secure-sdk/include",
+                "${workspaceFolder}/src/common",
+                "${workspaceFolder}/src/common/ui",
+                "${workspaceFolder}/ledger-secure-sdk/lib_ux/include",
+                "${workspaceFolder}/ledger-secure-sdk/target/nanos2/include",
+                "${workspaceFolder}/ledger-secure-sdk/lib_cxng/include",
+                "${workspaceFolder}/ledger-secure-sdk/lib_bagl/include",
+                "${workspaceFolder}/ledger-secure-sdk/unit-tests/lib_nbgl",
+                "${workspaceFolder}/ledger-secure-sdk/lib_standard_app",
+                "${workspaceFolder}/ledger-secure-sdk/lib_nbgl/include"
             ],
             "defines": [
                 "TARGET_NANOS2",

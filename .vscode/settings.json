@@ -19,7 +19,8 @@
         "limits": "c",
         "optional": "c",
         "ratio": "c",
-        "tuple": "c"
+        "tuple": "c",
+        "regex": "c"
     },
     "C_Cpp.clang_format_path": "/usr/bin/clang-format",
     "editor.formatOnSave": true,

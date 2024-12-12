@@ -1,13 +1,4 @@
-#include <os.h>
-#include <stdint.h>
-#include <string.h>
-
-#include "cx.h"
 #include "globals.h"
-#include "responseCodes.h"
-#include "util.h"
-#include "ux.h"
-#include "exportPrivateKey.h"
 
 // This class allows for the export of a number of very specific private keys. These private keys
 // are made exportable as they are used in computations that are not feasible to carry out on the
@@ -130,7 +121,7 @@ void handleExportPrivateKey(uint8_t *dataBuffer,
     }
     size_t offset = 0;
 
-    ctx->isNewPath = (bool) dataBuffer[offset];
+    ctx->isNewPath = (bool)dataBuffer[offset];
     offset += 1;
 
     uint32_t identity_provider;

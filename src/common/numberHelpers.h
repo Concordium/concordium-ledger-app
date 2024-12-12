@@ -1,7 +1,5 @@
 #pragma once
-
-#include <stddef.h>
-#include "stdint.h"
+#include "globals.h"
 
 /**
  * Writes the input amount of µGTU to the supplied destination as its value in

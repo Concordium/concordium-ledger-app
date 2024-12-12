@@ -1,8 +1,5 @@
 #pragma once
 
-#include <stdbool.h>
-#include <stdint.h>
-
 /**
  * Handles the signing flow, including updating the display, for the 'transfer to public'
  * account transaction.

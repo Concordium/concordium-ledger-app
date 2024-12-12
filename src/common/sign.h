@@ -1,6 +1,5 @@
 #pragma once
 
-#include "ux.h"
 #include "globals.h"
 
 #ifdef HAVE_BAGL

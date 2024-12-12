@@ -1,17 +1,6 @@
 #ifdef HAVE_NBGL
-
-#include "os.h"
-#include "ux.h"
-
-#include "display.h"
 #include "globals.h"
-#include "glyphs.h"
-#include "menu.h"
-#include "getPublicKey.h"
-#include "util.h"
-#include "sign.h"
 
-#include "nbgl_use_case.h"
 accountSender_t global_account_sender;
 static nbgl_contentTagValue_t pairs[10];
 
@@ -51,6 +40,11 @@ static void review_choice_sign(bool confirm) {
     }
 }
 
+static void sendSuccessNoIdleCallback(bool confirm) {
+    (void)confirm;  // Suppress unused parameter warning
+    sendSuccessNoIdle();
+}
+
 void uiComparePubkey(void) {
     nbgl_useCaseAddressReview(global.exportPublicKeyContext.publicKey,
                               NULL,
@@ -61,7 +55,7 @@ void uiComparePubkey(void) {
 }
 
 void uiGeneratePubkey(volatile unsigned int *flags) {
-    nbgl_useCaseAddressReview((char *) global.exportPublicKeyContext.display,  // Address to display
+    nbgl_useCaseAddressReview((char *)global.exportPublicKeyContext.display,  // Address to display
                               NULL,                     // No additional tag-value list
                               &C_app_concordium_64px,   // Icon to display
                               "Public Key",             // Review title
@@ -74,8 +68,8 @@ void uiGeneratePubkey(volatile unsigned int *flags) {
 void uiExportPrivateKey(volatile unsigned int *flags) {
     // Create tag-value pairs for the content
     uint8_t pairIndex = 0;
-    pairs[pairIndex].item = (char *) global.exportPrivateKeyContext.displayHeader;
-    pairs[pairIndex].value = (char *) global.exportPrivateKeyContext.display;
+    pairs[pairIndex].item = (char *)global.exportPrivateKeyContext.displayHeader;
+    pairs[pairIndex].value = (char *)global.exportPrivateKeyContext.display;
     pairIndex++;
 
     // Create the page content
@@ -106,7 +100,7 @@ void startConfigureBakerCommissionDisplay(void) {
     if (ctx->firstDisplay) {
         // Add sender address
         pairs[pairIndex].item = "Sender";
-        pairs[pairIndex].value = (char *) global_account_sender.sender;
+        pairs[pairIndex].value = (char *)global_account_sender.sender;
         pairIndex++;
         ctx->firstDisplay = false;
     }
@@ -121,21 +115,21 @@ void startConfigureBakerCommissionDisplay(void) {
     if (ctx->hasTransactionFeeCommission) {
         pairs[pairIndex].item = "Transaction fee";
         pairs[pairIndex].value =
-            (char *) global.signConfigureBaker.commissionRates.transactionFeeCommissionRate;
+            (char *)global.signConfigureBaker.commissionRates.transactionFeeCommissionRate;
         pairIndex++;
     }
 
     if (ctx->hasBakingRewardCommission) {
         pairs[pairIndex].item = "Baking reward";
         pairs[pairIndex].value =
-            (char *) global.signConfigureBaker.commissionRates.bakingRewardCommissionRate;
+            (char *)global.signConfigureBaker.commissionRates.bakingRewardCommissionRate;
         pairIndex++;
     }
 
     if (ctx->hasFinalizationRewardCommission) {
         pairs[pairIndex].item = "Finalization reward";
         pairs[pairIndex].value =
-            (char *) global.signConfigureBaker.commissionRates.finalizationRewardCommissionRate;
+            (char *)global.signConfigureBaker.commissionRates.finalizationRewardCommissionRate;
         pairIndex++;
     }
 
@@ -165,7 +159,7 @@ void startConfigureBakerDisplay(void) {
     uint8_t pairIndex = 0;
     // Add sender address
     pairs[pairIndex].item = "Sender";
-    pairs[pairIndex].value = (char *) global_account_sender.sender;
+    pairs[pairIndex].value = (char *)global_account_sender.sender;
     pairIndex++;
 
     ctx->firstDisplay = false;
@@ -177,7 +171,7 @@ void startConfigureBakerDisplay(void) {
         } else {
             pairs[pairIndex].item = "Amount to stake";
             pairs[pairIndex].value =
-                (char *) global.signConfigureBaker.capitalRestakeDelegation.displayCapital;
+                (char *)global.signConfigureBaker.capitalRestakeDelegation.displayCapital;
         }
         pairIndex++;
     }
@@ -185,14 +179,14 @@ void startConfigureBakerDisplay(void) {
     if (ctx->hasRestakeEarnings) {
         pairs[pairIndex].item = "Restake earnings";
         pairs[pairIndex].value =
-            (char *) global.signConfigureBaker.capitalRestakeDelegation.displayRestake;
+            (char *)global.signConfigureBaker.capitalRestakeDelegation.displayRestake;
         pairIndex++;
     }
 
     if (ctx->hasOpenForDelegation) {
         pairs[pairIndex].item = "Pool status";
         pairs[pairIndex].value =
-            (char *) global.signConfigureBaker.capitalRestakeDelegation.displayOpenForDelegation;
+            (char *)global.signConfigureBaker.capitalRestakeDelegation.displayOpenForDelegation;
         pairIndex++;
     }
 
@@ -219,7 +213,7 @@ void startConfigureBakerDisplay(void) {
                                 "Review Transaction",
                                 NULL,  // No subtitle
                                 "Continue with transaction",
-                                sendSuccessNoIdle);
+                                sendSuccessNoIdleCallback);
     } else {
         // Create the page content
         nbgl_contentTagValueList_t content;
@@ -250,14 +244,14 @@ void startConfigureBakerUrlDisplay(bool lastUrlPage) {
     if (ctx->firstDisplay) {
         // Add sender address
         pairs[pairIndex].item = "Sender";
-        pairs[pairIndex].value = (char *) global_account_sender.sender;
+        pairs[pairIndex].value = (char *)global_account_sender.sender;
         pairIndex++;
         ctx->firstDisplay = false;
     }
 
     if (!lastUrlPage) {
         pairs[pairIndex].item = "URL";
-        pairs[pairIndex].value = (char *) global.signConfigureBaker.url.urlDisplay;
+        pairs[pairIndex].value = (char *)global.signConfigureBaker.url.urlDisplay;
         pairIndex++;
     } else {
         if (ctx->url.urlLength == 0) {
@@ -265,7 +259,7 @@ void startConfigureBakerUrlDisplay(bool lastUrlPage) {
             pairs[pairIndex].value = "";
         } else {
             pairs[pairIndex].item = "URL";
-            pairs[pairIndex].value = (char *) global.signConfigureBaker.url.urlDisplay;
+            pairs[pairIndex].value = (char *)global.signConfigureBaker.url.urlDisplay;
         }
         pairIndex++;
     }
@@ -287,7 +281,7 @@ void startConfigureBakerUrlDisplay(bool lastUrlPage) {
                                 "Review Transaction",
                                 NULL,  // No subtitle
                                 "Continue with transaction",
-                                sendSuccessNoIdle);
+                                sendSuccessNoIdleCallback);
     } else {
         // Create the page content
         nbgl_contentTagValueList_t content;
@@ -316,7 +310,7 @@ void startConfigureDelegationDisplay(void) {
     uint8_t pairIndex = 0;
     // Add sender address
     pairs[pairIndex].item = "Sender";
-    pairs[pairIndex].value = (char *) global_account_sender.sender;
+    pairs[pairIndex].value = (char *)global_account_sender.sender;
     pairIndex++;
 
     // Add capital amount if present
@@ -326,7 +320,7 @@ void startConfigureDelegationDisplay(void) {
             pairs[pairIndex].value = "Stop delegation";
         } else {
             pairs[pairIndex].item = "Amount to delegate";
-            pairs[pairIndex].value = (char *) ctx->displayCapital;
+            pairs[pairIndex].value = (char *)ctx->displayCapital;
         }
         pairIndex++;
     }
@@ -334,14 +328,14 @@ void startConfigureDelegationDisplay(void) {
     // Add restake earnings if present
     if (ctx->hasRestakeEarnings) {
         pairs[pairIndex].item = "Restake earnings";
-        pairs[pairIndex].value = (char *) ctx->displayRestake;
+        pairs[pairIndex].value = (char *)ctx->displayRestake;
         pairIndex++;
     }
 
     // Add delegation target if present
     if (ctx->hasDelegationTarget) {
         pairs[pairIndex].item = "Delegation target";
-        pairs[pairIndex].value = (char *) ctx->displayDelegationTarget;
+        pairs[pairIndex].value = (char *)ctx->displayDelegationTarget;
         pairIndex++;
     }
 
@@ -364,42 +358,51 @@ void startConfigureDelegationDisplay(void) {
 }
 
 void uiSignUpdateCredentialThresholdDisplay(volatile unsigned int *flags) {
+    return;
     *flags |= IO_ASYNCH_REPLY;
     // TODO: Implement this
 }
 
 void uiSignUpdateCredentialInitialDisplay(volatile unsigned int *flags) {
+    return;
     *flags |= IO_ASYNCH_REPLY;
     // TODO: Implement this
 }
 
 void uiSignUpdateCredentialIdDisplay(volatile unsigned int *flags) {
+    return;
     *flags |= IO_ASYNCH_REPLY;
     // TODO: Implement this
 }
 
 void uiSignCredentialDeploymentVerificationKeyDisplay(volatile unsigned int *flags) {
+    return;
     *flags |= IO_ASYNCH_REPLY;
     // TODO: Implement this
 }
 
 void uiSignCredentialDeploymentNewIntroDisplay(void) {
+    return;
     // TODO: Implement this
 }
 
 void uiSignCredentialDeploymentExistingIntroDisplay(void) {
+    return;
     // TODO: Implement this
 }
 
 void uiSignCredentialDeploymentNewDisplay(void) {
+    return;
     // TODO: Implement this
 }
 
 void uiSignCredentialDeploymentExistingDisplay(void) {
+    return;
     // TODO: Implement this
 }
 
 void uiSignCredentialDeploymentVerificationKeyFlowDisplay(volatile unsigned int *flags) {
+    return;
     *flags |= IO_ASYNCH_REPLY;
     // TODO: Implement this
 }
@@ -413,10 +416,10 @@ void uiSignPublicInformationForIpCompleteDisplay(void) {
     // Setup data to display
     uint8_t pairIndex = 0;
     pairs[pairIndex].item = "Public key";
-    pairs[pairIndex].value = (char *) global.signPublicInformationForIp.publicKey;
+    pairs[pairIndex].value = (char *)global.signPublicInformationForIp.publicKey;
     pairIndex++;
     pairs[pairIndex].item = "Signature threshold";
-    pairs[pairIndex].value = (char *) global.signPublicInformationForIp.threshold;
+    pairs[pairIndex].value = (char *)global.signPublicInformationForIp.threshold;
     pairIndex++;
 
     // Create the page content
@@ -457,17 +460,17 @@ void uiReviewPublicInformationForIpDisplay(void) {
                             "Review identity",
                             "provider info",
                             "Continue reviewing info",
-                            sendSuccessNoIdle);
+                            sendSuccessNoIdleCallback);
 }
 
 void uiSignPublicInformationForIpFinalDisplay(void) {
     // Setup data to display
     uint8_t pairIndex = 0;
     pairs[pairIndex].item = "Public key";
-    pairs[pairIndex].value = (char *) global.signPublicInformationForIp.publicKey;
+    pairs[pairIndex].value = (char *)global.signPublicInformationForIp.publicKey;
     pairIndex++;
     pairs[pairIndex].item = "Signature threshold";
-    pairs[pairIndex].value = (char *) global.signPublicInformationForIp.threshold;
+    pairs[pairIndex].value = (char *)global.signPublicInformationForIp.threshold;
     pairIndex++;
 
     // Create the page content
@@ -508,15 +511,17 @@ void uiSignPublicInformationForIpPublicKeyDisplay(void) {
                             "Review identity",
                             NULL,  // No subtitle
                             "Continue reviewing info",
-                            sendSuccessNoIdle);
+                            sendSuccessNoIdleCallback);
 }
 
 void uiRegisterDataInitialDisplay(volatile unsigned int *flags) {
+    return;
     *flags |= IO_ASYNCH_REPLY;
     // TODO: Implement this
 }
 
 void uiRegisterDataPayloadDisplay(volatile unsigned int *flags) {
+    return;
     *flags |= IO_ASYNCH_REPLY;
     // TODO: Implement this
 }
@@ -524,17 +529,17 @@ void uiRegisterDataPayloadDisplay(volatile unsigned int *flags) {
 void startTransferDisplay(bool displayMemo, volatile unsigned int *flags) {
     uint8_t index = 0;
     pairs[index].item = "Sender";
-    pairs[index].value = (char *) global_account_sender.sender;
+    pairs[index].value = (char *)global_account_sender.sender;
     index++;
     pairs[index].item = "Recipient";
-    pairs[index].value = (char *) global.withDataBlob.signTransferContext.displayStr;
+    pairs[index].value = (char *)global.withDataBlob.signTransferContext.displayStr;
     index++;
     pairs[index].item = "Amount";
-    pairs[index].value = (char *) global.withDataBlob.signTransferContext.displayAmount;
+    pairs[index].value = (char *)global.withDataBlob.signTransferContext.displayAmount;
     index++;
     if (displayMemo) {
         pairs[index].item = "Memo";
-        pairs[index].value = (char *) global.withDataBlob.cborContext.display;
+        pairs[index].value = (char *)global.withDataBlob.cborContext.display;
         index++;
     }
 
@@ -559,6 +564,7 @@ void startTransferDisplay(bool displayMemo, volatile unsigned int *flags) {
 }
 
 void uiSignTransferToEncryptedDisplay(volatile unsigned int *flags) {
+    return;
     *flags |= IO_ASYNCH_REPLY;
     // TODO: Implement this
 }
@@ -567,10 +573,10 @@ void uiSignTransferToPublicDisplay(volatile unsigned int *flags) {
     // Setup data to display
     uint8_t pairIndex = 0;
     pairs[pairIndex].item = "Sender";
-    pairs[pairIndex].value = (char *) global_account_sender.sender;
+    pairs[pairIndex].value = (char *)global_account_sender.sender;
     pairIndex++;
     pairs[pairIndex].item = "Unshield amount";
-    pairs[pairIndex].value = (char *) global.signTransferToPublic.amount;
+    pairs[pairIndex].value = (char *)global.signTransferToPublic.amount;
     pairIndex++;
 
     // Create the page content
@@ -592,18 +598,22 @@ void uiSignTransferToPublicDisplay(volatile unsigned int *flags) {
 }
 
 void uiSignScheduledTransferPairFlowDisplay(void) {
+    return;
     // TODO: Implement this
 }
 
 void uiSignScheduledTransferPairFlowSignDisplay(void) {
+    return;
     // TODO: Implement this
 }
 
 void uiSignScheduledTransferPairFlowFinalDisplay(void) {
+    return;
     // TODO: Implement this
 }
 
 void uiVerifyAddress(volatile unsigned int *flags) {
+    return;
     *flags |= IO_ASYNCH_REPLY;
     // TODO: Implement this
 }
@@ -615,9 +625,9 @@ void startInitialScheduledTransferDisplay(bool displayMemo) {
 
 void uiDeployModuleDisplay(void) {
     pairs[0].item = "Sender";
-    pairs[0].value = (char *) global_account_sender.sender;
+    pairs[0].value = (char *)global_account_sender.sender;
     pairs[1].item = "Version";
-    pairs[1].value = (char *) global.deployModule.versionDisplay;
+    pairs[1].value = (char *)global.deployModule.versionDisplay;
 
     // Create the page content
     nbgl_contentTagValueList_t content;
@@ -639,16 +649,16 @@ void uiDeployModuleDisplay(void) {
 void uiUpdateContractDisplay(void) {
     uint8_t pairIndex = 0;
     pairs[pairIndex].item = "Sender";
-    pairs[pairIndex].value = (char *) global_account_sender.sender;
+    pairs[pairIndex].value = (char *)global_account_sender.sender;
     pairIndex++;
     pairs[pairIndex].item = "Amount";
-    pairs[pairIndex].value = (char *) global.updateContract.amountDisplay;
+    pairs[pairIndex].value = (char *)global.updateContract.amountDisplay;
     pairIndex++;
     pairs[pairIndex].item = "Index";
-    pairs[pairIndex].value = (char *) global.updateContract.indexDisplay;
+    pairs[pairIndex].value = (char *)global.updateContract.indexDisplay;
     pairIndex++;
     pairs[pairIndex].item = "Sub index";
-    pairs[pairIndex].value = (char *) global.updateContract.subIndexDisplay;
+    pairs[pairIndex].value = (char *)global.updateContract.subIndexDisplay;
     pairIndex++;
     // Create the page content
     nbgl_contentTagValueList_t content;
@@ -670,13 +680,13 @@ void uiUpdateContractDisplay(void) {
 void uiInitContractDisplay(void) {
     uint8_t pairIndex = 0;
     pairs[pairIndex].item = "Sender";
-    pairs[pairIndex].value = (char *) global_account_sender.sender;
+    pairs[pairIndex].value = (char *)global_account_sender.sender;
     pairIndex++;
     pairs[pairIndex].item = "Amount";
-    pairs[pairIndex].value = (char *) global.initContract.amountDisplay;
+    pairs[pairIndex].value = (char *)global.initContract.amountDisplay;
     pairIndex++;
     pairs[pairIndex].item = "Module ref";
-    pairs[pairIndex].value = (char *) global.initContract.moduleRefDisplay;
+    pairs[pairIndex].value = (char *)global.initContract.moduleRefDisplay;
     pairIndex++;
     // Create the page content
     nbgl_contentTagValueList_t content;

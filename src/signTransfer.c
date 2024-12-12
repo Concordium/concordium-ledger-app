@@ -1,10 +1,4 @@
-#include "os.h"
-
-#include "common/ui/display.h"
-#include "common/responseCodes.h"
-#include "common/sign.h"
-#include "common/util.h"
-#include "signTransfer.h"
+#include "globals.h"
 
 static signTransferContext_t *ctx = &global.withDataBlob.signTransferContext;
 static cborContext_t *memo_ctx = &global.withDataBlob.cborContext;
@@ -21,7 +15,7 @@ void handleSignTransfer(uint8_t *cdata, volatile unsigned int *flags) {
     // Build display value of the amount to transfer, and also add the bytes to the hash.
     uint64_t amount = U8BE(cdata, 0);
     amountToGtuDisplay(ctx->displayAmount, sizeof(ctx->displayAmount), amount);
-    updateHash((cx_hash_t *) &tx_state->hash, cdata, 8);
+    updateHash((cx_hash_t *)&tx_state->hash, cdata, 8);
 
     // Display the transaction information to the user (recipient address and amount to be sent).
     startTransferDisplay(false, flags);
@@ -56,12 +50,12 @@ void handleSignTransferWithMemo(uint8_t *cdata,
             THROW(ERROR_INVALID_PARAM);
         }
 
-        updateHash((cx_hash_t *) &tx_state->hash, cdata, 2);
+        updateHash((cx_hash_t *)&tx_state->hash, cdata, 2);
 
         ctx->state = TX_TRANSFER_MEMO_INITIAL;
         sendSuccessNoIdle();
     } else if (p1 == P1_MEMO && ctx->state == TX_TRANSFER_MEMO_INITIAL) {
-        updateHash((cx_hash_t *) &tx_state->hash, cdata, dataLength);
+        updateHash((cx_hash_t *)&tx_state->hash, cdata, dataLength);
 
         readCborInitial(cdata, dataLength);
         if (memo_ctx->cborLength == 0) {
@@ -71,7 +65,7 @@ void handleSignTransferWithMemo(uint8_t *cdata,
             sendSuccessNoIdle();
         }
     } else if (p1 == P1_MEMO && ctx->state == TX_TRANSFER_MEMO) {
-        updateHash((cx_hash_t *) &tx_state->hash, cdata, dataLength);
+        updateHash((cx_hash_t *)&tx_state->hash, cdata, dataLength);
 
         readCborContent(cdata, dataLength);
         if (memo_ctx->cborLength != 0) {
@@ -85,7 +79,7 @@ void handleSignTransferWithMemo(uint8_t *cdata,
         // Build display value of the amount to transfer, and also add the bytes to the hash.
         uint64_t amount = U8BE(cdata, 0);
         amountToGtuDisplay(ctx->displayAmount, sizeof(ctx->displayAmount), amount);
-        updateHash((cx_hash_t *) &tx_state->hash, cdata, 8);
+        updateHash((cx_hash_t *)&tx_state->hash, cdata, 8);
 
         startTransferDisplay(true, flags);
 

@@ -18,15 +18,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  ********************************************************************************/
-
-#include <stdlib.h>
-#include <string.h>
-
-#include "os.h"
-#include "cx.h"
-#include "base58.h"
-
-#include "responseCodes.h"
+#include "globals.h"
 
 #define MAX_ENC_INPUT_SIZE 120
 
@@ -35,85 +27,6 @@ unsigned char const BASE58ALPHABET[] = {'1', '2', '3', '4', '5', '6', '7', '8', 
                                         'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c',
                                         'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'm', 'n', 'o', 'p',
                                         'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'};
-
-// int base58_encode(const unsigned char *in, size_t length, unsigned char *out, size_t *outlen) {
-//     size_t i = 0, j;
-//     size_t startAt, stopAt;
-//     size_t zeroCount = 0;
-//     size_t outputSize;
-//     size_t pageSize = 10;
-
-//     if (length > MAX_ENC_INPUT_SIZE) {
-//         return -1;
-//     }
-
-//     while ((zeroCount < length) && (in[zeroCount] == 0)) {
-//         ++zeroCount;
-//     }
-
-//     outputSize = (length - zeroCount) * 138 / 100 + 1;
-//     int spaces = outputSize / pageSize;
-//     outputSize += spaces;
-//     if (*outlen < outputSize) {
-//         *outlen = outputSize;
-//         return -1;
-//     }
-
-//     memset(out, 0, outputSize);
-//     stopAt = outputSize - 1;
-//     for (startAt = zeroCount; startAt < length; startAt++) {
-//         int carry = in[startAt];
-//         for (j = outputSize - 1; (int) j >= 0; j--) {
-//             carry += 256 * out[j];
-//             out[j] = carry % 58;
-//             carry /= 58;
-
-//             if (j <= stopAt - 1 && carry == 0) {
-//                 break;
-//             }
-//         }
-//         stopAt = j;
-//     }
-
-//     j = 0;
-//     while (j < outputSize && out[j] == 0) {
-//         j += 1;
-//     }
-
-//     if (*outlen < zeroCount + outputSize - j) {
-//         *outlen = zeroCount + outputSize - j;
-//         return -1;
-//     }
-
-//     *outlen = zeroCount + outputSize - j;
-//     int distance = zeroCount - j;
-//     size_t nextSpace = pageSize;
-//     int offset = 0;
-//     if (distance < 0) {
-//         for (i = zeroCount; i < *outlen + spaces; ++i) {
-//             if (i == nextSpace) {
-//                 out[i] = ' ';
-//                 nextSpace += (pageSize + 1);
-//                 offset++;
-//             } else {
-//                 out[i] = BASE58ALPHABET[out[i - distance - offset]];
-//             }
-//         }
-//     } else {
-//         for (i = *outlen + spaces - 1; (int) i >= 0; --i) {
-//             if ((*outlen + spaces - 1 - i) == nextSpace) {
-//                 out[i] = ' ';
-//                 nextSpace += (pageSize + 1);
-//                 offset++;
-//             } else {
-//                 out[i] = BASE58ALPHABET[out[i - distance + offset]];
-//             }
-//         }
-//     }
-
-//     memset(out, BASE58ALPHABET[0], zeroCount);
-//     return 0;
-// }
 
 #define ADDRESS_LENGTH 32
 
@@ -139,5 +52,5 @@ int base58check_encode(const unsigned char *in, size_t length, unsigned char *ou
     cx_hash_sha256(hash, sizeof(hash), hash, sizeof(hash));
     memmove(&buffer[1 + ADDRESS_LENGTH], hash, 4);
 
-    return base58_encode(buffer, 1 + ADDRESS_LENGTH + 4, (char *) out, *outlen);
+    return base58_encode(buffer, 1 + ADDRESS_LENGTH + 4, (char *)out, *outlen);
 }
