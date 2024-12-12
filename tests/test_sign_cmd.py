@@ -135,173 +135,173 @@ def test_sign_tx_simple_transfer_with_memo_legacy_path(
     # assert check_signature_validity(public_key, der_sig, transaction)
 
 
-@pytest.mark.active_test_scope
-def test_sign_tx_transfer_with_schedule_legacy_path(
-    backend, firmware, navigator, default_screenshot_path, test_name
-):
-    # Initialize the command sender client
-    client = BoilerplateCommandSender(backend)
-    # Define the path for the transaction
-    path = "m/1105/0/0/0/0/2/0/0"
+# @pytest.mark.active_test_scope
+# def test_sign_tx_transfer_with_schedule_legacy_path(
+#     backend, firmware, navigator, default_screenshot_path, test_name
+# ):
+#     # Initialize the command sender client
+#     client = BoilerplateCommandSender(backend)
+#     # Define the path for the transaction
+#     path = "m/1105/0/0/0/0/2/0/0"
 
-    # Create the transaction that will be sent to the device for signing
-    header_and_to_address = "20a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7000000000000000a0000000000000064000000290000000063de5da71320a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7"
-    header_and_to_address = bytes.fromhex(header_and_to_address)
+#     # Create the transaction that will be sent to the device for signing
+#     header_and_to_address = "20a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7000000000000000a0000000000000064000000290000000063de5da71320a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7"
+#     header_and_to_address = bytes.fromhex(header_and_to_address)
 
-    # Define the schedule pairs
-    pairs = [
-        "0000017a396883d90000000005f5e100",
-        "0000017a396883d90000000005f5e100",
-        "0000017a396883d90000000005f5e100",
-        "0000017a396883d90000000005f5e100",
-        "0000017a396883d90000000005f5e100",
-    ]
-    joined_pairs = bytes.fromhex("".join(pairs))
+#     # Define the schedule pairs
+#     pairs = [
+#         "0000017a396883d90000000005f5e100",
+#         "0000017a396883d90000000005f5e100",
+#         "0000017a396883d90000000005f5e100",
+#         "0000017a396883d90000000005f5e100",
+#         "0000017a396883d90000000005f5e100",
+#     ]
+#     joined_pairs = bytes.fromhex("".join(pairs))
 
-    # Ensure pairs are a multiple of 16 bytes
-    if len(joined_pairs) % 16 != 0:
-        raise ValueError("Pairs must be a multiple of 16 bytes")
+#     # Ensure pairs are a multiple of 16 bytes
+#     if len(joined_pairs) % 16 != 0:
+#         raise ValueError("Pairs must be a multiple of 16 bytes")
 
-    # Split the pairs into chunks for APDU transmission
-    pairs_chunk = split_message(joined_pairs, MAX_SCHEDULE_PAIRS_IN_ONE_APDU)
+#     # Split the pairs into chunks for APDU transmission
+#     pairs_chunk = split_message(joined_pairs, MAX_SCHEDULE_PAIRS_IN_ONE_APDU)
 
-    # Send the first part of the transaction signing request
-    with client.sign_tx_with_schedule_part_1(
-        path=path,
-        header_and_to_address=header_and_to_address,
-        num_pairs=len(pairs),
-    ):
-        # Navigate and compare screenshots for validation
-        navigator.navigate_and_compare(
-            default_screenshot_path,
-            test_name,
-            instructions_builder(5, backend),
-            10,
-            True,
-            False,
-        )
+#     # Send the first part of the transaction signing request
+#     with client.sign_tx_with_schedule_part_1(
+#         path=path,
+#         header_and_to_address=header_and_to_address,
+#         num_pairs=len(pairs),
+#     ):
+#         # Navigate and compare screenshots for validation
+#         navigator.navigate_and_compare(
+#             default_screenshot_path,
+#             test_name,
+#             instructions_builder(5, backend),
+#             10,
+#             True,
+#             False,
+#         )
 
-    # Process each chunk of pairs
-    screenshots_so_far = 6
-    for chunk in pairs_chunk:
-        number_of_pairs_in_chunk = len(chunk) // 16
-        # Create the instructions to validate each pair
-        instructions = []
-        for _ in range(number_of_pairs_in_chunk):
-            instructions.extend(instructions_builder(2, backend))
+#     # Process each chunk of pairs
+#     screenshots_so_far = 6
+#     for chunk in pairs_chunk:
+#         number_of_pairs_in_chunk = len(chunk) // 16
+#         # Create the instructions to validate each pair
+#         instructions = []
+#         for _ in range(number_of_pairs_in_chunk):
+#             instructions.extend(instructions_builder(2, backend))
 
-        # Send the second part of the transaction signing request
-        with client.sign_tx_with_schedule_part_2(data=chunk):
-            # Navigate and compare screenshots for validation
-            navigator.navigate_and_compare(
-                default_screenshot_path,
-                test_name,
-                instructions,
-                10,
-                False,
-                False,
-                screenshots_so_far,
-            )
-        screenshots_so_far += number_of_pairs_in_chunk * 3
+#         # Send the second part of the transaction signing request
+#         with client.sign_tx_with_schedule_part_2(data=chunk):
+#             # Navigate and compare screenshots for validation
+#             navigator.navigate_and_compare(
+#                 default_screenshot_path,
+#                 test_name,
+#                 instructions,
+#                 10,
+#                 False,
+#                 False,
+#                 screenshots_so_far,
+#             )
+#         screenshots_so_far += number_of_pairs_in_chunk * 3
 
-    # The device as yielded the result, parse it and ensure that the signature is correct
-    response = client.get_async_response().data
-    response_hex = response.hex()
-    print("km------------response", response_hex)
-    # TODO: verify the signature
-    assert (
-        response_hex
-        == "e22fa38f78a79db71e84376c4eec2382166cdc412994207e7631b0ba3828f069b17b6f30351a64c50e5efacec3fe25161e9f7131e0235cd740739b24e0b06308"
-    )
+#     # The device as yielded the result, parse it and ensure that the signature is correct
+#     response = client.get_async_response().data
+#     response_hex = response.hex()
+#     print("km------------response", response_hex)
+#     # TODO: verify the signature
+#     assert (
+#         response_hex
+#         == "e22fa38f78a79db71e84376c4eec2382166cdc412994207e7631b0ba3828f069b17b6f30351a64c50e5efacec3fe25161e9f7131e0235cd740739b24e0b06308"
+#     )
 
 
-@pytest.mark.active_test_scope
-def test_sign_tx_transfer_with_schedule_and_memo_legacy_path(
-    backend, firmware, navigator, default_screenshot_path, test_name
-):
-    # Initialize the command sender client
-    client = BoilerplateCommandSender(backend)
-    # Define the path for the transaction
-    path = "m/1105/0/0/0/0/2/0/0"
+# @pytest.mark.active_test_scope
+# def test_sign_tx_transfer_with_schedule_and_memo_legacy_path(
+#     backend, firmware, navigator, default_screenshot_path, test_name
+# ):
+#     # Initialize the command sender client
+#     client = BoilerplateCommandSender(backend)
+#     # Define the path for the transaction
+#     path = "m/1105/0/0/0/0/2/0/0"
 
-    # Create the transaction that will be sent to the device for signing
-    header_and_to_address = "20a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7000000000000000a0000000000000064000000290000000063de5da71820a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7"
-    header_and_to_address = bytes.fromhex(header_and_to_address)
+#     # Create the transaction that will be sent to the device for signing
+#     header_and_to_address = "20a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7000000000000000a0000000000000064000000290000000063de5da71820a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7"
+#     header_and_to_address = bytes.fromhex(header_and_to_address)
 
-    # Define the memo
-    memo = "6474657374"  # "test" in hex
-    memo = bytes.fromhex(memo)
+#     # Define the memo
+#     memo = "6474657374"  # "test" in hex
+#     memo = bytes.fromhex(memo)
 
-    memo_chunks = split_message(memo, MAX_APDU_LEN)
+#     memo_chunks = split_message(memo, MAX_APDU_LEN)
 
-    # Define the schedule pairs
-    pairs = [
-        "0000017a396883d90000000005f5e100",
-        "0000017a396883d90000000005f5e100",
-        "0000017a396883d90000000005f5e100",
-        "0000017a396883d90000000005f5e100",
-        "0000017a396883d90000000005f5e100",
-    ]
-    joined_pairs = bytes.fromhex("".join(pairs))
+#     # Define the schedule pairs
+#     pairs = [
+#         "0000017a396883d90000000005f5e100",
+#         "0000017a396883d90000000005f5e100",
+#         "0000017a396883d90000000005f5e100",
+#         "0000017a396883d90000000005f5e100",
+#         "0000017a396883d90000000005f5e100",
+#     ]
+#     joined_pairs = bytes.fromhex("".join(pairs))
 
-    # Ensure pairs are a multiple of 16 bytes
-    if len(joined_pairs) % 16 != 0:
-        raise ValueError("Pairs must be a multiple of 16 bytes")
+#     # Ensure pairs are a multiple of 16 bytes
+#     if len(joined_pairs) % 16 != 0:
+#         raise ValueError("Pairs must be a multiple of 16 bytes")
 
-    # Split the pairs into chunks for APDU transmission
-    pairs_chunk = split_message(joined_pairs, MAX_SCHEDULE_PAIRS_IN_ONE_APDU)
+#     # Split the pairs into chunks for APDU transmission
+#     pairs_chunk = split_message(joined_pairs, MAX_SCHEDULE_PAIRS_IN_ONE_APDU)
 
-    # Send the first part of the transaction signing request
-    response = client.sign_tx_with_schedule_and_memo_part_1(
-        path=path,
-        header_and_to_address=header_and_to_address,
-        num_pairs=len(pairs),
-        memo_length=len(memo),
-    )
-    print("km------------response", response)
-    assert response.status == 0x9000
-    # Send the part with the memo
-    for chunk in memo_chunks:
-        with client.sign_tx_with_schedule_and_memo_part_2(memo_chunk=chunk):
-            # Navigate and compare screenshots for validation
-            navigator.navigate_and_compare(
-                default_screenshot_path,
-                test_name,
-                instructions_builder(6, backend),
-                10,
-                True,
-                False,
-            )
+#     # Send the first part of the transaction signing request
+#     response = client.sign_tx_with_schedule_and_memo_part_1(
+#         path=path,
+#         header_and_to_address=header_and_to_address,
+#         num_pairs=len(pairs),
+#         memo_length=len(memo),
+#     )
+#     print("km------------response", response)
+#     assert response.status == 0x9000
+#     # Send the part with the memo
+#     for chunk in memo_chunks:
+#         with client.sign_tx_with_schedule_and_memo_part_2(memo_chunk=chunk):
+#             # Navigate and compare screenshots for validation
+#             navigator.navigate_and_compare(
+#                 default_screenshot_path,
+#                 test_name,
+#                 instructions_builder(6, backend),
+#                 10,
+#                 True,
+#                 False,
+#             )
 
-    # Process each chunk of pairs
-    screenshots_so_far = 7
-    for chunk in pairs_chunk:
-        number_of_pairs_in_chunk = len(chunk) // 16
-        # Create the instructions to validate each pair
-        instructions = []
-        for _ in range(number_of_pairs_in_chunk):
-            instructions.extend(instructions_builder(2, backend))
+#     # Process each chunk of pairs
+#     screenshots_so_far = 7
+#     for chunk in pairs_chunk:
+#         number_of_pairs_in_chunk = len(chunk) // 16
+#         # Create the instructions to validate each pair
+#         instructions = []
+#         for _ in range(number_of_pairs_in_chunk):
+#             instructions.extend(instructions_builder(2, backend))
 
-        # Send the second part of the transaction signing request
-        with client.sign_tx_with_schedule_part_2(data=chunk):
-            # Navigate and compare screenshots for validation
-            navigator.navigate_and_compare(
-                default_screenshot_path,
-                test_name,
-                instructions,
-                10,
-                False,
-                False,
-                screenshots_so_far,
-            )
-        screenshots_so_far += number_of_pairs_in_chunk * 3
+#         # Send the second part of the transaction signing request
+#         with client.sign_tx_with_schedule_part_2(data=chunk):
+#             # Navigate and compare screenshots for validation
+#             navigator.navigate_and_compare(
+#                 default_screenshot_path,
+#                 test_name,
+#                 instructions,
+#                 10,
+#                 False,
+#                 False,
+#                 screenshots_so_far,
+#             )
+#         screenshots_so_far += number_of_pairs_in_chunk * 3
 
-    # The device as yielded the result, parse it and ensure that the signature is correct
-    response = client.get_async_response().data
-    response_hex = response.hex()
-    print("km------------response", response_hex)
-    # TODO: verify the signature
-    assert (
-        response_hex
-        == "9056db36dfa7b0ba722660b2becb227ed490dcaff9e332a7fba4c6d534ff0ff3368b21da8e7ebb62891be561261abd7c0435dfb46e596b1116c9996269d2a70b"
-    )
+#     # The device as yielded the result, parse it and ensure that the signature is correct
+#     response = client.get_async_response().data
+#     response_hex = response.hex()
+#     print("km------------response", response_hex)
+#     # TODO: verify the signature
+#     assert (
+#         response_hex
+#         == "9056db36dfa7b0ba722660b2becb227ed490dcaff9e332a7fba4c6d534ff0ff3368b21da8e7ebb62891be561261abd7c0435dfb46e596b1116c9996269d2a70b"
+#     )

@@ -201,6 +201,38 @@ void uiRegisterDataPayloadDisplay(volatile unsigned int *flags) {
 }
 
 void startTransferDisplay(bool displayMemo, volatile unsigned int *flags) {
+    uint8_t index = 0;
+    pairs[index].item = "Sender";
+    pairs[index].value = (char *) global_account_sender.sender;
+    index++;
+    pairs[index].item = "Recipient";
+    pairs[index].value = (char *) global.withDataBlob.signTransferContext.displayStr;
+    index++;
+    pairs[index].item = "Amount";
+    pairs[index].value = (char *) global.withDataBlob.signTransferContext.displayAmount;
+    index++;
+    if (displayMemo) {
+        pairs[index].item = "Memo";
+        pairs[index].value = (char *) global.withDataBlob.cborContext.display;
+        index++;
+    }
+
+    // Create the page content
+    nbgl_contentTagValueList_t content;
+    content.nbPairs = index;
+    content.pairs = pairs;
+    content.smallCaseForValue = false;
+    content.nbMaxLinesForValue = 0;
+    content.startIndex = 0;
+    // Setup the review screen
+    nbgl_useCaseReview(TYPE_TRANSACTION,
+                       &content,
+                       &C_app_concordium_64px,
+                       "Review Transfer",
+                       NULL,  // No subtitle
+                       "Sign Transfer",
+                       review_choice_sign);
+
     *flags |= IO_ASYNCH_REPLY;
     displayMemo = false;
     // TODO: Implement this
