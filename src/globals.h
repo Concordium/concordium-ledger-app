@@ -39,10 +39,8 @@
 #include "signConfigureBaker.h"
 #include "signConfigureDelegation.h"
 #include "signCredentialDeployment.h"
-#include "signEncryptedAmountTransfer.h"
 #include "signPublicInformationForIp.h"
 #include "signTransfer.h"
-#include "signTransferToEncrypted.h"
 #include "signTransferToPublic.h"
 #include "signTransferWithSchedule.h"
 #include "signRegisterData.h"
@@ -94,14 +92,11 @@ typedef enum {
     UPDATE_CONTRACT = 2,
     TRANSFER = 3,
     UPDATE_CREDENTIAL_KEYS = 13,
-    ENCRYPTED_AMOUNT_TRANSFER = 16,
-    TRANSFER_TO_ENCRYPTED = 17,
     TRANSFER_TO_PUBLIC = 18,
     TRANSFER_WITH_SCHEDULE = 19,
     UPDATE_CREDENTIALS = 20,
     REGISTER_DATA = 21,
     TRANSFER_WITH_MEMO = 22,
-    ENCRYPTED_AMOUNT_TRANSFER_WITH_MEMO = 23,
     TRANSFER_WITH_SCHEDULE_WITH_MEMO = 24,
     CONFIGURE_BAKER = 25,
     CONFIGURE_DELEGATION = 26
@@ -146,7 +141,6 @@ typedef struct {
 typedef struct {
     union {
         signTransferContext_t signTransferContext;
-        signEncryptedAmountToTransfer_t signEncryptedAmountToTransfer;
         signTransferWithScheduleContext_t signTransferWithScheduleContext;
         signRegisterData_t signRegisterData;
     };
@@ -167,7 +161,6 @@ typedef union {
     signPublicInformationForIp_t signPublicInformationForIp;
     signCredentialDeploymentContext_t signCredentialDeploymentContext;
 
-    signTransferToEncrypted_t signTransferToEncrypted;
     signTransferToPublic_t signTransferToPublic;
     signConfigureBaker_t signConfigureBaker;
     signConfigureDelegationContext_t signConfigureDelegation;
