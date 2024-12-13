@@ -83,15 +83,26 @@ def test_credential_deployment_new(
         proofs=proofs,
         transaction=new_transaction,
     ):
-        navigate_until_text_and_compare(
-            firmware,
-            navigator,
-            "Sign transaction",
-            default_screenshot_path,
-            test_name + "/last_key",
-            True,
-            False,
-        )
+        if firmware.is_nano:
+            navigate_until_text_and_compare(
+                firmware,
+                navigator,
+                "details",
+                default_screenshot_path,
+                test_name + "/last_key",
+            )
+        else:
+            navigate_until_text_and_compare(
+                firmware,
+                navigator,
+                "Sign details",
+                default_screenshot_path,
+                test_name + "/last_key",
+                True,
+                False,
+                NavInsID.USE_CASE_REVIEW_CONFIRM
+            )
+
     response = client.get_async_response()
     print("km------------response", response.data.hex())
     assert response.status == 0x9000
@@ -171,15 +182,26 @@ def test_credential_deployment_existing(
         proofs=proofs,
         transaction=existing_transaction,
     ):
-        navigate_until_text_and_compare(
-            firmware,
-            navigator,
-            "Sign transaction",
-            default_screenshot_path,
-            test_name + "/last_key",
-            True,
-            False
-        )
+        if firmware.is_nano:
+            navigate_until_text_and_compare(
+                firmware,
+                navigator,
+                "details",
+                default_screenshot_path,
+                test_name + "/last_key"
+            )
+        else:
+            navigate_until_text_and_compare(
+                firmware,
+                navigator,
+                "Sign details",
+                default_screenshot_path,
+                test_name + "/last_key",
+                True,
+                False,
+                NavInsID.USE_CASE_REVIEW_CONFIRM
+            )
+
     response = client.get_async_response()
     print("km------------response", response.data.hex())
     assert response.status == 0x9000

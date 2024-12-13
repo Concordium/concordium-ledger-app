@@ -432,7 +432,7 @@ void uiSignCredentialDeploymentNewIntroDisplay(void) {
                        &C_app_concordium_64px,
                        "Review Transaction",
                        NULL,
-                       "Sign transaction",
+                       "Sign details",
                        review_choice_sign);
 }
 
@@ -466,7 +466,7 @@ void uiSignCredentialDeploymentExistingIntroDisplay(void) {
                        &C_app_concordium_64px,
                        "Review Transaction",
                        NULL,
-                       "Sign transaction",
+                       "Sign details",
                        review_choice_sign);
 }
 
@@ -497,7 +497,7 @@ void uiSignCredentialDeploymentNewDisplay(void) {
                        &C_app_concordium_64px,
                        "Review Transaction",
                        NULL,
-                       "Sign transaction",
+                       "Sign details",
                        review_choice_sign);
 }
 
@@ -531,7 +531,7 @@ void uiSignCredentialDeploymentExistingDisplay(void) {
                        &C_app_concordium_64px,
                        "Review Transaction",
                        NULL,
-                       "Sign transaction",
+                       "Sign details",
                        review_choice_sign);
 }
 
