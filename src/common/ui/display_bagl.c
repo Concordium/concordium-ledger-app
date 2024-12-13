@@ -1,42 +1,28 @@
 #ifdef HAVE_BAGL
-
-#include "os.h"
-#include "ux.h"
-
-#include "common/responseCodes.h"
-#include "common/sign.h"
-#include "common/util.h"
-#include "display.h"
 #include "globals.h"
-#include "menu.h"
-#include "getPublicKey.h"
-#include "verifyAddress.h"
-#include "exportPrivateKey.h"
-#include "signConfigureBaker.h"
-#include "signCredentialDeployment.h"
 
 accountSender_t global_account_sender;
 
 UX_STEP_NOCB(ux_display_memo_step_nocb,
              bnnn_paging,
-             {"Memo", (char *) global.withDataBlob.cborContext.display});
+             {"Memo", (char *)global.withDataBlob.cborContext.display});
 
 UX_STEP_CB(ux_display_memo_step,
            bnnn_paging,
            handleCborStep(),
-           {"Memo", (char *) global.withDataBlob.cborContext.display});
+           {"Memo", (char *)global.withDataBlob.cborContext.display});
 
 UX_FLOW(ux_display_memo, &ux_display_memo_step);
 
 UX_STEP_NOCB(ux_sign_flow_account_sender_view,
              bnnn_paging,
-             {.title = "Sender", .text = (char *) global_account_sender.sender});
+             {.title = "Sender", .text = (char *)global_account_sender.sender});
 
 // UI definitions for comparison of public-key on the device
 // with the public-key that the caller received.
 UX_STEP_NOCB(ux_sign_compare_public_key_0_step,
              bnnn_paging,
-             {.title = "Compare", .text = (char *) global.exportPublicKeyContext.publicKey});
+             {.title = "Compare", .text = (char *)global.exportPublicKeyContext.publicKey});
 UX_STEP_CB(ux_compare_accept_step, pb, ui_menu_main(), {&C_icon_validate_14, "Accept"});
 UX_STEP_CB(ux_compare_decline_step, pb, ui_menu_main(), {&C_icon_crossmark, "Decline"});
 UX_FLOW(ux_sign_compare_public_key,
@@ -55,7 +41,7 @@ UX_STEP_VALID(ux_decline_step, pb, sendUserRejection(), {&C_icon_crossmark, "Dec
 UX_STEP_VALID(ux_generate_public_flow_0_step,
               pnn,
               sendPublicKey(true),
-              {&C_icon_validate_14, "Public key", (char *) global.exportPublicKeyContext.display});
+              {&C_icon_validate_14, "Public key", (char *)global.exportPublicKeyContext.display});
 UX_FLOW(ux_generate_public_flow, &ux_generate_public_flow_0_step, &ux_decline_step, FLOW_LOOP);
 
 void uiGeneratePubkey(volatile unsigned int *flags) {
@@ -69,11 +55,11 @@ void uiGeneratePubkey(volatile unsigned int *flags) {
 
 UX_STEP_NOCB(ux_verify_address_0_step,
              bnnn_paging,
-             {.title = "Verify Address", .text = (char *) global.verifyAddressContext.display});
+             {.title = "Verify Address", .text = (char *)global.verifyAddressContext.display});
 
 UX_STEP_NOCB(ux_verify_address_1_step,
              bnnn_paging,
-             {.title = "Address", .text = (char *) global.verifyAddressContext.address});
+             {.title = "Address", .text = (char *)global.verifyAddressContext.address});
 UX_STEP_CB(ux_verify_address_approve_step, pb, sendSuccess(0), {&C_icon_validate_14, "Approve"});
 UX_STEP_CB(ux_verify_address_reject_step, pb, sendUserRejection(), {&C_icon_crossmark, "Reject"});
 UX_FLOW(ux_verify_address,
@@ -105,8 +91,8 @@ UX_FLOW(ux_sign_flow_shared, &ux_sign_flow_shared_sign, &ux_sign_flow_shared_dec
 
 UX_STEP_NOCB(ux_export_private_key_0_step,
              nn,
-             {(char *) global.exportPrivateKeyContext.displayHeader,
-              (char *) global.exportPrivateKeyContext.display});
+             {(char *)global.exportPrivateKeyContext.displayHeader,
+              (char *)global.exportPrivateKeyContext.display});
 UX_STEP_CB(ux_export_private_key_accept_step,
            pb,
            exportPrivateKey(),
@@ -138,29 +124,28 @@ UX_STEP_NOCB(ux_sign_configure_baker_stop_baking_step, nn, {"Stop", "baking"});
 UX_STEP_NOCB(ux_sign_configure_baker_capital_step,
              bnnn_paging,
              {.title = "Amount to stake",
-              .text = (char *) global.signConfigureBaker.capitalRestakeDelegation.displayCapital});
+              .text = (char *)global.signConfigureBaker.capitalRestakeDelegation.displayCapital});
 
 UX_STEP_NOCB(ux_sign_configure_baker_restake_step,
              bn,
              {"Restake earnings",
-              (char *) global.signConfigureBaker.capitalRestakeDelegation.displayRestake});
+              (char *)global.signConfigureBaker.capitalRestakeDelegation.displayRestake});
 
-UX_STEP_NOCB(
-    ux_sign_configure_baker_open_status_step,
-    bn,
-    {"Pool status",
-     (char *) global.signConfigureBaker.capitalRestakeDelegation.displayOpenForDelegation});
+UX_STEP_NOCB(ux_sign_configure_baker_open_status_step,
+             bn,
+             {"Pool status",
+              (char *)global.signConfigureBaker.capitalRestakeDelegation.displayOpenForDelegation});
 
 UX_STEP_NOCB(ux_sign_configure_baker_keys_step, nn, {"Update baker", "keys"});
 
 UX_STEP_CB(ux_sign_configure_baker_url_cb_step,
            bnnn_paging,
            sendSuccessNoIdle(),
-           {.title = "URL", .text = (char *) global.signConfigureBaker.url.urlDisplay});
+           {.title = "URL", .text = (char *)global.signConfigureBaker.url.urlDisplay});
 
 UX_STEP_NOCB(ux_sign_configure_baker_url_step,
              bnnn_paging,
-             {.title = "URL", .text = (char *) global.signConfigureBaker.url.urlDisplay});
+             {.title = "URL", .text = (char *)global.signConfigureBaker.url.urlDisplay});
 
 UX_STEP_CB(ux_sign_configure_baker_continue,
            nn,
@@ -174,17 +159,17 @@ UX_STEP_NOCB(ux_sign_configure_baker_commission_rates_step, nn, {"Commission", "
 UX_STEP_NOCB(ux_sign_configure_baker_commission_transaction_fee_step,
              bn,
              {"Transaction fee",
-              (char *) global.signConfigureBaker.commissionRates.transactionFeeCommissionRate});
+              (char *)global.signConfigureBaker.commissionRates.transactionFeeCommissionRate});
 
 UX_STEP_NOCB(ux_sign_configure_baker_commission_baking_reward_step,
              bn,
              {"Baking reward",
-              (char *) global.signConfigureBaker.commissionRates.bakingRewardCommissionRate});
+              (char *)global.signConfigureBaker.commissionRates.bakingRewardCommissionRate});
 
 UX_STEP_NOCB(ux_sign_configure_baker_commission_finalization_reward_step,
              bn,
              {"Finalization reward",
-              (char *) global.signConfigureBaker.commissionRates.finalizationRewardCommissionRate});
+              (char *)global.signConfigureBaker.commissionRates.finalizationRewardCommissionRate});
 
 /**
  * Dynamically builds and initializes the capital, restake earnings, pool status and
@@ -334,17 +319,17 @@ const ux_flow_step_t *ux_sign_configure_delegation[8];
 UX_STEP_NOCB(ux_sign_configure_delegation_capital_step,
              bnnn_paging,
              {.title = "Amount to delegate",
-              .text = (char *) global.signConfigureDelegation.displayCapital});
+              .text = (char *)global.signConfigureDelegation.displayCapital});
 
 UX_STEP_NOCB(ux_sign_configure_delegation_restake_step,
              bnnn_paging,
              {.title = "Restake earnings",
-              .text = (char *) global.signConfigureDelegation.displayRestake});
+              .text = (char *)global.signConfigureDelegation.displayRestake});
 
 UX_STEP_NOCB(ux_sign_configure_delegation_pool_step,
              bnnn_paging,
              {.title = "Delegation target",
-              .text = (char *) global.signConfigureDelegation.displayDelegationTarget});
+              .text = (char *)global.signConfigureDelegation.displayDelegationTarget});
 
 UX_STEP_NOCB(ux_sign_configure_delegation_stop_delegation_step, nn, {"Stop", "delegation"});
 
@@ -396,7 +381,7 @@ UX_FLOW(ux_update_credentials_initial_flow,
 UX_STEP_NOCB(ux_credential_deployment_verification_key_flow_0_step,
              bnnn_paging,
              {.title = "Public key",
-              .text = (char *) global.signCredentialDeploymentContext.accountVerificationKey});
+              .text = (char *)global.signCredentialDeploymentContext.accountVerificationKey});
 
 UX_STEP_CB(ux_credential_deployment_verification_key_flow_1_step,
            nn,
@@ -414,17 +399,17 @@ UX_FLOW(ux_credential_deployment_verification_key_flow_with_intro,
 UX_STEP_NOCB(ux_credential_deployment_threshold_flow_0_step,
              bn,
              {"Signature threshold",
-              (char *) global.signCredentialDeploymentContext.signatureThreshold});
+              (char *)global.signCredentialDeploymentContext.signatureThreshold});
 UX_STEP_CB(ux_credential_deployment_threshold_flow_1_step,
            bn,
            sendSuccessNoIdle(),
            {"AR threshold",
-            (char *) global.signCredentialDeploymentContext.anonymityRevocationThreshold});
+            (char *)global.signCredentialDeploymentContext.anonymityRevocationThreshold});
 
 UX_STEP_NOCB(ux_sign_credential_deployment_0_step,
              bnnn_paging,
              {.title = "Address",
-              .text = (char *) global.signCredentialDeploymentContext.accountAddress});
+              .text = (char *)global.signCredentialDeploymentContext.accountAddress});
 UX_STEP_CB(ux_sign_credential_deployment_1_step,
            pnn,
            buildAndSignTransactionHash(),
@@ -470,13 +455,13 @@ UX_STEP_CB(ux_sign_credential_update_id_0_step,
            bnnn_paging,
            sendSuccessNoIdle(),
            {.title = "Rem. credential",
-            .text = (char *) global.signCredentialDeploymentContext.credentialId});
+            .text = (char *)global.signCredentialDeploymentContext.credentialId});
 UX_FLOW(ux_sign_credential_update_id, &ux_sign_credential_update_id_0_step);
 
 UX_STEP_NOCB(ux_sign_credential_update_threshold_0_step,
              bnnn_paging,
              {.title = "Cred. sig. threshold",
-              .text = (char *) global.signCredentialDeploymentContext.threshold});
+              .text = (char *)global.signCredentialDeploymentContext.threshold});
 UX_STEP_CB(ux_sign_credential_update_threshold_1_step,
            pnn,
            buildAndSignTransactionHash(),
@@ -541,7 +526,7 @@ UX_STEP_NOCB(ux_sign_encrypted_amount_transfer_1_step, nn, {"Shielded", "transfe
 UX_STEP_NOCB(ux_sign_encrypted_amount_transfer_2_step,
              bnnn_paging,
              {.title = "Recipient",
-              .text = (char *) global.withDataBlob.signEncryptedAmountToTransfer.to});
+              .text = (char *)global.withDataBlob.signEncryptedAmountToTransfer.to});
 
 void startEncryptedTransferDisplay(bool displayMemo) {
     uint8_t index = 0;
@@ -566,7 +551,7 @@ void startEncryptedTransferDisplay(bool displayMemo) {
 
 UX_STEP_NOCB(ux_sign_public_info_for_ip_display_public_key,
              bnnn_paging,
-             {.title = "Public key", .text = (char *) global.signPublicInformationForIp.publicKey});
+             {.title = "Public key", .text = (char *)global.signPublicInformationForIp.publicKey});
 
 UX_STEP_CB(ux_sign_public_info_for_ip_continue,
            nn,
@@ -590,7 +575,7 @@ UX_STEP_CB(ux_sign_public_info_for_ip_decline,
 
 UX_STEP_NOCB(ux_sign_public_info_for_ip_display_threshold,
              bn,
-             {"Signature threshold", (char *) global.signPublicInformationForIp.threshold});
+             {"Signature threshold", (char *)global.signPublicInformationForIp.threshold});
 
 // Display a public key with continue
 UX_FLOW(ux_sign_public_info_for_ip_public_key,
@@ -640,7 +625,7 @@ UX_STEP_VALID(ux_register_data_initial_flow_step,
 UX_STEP_VALID(ux_register_data_display_data_step,
               bnnn_paging,
               handleData(),
-              {"Data", (char *) global.withDataBlob.cborContext.display});
+              {"Data", (char *)global.withDataBlob.cborContext.display});
 UX_FLOW(ux_register_data_initial,
         &ux_sign_flow_shared_review,
         &ux_sign_flow_account_sender_view,
@@ -667,12 +652,12 @@ const ux_flow_step_t *ux_sign_amount_transfer[8];
 
 UX_STEP_NOCB(ux_sign_flow_1_step,
              bnnn_paging,
-             {"Amount", (char *) global.withDataBlob.signTransferContext.displayAmount});
+             {"Amount", (char *)global.withDataBlob.signTransferContext.displayAmount});
 
 UX_STEP_NOCB(ux_sign_flow_2_step,
              bnnn_paging,
              {.title = "Recipient",
-              .text = (char *) global.withDataBlob.signTransferContext.displayStr});
+              .text = (char *)global.withDataBlob.signTransferContext.displayStr});
 
 void startTransferDisplay(bool displayMemo, volatile unsigned int *flags) {
     uint8_t index = 0;
@@ -698,7 +683,7 @@ void startTransferDisplay(bool displayMemo, volatile unsigned int *flags) {
 
 UX_STEP_NOCB(ux_sign_transfer_to_encrypted_1_step,
              bnnn_paging,
-             {.title = "Shield amount", .text = (char *) global.signTransferToEncrypted.amount});
+             {.title = "Shield amount", .text = (char *)global.signTransferToEncrypted.amount});
 UX_FLOW(ux_sign_transfer_to_encrypted,
         &ux_sign_flow_shared_review,
         &ux_sign_flow_account_sender_view,
@@ -715,7 +700,7 @@ void uiSignTransferToEncryptedDisplay(volatile unsigned int *flags) {
 
 UX_STEP_NOCB(ux_sign_transfer_to_public_1_step,
              bnnn_paging,
-             {.title = "Unshield amount", .text = (char *) global.signTransferToPublic.amount});
+             {.title = "Unshield amount", .text = (char *)global.signTransferToPublic.amount});
 UX_FLOW(ux_sign_transfer_to_public,
         &ux_sign_flow_shared_review,
         &ux_sign_flow_account_sender_view,
@@ -739,7 +724,7 @@ static signTransferWithScheduleContext_t *ctx_sign_transfer_with_schedule =
 UX_STEP_NOCB(ux_scheduled_transfer_initial_flow_1_step,
              bnnn_paging,
              {.title = "Recipient",
-              .text = (char *) global.withDataBlob.signTransferWithScheduleContext.displayStr});
+              .text = (char *)global.withDataBlob.signTransferWithScheduleContext.displayStr});
 UX_STEP_VALID(ux_scheduled_transfer_initial_flow_2_step,
               nn,
               sendSuccessNoIdle(),
@@ -749,11 +734,10 @@ UX_STEP_VALID(ux_scheduled_transfer_initial_flow_2_step,
 UX_STEP_NOCB(ux_sign_scheduled_transfer_pair_flow_0_step,
              bnnn_paging,
              {"Release time (UTC)",
-              (char *) global.withDataBlob.signTransferWithScheduleContext.displayTimestamp});
+              (char *)global.withDataBlob.signTransferWithScheduleContext.displayTimestamp});
 UX_STEP_NOCB(ux_sign_scheduled_transfer_pair_flow_1_step,
              bnnn_paging,
-             {"Amount",
-              (char *) global.withDataBlob.signTransferWithScheduleContext.displayAmount});
+             {"Amount", (char *)global.withDataBlob.signTransferWithScheduleContext.displayAmount});
 UX_STEP_CB(ux_sign_scheduled_transfer_pair_flow_2_step,
            nn,
            processNextScheduledAmount(ctx_sign_transfer_with_schedule->buffer),
@@ -797,10 +781,10 @@ void uiSignScheduledTransferPairFlowDisplay(void) {
 // Deploy Module
 UX_STEP_NOCB(ux_deploy_module_1_step,
              bnnn_paging,
-             {.title = "Version", .text = (char *) global.deployModule.versionDisplay});
+             {.title = "Version", .text = (char *)global.deployModule.versionDisplay});
 UX_STEP_NOCB(ux_deploy_module_2_step,
              bnnn_paging,
-             {.title = "TX hash", .text = (char *) global.deployModule.sourceHashDisplay});
+             {.title = "TX hash", .text = (char *)global.deployModule.sourceHashDisplay});
 UX_FLOW(ux_deploy_module,
         &ux_sign_flow_shared_review,
         &ux_sign_flow_account_sender_view,
@@ -816,10 +800,10 @@ void uiDeployModuleDisplay() {
 // Init Contract
 UX_STEP_NOCB(ux_init_contract_1_step,
              bnnn_paging,
-             {.title = "Amount", .text = (char *) global.initContract.amountDisplay});
+             {.title = "Amount", .text = (char *)global.initContract.amountDisplay});
 UX_STEP_NOCB(ux_init_contract_2_step,
              bnnn_paging,
-             {.title = "Module ref", .text = (char *) global.initContract.moduleRefDisplay});
+             {.title = "Module ref", .text = (char *)global.initContract.moduleRefDisplay});
 UX_FLOW(ux_init_contract,
         &ux_sign_flow_shared_review,
         &ux_sign_flow_account_sender_view,
@@ -835,13 +819,13 @@ void uiInitContractDisplay() {
 // Update Contract
 UX_STEP_NOCB(ux_update_contract_1_step,
              bnnn_paging,
-             {.title = "Amount", .text = (char *) global.updateContract.amountDisplay});
+             {.title = "Amount", .text = (char *)global.updateContract.amountDisplay});
 UX_STEP_NOCB(ux_update_contract_2_step,
              bnnn_paging,
-             {.title = "Index", .text = (char *) global.updateContract.indexDisplay});
+             {.title = "Index", .text = (char *)global.updateContract.indexDisplay});
 UX_STEP_NOCB(ux_update_contract_3_step,
              bnnn_paging,
-             {.title = "Sub index", .text = (char *) global.updateContract.subIndexDisplay});
+             {.title = "Sub index", .text = (char *)global.updateContract.subIndexDisplay});
 UX_FLOW(ux_update_contract,
         &ux_sign_flow_shared_review,
         &ux_sign_flow_account_sender_view,

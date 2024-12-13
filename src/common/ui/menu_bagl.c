@@ -17,13 +17,7 @@
 
 #ifdef HAVE_BAGL
 
-#include "os.h"
-#include "ux.h"
-#include "glyphs.h"
-
-#include "../globals.h"
-#include "util.h"
-#include "menu.h"
+#include "globals.h"
 
 static tx_state_t *tx_state = &global_tx_state;
 

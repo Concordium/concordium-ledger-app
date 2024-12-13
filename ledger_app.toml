@@ -4,5 +4,4 @@ sdk = "C"
 devices = ["flex", "stax","nanos+", "nanox"]
 
 [tests]
-unit_directory = "./unit-tests/"
 pytest_directory = "./tests/"

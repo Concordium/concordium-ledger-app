@@ -9,7 +9,8 @@ AlignAfterOpenBracket: Align
 AlignConsecutiveMacros: true
 AllowAllParametersOfDeclarationOnNextLine: false
 SortIncludes: false
-SpaceAfterCStyleCast: true
+SpaceAfterCStyleCast: false
+SpacesInCStyleCastParentheses: false
 AllowShortCaseLabelsOnASingleLine: false
 AllowAllArgumentsOnNextLine: false
 AllowShortBlocksOnASingleLine: Never
@@ -17,3 +18,4 @@ AllowShortFunctionsOnASingleLine: None
 BinPackArguments: false
 BinPackParameters: false
 ---
+

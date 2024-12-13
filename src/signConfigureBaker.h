@@ -1,8 +1,5 @@
 #pragma once
 
-#include <stdbool.h>
-#include <stdint.h>
-
 /**
  * Handles the signing flow for a 'Configure Baker' transaction. It validates
  * that the correct UpdateType is supplied and will fail otherwise.

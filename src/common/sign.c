@@ -1,23 +1,11 @@
-#include "sign.h"
-
-#include <os_io_seproxyhal.h>
-#include <stdint.h>
-#include <stdio.h>
-
-#include "cx.h"
-#include "os.h"
-#include "util.h"
-#include "ux.h"
-#include "sign.h"
-#include "display.h"
-#include "responseCodes.h"
+#include "globals.h"
 
 static tx_state_t *tx_state = &global_tx_state;
 static cborContext_t *ctx = &global.withDataBlob.cborContext;
 
 // Hashes transaction, signs it and sends the signature back to the computer.
 void buildAndSignTransactionHash() {
-    hash((cx_hash_t *) &tx_state->hash, CX_LAST, NULL, 0, tx_state->transactionHash, 32);
+    hash((cx_hash_t *)&tx_state->hash, CX_LAST, NULL, 0, tx_state->transactionHash, 32);
 
     uint8_t signedHash[64];
     sign(tx_state->transactionHash, signedHash);

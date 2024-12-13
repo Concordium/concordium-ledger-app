@@ -1,10 +1,4 @@
 #include "globals.h"
-#include "menu.h"
-#include "os.h"
-#include "responseCodes.h"
-#include "util.h"
-#include "ux.h"
-#include "display.h"
 
 static keyDerivationPath_t *keyPath = &path;
 static exportPublicKeyContext_t *ctx = &global.exportPublicKeyContext;

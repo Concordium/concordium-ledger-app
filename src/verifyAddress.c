@@ -1,12 +1,4 @@
-#include <os.h>
-#include "cx.h"
-#include "ux.h"
-#include <stdlib.h>
-#include <string.h>
-#include "util.h"
 #include "globals.h"
-#include "base58check.h"
-#include "responseCodes.h"
 
 #define LEGACY_ACCOUNT_SUBTREE 0
 #define LEGACY_NORMAL_ACCOUNTS 0
