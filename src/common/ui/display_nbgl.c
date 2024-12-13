@@ -773,11 +773,10 @@ void uiSignScheduledTransferPairFlowDisplay(void) {
     uint8_t pairIndex = 0;
     pairs[pairIndex].item = "Release time (UTC)";
     pairs[pairIndex].value =
-        (char *) global.withDataBlob.signTransferWithScheduleContext.displayTimestamp;
+        (char *)global.withDataBlob.signTransferWithScheduleContext.displayTimestamp;
     pairIndex++;
     pairs[pairIndex].item = "Amount";
-    pairs[pairIndex].value =
-        (char *) global.withDataBlob.signTransferWithScheduleContext.displayStr;
+    pairs[pairIndex].value = (char *)global.withDataBlob.signTransferWithScheduleContext.displayStr;
     pairIndex++;
 
     // Create the page content
@@ -802,11 +801,10 @@ void uiSignScheduledTransferPairFlowSignDisplay(void) {
     uint8_t pairIndex = 0;
     pairs[pairIndex].item = "Release time (UTC)";
     pairs[pairIndex].value =
-        (char *) global.withDataBlob.signTransferWithScheduleContext.displayTimestamp;
+        (char *)global.withDataBlob.signTransferWithScheduleContext.displayTimestamp;
     pairIndex++;
     pairs[pairIndex].item = "Amount";
-    pairs[pairIndex].value =
-        (char *) global.withDataBlob.signTransferWithScheduleContext.displayStr;
+    pairs[pairIndex].value = (char *)global.withDataBlob.signTransferWithScheduleContext.displayStr;
     pairIndex++;
 
     // Create the page content
@@ -845,14 +843,14 @@ void uiVerifyAddress(volatile unsigned int *flags) {
 void startInitialScheduledTransferDisplay(bool displayMemo) {
     uint8_t index = 0;
     pairs[index].item = "Sender";
-    pairs[index].value = (char *) global_account_sender.sender;
+    pairs[index].value = (char *)global_account_sender.sender;
     index++;
     pairs[index].item = "Recipient";
-    pairs[index].value = (char *) global.withDataBlob.signTransferWithScheduleContext.displayStr;
+    pairs[index].value = (char *)global.withDataBlob.signTransferWithScheduleContext.displayStr;
     index++;
     if (displayMemo) {
         pairs[index].item = "Memo";
-        pairs[index].value = (char *) global.withDataBlob.cborContext.display;
+        pairs[index].value = (char *)global.withDataBlob.cborContext.display;
         index++;
     }
     // Create the page content
