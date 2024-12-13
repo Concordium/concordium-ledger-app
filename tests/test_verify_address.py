@@ -19,13 +19,12 @@ from utils import instructions_builder
 nbgl_instructions_address_confirmation = [
     NavInsID.SWIPE_CENTER_TO_LEFT,
     NavInsID.SWIPE_CENTER_TO_LEFT,
-    NavInsID.USE_CASE_ADDRESS_CONFIRMATION_CONFIRM,
+    NavInsID.USE_CASE_CHOICE_CONFIRM,
 ]
 nbgl_instructions_address_confirmation_reject = [
     NavInsID.SWIPE_CENTER_TO_LEFT,
     NavInsID.SWIPE_CENTER_TO_LEFT,
-    NavInsID.USE_CASE_ADDRESS_CONFIRMATION_CANCEL,
-    NavInsID.USE_CASE_ADDRESS_CONFIRMATION_CONFIRM,
+    NavInsID.USE_CASE_CHOICE_REJECT,
 ]
 bagl_instructions_address_confirmation = [
     NavInsID.RIGHT_CLICK,
