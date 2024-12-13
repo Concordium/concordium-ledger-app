@@ -409,12 +409,10 @@ void uiSignCredentialDeploymentNewIntroDisplay(void) {
     // Setup data to display
     uint8_t pairIndex = 0;
     pairs[pairIndex].item = "Public key";
-    pairs[pairIndex].value =
-        (char *)global.signCredentialDeploymentContext.accountVerificationKey;
+    pairs[pairIndex].value = (char *)global.signCredentialDeploymentContext.accountVerificationKey;
     pairIndex++;
     pairs[pairIndex].item = "Signature threshold";
-    pairs[pairIndex].value =
-        (char *)global.signCredentialDeploymentContext.signatureThreshold;
+    pairs[pairIndex].value = (char *)global.signCredentialDeploymentContext.signatureThreshold;
     pairIndex++;
     pairs[pairIndex].item = "AR threshold";
     pairs[pairIndex].value =
@@ -448,7 +446,8 @@ void uiSignCredentialDeploymentExistingIntroDisplay(void) {
     pairs[pairIndex].value = (char *)global.signCredentialDeploymentContext.signatureThreshold;
     pairIndex++;
     pairs[pairIndex].item = "AR threshold";
-    pairs[pairIndex].value = (char *)global.signCredentialDeploymentContext.anonymityRevocationThreshold;
+    pairs[pairIndex].value =
+        (char *)global.signCredentialDeploymentContext.anonymityRevocationThreshold;
     pairIndex++;
     pairs[pairIndex].item = "Address";
     pairs[pairIndex].value = (char *)global.signCredentialDeploymentContext.accountAddress;
@@ -481,7 +480,8 @@ void uiSignCredentialDeploymentNewDisplay(void) {
     pairs[pairIndex].value = (char *)global.signCredentialDeploymentContext.signatureThreshold;
     pairIndex++;
     pairs[pairIndex].item = "AR threshold";
-    pairs[pairIndex].value = (char *)global.signCredentialDeploymentContext.anonymityRevocationThreshold;
+    pairs[pairIndex].value =
+        (char *)global.signCredentialDeploymentContext.anonymityRevocationThreshold;
     pairIndex++;
 
     // Create the page content
