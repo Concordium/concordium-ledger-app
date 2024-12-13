@@ -25,6 +25,7 @@ nbgl_instructions_address_confirmation_reject = [
     NavInsID.SWIPE_CENTER_TO_LEFT,
     NavInsID.SWIPE_CENTER_TO_LEFT,
     NavInsID.USE_CASE_CHOICE_REJECT,
+    NavInsID.USE_CASE_CHOICE_CONFIRM,
 ]
 bagl_instructions_address_confirmation = [
     NavInsID.RIGHT_CLICK,
@@ -34,7 +35,6 @@ bagl_instructions_address_confirmation = [
 ]
 
 bagl_instructions_address_confirmation_reject = [
-    NavInsID.RIGHT_CLICK,
     NavInsID.RIGHT_CLICK,
     NavInsID.RIGHT_CLICK,
     NavInsID.RIGHT_CLICK,
@@ -90,6 +90,7 @@ def test_verify_address_confirm_new_path_accepted(
 
 
 # In this test we check that the VERIFY ADDRESS in confirmation mode replies an error if the user refuses
+@pytest.mark.active_test_scope
 def test_verify_address_confirm_refused(
     backend, scenario_navigator, test_name, default_screenshot_path
 ):

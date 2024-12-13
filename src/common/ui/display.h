@@ -36,14 +36,6 @@ void uiSignCredentialDeploymentNewDisplay(void);
 void uiSignCredentialDeploymentExistingIntroDisplay(void);
 void uiSignCredentialDeploymentExistingDisplay(void);
 
-// Encrypted amount transfer
-
-#ifdef HAVE_BAGL
-extern const ux_flow_step_t *ux_sign_encrypted_amount_transfer[8];
-#endif
-
-void startEncryptedTransferDisplay(bool displayMemo);
-
 // Public information for IP
 void uiReviewPublicInformationForIpDisplay(void);
 void uiSignPublicInformationForIpPublicKeyDisplay(void);
@@ -62,8 +54,6 @@ extern const ux_flow_step_t *ux_sign_amount_transfer[8];
 
 void startTransferDisplay(bool displayMemo, volatile unsigned int *flags);
 
-// Sign Transfer to Encrypted
-void uiSignTransferToEncryptedDisplay(volatile unsigned int *flags);
 // Sign Transfer to Public
 void uiSignTransferToPublicDisplay(volatile unsigned int *flags);
 

@@ -33,15 +33,6 @@ int handler(uint8_t INS,
         case INS_EXPORT_PRIVATE_KEY:
             handleExportPrivateKey(cdata, p1, p2, flags);
             break;
-        case INS_TRANSFER_TO_ENCRYPTED:
-            handleSignTransferToEncrypted(cdata, flags);
-            break;
-        case INS_ENCRYPTED_AMOUNT_TRANSFER:
-            handleSignEncryptedAmountTransfer(cdata, p1, lc, flags, isInitialCall);
-            break;
-        case INS_ENCRYPTED_AMOUNT_TRANSFER_WITH_MEMO:
-            handleSignEncryptedAmountTransferWithMemo(cdata, p1, lc, flags, isInitialCall);
-            break;
         case INS_TRANSFER_TO_PUBLIC:
             handleSignTransferToPublic(cdata, p1, lc, flags, isInitialCall);
             break;

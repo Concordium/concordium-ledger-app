@@ -516,37 +516,6 @@ void uiSignCredentialDeploymentExistingDisplay(void) {
     ux_flow_init(0, ux_sign_credential_deployment_existing, NULL);
 }
 
-// Encrypted amount transfer
-
-const ux_flow_step_t *ux_sign_encrypted_amount_transfer[8];
-
-// UI for displaying encrypted transfer transaction. It only shows the user the recipient address
-// as the amounts are encrypted and can't be validated by the user.
-UX_STEP_NOCB(ux_sign_encrypted_amount_transfer_1_step, nn, {"Shielded", "transfer"});
-UX_STEP_NOCB(ux_sign_encrypted_amount_transfer_2_step,
-             bnnn_paging,
-             {.title = "Recipient",
-              .text = (char *)global.withDataBlob.signEncryptedAmountToTransfer.to});
-
-void startEncryptedTransferDisplay(bool displayMemo) {
-    uint8_t index = 0;
-
-    ux_sign_encrypted_amount_transfer[index++] = &ux_sign_flow_shared_review;
-    ux_sign_encrypted_amount_transfer[index++] = &ux_sign_encrypted_amount_transfer_1_step;
-    ux_sign_encrypted_amount_transfer[index++] = &ux_sign_flow_account_sender_view;
-    ux_sign_encrypted_amount_transfer[index++] = &ux_sign_encrypted_amount_transfer_2_step;
-
-    if (displayMemo) {
-        ux_sign_encrypted_amount_transfer[index++] = &ux_display_memo_step_nocb;
-    }
-
-    ux_sign_encrypted_amount_transfer[index++] = &ux_sign_flow_shared_sign;
-    ux_sign_encrypted_amount_transfer[index++] = &ux_sign_flow_shared_decline;
-
-    ux_sign_encrypted_amount_transfer[index++] = FLOW_END_STEP;
-    ux_flow_init(0, ux_sign_encrypted_amount_transfer, NULL);
-}
-
 // Public information for IP
 
 UX_STEP_NOCB(ux_sign_public_info_for_ip_display_public_key,
@@ -676,23 +645,6 @@ void startTransferDisplay(bool displayMemo, volatile unsigned int *flags) {
 
     ux_sign_amount_transfer[index++] = FLOW_END_STEP;
     ux_flow_init(0, ux_sign_amount_transfer, NULL);
-    *flags |= IO_ASYNCH_REPLY;
-}
-
-// Sign Transfer to Encrypted
-
-UX_STEP_NOCB(ux_sign_transfer_to_encrypted_1_step,
-             bnnn_paging,
-             {.title = "Shield amount", .text = (char *)global.signTransferToEncrypted.amount});
-UX_FLOW(ux_sign_transfer_to_encrypted,
-        &ux_sign_flow_shared_review,
-        &ux_sign_flow_account_sender_view,
-        &ux_sign_transfer_to_encrypted_1_step,
-        &ux_sign_flow_shared_sign,
-        &ux_sign_flow_shared_decline);
-
-void uiSignTransferToEncryptedDisplay(volatile unsigned int *flags) {
-    ux_flow_init(0, ux_sign_transfer_to_encrypted, NULL);
     *flags |= IO_ASYNCH_REPLY;
 }
 
