@@ -774,6 +774,7 @@ void startTransferDisplay(bool displayMemo, volatile unsigned int *flags) {
                        review_choice_sign);
 
     *flags |= IO_ASYNCH_REPLY;
+}
 
 void uiSignTransferToPublicDisplay(volatile unsigned int *flags) {
     // Setup data to display
