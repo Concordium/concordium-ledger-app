@@ -45,6 +45,11 @@ static void sendSuccessNoIdleCallback(bool confirm) {
     sendSuccessNoIdle();
 }
 
+static void processNextVerificationKeyNoIdleCallback(bool confirm) {
+    (void)confirm;  // Suppress unused parameter warning
+    processNextVerificationKey();
+}
+
 void uiComparePubkey(void) {
     nbgl_useCaseAddressReview(global.exportPublicKeyContext.publicKey,
                               NULL,
@@ -376,35 +381,179 @@ void uiSignUpdateCredentialIdDisplay(volatile unsigned int *flags) {
 }
 
 void uiSignCredentialDeploymentVerificationKeyDisplay(volatile unsigned int *flags) {
-    return;
+    // Setup data to display
+    uint8_t pairIndex = 0;
+    pairs[pairIndex].item = "Public key";
+    pairs[pairIndex].value = (char *)global.signCredentialDeploymentContext.accountVerificationKey;
+    pairIndex++;
+
+    // Create the page content
+    nbgl_contentTagValueList_t content;
+    content.nbPairs = pairIndex;
+    content.pairs = pairs;
+    content.smallCaseForValue = false;
+    content.nbMaxLinesForValue = 0;
+    content.startIndex = 0;
+    // Setup the review screen
+    nbgl_useCaseReviewLight(TYPE_OPERATION,
+                            &content,
+                            &C_app_concordium_64px,
+                            "Review",
+                            "details",
+                            "Continue with transaction",
+                            processNextVerificationKeyNoIdleCallback);
     *flags |= IO_ASYNCH_REPLY;
-    // TODO: Implement this
 }
 
 void uiSignCredentialDeploymentNewIntroDisplay(void) {
-    return;
-    // TODO: Implement this
+    // Setup data to display
+    uint8_t pairIndex = 0;
+    pairs[pairIndex].item = "Public key";
+    pairs[pairIndex].value = (char *)global.signCredentialDeploymentContext.accountVerificationKey;
+    pairIndex++;
+    pairs[pairIndex].item = "Signature threshold";
+    pairs[pairIndex].value = (char *)global.signCredentialDeploymentContext.signatureThreshold;
+    pairIndex++;
+    pairs[pairIndex].item = "AR threshold";
+    pairs[pairIndex].value = (char *)global.signCredentialDeploymentContext.anonymityRevocationThreshold;
+    pairIndex++;
+
+    // Create the page content
+    nbgl_contentTagValueList_t content;
+    content.nbPairs = pairIndex;
+    content.pairs = pairs;
+    content.smallCaseForValue = false;
+    content.nbMaxLinesForValue = 0;
+    content.startIndex = 0;
+    // Setup the review screen
+    nbgl_useCaseReview(TYPE_TRANSACTION,
+                       &content,
+                       &C_app_concordium_64px,
+                       "Review Transaction",
+                       NULL,
+                       "Sign transaction",
+                       review_choice_sign);
 }
 
 void uiSignCredentialDeploymentExistingIntroDisplay(void) {
-    return;
-    // TODO: Implement this
+    // Setup data to display
+    uint8_t pairIndex = 0;
+    pairs[pairIndex].item = "Public key";
+    pairs[pairIndex].value = (char *)global.signCredentialDeploymentContext.accountVerificationKey;
+    pairIndex++;
+    pairs[pairIndex].item = "Signature threshold";
+    pairs[pairIndex].value = (char *)global.signCredentialDeploymentContext.signatureThreshold;
+    pairIndex++;
+    pairs[pairIndex].item = "AR threshold";
+    pairs[pairIndex].value = (char *)global.signCredentialDeploymentContext.anonymityRevocationThreshold;
+    pairIndex++;
+    pairs[pairIndex].item = "Address";
+    pairs[pairIndex].value = (char *)global.signCredentialDeploymentContext.accountAddress;
+    pairIndex++;
+
+    // Create the page content
+    nbgl_contentTagValueList_t content;
+    content.nbPairs = pairIndex;
+    content.pairs = pairs;
+    content.smallCaseForValue = false;
+    content.nbMaxLinesForValue = 0;
+    content.startIndex = 0;
+    // Setup the review screen
+    nbgl_useCaseReview(TYPE_TRANSACTION,
+                       &content,
+                       &C_app_concordium_64px,
+                       "Review Transaction",
+                       NULL,
+                       "Sign transaction",
+                       review_choice_sign);
 }
 
 void uiSignCredentialDeploymentNewDisplay(void) {
-    return;
-    // TODO: Implement this
+    // Setup data to display
+    uint8_t pairIndex = 0;
+    pairs[pairIndex].item = "Public key";
+    pairs[pairIndex].value = (char *)global.signCredentialDeploymentContext.accountVerificationKey;
+    pairIndex++;
+    pairs[pairIndex].item = "Signature threshold";
+    pairs[pairIndex].value = (char *)global.signCredentialDeploymentContext.signatureThreshold;
+    pairIndex++;
+    pairs[pairIndex].item = "AR threshold";
+    pairs[pairIndex].value = (char *)global.signCredentialDeploymentContext.anonymityRevocationThreshold;
+    pairIndex++;
+
+    // Create the page content
+    nbgl_contentTagValueList_t content;
+    content.nbPairs = pairIndex;
+    content.pairs = pairs;
+    content.smallCaseForValue = false;
+    content.nbMaxLinesForValue = 0;
+    content.startIndex = 0;
+    // Setup the review screen
+    nbgl_useCaseReview(TYPE_TRANSACTION,
+                       &content,
+                       &C_app_concordium_64px,
+                       "Review Transaction",
+                       NULL,
+                       "Sign transaction",
+                       review_choice_sign);
 }
 
 void uiSignCredentialDeploymentExistingDisplay(void) {
-    return;
-    // TODO: Implement this
+     // Setup data to display
+    uint8_t pairIndex = 0;
+    pairs[pairIndex].item = "Public key";
+    pairs[pairIndex].value = (char *)global.signCredentialDeploymentContext.accountVerificationKey;
+    pairIndex++;
+    pairs[pairIndex].item = "Signature threshold";
+    pairs[pairIndex].value = (char *)global.signCredentialDeploymentContext.signatureThreshold;
+    pairIndex++;
+    pairs[pairIndex].item = "AR threshold";
+    pairs[pairIndex].value = (char *)global.signCredentialDeploymentContext.anonymityRevocationThreshold;
+    pairIndex++;
+    pairs[pairIndex].item = "Address";
+    pairs[pairIndex].value = (char *)global.signCredentialDeploymentContext.accountAddress;
+    pairIndex++;
+
+    // Create the page content
+    nbgl_contentTagValueList_t content;
+    content.nbPairs = pairIndex;
+    content.pairs = pairs;
+    content.smallCaseForValue = false;
+    content.nbMaxLinesForValue = 0;
+    content.startIndex = 0;
+    // Setup the review screen
+    nbgl_useCaseReview(TYPE_TRANSACTION,
+                       &content,
+                       &C_app_concordium_64px,
+                       "Review Transaction",
+                       NULL,
+                       "Sign transaction",
+                       review_choice_sign);
 }
 
 void uiSignCredentialDeploymentVerificationKeyFlowDisplay(volatile unsigned int *flags) {
-    return;
+    // Setup data to display
+    uint8_t pairIndex = 0;
+    pairs[pairIndex].item = "Public key";
+    pairs[pairIndex].value = (char *)global.signCredentialDeploymentContext.accountVerificationKey;
+    pairIndex++;
+
+    // Create the page content
+    nbgl_contentTagValueList_t content;
+    content.nbPairs = pairIndex;
+    content.pairs = pairs;
+    content.smallCaseForValue = false;
+    content.nbMaxLinesForValue = 0;
+    content.startIndex = 0;
+    // Setup the review screen
+    nbgl_useCaseReviewLight(TYPE_OPERATION,
+                            &content,
+                            &C_app_concordium_64px,
+                            "Review",
+                            "details",
+                            "Continue with transaction",
+                            processNextVerificationKeyNoIdleCallback);
     *flags |= IO_ASYNCH_REPLY;
-    // TODO: Implement this
 }
 
 void startEncryptedTransferDisplay(bool displayMemo) {
