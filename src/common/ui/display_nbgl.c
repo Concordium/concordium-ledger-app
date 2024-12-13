@@ -668,15 +668,64 @@ void uiSignPublicInformationForIpPublicKeyDisplay(void) {
 }
 
 void uiRegisterDataInitialDisplay(volatile unsigned int *flags) {
-    return;
+    uint8_t pairIndex = 0;
+    pairs[pairIndex].item = "Sender";
+    pairs[pairIndex].value = (char *)global_account_sender.sender;
+    pairIndex++;
+    // Create the page content
+    nbgl_contentTagValueList_t content;
+    content.nbPairs = pairIndex;
+    content.pairs = pairs;
+    content.smallCaseForValue = false;
+    content.nbMaxLinesForValue = 0;
+    content.startIndex = 0;
+    // Setup the review screen
+    nbgl_useCaseReviewLight(TYPE_OPERATION,
+                            &content,
+                            &C_app_concordium_64px,
+                            "Review transaction",
+                            NULL,  // No subtitle
+                            "Continue with transaction",
+                            sendSuccessNoIdleCallback);
     *flags |= IO_ASYNCH_REPLY;
-    // TODO: Implement this
 }
 
 void uiRegisterDataPayloadDisplay(volatile unsigned int *flags) {
-    return;
+    // Get context from global state
+    signRegisterData_t *ctx = &global.withDataBlob.signRegisterData;
+
+    uint8_t index = 0;
+    pairs[index].item = "Data";
+    pairs[index].value = (char *)global.withDataBlob.cborContext.display;
+    index++;
+    // Create the page content
+    nbgl_contentTagValueList_t content;
+    content.nbPairs = index;
+    content.pairs = pairs;
+    content.smallCaseForValue = false;
+    content.nbMaxLinesForValue = 0;
+    content.startIndex = 0;
+
+    if (ctx->dataLength > 0) {
+        // Setup the review screen
+        nbgl_useCaseReviewLight(TYPE_OPERATION,
+                                &content,
+                                &C_app_concordium_64px,
+                                "Review Data",
+                                NULL,  // No subtitle
+                                "Continue with transaction",
+                                sendSuccessNoIdleCallback);
+    } else {
+        nbgl_useCaseReview(TYPE_TRANSACTION,
+                           &content,
+                           &C_app_concordium_64px,
+                           "Review Data",
+                           NULL,  // No subtitle
+                           "Sign transaction",
+                           review_choice_sign);
+    }
+
     *flags |= IO_ASYNCH_REPLY;
-    // TODO: Implement this
 }
 
 void startTransferDisplay(bool displayMemo, volatile unsigned int *flags) {
