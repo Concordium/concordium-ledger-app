@@ -26,19 +26,21 @@ def check_signature_validity(
 
 
 def instructions_builder(
-    number_of_screens_until_confirm: int, backend
+    number_of_screens_until_confirm: int,
+    backend,
+    confirm_instruction: NavInsID = NavInsID.USE_CASE_REVIEW_CONFIRM,
 ) -> list[NavInsID]:
     if backend.firmware.device.startswith(("stax", "flex")):
         go_right_instruction = NavInsID.SWIPE_CENTER_TO_LEFT
-        confirm_instruction = NavInsID.USE_CASE_REVIEW_CONFIRM
+        temp_confirm_instruction = confirm_instruction
     else:
         go_right_instruction = NavInsID.RIGHT_CLICK
-        confirm_instruction = NavInsID.BOTH_CLICK
+        temp_confirm_instruction = NavInsID.BOTH_CLICK
 
     # Add the go right instruction for the number of screens needed
     instructions = [go_right_instruction] * number_of_screens_until_confirm
     # Add the confirm instruction
-    instructions.append(confirm_instruction)
+    instructions.append(temp_confirm_instruction)
     return instructions
 
 
