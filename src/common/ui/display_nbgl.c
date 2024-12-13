@@ -824,16 +824,6 @@ void uiSignScheduledTransferPairFlowSignDisplay(void) {
                        review_choice_sign);
 }
 
-void uiSignScheduledTransferPairFlowSignDisplay(void) {
-    return;
-    // TODO: Implement this
-}
-
-void uiSignScheduledTransferPairFlowFinalDisplay(void) {
-    return;
-    // TODO: Implement this
-}
-
 void uiVerifyAddress(volatile unsigned int *flags) {
     return;
     *flags |= IO_ASYNCH_REPLY;
