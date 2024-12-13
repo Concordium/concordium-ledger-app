@@ -578,8 +578,9 @@ void uiSignCredentialDeploymentVerificationKeyFlowDisplay(volatile unsigned int 
 }
 
 void startEncryptedTransferDisplay(bool displayMemo) {
-    displayMemo = false;
-    // TODO: Implement this
+    if (displayMemo) {
+        return;
+    }
 }
 
 void uiSignPublicInformationForIpCompleteDisplay(void) {
@@ -779,7 +780,6 @@ void startTransferDisplay(bool displayMemo, volatile unsigned int *flags) {
                        review_choice_sign);
 
     *flags |= IO_ASYNCH_REPLY;
-    displayMemo = false;
 }
 
 void uiSignTransferToEncryptedDisplay(volatile unsigned int *flags) {
