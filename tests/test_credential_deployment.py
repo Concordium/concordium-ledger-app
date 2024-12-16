@@ -67,7 +67,7 @@ def test_credential_deployment_new(
                 test_name + f"/key{i}",
                 True,
                 False,
-                NavInsID.USE_CASE_CHOICE_CONFIRM
+                NavInsID.USE_CASE_CHOICE_CONFIRM,
             )
         response = client.get_async_response()
         print("km------------response", response)
@@ -100,7 +100,7 @@ def test_credential_deployment_new(
                 test_name + "/last_key",
                 True,
                 False,
-                NavInsID.USE_CASE_REVIEW_CONFIRM
+                NavInsID.USE_CASE_REVIEW_CONFIRM,
             )
 
     response = client.get_async_response()
@@ -166,7 +166,7 @@ def test_credential_deployment_existing(
                 test_name + f"/key{i}",
                 True,
                 False,
-                NavInsID.USE_CASE_CHOICE_CONFIRM
+                NavInsID.USE_CASE_CHOICE_CONFIRM,
             )
         response = client.get_async_response()
         print("km------------response", response)
@@ -188,7 +188,7 @@ def test_credential_deployment_existing(
                 navigator,
                 "details",
                 default_screenshot_path,
-                test_name + "/last_key"
+                test_name + "/last_key",
             )
         else:
             navigate_until_text_and_compare(
@@ -199,7 +199,7 @@ def test_credential_deployment_existing(
                 test_name + "/last_key",
                 True,
                 False,
-                NavInsID.USE_CASE_REVIEW_CONFIRM
+                NavInsID.USE_CASE_REVIEW_CONFIRM,
             )
 
     response = client.get_async_response()
@@ -255,6 +255,18 @@ def test_credential_update(
                 screen_change_before_first_instruction=False,
                 screen_change_after_last_instruction=False,
             )
+        else:
+            navigate_until_text_and_compare(
+                firmware,
+                navigator,
+                "Approve",
+                default_screenshot_path,
+                test_name + "/1_sender",
+                True,
+                False,
+                NavInsID.USE_CASE_CHOICE_CONFIRM,
+            )
+
     for i, key in enumerate(keys):
         with client.sign_update_credential_part_2(
             key_index=bytes.fromhex(f"{i:02x}"),
@@ -272,6 +284,18 @@ def test_credential_update(
                     screen_change_before_first_instruction=False,
                     screen_change_after_last_instruction=False,
                 )
+            elif not firmware.is_nano and i < len(keys) - 1:
+                navigate_until_text_and_compare(
+                    firmware,
+                    navigator,
+                    "Approve",
+                    default_screenshot_path,
+                    test_name + f"/2_key{i}",
+                    True,
+                    False,
+                    NavInsID.USE_CASE_CHOICE_CONFIRM,
+                )
+
         with client.sign_update_credential_part_3(
             signature_threshold=signature_threshold,
             ar_identity=ar_identity,
@@ -292,6 +316,18 @@ def test_credential_update(
                     screen_change_before_first_instruction=False,
                     screen_change_after_last_instruction=False,
                 )
+            else:
+                navigate_until_text_and_compare(
+                    firmware,
+                    navigator,
+                    "Approve",
+                    default_screenshot_path,
+                    test_name + "/3_rem_credential",
+                    True,
+                    False,
+                    NavInsID.USE_CASE_CHOICE_CONFIRM,
+                )
+
         with client.sign_update_credential_part_4(
             threshold=bytes.fromhex(f"{len(credential_id_list):02x}"),
         ):
@@ -304,6 +340,17 @@ def test_credential_update(
                     ),
                     screen_change_before_first_instruction=False,
                     screen_change_after_last_instruction=False,
+                )
+            else:
+                navigate_until_text_and_compare(
+                    firmware,
+                    navigator,
+                    "Sign transaction",
+                    default_screenshot_path,
+                    test_name + "/4_threshold_and_sign",
+                    True,
+                    False,
+                    NavInsID.USE_CASE_REVIEW_CONFIRM,
                 )
 
     response = client.get_async_response().data
