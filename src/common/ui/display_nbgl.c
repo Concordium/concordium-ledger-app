@@ -380,21 +380,90 @@ void startConfigureDelegationDisplay(void) {
 }
 
 void uiSignUpdateCredentialThresholdDisplay(volatile unsigned int *flags) {
-    return;
+    // Create tag-value pairs for the content
+    uint8_t pairIndex = 0;
+
+    // Add threshold information
+    pairs[pairIndex].item = "Threshold";
+    pairs[pairIndex].value = (char *)global.signCredentialDeploymentContext.threshold;
+    pairIndex++;
+
+    // Create the page content
+    nbgl_contentTagValueList_t content;
+    content.nbPairs = pairIndex;
+    content.pairs = pairs;
+    content.smallCaseForValue = false;
+    content.nbMaxLinesForValue = 0;
+    content.startIndex = 0;
+
+    // Setup the review screen - this is the final step so use nbgl_useCaseReview
+    nbgl_useCaseReview(TYPE_TRANSACTION,
+                       &content,
+                       &C_app_concordium_64px,
+                       "Review Transaction",
+                       NULL,  // No subtitle
+                       "Sign transaction",
+                       review_choice_sign);
+
     *flags |= IO_ASYNCH_REPLY;
-    // TODO: Implement this
 }
 
 void uiSignUpdateCredentialInitialDisplay(volatile unsigned int *flags) {
-    return;
+    // Create tag-value pairs for the content
+    uint8_t pairIndex = 0;
+
+    // Add sender address
+    pairs[pairIndex].item = "Sender";
+    pairs[pairIndex].value = (char *)global_account_sender.sender;
+    pairIndex++;
+
+    // Create the page content
+    nbgl_contentTagValueList_t content;
+    content.nbPairs = pairIndex;
+    content.pairs = pairs;
+    content.smallCaseForValue = false;
+    content.nbMaxLinesForValue = 0;
+    content.startIndex = 0;
+
+    // Setup the review screen
+    nbgl_useCaseReviewLight(TYPE_OPERATION,
+                            &content,
+                            &C_app_concordium_64px,
+                            "Review",
+                            "details",
+                            "Continue with transaction",
+                            sendSuccessNoIdleCallback);
+
     *flags |= IO_ASYNCH_REPLY;
-    // TODO: Implement this
 }
 
 void uiSignUpdateCredentialIdDisplay(volatile unsigned int *flags) {
-    return;
+    // Create tag-value pairs for the content
+    uint8_t pairIndex = 0;
+
+    // Add credential ID information
+    pairs[pairIndex].item = "Credential ID";
+    pairs[pairIndex].value = (char *)global.signCredentialDeploymentContext.credentialId;
+    pairIndex++;
+
+    // Create the page content
+    nbgl_contentTagValueList_t content;
+    content.nbPairs = pairIndex;
+    content.pairs = pairs;
+    content.smallCaseForValue = false;
+    content.nbMaxLinesForValue = 0;
+    content.startIndex = 0;
+
+    // Setup the review screen
+    nbgl_useCaseReviewLight(TYPE_OPERATION,
+                            &content,
+                            &C_app_concordium_64px,
+                            "Review",
+                            "details",
+                            "Continue with transaction",
+                            sendSuccessNoIdleCallback);
+
     *flags |= IO_ASYNCH_REPLY;
-    // TODO: Implement this
 }
 
 void uiSignCredentialDeploymentVerificationKeyDisplay(volatile unsigned int *flags) {

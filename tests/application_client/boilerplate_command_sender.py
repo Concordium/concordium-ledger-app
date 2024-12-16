@@ -713,6 +713,157 @@ class BoilerplateCommandSender:
             yield response
 
     @contextmanager
+    def credential_update_part_1(
+        self,
+        data: bytes,
+    ) -> Generator[None, None, None]:
+        with self.backend.exchange_async(
+            cla=CLA,
+            ins=InsType.SIGN_UPDATE_CREDENTIAL,
+            p1=P1.P1_NONE,
+            p2=P2.P2_NONE,
+            data=data,
+        ) as response:
+            yield response
+
+    @contextmanager
+    def sign_update_credential_part_2(
+        self,
+        key_index: bytes,
+        number_of_keys: int,
+        key: bytes,
+    ) -> Generator[None, None, None]:
+        # Send all keys
+        with self.backend.exchange_async(
+            cla=CLA,
+            ins=InsType.SIGN_UPDATE_CREDENTIAL,
+            p1=P1.P1_NONE,
+            p2=P2.P2_CREDENTIAL_CREDENTIAL_INDEX,
+            data=key_index,
+        ):
+            pass
+        with self.backend.exchange_async(
+            cla=CLA,
+            ins=InsType.SIGN_UPDATE_CREDENTIAL,
+            p1=P1.P1_VERIFICATION_KEY_LENGTH,
+            p2=P2.P2_CREDENTIAL_CREDENTIAL,
+            data=bytes.fromhex(f"{number_of_keys:02x}"),
+        ):
+            pass
+        with self.backend.exchange_async(
+            cla=CLA,
+            ins=InsType.SIGN_UPDATE_CREDENTIAL,
+            p1=P1.P1_VERIFICATION_KEY,
+            p2=P2.P2_CREDENTIAL_CREDENTIAL,
+            data=key,
+        ) as response:
+            yield response
+
+    @contextmanager
+    def sign_update_credential_part_3(
+        self,
+        signature_threshold: bytes,
+        ar_identity: bytes,
+        credential_dates: bytes,
+        attribute_tag: bytes,
+        attribute_value: bytes,
+        proof_length: bytes,
+        proofs: bytes,
+        credential_id_list: List[bytes],
+    ) -> Generator[None, None, None]:
+        with self.backend.exchange_async(
+            cla=CLA,
+            ins=InsType.SIGN_UPDATE_CREDENTIAL,
+            p1=P1.P1_SIGNATURE_THRESHOLD,
+            p2=P2.P2_CREDENTIAL_CREDENTIAL,
+            data=signature_threshold,
+        ):
+            pass
+
+        with self.backend.exchange_async(
+            cla=CLA,
+            ins=InsType.SIGN_UPDATE_CREDENTIAL,
+            p1=P1.P1_AR_IDENTITY,
+            p2=P2.P2_CREDENTIAL_CREDENTIAL,
+            data=ar_identity,
+        ):
+            pass
+        with self.backend.exchange_async(
+            cla=CLA,
+            ins=InsType.SIGN_UPDATE_CREDENTIAL,
+            p1=P1.P1_CREDENTIAL_DATES,
+            p2=P2.P2_CREDENTIAL_CREDENTIAL,
+            data=credential_dates,
+        ):
+            pass
+        with self.backend.exchange_async(
+            cla=CLA,
+            ins=InsType.SIGN_UPDATE_CREDENTIAL,
+            p1=P1.P1_ATTRIBUTE_TAG,
+            p2=P2.P2_CREDENTIAL_CREDENTIAL,
+            data=attribute_tag,
+        ):
+            pass
+        with self.backend.exchange_async(
+            cla=CLA,
+            ins=InsType.SIGN_UPDATE_CREDENTIAL,
+            p1=P1.P1_ATTRIBUTE_VALUE,
+            p2=P2.P2_CREDENTIAL_CREDENTIAL,
+            data=attribute_value,
+        ):
+            pass
+        with self.backend.exchange_async(
+            cla=CLA,
+            ins=InsType.SIGN_UPDATE_CREDENTIAL,
+            p1=P1.P1_LENGTH_OF_PROOFS,
+            p2=P2.P2_CREDENTIAL_CREDENTIAL,
+            data=proof_length,
+        ):
+            pass
+        proof_chunks = split_message(proofs, MAX_APDU_LEN)
+        for i, chunk in enumerate(proof_chunks):
+            with self.backend.exchange_async(
+                cla=CLA,
+                ins=InsType.SIGN_UPDATE_CREDENTIAL,
+                p1=P1.P1_PROOFS,
+                p2=P2.P2_CREDENTIAL_CREDENTIAL,
+                data=chunk,
+            ):
+                pass
+        with self.backend.exchange_async(
+            cla=CLA,
+            ins=InsType.SIGN_UPDATE_CREDENTIAL,
+            p1=P1.P1_NONE,
+            p2=P2.P2_CREDENTIAL_ID_COUNT,
+            data=bytes.fromhex(f"{len(credential_id_list):02x}"),
+        ):
+            pass
+        for i, credential_id in enumerate(credential_id_list):
+            with self.backend.exchange_async(
+                cla=CLA,
+                ins=InsType.SIGN_UPDATE_CREDENTIAL,
+                p1=P1.P1_NONE,
+                p2=P2.P2_CREDENTIAL_ID,
+                data=credential_id,
+            ) as response:
+                if i == len(credential_id_list) - 1:
+                    yield response
+
+    @contextmanager
+    def sign_update_credential_part_4(
+        self,
+        threshold: bytes,
+    ) -> Generator[None, None, None]:
+        with self.backend.exchange_async(
+            cla=CLA,
+            ins=InsType.SIGN_UPDATE_CREDENTIAL,
+            p1=P1.P1_NONE,
+            p2=P2.P2_THRESHOLD,
+            data=threshold,
+        ) as response:
+            yield response
+
+    @contextmanager
     def sign_public_information_for_ip_part_1(
         self, chunks: List[bytes]
     ) -> Generator[None, None, None]:
