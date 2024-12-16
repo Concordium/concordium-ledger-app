@@ -21,7 +21,6 @@ void readCborInitial(uint8_t *cdata, uint8_t dataLength);
  * Read part of a CBOR encoded dataBlob. Should only be used after readCborInitial.
  */
 void readCborContent(uint8_t *cdata, uint8_t dataLength);
-// extern const ux_flow_step_t *const ux_display_memo[];
 
 void handleCborStep(void);
 
