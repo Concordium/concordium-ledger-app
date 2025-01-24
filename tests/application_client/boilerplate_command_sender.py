@@ -498,6 +498,32 @@ class BoilerplateCommandSender:
         ) as response:
             yield response
 
+    @contextmanager
+    def sign_configure_baker_suspended(
+        self,
+        bitmap: bytes,
+        suspended: bool = False,
+        is_called_first: bool = True,
+    ) -> Generator[None, None, None]:
+        serialized_suspended_status = b""
+
+        if is_called_first:
+            self._configure_baker_part_0(bitmap)
+
+        if suspended:
+            serialized_suspended_status += bytes.fromhex("01")
+        else:
+            serialized_suspended_status += bytes.fromhex("00")
+
+        with self.backend.exchange_async(
+            cla=CLA,
+            ins=InsType.CONFIGURE_BAKER,
+            p1=0x06,  # Special P1 value for commission rates
+            p2=P2.P2_NONE,
+            data=serialized_suspended_status,
+        ) as response:
+            yield response
+
     def _configure_baker_part_0(
         self,
         bitmap: bytes,

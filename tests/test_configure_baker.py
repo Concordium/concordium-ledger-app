@@ -238,6 +238,37 @@ def test_sign_configure_baker_commission_rate_only(
         == "2a6f49a786b62514d89bfc0e354689e1af2f3d3194b18b93433abd032e518fb72c55501fb5605402bf5a84b88f74d30a46ccb6a05907cb78144e93363b133205"
     )
 
+@pytest.mark.active_test_scope
+def test_sign_configure_baker_suspended_only(
+    backend, firmware, navigator, default_screenshot_path, test_name
+):
+    # Use the app interface instead of raw interface
+    client = BoilerplateCommandSender(backend)
+    bitmap = "0100"
+    bitmap = bytes.fromhex(bitmap)
+
+    # Send the sign device instruction.
+    # As it requires on-screen validation, the function is asynchronous.
+    # It will yield the result when the navigation is done
+    with client.sign_configure_baker_suspended(
+        bitmap=bitmap,
+        suspended=False,
+        is_called_first=True
+    ):
+        # Validate the on-screen request by performing the navigation appropriate for this device
+        navigate_until_text_and_compare(
+            firmware, navigator, "Sign", default_screenshot_path, test_name
+        )
+
+    # The device as yielded the result, parse it and ensure that the signature is correct
+    response = client.get_async_response().data
+    response_hex = response.hex()
+    print("response", response_hex)
+    assert (
+        response_hex
+        == "ebc5ded8d20f43387615a40818e5890558008dd8c9a596cc4ecd007b3ec7923b918dc428b5a37a411c4f9c12a9df7c4d2d6edf3c0793159925720e7bb7078a08"
+    )
+
 
 @pytest.mark.active_test_scope
 def test_sign_configure_baker_all_parameters(
@@ -272,7 +303,7 @@ def test_sign_configure_baker_all_parameters(
     url_bytes = url.encode("utf-8")
 
     # Bitmap indicating all features are enabled (keys, url, and commission rates)
-    bitmap = "00FF"
+    bitmap = "01FF"
 
     with client.sign_configure_baker(
         transaction=bytes.fromhex(transaction),
@@ -314,7 +345,15 @@ def test_sign_configure_baker_all_parameters(
         is_called_first=False,
     ):
         navigate_until_text_and_compare(
-            firmware, navigator, "Sign", default_screenshot_path, test_name + "_3"
+            firmware, navigator, "Continue", default_screenshot_path, test_name + "_3", True, False, NavInsID.USE_CASE_CHOICE_CONFIRM
+        )
+    with client.sign_configure_baker_suspended(
+        bitmap=bitmap,
+        suspended=True,
+        is_called_first=False,
+    ):
+        navigate_until_text_and_compare(
+            firmware, navigator, "Sign", default_screenshot_path, test_name + "_4"
         )
 
     response = client.get_async_response().data
@@ -322,5 +361,5 @@ def test_sign_configure_baker_all_parameters(
     print("response", response_hex)
     assert (
         response_hex
-        == "86e662beabfe77f36da4e07867b47c9fd000186dd70a4dad59bbbd374f2d2fa4b63ac40f2e7af814429901de07e3fc33bf327c52f36a55a14ceb2941a995860c"
+        == "bba026c23bae21bf5deb23cab3f6ec57ccbe2fb504324dbfe28298ea9eb0a1874626db70d911c0922348616862a7eadac7b479dd181a706e31246ceab1a5f604"
     )

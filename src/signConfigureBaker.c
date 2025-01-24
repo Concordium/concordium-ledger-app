@@ -15,6 +15,7 @@ bool hasCommissionRate() {
 #define P1_URL_LENGTH       0x03
 #define P1_URL              0x04
 #define P1_COMMISSION_RATES 0x05
+#define P1_SUSPENDED        0x06
 
 void handleCommissionRates(uint8_t *cdata, uint8_t dataLength) {
     if (ctx_conf_baker->hasTransactionFeeCommission) {
@@ -49,8 +50,13 @@ void handleCommissionRates(uint8_t *cdata, uint8_t dataLength) {
         dataLength -= 4;
     }
 
-    if (dataLength != 0) {
-        THROW(ERROR_INVALID_TRANSACTION);
+    if (ctx_conf_baker->hasSuspended) {
+        ctx_conf_baker->state = CONFIGURE_BAKER_SUSPENDED;
+    } else {
+        if (dataLength != 0) {
+            THROW(ERROR_INVALID_TRANSACTION);
+        }
+        ctx_conf_baker->state = CONFIGURE_BAKER_END;
     }
 
     startConfigureBakerCommissionDisplay();
@@ -71,10 +77,9 @@ void handleSignConfigureBaker(uint8_t *cdata,
         updateHash((cx_hash_t *)&tx_state->hash, cdata, 2);
         uint16_t bitmap = U2BE(cdata, 0);
 
-        // An empty transaction with none of the optionals available is invalid,
-        // or any transaction with a bit set after the 10th bits place (as there are 10
-        // optionals).
-        if (bitmap == 0 || bitmap > 1023) {
+        // A transaction with a bit set after the 9th bits place (as there are 9
+        // optionals) is invalid.
+        if (bitmap > 511) {
             THROW(ERROR_INVALID_TRANSACTION);
         }
 
@@ -86,6 +91,7 @@ void handleSignConfigureBaker(uint8_t *cdata,
         ctx_conf_baker->hasTransactionFeeCommission = (bitmap >> 5) & 1;
         ctx_conf_baker->hasBakingRewardCommission = (bitmap >> 6) & 1;
         ctx_conf_baker->hasFinalizationRewardCommission = (bitmap >> 7) & 1;
+        ctx_conf_baker->hasSuspended = (bitmap >> 8) & 1;
 
         if (ctx_conf_baker->hasCapital || ctx_conf_baker->hasRestakeEarnings ||
             ctx_conf_baker->hasOpenForDelegation || ctx_conf_baker->hasKeys) {
@@ -94,6 +100,8 @@ void handleSignConfigureBaker(uint8_t *cdata,
             ctx_conf_baker->state = CONFIGURE_BAKER_URL_LENGTH;
         } else if (hasCommissionRate()) {
             ctx_conf_baker->state = CONFIGURE_BAKER_COMMISSION_RATES;
+        } else if (ctx_conf_baker->hasSuspended) {
+            ctx_conf_baker->state = CONFIGURE_BAKER_SUSPENDED;
         }
 
         sendSuccessNoIdle();
@@ -189,6 +197,8 @@ void handleSignConfigureBaker(uint8_t *cdata,
                 ctx_conf_baker->state = CONFIGURE_BAKER_URL_LENGTH;
             } else if (hasCommissionRate()) {
                 ctx_conf_baker->state = CONFIGURE_BAKER_COMMISSION_RATES;
+            } else if (ctx_conf_baker->hasSuspended) {
+                ctx_conf_baker->state = CONFIGURE_BAKER_SUSPENDED;
             } else {
                 ctx_conf_baker->state = CONFIGURE_BAKER_END;
             }
@@ -213,6 +223,8 @@ void handleSignConfigureBaker(uint8_t *cdata,
             ctx_conf_baker->state = CONFIGURE_BAKER_URL_LENGTH;
         } else if (hasCommissionRate()) {
             ctx_conf_baker->state = CONFIGURE_BAKER_COMMISSION_RATES;
+        } else if (ctx_conf_baker->hasSuspended) {
+            ctx_conf_baker->state = CONFIGURE_BAKER_SUSPENDED;
         } else {
             ctx_conf_baker->state = CONFIGURE_BAKER_END;
         }
@@ -235,6 +247,8 @@ void handleSignConfigureBaker(uint8_t *cdata,
             // If the url has length zero, we don't wait for the url bytes.
             if (hasCommissionRate()) {
                 ctx_conf_baker->state = CONFIGURE_BAKER_COMMISSION_RATES;
+            } else if (ctx_conf_baker->hasSuspended) {
+                ctx_conf_baker->state = CONFIGURE_BAKER_SUSPENDED;
             } else {
                 ctx_conf_baker->state = CONFIGURE_BAKER_END;
             }
@@ -259,6 +273,8 @@ void handleSignConfigureBaker(uint8_t *cdata,
 
             if (hasCommissionRate()) {
                 ctx_conf_baker->state = CONFIGURE_BAKER_COMMISSION_RATES;
+            } else if (ctx_conf_baker->hasSuspended) {
+                ctx_conf_baker->state = CONFIGURE_BAKER_SUSPENDED;
             } else {
                 ctx_conf_baker->state = CONFIGURE_BAKER_END;
             }
@@ -271,6 +287,24 @@ void handleSignConfigureBaker(uint8_t *cdata,
     } else if (P1_COMMISSION_RATES == p1 &&
                ctx_conf_baker->state == CONFIGURE_BAKER_COMMISSION_RATES) {
         handleCommissionRates(cdata, dataLength);
+        *flags |= IO_ASYNCH_REPLY;
+    } else if (P1_SUSPENDED == p1 && ctx_conf_baker->state == CONFIGURE_BAKER_SUSPENDED) {
+        uint8_t suspended = cdata[0];
+        updateHash((cx_hash_t *)&tx_state->hash, cdata, 1);
+        dataLength -= 1;
+
+        if (dataLength != 0) {
+            THROW(ERROR_INVALID_TRANSACTION);
+        }
+
+        if (suspended == 0) {
+            memmove(ctx_conf_baker->suspended, "Resume validator", 17);
+        } else if (suspended == 1) {
+            memmove(ctx_conf_baker->suspended, "Suspend validator", 18);
+        } else {
+            THROW(ERROR_INVALID_TRANSACTION);
+        }
+        startConfigureBakerSuspendedDisplay();
         *flags |= IO_ASYNCH_REPLY;
     } else {
         THROW(ERROR_INVALID_STATE);

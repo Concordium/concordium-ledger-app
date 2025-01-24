@@ -21,6 +21,7 @@ extern const ux_flow_step_t *ux_sign_configure_baker_commission[9];
 
 void startConfigureBakerCommissionDisplay(void);
 void startConfigureBakerUrlDisplay(bool lastUrlPage);
+void startConfigureBakerSuspendedDisplay(void);
 void startConfigureBakerDisplay(void);
 
 void startConfigureDelegationDisplay();
