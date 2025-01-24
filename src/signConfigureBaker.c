@@ -53,6 +53,9 @@ void handleCommissionRates(uint8_t *cdata, uint8_t dataLength) {
     if (ctx_conf_baker->hasSuspended) {
         ctx_conf_baker->state = CONFIGURE_BAKER_SUSPENDED;
     } else {
+        if (dataLength != 0) {
+            THROW(ERROR_INVALID_TRANSACTION);
+        }
         ctx_conf_baker->state = CONFIGURE_BAKER_END;
     }
 
@@ -288,7 +291,6 @@ void handleSignConfigureBaker(uint8_t *cdata,
     } else if (P1_SUSPENDED == p1 && ctx_conf_baker->state == CONFIGURE_BAKER_SUSPENDED) {
         uint8_t suspended = cdata[0];
         updateHash((cx_hash_t *)&tx_state->hash, cdata, 1);
-        cdata += 1;
         dataLength -= 1;
 
         if (dataLength != 0) {

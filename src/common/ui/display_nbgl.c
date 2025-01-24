@@ -186,7 +186,7 @@ void startConfigureBakerCommissionDisplay(void) {
 }
 
 void startConfigureBakerSuspendedDisplay(void) {
-   // Get context from global state
+    // Get context from global state
     signConfigureBaker_t *ctx = &global.signConfigureBaker;
     // Create tag-value pairs for the content
     uint8_t pairIndex = 0;
@@ -200,8 +200,7 @@ void startConfigureBakerSuspendedDisplay(void) {
     }
 
     pairs[pairIndex].item = "Validator status";
-    pairs[pairIndex].value =
-        (char *)global.signConfigureBaker.suspended;
+    pairs[pairIndex].value = (char *)global.signConfigureBaker.suspended;
     pairIndex++;
 
     // Create the page content
@@ -214,12 +213,12 @@ void startConfigureBakerSuspendedDisplay(void) {
 
     // to signing screens.
     nbgl_useCaseReview(TYPE_TRANSACTION,
-                        &content,
-                        &C_app_concordium_64px,
-                        "Review Transaction",
-                        NULL,  // No subtitle
-                        "Sign transaction",
-                        review_choice_sign);
+                       &content,
+                       &C_app_concordium_64px,
+                       "Review Transaction",
+                       NULL,  // No subtitle
+                       "Sign transaction",
+                       review_choice_sign);
 }
 
 void startConfigureBakerDisplay(void) {

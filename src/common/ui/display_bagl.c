@@ -174,8 +174,7 @@ UX_STEP_NOCB(ux_sign_configure_baker_commission_finalization_reward_step,
 
 UX_STEP_NOCB(ux_sign_configure_baker_suspended_step,
              bn,
-             {"Validator status",
-              (char *)global.signConfigureBaker.suspended});
+             {"Validator status", (char *)global.signConfigureBaker.suspended});
 
 /**
  * Dynamically builds and initializes the capital, restake earnings, pool status and
@@ -308,7 +307,7 @@ void startConfigureBakerCommissionDisplay() {
             &ux_sign_configure_baker_commission_finalization_reward_step;
     }
 
-    if(ctx_conf_baker->hasSuspended){
+    if (ctx_conf_baker->hasSuspended) {
         ux_sign_configure_baker_commission[index++] = &ux_sign_configure_baker_continue;
     } else {
         ux_sign_configure_baker_commission[index++] = &ux_sign_flow_shared_sign;
