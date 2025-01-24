@@ -163,14 +163,63 @@ void startConfigureBakerCommissionDisplay(void) {
     content.nbMaxLinesForValue = 0;
     content.startIndex = 0;
 
-    // Setup the review screen
+    // to signing screens.
+    if (ctx->hasSuspended) {
+        // Setup the review screen
+        nbgl_useCaseReviewLight(TYPE_OPERATION,
+                                &content,
+                                &C_app_concordium_64px,
+                                "Review Transaction",
+                                NULL,  // No subtitle
+                                "Continue with transaction",
+                                sendSuccessNoIdleCallback);
+    } else {
+        // Setup the review screen
+        nbgl_useCaseReview(TYPE_TRANSACTION,
+                           &content,
+                           &C_app_concordium_64px,
+                           "Review Transaction",
+                           NULL,  // No subtitle
+                           "Sign transaction",
+                           review_choice_sign);
+    }
+}
+
+void startConfigureBakerSuspendedDisplay(void) {
+   // Get context from global state
+    signConfigureBaker_t *ctx = &global.signConfigureBaker;
+    // Create tag-value pairs for the content
+    uint8_t pairIndex = 0;
+
+    if (ctx->firstDisplay) {
+        // Add sender address
+        pairs[pairIndex].item = "Sender";
+        pairs[pairIndex].value = (char *)global_account_sender.sender;
+        pairIndex++;
+        ctx->firstDisplay = false;
+    }
+
+    pairs[pairIndex].item = "Validator status";
+    pairs[pairIndex].value =
+        (char *)global.signConfigureBaker.suspended;
+    pairIndex++;
+
+    // Create the page content
+    nbgl_contentTagValueList_t content;
+    content.nbPairs = pairIndex;
+    content.pairs = pairs;
+    content.smallCaseForValue = false;
+    content.nbMaxLinesForValue = 0;
+    content.startIndex = 0;
+
+    // to signing screens.
     nbgl_useCaseReview(TYPE_TRANSACTION,
-                       &content,
-                       &C_app_concordium_64px,
-                       "Review Transaction",
-                       NULL,  // No subtitle
-                       "Sign Transaction",
-                       review_choice_sign);
+                        &content,
+                        &C_app_concordium_64px,
+                        "Review Transaction",
+                        NULL,  // No subtitle
+                        "Sign transaction",
+                        review_choice_sign);
 }
 
 void startConfigureBakerDisplay(void) {

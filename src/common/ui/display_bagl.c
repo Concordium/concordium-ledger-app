@@ -118,6 +118,7 @@ static signConfigureBaker_t *ctx_conf_baker = &global.signConfigureBaker;
 const ux_flow_step_t *ux_sign_configure_baker_first[8];
 const ux_flow_step_t *ux_sign_configure_baker_url[6];
 const ux_flow_step_t *ux_sign_configure_baker_commission[9];
+const ux_flow_step_t *ux_sign_configure_baker_suspended[6];
 
 UX_STEP_NOCB(ux_sign_configure_baker_stop_baking_step, nn, {"Stop", "baking"});
 
@@ -170,6 +171,11 @@ UX_STEP_NOCB(ux_sign_configure_baker_commission_finalization_reward_step,
              bn,
              {"Finalization reward",
               (char *)global.signConfigureBaker.commissionRates.finalizationRewardCommissionRate});
+
+UX_STEP_NOCB(ux_sign_configure_baker_suspended_step,
+             bn,
+             {"Validator status",
+              (char *)global.signConfigureBaker.suspended});
 
 /**
  * Dynamically builds and initializes the capital, restake earnings, pool status and
@@ -302,11 +308,40 @@ void startConfigureBakerCommissionDisplay() {
             &ux_sign_configure_baker_commission_finalization_reward_step;
     }
 
-    ux_sign_configure_baker_commission[index++] = &ux_sign_flow_shared_sign;
-    ux_sign_configure_baker_commission[index++] = &ux_sign_flow_shared_decline;
+    if(ctx_conf_baker->hasSuspended){
+        ux_sign_configure_baker_commission[index++] = &ux_sign_configure_baker_continue;
+    } else {
+        ux_sign_configure_baker_commission[index++] = &ux_sign_flow_shared_sign;
+        ux_sign_configure_baker_commission[index++] = &ux_sign_flow_shared_decline;
+    }
 
     ux_sign_configure_baker_commission[index++] = FLOW_END_STEP;
     ux_flow_init(0, ux_sign_configure_baker_commission, NULL);
+}
+
+/**
+ * Dynamically builds and initializes the suspended display.
+ * - If the transaction only contains suspended boolean, then it ensures that
+ *   the UI starts with the shared review transaction screens.
+ * - Only shows the suspended message that have been indicated to be part of the transaction.
+ * - Shows the signing / decline screens.
+ */
+void startConfigureBakerSuspendedDisplay() {
+    uint8_t index = 0;
+
+    if (ctx_conf_baker->firstDisplay) {
+        ux_sign_configure_baker_suspended[index++] = &ux_sign_flow_shared_review;
+        ux_sign_configure_baker_suspended[index++] = &ux_sign_flow_account_sender_view;
+        ctx_conf_baker->firstDisplay = false;
+    }
+
+    ux_sign_configure_baker_suspended[index++] = &ux_sign_configure_baker_suspended_step;
+
+    ux_sign_configure_baker_suspended[index++] = &ux_sign_flow_shared_sign;
+    ux_sign_configure_baker_suspended[index++] = &ux_sign_flow_shared_decline;
+
+    ux_sign_configure_baker_suspended[index++] = FLOW_END_STEP;
+    ux_flow_init(0, ux_sign_configure_baker_suspended, NULL);
 }
 
 // Delegation

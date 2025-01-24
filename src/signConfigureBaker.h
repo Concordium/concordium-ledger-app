@@ -18,7 +18,8 @@ typedef enum {
     CONFIGURE_BAKER_URL_LENGTH = 63,
     CONFIGURE_BAKER_URL = 64,
     CONFIGURE_BAKER_COMMISSION_RATES = 65,
-    CONFIGURE_BAKER_END = 66
+    CONFIGURE_BAKER_SUSPENDED = 66,
+    CONFIGURE_BAKER_END = 67
 } configureBakerState_t;
 
 typedef struct {
@@ -48,12 +49,14 @@ typedef struct {
     bool hasTransactionFeeCommission;
     bool hasBakingRewardCommission;
     bool hasFinalizationRewardCommission;
+    bool hasSuspended;
     bool firstDisplay;
 
     union {
         configureBakerCapitalRestakeOpenForDelegationBlob_t capitalRestakeDelegation;
         configureBakerUrl_t url;
         configureBakerCommisionRates_t commissionRates;
+        uint8_t suspended[18];
     };
 
     configureBakerState_t state;
