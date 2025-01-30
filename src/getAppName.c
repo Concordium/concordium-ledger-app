@@ -1,3 +1,5 @@
+#include <assert.h>  // _Static_assert
+
 #include "getAppName.h"
 #include "globals.h"
 

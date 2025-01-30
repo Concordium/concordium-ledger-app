@@ -22,13 +22,8 @@
 
 #define MAX_ENC_INPUT_SIZE 120
 
-unsigned char const BASE58ALPHABET[] = {'1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C',
-                                        'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'Q',
-                                        'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c',
-                                        'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'm', 'n', 'o', 'p',
-                                        'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'};
-
 #define ADDRESS_LENGTH 32
+#define HASH_LENGTH 32
 
 int base58check_encode(const unsigned char *in, size_t length, unsigned char *out, size_t *outlen) {
     if (length != ADDRESS_LENGTH) {
@@ -47,9 +42,16 @@ int base58check_encode(const unsigned char *in, size_t length, unsigned char *ou
 
     // Calculate SHA256(SHA256(version + in)), and append the first 4 bytes to the (version + in)
     // bytes.
-    uint8_t hash[32];
-    cx_hash_sha256(buffer, ADDRESS_LENGTH + 1, hash, sizeof(hash));
-    cx_hash_sha256(hash, sizeof(hash), hash, sizeof(hash));
+    uint8_t hash[HASH_LENGTH];
+    cx_err_t error = 0;
+    error = cx_hash_sha256(buffer, ADDRESS_LENGTH + 1, hash, sizeof(hash));
+    if (error == 0) {
+        THROW(ERROR_FAILED_CX_OPERATION);
+    }
+    error = cx_hash_sha256(hash, sizeof(hash), hash, sizeof(hash));
+    if (error == 0) {
+        THROW(ERROR_FAILED_CX_OPERATION);
+    }
     memmove(&buffer[1 + ADDRESS_LENGTH], hash, 4);
 
     return base58_encode(buffer, 1 + ADDRESS_LENGTH + 4, (char *)out, *outlen);

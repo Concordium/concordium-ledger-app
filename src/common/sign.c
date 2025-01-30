@@ -14,14 +14,6 @@ void buildAndSignTransactionHash() {
     sendSuccess(sizeof(signedHash));
 }
 
-void handleCborStep(void) {
-    if (ctx->cborLength < 0) {
-        THROW(ERROR_INVALID_STATE);
-    } else {
-        sendSuccessNoIdle();  // Request more data from the computer.
-    }
-}
-
 void readCborInitial(uint8_t *cdata, uint8_t dataLength) {
     uint8_t header = cdata[0];
     cdata += 1;

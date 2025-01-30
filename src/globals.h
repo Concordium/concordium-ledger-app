@@ -78,6 +78,11 @@
  */
 #define MAX_APPNAME_LEN 64
 
+/**
+ * Key length of (Public Key || Verification Key || Account Key)
+ */
+#define KEY_LENGTH 32
+
 typedef enum {
     LEGACY_ID_CRED_SEC = 0,
     LEGACY_PRF_KEY = 1,

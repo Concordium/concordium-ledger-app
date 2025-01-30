@@ -216,7 +216,7 @@ def test_sign_tx_transfer_with_schedule_legacy_path(
                 test_name,
                 instructions,
                 10,
-                False,
+                True,
                 True,
                 screenshots_so_far,
             )
@@ -325,7 +325,7 @@ def test_sign_tx_transfer_with_schedule_and_memo_legacy_path(
                 test_name,
                 instructions,
                 10,
-                False,
+                True,
                 True,
                 screenshots_so_far,
             )

@@ -66,7 +66,7 @@ int secondsToTm(long long t, tm *tm) {
 
     for (months = 0; days_in_month[months] <= remdays; months++) remdays -= days_in_month[months];
 
-    if (years + 100 > INT_MAX || years + 100 < INT_MIN) return -1;
+    if (years > INT_MAX - 100 || years < INT_MIN + 100) return -1;
 
     tm->tm_year = years + 100;
     tm->tm_mon = months + 2;
@@ -89,8 +89,11 @@ int secondsToTm(long long t, tm *tm) {
  * Helper function for prepending numbers that are
  * less than 10 with a '0', so that 5 results in 05.
  */
-int prefixWithZero(uint8_t *dst, int value) {
+int prefixWithZero(uint8_t *dst, size_t dstLength, int value) {
     if (value < 10) {
+        if (dstLength < 1) {
+            return -1;  // Prevent overflow
+        }
         memmove(dst, "0", 1);
         return 1;
     }
@@ -105,31 +108,31 @@ int timeToDisplayText(tm time, uint8_t *dst, size_t dstLength) {
     memmove(dst + offset, "-", 1);
     offset += 1;
 
-    offset += prefixWithZero(dst + offset, time.tm_mon + 1);
+    offset += prefixWithZero(dst + offset, dstLength - offset, time.tm_mon + 1);
     offset += numberToText(dst + offset, dstLength - offset, time.tm_mon + 1);
 
     memmove(dst + offset, "-", 1);
     offset += 1;
 
-    offset += prefixWithZero(dst + offset, time.tm_mday);
+    offset += prefixWithZero(dst + offset, dstLength - offset, time.tm_mday);
     offset += numberToText(dst + offset, dstLength - offset, time.tm_mday);
 
     memmove(dst + offset, " ", 1);
     offset += 1;
 
-    offset += prefixWithZero(dst + offset, time.tm_hour);
+    offset += prefixWithZero(dst + offset, dstLength - offset, time.tm_hour);
     offset += numberToText(dst + offset, dstLength - offset, time.tm_hour);
 
     memmove(dst + offset, ":", 1);
     offset += 1;
 
-    offset += prefixWithZero(dst + offset, time.tm_min);
+    offset += prefixWithZero(dst + offset, dstLength - offset, time.tm_min);
     offset += numberToText(dst + offset, dstLength - offset, time.tm_min);
 
     memmove(dst + offset, ":", 1);
     offset += 1;
 
-    offset += prefixWithZero(dst + offset, time.tm_sec);
+    offset += prefixWithZero(dst + offset, dstLength - offset, time.tm_sec);
     offset += bin2dec(dst + offset, dstLength - offset, time.tm_sec);
 
     return offset;
