@@ -17,10 +17,16 @@ void handleSignTransferToPublic(uint8_t *cdata,
     }
 
     if (p1 == P1_INITIAL && ctx->state == TX_TRANSFER_TO_PUBLIC_INITIAL) {
-        cdata += parseKeyDerivationPath(cdata);
+        size_t offset = parseKeyDerivationPath(cdata);
+        if (offset > dataLength) {
+            THROW(ERROR_BUFFER_OVERFLOW);  // Ensure safe access
+        }
+        cdata += offset;
         cx_sha256_init(&tx_state->hash);
-        hashAccountTransactionHeaderAndKind(cdata, TRANSFER_TO_PUBLIC);
-
+        offset = hashAccountTransactionHeaderAndKind(cdata, TRANSFER_TO_PUBLIC);
+        if (offset > dataLength) {
+            THROW(ERROR_BUFFER_OVERFLOW);  // Ensure safe access
+        }
         ctx->state = TX_TRANSFER_TO_PUBLIC_REMAINING_AMOUNT;
         // Ask the caller for the next command.
         sendSuccessNoIdle();
@@ -46,18 +52,18 @@ void handleSignTransferToPublic(uint8_t *cdata,
         sendSuccessNoIdle();
     } else if (p1 == P1_PROOF && ctx->state == TX_TRANSFER_TO_PUBLIC_PROOF) {
         updateHash((cx_hash_t *)&tx_state->hash, cdata, dataLength);
-        ctx->proofSize -= dataLength;
 
-        if (ctx->proofSize == 0) {
+        if (ctx->proofSize == dataLength) {
             // We have received all proof bytes, continue to signing flow.
             uiSignTransferToPublicDisplay(flags);
-        } else if (ctx->proofSize < 0) {
+        } else if (ctx->proofSize < dataLength) {
             // We received more proof bytes than expected, and so the received
             // transaction is invalid.
             THROW(ERROR_INVALID_TRANSACTION);
         } else {
             // There are additional bytes to be received, so ask the caller
             // for more data.
+            ctx->proofSize -= dataLength;
             sendSuccessNoIdle();
         }
     } else {

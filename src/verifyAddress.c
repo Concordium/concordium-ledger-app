@@ -153,8 +153,11 @@ void handleVerifyAddress(uint8_t *cdata, uint8_t p1, volatile unsigned int *flag
     END_TRY;
 
     uint8_t accountAddress[32];
-    cx_hash_sha256(credId, sizeof(credId), accountAddress, sizeof(accountAddress));
-
+    cx_err_t error = 0;
+    error = cx_hash_sha256(credId, sizeof(credId), accountAddress, sizeof(accountAddress));
+    if (error == 0) {
+        THROW(ERROR_FAILED_CX_OPERATION);
+    }
     size_t addressLength = sizeof(ctx->address);
 
     base58check_encode(accountAddress, sizeof(accountAddress), ctx->address, &addressLength);

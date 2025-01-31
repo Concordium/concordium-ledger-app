@@ -61,7 +61,7 @@ size_t decimalDigitsDisplay(uint8_t *dst,
     size_t length = lengthOfNumber(decimalPart);
     int zeroFillLength = decimalDigitsLength - length;
 
-    if (dstLength - zeroFillLength < 0) {
+    if (zeroFillLength < 0 || dstLength < (size_t)zeroFillLength) {
         THROW(ERROR_BUFFER_OVERFLOW);
     }
 
@@ -185,6 +185,7 @@ size_t fractionToPercentageDisplay(uint8_t *dst, size_t dstLength, uint32_t numb
  * to relate to in the GUI.
  */
 size_t amountToGtuDisplay(uint8_t *dst, size_t dstLength, uint64_t microGtuAmount) {
+    if (dstLength < 4) return 0;  // Prevent overflow
     memmove(dst, "CCD ", 4);
     size_t offset = decimalNumberToDisplay(dst + 4, dstLength, microGtuAmount, 1000000, 6) + 4;
     dst[offset] = '\0';
@@ -192,6 +193,8 @@ size_t amountToGtuDisplay(uint8_t *dst, size_t dstLength, uint64_t microGtuAmoun
 }
 
 void toPaginatedHex(uint8_t *byteArray, const uint64_t len, char *asHex, const size_t asHexSize) {
+    LEDGER_ASSERT(byteArray != NULL, "NULL byteArray");
+
     static uint8_t const hex[] = "0123456789abcdef";
 
     if (asHexSize < len * 2 + len / 16 + 1) {

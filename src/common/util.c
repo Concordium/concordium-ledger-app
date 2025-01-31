@@ -163,11 +163,6 @@ void getIdentityAccountDisplayNewPath(uint8_t *dst,
  * error that should be sent back to the callee.
  */
 void ensureNoError(cx_err_t errorCode) {
-    // TODO An improvement would be to stop using THROW for the control flow like this
-    // and to explicitly send back the error instead and then stop the flow.
-    // This implementation is a quick patch to the changes made to the Ledger SDK to
-    // mimic the old library functions that would do a similar throw.
-
     if (errorCode != CX_OK) {
         THROW(ERROR_FAILED_CX_OPERATION);
     }
@@ -311,9 +306,12 @@ void blsKeygen(const uint8_t *seed, size_t seedLength, uint8_t *dst, size_t dstL
 
     memcpy(ikm, seed, SEED_LENGTH);
     ikm[SEED_LENGTH] = 0;
-
+    cx_err_t error = 0;
     do {
-        cx_hash_sha256(salt, saltSize, salt, sizeof(salt));
+        error = cx_hash_sha256(salt, saltSize, salt, sizeof(salt));
+        if (error == 0) {
+            THROW(ERROR_FAILED_CX_OPERATION);
+        }
         saltSize = sizeof(salt);
         cx_hkdf_extract(CX_SHA256, ikm, sizeof(ikm), salt, sizeof(salt), prk);
         cx_hkdf_expand(CX_SHA256,

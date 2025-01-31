@@ -218,7 +218,7 @@ def test_credential_update(
 
     keys = [
         bytes.fromhex(
-            "00f78929ec8a9819f6ae2e10e79522b6b311949635fecc3d924d9d1e23f8e9e1c3"
+            "0100f78929ec8a9819f6ae2e10e79522b6b311949635fecc3d924d9d1e23f8e9e1c3"
         ),
     ]
     signature_threshold = bytes.fromhex(
@@ -358,5 +358,5 @@ def test_credential_update(
     print("response", response_hex)
     assert (
         response_hex
-        == "e9f03b5e1d35447a3c1f088620edcc9ffb381fee716076d54971d02466be8f7edd16b999d903a7698d58ea1f79782576075d930654f3143c38704d7ef272be07"
+        == "04974271c62c687aa5b14ff7e250eafd56b0e288c8be837a8d6fcfae4f1d77f4f1fd9e4621b7a2616cb8326e936f44cb358cc66c9ee3ca87906fa4eba698fe04"
     )

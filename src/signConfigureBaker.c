@@ -68,9 +68,18 @@ void handleSignConfigureBaker(uint8_t *cdata,
                               volatile unsigned int *flags,
                               bool isInitialCall) {
     if (P1_INITIAL == p1 && isInitialCall) {
-        cdata += parseKeyDerivationPath(cdata);
         cx_sha256_init(&tx_state->hash);
-        cdata += hashAccountTransactionHeaderAndKind(cdata, CONFIGURE_BAKER);
+        size_t offset = parseKeyDerivationPath(cdata);
+        if (offset > dataLength) {
+            THROW(ERROR_BUFFER_OVERFLOW);  // Ensure safe access
+        }
+        cdata += offset;
+
+        offset = hashAccountTransactionHeaderAndKind(cdata, CONFIGURE_BAKER);
+        if (offset > dataLength) {
+            THROW(ERROR_BUFFER_OVERFLOW);  // Ensure safe access
+        }
+        cdata += offset;
         ctx_conf_baker->firstDisplay = true;
 
         // The initial 2 bytes tells us the fields we are receiving.

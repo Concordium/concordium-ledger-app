@@ -12,7 +12,7 @@ instructionContext global;
  * the APDU buffer to be returned to the caller.
  */
 void sendPublicKey(bool compare) {
-    uint8_t publicKey[32];
+    uint8_t publicKey[KEY_LENGTH];
     getPublicKey(publicKey);
 
     // tx is holding the offset in the buffer we have written to. It is a convention to call this tx

@@ -12,18 +12,29 @@ void processNextVerificationKey(void) {
     }
 }
 
-void parseVerificationKey(uint8_t *buffer) {
+void parseVerificationKey(uint8_t *buffer, uint8_t dataLength) {
     // Hash key index
     updateHash((cx_hash_t *)&tx_state->hash, buffer, 1);
+    if (dataLength < 1) {
+        THROW(ERROR_BUFFER_OVERFLOW);  // Ensure safe access
+    }
+    dataLength -= 1;
     buffer += 1;
 
     // Hash schemeId
     updateHash((cx_hash_t *)&tx_state->hash, buffer, 1);
+    if (dataLength < 1) {
+        THROW(ERROR_BUFFER_OVERFLOW);  // Ensure safe access
+    }
+    dataLength -= 1;
     buffer += 1;
 
-    uint8_t verificationKey[32];
-    memmove(verificationKey, buffer, 32);
-    updateHash((cx_hash_t *)&tx_state->hash, verificationKey, 32);
+    uint8_t verificationKey[KEY_LENGTH];
+    if (dataLength < KEY_LENGTH) {
+        THROW(ERROR_BUFFER_OVERFLOW);  // Ensure safe access
+    }
+    memmove(verificationKey, buffer, KEY_LENGTH);
+    updateHash((cx_hash_t *)&tx_state->hash, verificationKey, KEY_LENGTH);
 
     // Convert to a human-readable format.
     toPaginatedHex(verificationKey,
@@ -63,6 +74,7 @@ void parseVerificationKey(uint8_t *buffer) {
 void handleSignUpdateCredential(uint8_t *dataBuffer,
                                 uint8_t p1,
                                 uint8_t p2,
+                                uint8_t lc,
                                 volatile unsigned int *flags,
                                 bool isInitialCall) {
     if (isInitialCall) {
@@ -96,7 +108,7 @@ void handleSignUpdateCredential(uint8_t *dataBuffer,
     } else if (p2 == P2_CREDENTIAL_CREDENTIAL &&
                ctx->updateCredentialState == TX_UPDATE_CREDENTIAL_CREDENTIAL &&
                ctx->credentialDeploymentCount > 0) {
-        handleSignCredentialDeployment(dataBuffer, p1, p2, flags, false);
+        handleSignCredentialDeployment(dataBuffer, p1, p2, lc, flags, false);
     } else if (p2 == P2_CREDENTIAL_ID_COUNT &&
                ctx->updateCredentialState == TX_UPDATE_CREDENTIAL_ID_COUNT) {
         ctx->credentialIdCount = dataBuffer[0];
@@ -134,6 +146,7 @@ void handleSignUpdateCredential(uint8_t *dataBuffer,
 void handleSignCredentialDeployment(uint8_t *dataBuffer,
                                     uint8_t p1,
                                     uint8_t p2,
+                                    uint8_t lc,
                                     volatile unsigned int *flags,
                                     bool isInitialCall) {
     if (isInitialCall) {
@@ -158,7 +171,7 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer,
     } else if (p1 == P1_VERIFICATION_KEY) {
         if (ctx->numberOfVerificationKeys > 0 &&
             ctx->state == TX_CREDENTIAL_DEPLOYMENT_VERIFICATION_KEY) {
-            parseVerificationKey(dataBuffer);
+            parseVerificationKey(dataBuffer, lc);
         } else {
             THROW(ERROR_INVALID_STATE);
         }

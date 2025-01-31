@@ -7,11 +7,17 @@ void handleSignConfigureDelegation(uint8_t *cdata,
                                    uint8_t dataLength,
                                    volatile unsigned int *flags) {
     int keyDerivationPathLength = parseKeyDerivationPath(cdata);
+    if (keyDerivationPathLength > dataLength) {
+        THROW(ERROR_BUFFER_OVERFLOW);  // Ensure safe access
+    }
     cdata += keyDerivationPathLength;
 
     cx_sha256_init(&tx_state->hash);
     int accountTransactionHeaderAndKindLength =
         hashAccountTransactionHeaderAndKind(cdata, CONFIGURE_DELEGATION);
+    if (accountTransactionHeaderAndKindLength > dataLength) {
+        THROW(ERROR_BUFFER_OVERFLOW);  // Ensure safe access
+    }
     cdata += accountTransactionHeaderAndKindLength;
 
     // The initial 2 bytes tells us the fields we are receiving.

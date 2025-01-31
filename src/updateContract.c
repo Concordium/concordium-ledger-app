@@ -10,8 +10,16 @@ static tx_state_t *tx_state = &global_tx_state;
 void handleUpdateContract(uint8_t *cdata, uint8_t p1, uint8_t lc) {
     if (p1 == P1_INITIAL) {
         cx_sha256_init(&tx_state->hash);
-        cdata += parseKeyDerivationPath(cdata);
-        cdata += hashAccountTransactionHeaderAndKind(cdata, UPDATE_CONTRACT);
+        size_t offset = parseKeyDerivationPath(cdata);
+        if (offset > lc) {
+            THROW(ERROR_BUFFER_OVERFLOW);  // Ensure safe access
+        }
+        cdata += offset;
+        offset = hashAccountTransactionHeaderAndKind(cdata, UPDATE_CONTRACT);
+        if (offset > lc) {
+            THROW(ERROR_BUFFER_OVERFLOW);  // Ensure safe access
+        }
+        cdata += offset;
         // hash the amount
         updateHash((cx_hash_t *)&tx_state->hash, cdata, 8);
         // extract the amount

@@ -1,5 +1,16 @@
 #include "globals.h"
 
+// CBOR encoding constants
+#define CBOR_SHORT_COUNT_MAX   23  // Values below this are direct length
+#define CBOR_ONE_BYTE_LENGTH   24  // Uses 1 additional byte for length
+#define CBOR_TWO_BYTE_LENGTH   25  // Uses 2 additional bytes for length
+#define CBOR_FOUR_BYTE_LENGTH  26  // Uses 4 additional bytes for length
+#define CBOR_EIGHT_BYTE_LENGTH 27  // Uses 8 additional bytes for length
+#define CBOR_INDEFINITE_LENGTH 31  // Indicates indefinite length encoding (unsupported)
+
+// Mask and bit shifts
+#define CBOR_SHORT_COUNT_MASK 0x1F  // 5 lower bits
+
 static tx_state_t *tx_state = &global_tx_state;
 static cborContext_t *ctx = &global.withDataBlob.cborContext;
 
@@ -14,14 +25,6 @@ void buildAndSignTransactionHash() {
     sendSuccess(sizeof(signedHash));
 }
 
-void handleCborStep(void) {
-    if (ctx->cborLength < 0) {
-        THROW(ERROR_INVALID_STATE);
-    } else {
-        sendSuccessNoIdle();  // Request more data from the computer.
-    }
-}
-
 void readCborInitial(uint8_t *cdata, uint8_t dataLength) {
     uint8_t header = cdata[0];
     cdata += 1;
@@ -29,7 +32,7 @@ void readCborInitial(uint8_t *cdata, uint8_t dataLength) {
     // the first byte of an cbor encoding contains the type (3 high bits) and the shortCount (5
     // lower bits);
     ctx->majorType = header >> 5;
-    uint8_t shortCount = header & 0x1f;
+    uint8_t shortCount = header & CBOR_SHORT_COUNT_MASK;
 
     // Calculate length of cbor payload
     // sizeLength: number of bytes (beside the header) used to indicate the payload length
@@ -39,23 +42,22 @@ void readCborInitial(uint8_t *cdata, uint8_t dataLength) {
 
     ctx->displayUsed = 0;
 
-    if (shortCount < 24) {
+    if (shortCount <= CBOR_SHORT_COUNT_MAX) {
         // shortCount is the length, no extra bytes are used.
-        sizeLength = 0;
         length = shortCount;
-    } else if (shortCount == 24) {
+    } else if (shortCount == CBOR_ONE_BYTE_LENGTH) {
         length = cdata[0];
         sizeLength = 1;
-    } else if (shortCount == 25) {
+    } else if (shortCount == CBOR_TWO_BYTE_LENGTH) {
         length = U2BE(cdata, 0);
         sizeLength = 2;
-    } else if (shortCount == 26) {
+    } else if (shortCount == CBOR_FOUR_BYTE_LENGTH) {
         length = U4BE(cdata, 0);
         sizeLength = 4;
-    } else if (shortCount == 27) {
+    } else if (shortCount == CBOR_EIGHT_BYTE_LENGTH) {
         length = U8BE(cdata, 0);
         sizeLength = 8;
-    } else if (shortCount == 31) {
+    } else if (shortCount == CBOR_INDEFINITE_LENGTH) {
         THROW(ERROR_UNSUPPORTED_CBOR);
     } else {
         THROW(ERROR_INVALID_PARAM);

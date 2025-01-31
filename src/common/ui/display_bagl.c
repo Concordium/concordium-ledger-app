@@ -9,7 +9,7 @@ UX_STEP_NOCB(ux_display_memo_step_nocb,
 
 UX_STEP_CB(ux_display_memo_step,
            bnnn_paging,
-           handleCborStep(),
+           sendSuccessNoIdle(),
            {"Memo", (char *)global.withDataBlob.cborContext.display});
 
 UX_FLOW(ux_display_memo, &ux_display_memo_step);

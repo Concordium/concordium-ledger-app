@@ -5,12 +5,14 @@ void processNextVerificationKey(void);
 void handleSignCredentialDeployment(uint8_t *dataBuffer,
                                     uint8_t p1,
                                     uint8_t p2,
+                                    uint8_t lc,
                                     volatile unsigned int *flags,
                                     bool isInitialCall);
 
 void handleSignUpdateCredential(uint8_t *dataBuffer,
                                 uint8_t p1,
                                 uint8_t p2,
+                                uint8_t lc,
                                 volatile unsigned int *flags,
                                 bool isInitialCall);
 
