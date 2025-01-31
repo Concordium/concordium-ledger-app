@@ -8,7 +8,7 @@ void handleSignConfigureDelegation(uint8_t *cdata,
                                    volatile unsigned int *flags) {
     int keyDerivationPathLength = parseKeyDerivationPath(cdata);
     if (keyDerivationPathLength > dataLength) {
-        THROW(ERROR_BUFFER_OVERFLOW); // Ensure safe access
+        THROW(ERROR_BUFFER_OVERFLOW);  // Ensure safe access
     }
     cdata += keyDerivationPathLength;
 

@@ -19,15 +19,14 @@ void handleSignTransferToPublic(uint8_t *cdata,
     if (p1 == P1_INITIAL && ctx->state == TX_TRANSFER_TO_PUBLIC_INITIAL) {
         size_t offset = parseKeyDerivationPath(cdata);
         if (offset > dataLength) {
-            THROW(ERROR_BUFFER_OVERFLOW); // Ensure safe access
+            THROW(ERROR_BUFFER_OVERFLOW);  // Ensure safe access
         }
         cdata += offset;
         cx_sha256_init(&tx_state->hash);
         offset = hashAccountTransactionHeaderAndKind(cdata, TRANSFER_TO_PUBLIC);
         if (offset > dataLength) {
-            THROW(ERROR_BUFFER_OVERFLOW); // Ensure safe access
+            THROW(ERROR_BUFFER_OVERFLOW);  // Ensure safe access
         }
-        cdata += offset;
         ctx->state = TX_TRANSFER_TO_PUBLIC_REMAINING_AMOUNT;
         // Ask the caller for the next command.
         sendSuccessNoIdle();

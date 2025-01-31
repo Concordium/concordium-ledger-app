@@ -1,16 +1,15 @@
 #include "globals.h"
 
 // CBOR encoding constants
-#define CBOR_SHORT_COUNT_MAX      23  // Values below this are direct length
-#define CBOR_ONE_BYTE_LENGTH      24  // Uses 1 additional byte for length
-#define CBOR_TWO_BYTE_LENGTH      25  // Uses 2 additional bytes for length
-#define CBOR_FOUR_BYTE_LENGTH     26  // Uses 4 additional bytes for length
-#define CBOR_EIGHT_BYTE_LENGTH    27  // Uses 8 additional bytes for length
-#define CBOR_INDEFINITE_LENGTH    31  // Indicates indefinite length encoding (unsupported)
+#define CBOR_SHORT_COUNT_MAX   23  // Values below this are direct length
+#define CBOR_ONE_BYTE_LENGTH   24  // Uses 1 additional byte for length
+#define CBOR_TWO_BYTE_LENGTH   25  // Uses 2 additional bytes for length
+#define CBOR_FOUR_BYTE_LENGTH  26  // Uses 4 additional bytes for length
+#define CBOR_EIGHT_BYTE_LENGTH 27  // Uses 8 additional bytes for length
+#define CBOR_INDEFINITE_LENGTH 31  // Indicates indefinite length encoding (unsupported)
 
 // Mask and bit shifts
-#define CBOR_MAJOR_TYPE_MASK      0xE0  // 3 high bits
-#define CBOR_SHORT_COUNT_MASK     0x1F  // 5 lower bits
+#define CBOR_SHORT_COUNT_MASK 0x1F  // 5 lower bits
 
 static tx_state_t *tx_state = &global_tx_state;
 static cborContext_t *ctx = &global.withDataBlob.cborContext;

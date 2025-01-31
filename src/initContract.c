@@ -13,7 +13,7 @@ void handleInitContract(uint8_t *cdata, uint8_t p1, uint8_t lc) {
 
         size_t offset = parseKeyDerivationPath(cdata);
         if (offset > lc) {
-            THROW(ERROR_BUFFER_OVERFLOW); // Ensure safe access
+            THROW(ERROR_BUFFER_OVERFLOW);  // Ensure safe access
         }
         cdata += offset;
 

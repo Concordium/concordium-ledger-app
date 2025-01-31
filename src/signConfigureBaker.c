@@ -71,7 +71,7 @@ void handleSignConfigureBaker(uint8_t *cdata,
         cx_sha256_init(&tx_state->hash);
         size_t offset = parseKeyDerivationPath(cdata);
         if (offset > dataLength) {
-            THROW(ERROR_BUFFER_OVERFLOW); // Ensure safe access
+            THROW(ERROR_BUFFER_OVERFLOW);  // Ensure safe access
         }
         cdata += offset;
 

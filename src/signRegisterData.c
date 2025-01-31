@@ -27,14 +27,14 @@ void handleSignRegisterData(uint8_t *cdata,
     if (p1 == P1_INITIAL && ctx->state == TX_REGISTER_DATA_INITIAL) {
         size_t offset = parseKeyDerivationPath(cdata);
         if (offset > dataLength) {
-            THROW(ERROR_BUFFER_OVERFLOW); // Ensure safe access
+            THROW(ERROR_BUFFER_OVERFLOW);  // Ensure safe access
         }
         cdata += offset;
         cx_sha256_init(&tx_state->hash);
 
         offset = hashAccountTransactionHeaderAndKind(cdata, REGISTER_DATA);
         if (offset > dataLength) {
-            THROW(ERROR_BUFFER_OVERFLOW); // Ensure safe access
+            THROW(ERROR_BUFFER_OVERFLOW);  // Ensure safe access
         }
         cdata += offset;
 

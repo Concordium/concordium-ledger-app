@@ -16,7 +16,7 @@ void parseVerificationKey(uint8_t *buffer, uint8_t dataLength) {
     // Hash key index
     updateHash((cx_hash_t *)&tx_state->hash, buffer, 1);
     if (dataLength < 1) {
-        THROW(ERROR_BUFFER_OVERFLOW); // Ensure safe access
+        THROW(ERROR_BUFFER_OVERFLOW);  // Ensure safe access
     }
     dataLength -= 1;
     buffer += 1;
@@ -24,14 +24,14 @@ void parseVerificationKey(uint8_t *buffer, uint8_t dataLength) {
     // Hash schemeId
     updateHash((cx_hash_t *)&tx_state->hash, buffer, 1);
     if (dataLength < 1) {
-        THROW(ERROR_BUFFER_OVERFLOW); // Ensure safe access
+        THROW(ERROR_BUFFER_OVERFLOW);  // Ensure safe access
     }
     dataLength -= 1;
     buffer += 1;
 
     uint8_t verificationKey[KEY_LENGTH];
     if (dataLength < KEY_LENGTH) {
-        THROW(ERROR_BUFFER_OVERFLOW); // Ensure safe access
+        THROW(ERROR_BUFFER_OVERFLOW);  // Ensure safe access
     }
     memmove(verificationKey, buffer, KEY_LENGTH);
     updateHash((cx_hash_t *)&tx_state->hash, verificationKey, KEY_LENGTH);

@@ -23,7 +23,7 @@
 #define MAX_ENC_INPUT_SIZE 120
 
 #define ADDRESS_LENGTH 32
-#define HASH_LENGTH 32
+#define HASH_LENGTH    32
 
 int base58check_encode(const unsigned char *in, size_t length, unsigned char *out, size_t *outlen) {
     if (length != ADDRESS_LENGTH) {
