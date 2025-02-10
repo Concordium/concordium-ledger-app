@@ -179,7 +179,7 @@ jobs:
                 mkdir tests/bin
 
             - name: Download binaries
-              uses: actions/download-artifact@v3
+              uses: actions/download-artifact@v4
               with:
                 path: tests/bin
 
