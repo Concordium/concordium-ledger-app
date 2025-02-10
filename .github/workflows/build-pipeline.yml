@@ -9,7 +9,7 @@ on:
     # Allows us to run the workflow manually from the Actions tab
     workflow_dispatch:
 
-jobs: 
+jobs:
     compile-nano-s:
         name: Compile for Nano S
         runs-on: ubuntu-latest
@@ -27,7 +27,7 @@ jobs:
                   mv bin/app.elf concordium_nanos.elf
 
             - name: Upload binary
-              uses: actions/upload-artifact@v3
+              uses: actions/upload-artifact@v4
               with:
                 name: nanos
                 path: ./concordium_nanos.elf
@@ -50,7 +50,7 @@ jobs:
                   mv bin/app.elf concordium_nanosplus.elf
 
             - name: Upload binary
-              uses: actions/upload-artifact@v3
+              uses: actions/upload-artifact@v4
               with:
                 name: nanosplus
                 path: ./concordium_nanosplus.elf
@@ -72,7 +72,7 @@ jobs:
                   mv bin/app.elf concordium_nanox.elf
 
             - name: Upload binary
-              uses: actions/upload-artifact@v3
+              uses: actions/upload-artifact@v4
               with:
                 name: nanox
                 path: ./concordium_nanox.elf
@@ -95,7 +95,7 @@ jobs:
                   mv bin/app.elf ccdGovernance_nanos.elf
 
             - name: Upload binary
-              uses: actions/upload-artifact@v3
+              uses: actions/upload-artifact@v4
               with:
                 name: governance-nanos
                 path: ./governance-app/ccdGovernance_nanos.elf
@@ -118,7 +118,7 @@ jobs:
                   mv bin/app.elf ccdGovernance_nanosplus.elf
 
             - name: Upload binary
-              uses: actions/upload-artifact@v3
+              uses: actions/upload-artifact@v4
               with:
                 name: governance-nanosplus
                 path: ./governance-app/ccdGovernance_nanosplus.elf
@@ -189,7 +189,7 @@ jobs:
 
             - name: Upload snapshots
               if: always()
-              uses: actions/upload-artifact@v3
+              uses: actions/upload-artifact@v4
               with:
                 name: snapshots
                 path: ./tests/snapshots-tmp
