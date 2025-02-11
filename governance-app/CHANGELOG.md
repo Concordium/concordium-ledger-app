@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.1.0
+
 - Support for update validator score parameters transaction.
 
 ## 1.0.0
