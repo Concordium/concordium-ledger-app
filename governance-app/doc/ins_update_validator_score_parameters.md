@@ -1,6 +1,6 @@
 # Update validator score parameters
 
-Used for updating the parameters determining the "score" of a validator which are used when decideng whether a validator should be suspended.
+Used for updating the parameters determining the "score" of a validator which are used when deciding whether a validator should be suspended.
 
 ## Protocol description
 
