@@ -43,6 +43,7 @@
 #include "signUpdateMinBlockTime.h"
 #include "signUpdateBlockEnergyLimit.h"
 #include "signUpdateFinalizationCommitteeParameters.h"
+#include "signUpdateValidatorScoreParameters.h"
 #include "ux.h"
 
 // Global variable definitions
@@ -77,6 +78,9 @@ instructionContext global;
 #define INS_UPDATE_MIN_BLOCK_TIME     0x44
 #define INS_UPDATE_BLOCK_ENERGY_LIMIT 0x45
 #define INS_UPDATE_FINALIZATION_COMMITTEE_PARAMETERS 0x46
+
+// Protocol update 8 transactions.
+#define INS_UPDATE_VALIDATOR_SCORE_PARAMETERS 0x47
 
 void handler(
     uint8_t INS,
@@ -164,6 +168,9 @@ void handler(
                         break;
                     case INS_UPDATE_FINALIZATION_COMMITTEE_PARAMETERS:
                         handleSignUpdateFinalizationCommitteeParameters(cdata, flags);
+                        break;
+                    case INS_UPDATE_VALIDATOR_SCORE_PARAMETERS:
+                        handleSignUpdateValidatorScoreParameters(cdata, flags);
                         break;
                     default:
                         THROW(ERROR_INVALID_INSTRUCTION);
