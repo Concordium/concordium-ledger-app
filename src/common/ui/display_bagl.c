@@ -115,7 +115,7 @@ void uiExportPrivateKey(volatile unsigned int *flags) {
 
 static signConfigureBaker_t *ctx_conf_baker = &global.signConfigureBaker;
 
-const ux_flow_step_t *ux_sign_configure_baker_first[8];
+const ux_flow_step_t *ux_sign_configure_baker_first[10];
 const ux_flow_step_t *ux_sign_configure_baker_url[6];
 const ux_flow_step_t *ux_sign_configure_baker_commission[9];
 const ux_flow_step_t *ux_sign_configure_baker_suspended[6];
