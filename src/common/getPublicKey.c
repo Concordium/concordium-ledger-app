@@ -28,6 +28,9 @@ void sendPublicKey(bool compare) {
     if (ctx->signPublicKey) {
         uint8_t signedPublicKey[64];
         sign(publicKey, signedPublicKey);
+        if (sizeof(signedPublicKey) > sizeof(G_io_apdu_buffer) - tx) {
+            THROW(ERROR_BUFFER_OVERFLOW);
+        }
         memmove(G_io_apdu_buffer + tx, signedPublicKey, sizeof(signedPublicKey));
         tx += sizeof(signedPublicKey);
     }
@@ -67,6 +70,9 @@ void handleGetPublicKey(uint8_t *cdata, uint8_t p1, uint8_t p2, volatile unsigne
             }
 
             uint32_t purpose = keyPath->rawKeyDerivationPath[3];
+            if (sizeof(ctx->display) < 13) {
+                THROW(ERROR_BUFFER_OVERFLOW);
+            }
 
             switch (purpose) {
                 case 0:
