@@ -174,6 +174,9 @@ size_t fractionToPercentageDisplay(uint8_t *dst, size_t dstLength, uint32_t numb
     }
 
     size_t offset = decimalNumberToDisplay(dst, dstLength, number, 1000, 3);
+    if (dstLength < offset + 2) {
+        THROW(ERROR_BUFFER_OVERFLOW);
+    }
     dst[offset] = '%';
     dst[offset + 1] = '\0';
     return offset + 2;
