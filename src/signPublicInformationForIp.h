@@ -8,6 +8,7 @@
  */
 void handleSignPublicInformationForIp(uint8_t *cdata,
                                       uint8_t p1,
+                                      uint8_t lc,
                                       volatile unsigned int *flags,
                                       bool isInitialCall);
 

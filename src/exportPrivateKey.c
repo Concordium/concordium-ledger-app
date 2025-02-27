@@ -114,21 +114,31 @@ void exportPrivateKey(void) {
 void handleExportPrivateKey(uint8_t *dataBuffer,
                             uint8_t p1,
                             uint8_t p2,
+                            uint8_t lc,
                             volatile unsigned int *flags) {
     if ((p1 != P1_BOTH && p1 != P1_PRF_KEY && p1 != P1_PRF_KEY_RECOVERY) ||
         (p2 != P2_KEY && p2 != P2_SEED)) {
         THROW(ERROR_INVALID_PARAM);
     }
     size_t offset = 0;
-
+    if (lc < 1) {
+        THROW(ERROR_INVALID_PATH);
+    }
     ctx->isNewPath = (bool)dataBuffer[offset];
     offset += 1;
-
+    uint8_t remainingDataLength = lc - offset;
     uint32_t identity_provider;
     uint32_t identity;
     if (ctx->isNewPath) {
+        if (remainingDataLength < 4) {
+            THROW(ERROR_INVALID_PATH);
+        }
         identity_provider = U4BE(dataBuffer, offset);
         offset += 4;
+        remainingDataLength -= 4;
+    }
+    if (remainingDataLength < 4) {
+        THROW(ERROR_INVALID_PATH);
     }
     identity = U4BE(dataBuffer, offset);
     uint32_t *keyDerivationPath;

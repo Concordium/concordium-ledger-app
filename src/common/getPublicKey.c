@@ -49,8 +49,12 @@ void sendPublicKey(bool compare) {
     }
 }
 
-void handleGetPublicKey(uint8_t *cdata, uint8_t p1, uint8_t p2, volatile unsigned int *flags) {
-    parseKeyDerivationPath(cdata);
+void handleGetPublicKey(uint8_t *cdata,
+                        uint8_t p1,
+                        uint8_t p2,
+                        uint8_t lc,
+                        volatile unsigned int *flags) {
+    parseKeyDerivationPath(cdata, lc);
 
     // If P2 == 0x01, then the public-key is signed by its corresponding private key, and
     // appended to the returned public-key. This is used when it is needed to provide

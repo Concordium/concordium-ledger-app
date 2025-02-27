@@ -97,16 +97,28 @@ end:
     return error;
 }
 
-void handleVerifyAddress(uint8_t *cdata, uint8_t p1, volatile unsigned int *flags) {
+void handleVerifyAddress(uint8_t *cdata, uint8_t p1, uint8_t lc, volatile unsigned int *flags) {
     size_t offset = 0;
     bool is_new_path = p1 == 0x01;
     uint32_t identityProvider = 0;
+    uint8_t remainingDataLength = lc;
     if (is_new_path) {
+        if (remainingDataLength < 4) {
+            THROW(ERROR_BUFFER_OVERFLOW);
+        }
         identityProvider = U4BE(cdata, offset);
         offset += 4;
+        remainingDataLength -= 4;
+    }
+    if (remainingDataLength < 4) {
+        THROW(ERROR_BUFFER_OVERFLOW);
     }
     uint32_t identity = U4BE(cdata, offset);
     offset += 4;
+    remainingDataLength -= 4;
+    if (remainingDataLength < 4) {
+        THROW(ERROR_BUFFER_OVERFLOW);
+    }
     uint32_t credCounter = U4BE(cdata, offset);
 
     size_t prfKeyPathLen = is_new_path ? 5 : 6;

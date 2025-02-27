@@ -9,27 +9,43 @@ static tx_state_t *tx_state = &global_tx_state;
 
 void handleSignPublicInformationForIp(uint8_t *cdata,
                                       uint8_t p1,
+                                      uint8_t lc,
                                       volatile unsigned int *flags,
                                       bool isInitialCall) {
     if (isInitialCall) {
         ctx->state = TX_PUBLIC_INFO_FOR_IP_INITIAL;
     }
+    uint8_t remainingDataLength = lc;
 
     if (p1 == P1_INITIAL && ctx->state == TX_PUBLIC_INFO_FOR_IP_INITIAL) {
-        cdata += parseKeyDerivationPath(cdata);
-        cx_sha256_init(&tx_state->hash);
+        uint8_t offset = parseKeyDerivationPath(cdata, remainingDataLength);
+        cdata += offset;
+        remainingDataLength -= offset;
+        if (cx_sha256_init(&tx_state->hash) != CX_SHA256) {
+            THROW(ERROR_FAILED_CX_OPERATION);
+        }
 
         // We do not display IdCredPub as it is infeasible for the user to verify its correctness,
         // and maliciously replacing this value cannot give an attacker control of an account.
+        if (remainingDataLength < 48) {
+            THROW(ERROR_BUFFER_OVERFLOW);
+        }
         updateHash((cx_hash_t *)&tx_state->hash, cdata, 48);
         cdata += 48;
-
+        remainingDataLength -= 48;
         // We do not display CredId as it is infeasible for the user to verify its correctness,
         // and maliciously replacing this value cannot give an attacker control of an account.
+        if (remainingDataLength < 48) {
+            THROW(ERROR_BUFFER_OVERFLOW);
+        }
         updateHash((cx_hash_t *)&tx_state->hash, cdata, 48);
         cdata += 48;
+        remainingDataLength -= 48;
 
         // Parse number of public-keys that will be received next.
+        if (remainingDataLength < 1) {
+            THROW(ERROR_BUFFER_OVERFLOW);
+        }
         ctx->publicKeysLength = cdata[0];
         updateHash((cx_hash_t *)&tx_state->hash, cdata, 1);
 
@@ -41,15 +57,26 @@ void handleSignPublicInformationForIp(uint8_t *cdata,
             THROW(ERROR_INVALID_STATE);
         }
         // Hash key index
+        if (remainingDataLength < 1) {
+            THROW(ERROR_BUFFER_OVERFLOW);
+        }
         updateHash((cx_hash_t *)&tx_state->hash, cdata, 1);
         cdata += 1;
+        remainingDataLength -= 1;
 
         // Hash key type
         // We do not display the key type, as currently only ed_25519 is used.
+        if (remainingDataLength < 1) {
+            THROW(ERROR_BUFFER_OVERFLOW);
+        }
         updateHash((cx_hash_t *)&tx_state->hash, cdata, 1);
         cdata += 1;
+        remainingDataLength -= 1;
 
         uint8_t publicKey[32];
+        if (remainingDataLength < 32) {
+            THROW(ERROR_BUFFER_OVERFLOW);
+        }
         memmove(publicKey, cdata, 32);
         updateHash((cx_hash_t *)&tx_state->hash, publicKey, 32);
         toPaginatedHex(publicKey, 32, ctx->publicKey, sizeof(ctx->publicKey));
@@ -71,6 +98,9 @@ void handleSignPublicInformationForIp(uint8_t *cdata,
         }
     } else if (p1 == P1_THRESHOLD && ctx->state == TX_PUBLIC_INFO_FOR_IP_THRESHOLD) {
         // Read the threshold byte and parse it to display it.
+        if (remainingDataLength < 1) {
+            THROW(ERROR_BUFFER_OVERFLOW);
+        }
         updateHash((cx_hash_t *)&tx_state->hash, cdata, 1);
         bin2dec(ctx->threshold, sizeof(ctx->threshold), cdata[0]);
 

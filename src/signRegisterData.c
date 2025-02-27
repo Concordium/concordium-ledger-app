@@ -23,22 +23,28 @@ void handleSignRegisterData(uint8_t *cdata,
     if (isInitialCall) {
         ctx->state = TX_REGISTER_DATA_INITIAL;
     }
-
+    uint8_t remainingDataLength = dataLength;
     if (p1 == P1_INITIAL && ctx->state == TX_REGISTER_DATA_INITIAL) {
-        size_t offset = parseKeyDerivationPath(cdata);
+        size_t offset = parseKeyDerivationPath(cdata, remainingDataLength);
         if (offset > dataLength) {
             THROW(ERROR_BUFFER_OVERFLOW);  // Ensure safe access
         }
         cdata += offset;
-        cx_sha256_init(&tx_state->hash);
+        remainingDataLength -= offset;
+        if (cx_sha256_init(&tx_state->hash) != CX_SHA256) {
+            THROW(ERROR_FAILED_CX_OPERATION);
+        }
 
-        offset = hashAccountTransactionHeaderAndKind(cdata, REGISTER_DATA);
+        offset = hashAccountTransactionHeaderAndKind(cdata, remainingDataLength, REGISTER_DATA);
         if (offset > dataLength) {
             THROW(ERROR_BUFFER_OVERFLOW);  // Ensure safe access
         }
         cdata += offset;
-
+        remainingDataLength -= offset;
         // hash the data length
+        if (remainingDataLength < 2) {
+            THROW(ERROR_BUFFER_OVERFLOW);
+        }
         ctx->dataLength = U2BE(cdata, 0);
         if (ctx->dataLength > MAX_DATA_SIZE) {
             THROW(ERROR_INVALID_PARAM);

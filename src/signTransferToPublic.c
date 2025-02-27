@@ -15,15 +15,19 @@ void handleSignTransferToPublic(uint8_t *cdata,
     if (isInitialCall) {
         ctx->state = TX_TRANSFER_TO_PUBLIC_INITIAL;
     }
-
+    uint8_t remainingDataLength = dataLength;
     if (p1 == P1_INITIAL && ctx->state == TX_TRANSFER_TO_PUBLIC_INITIAL) {
-        size_t offset = parseKeyDerivationPath(cdata);
+        size_t offset = parseKeyDerivationPath(cdata, remainingDataLength);
         if (offset > dataLength) {
             THROW(ERROR_BUFFER_OVERFLOW);  // Ensure safe access
         }
         cdata += offset;
-        cx_sha256_init(&tx_state->hash);
-        offset = hashAccountTransactionHeaderAndKind(cdata, TRANSFER_TO_PUBLIC);
+        remainingDataLength -= offset;
+        if (cx_sha256_init(&tx_state->hash) != CX_SHA256) {
+            THROW(ERROR_FAILED_CX_OPERATION);
+        }
+        offset =
+            hashAccountTransactionHeaderAndKind(cdata, remainingDataLength, TRANSFER_TO_PUBLIC);
         if (offset > dataLength) {
             THROW(ERROR_BUFFER_OVERFLOW);  // Ensure safe access
         }
@@ -32,20 +36,35 @@ void handleSignTransferToPublic(uint8_t *cdata,
         sendSuccessNoIdle();
     } else if (p1 == P1_REMAINING_AMOUNT && ctx->state == TX_TRANSFER_TO_PUBLIC_REMAINING_AMOUNT) {
         // Hash remaining amount. Remaining amount is encrypted, and so we cannot display it.
+        if (remainingDataLength < 192) {
+            THROW(ERROR_BUFFER_OVERFLOW);
+        }
         updateHash((cx_hash_t *)&tx_state->hash, cdata, 192);
         cdata += 192;
+        remainingDataLength -= 192;
 
         // Parse transaction amount so it can be displayed.
+        if (remainingDataLength < 8) {
+            THROW(ERROR_BUFFER_OVERFLOW);
+        }
         uint64_t amountToPublic = U8BE(cdata, 0);
         amountToGtuDisplay(ctx->amount, sizeof(ctx->amount), amountToPublic);
         updateHash((cx_hash_t *)&tx_state->hash, cdata, 8);
         cdata += 8;
+        remainingDataLength -= 8;
 
         // Hash amount index
+        if (remainingDataLength < 8) {
+            THROW(ERROR_BUFFER_OVERFLOW);
+        }
         updateHash((cx_hash_t *)&tx_state->hash, cdata, 8);
         cdata += 8;
+        remainingDataLength -= 8;
 
         // Parse size of incoming proofs.
+        if (remainingDataLength < 2) {
+            THROW(ERROR_BUFFER_OVERFLOW);
+        }
         ctx->proofSize = U2BE(cdata, 0);
 
         ctx->state = TX_TRANSFER_TO_PUBLIC_PROOF;
