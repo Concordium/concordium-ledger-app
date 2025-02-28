@@ -5,7 +5,7 @@
  * account transaction.
  * @param cdata please see /doc/ins_transfer.md for details
  */
-void handleSignTransfer(uint8_t *cdata, volatile unsigned int *flags);
+void handleSignTransfer(uint8_t *cdata, uint8_t lc, volatile unsigned int *flags);
 
 /**
  * Handles the signing flow, including updating the display, for the 'simple transfer with memo'

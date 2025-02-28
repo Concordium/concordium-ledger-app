@@ -19,6 +19,9 @@ bool hasCommissionRate() {
 
 void handleCommissionRates(uint8_t *cdata, uint8_t dataLength) {
     if (ctx_conf_baker->hasTransactionFeeCommission) {
+        if (dataLength < 4) {
+            THROW(ERROR_INVALID_TRANSACTION);
+        }
         uint32_t rate = U4BE(cdata, 0);
         fractionToPercentageDisplay(
             ctx_conf_baker->commissionRates.transactionFeeCommissionRate,
@@ -30,6 +33,9 @@ void handleCommissionRates(uint8_t *cdata, uint8_t dataLength) {
     }
 
     if (ctx_conf_baker->hasBakingRewardCommission) {
+        if (dataLength < 4) {
+            THROW(ERROR_INVALID_TRANSACTION);
+        }
         uint32_t rate = U4BE(cdata, 0);
         fractionToPercentageDisplay(
             ctx_conf_baker->commissionRates.bakingRewardCommissionRate,
@@ -41,6 +47,9 @@ void handleCommissionRates(uint8_t *cdata, uint8_t dataLength) {
     }
 
     if (ctx_conf_baker->hasFinalizationRewardCommission) {
+        if (dataLength < 4) {
+            THROW(ERROR_INVALID_TRANSACTION);
+        }
         uint32_t rate = U4BE(cdata, 0);
         fractionToPercentageDisplay(
             ctx_conf_baker->commissionRates.finalizationRewardCommissionRate,
@@ -68,21 +77,27 @@ void handleSignConfigureBaker(uint8_t *cdata,
                               volatile unsigned int *flags,
                               bool isInitialCall) {
     if (P1_INITIAL == p1 && isInitialCall) {
-        cx_sha256_init(&tx_state->hash);
-        size_t offset = parseKeyDerivationPath(cdata);
+        if (cx_sha256_init(&tx_state->hash) != CX_SHA256) {
+            THROW(ERROR_FAILED_CX_OPERATION);
+        }
+        size_t offset = parseKeyDerivationPath(cdata, dataLength);
         if (offset > dataLength) {
-            THROW(ERROR_BUFFER_OVERFLOW);  // Ensure safe access
+            THROW(ERROR_INVALID_TRANSACTION);  // Ensure safe access
         }
         cdata += offset;
-
-        offset = hashAccountTransactionHeaderAndKind(cdata, CONFIGURE_BAKER);
+        uint8_t remainingDataLength = dataLength - offset;
+        offset = hashAccountTransactionHeaderAndKind(cdata, remainingDataLength, CONFIGURE_BAKER);
         if (offset > dataLength) {
-            THROW(ERROR_BUFFER_OVERFLOW);  // Ensure safe access
+            THROW(ERROR_INVALID_TRANSACTION);  // Ensure safe access
         }
         cdata += offset;
+        remainingDataLength -= offset;
         ctx_conf_baker->firstDisplay = true;
 
         // The initial 2 bytes tells us the fields we are receiving.
+        if (remainingDataLength < 2) {
+            THROW(ERROR_INVALID_TRANSACTION);
+        }
         updateHash((cx_hash_t *)&tx_state->hash, cdata, 2);
         uint16_t bitmap = U2BE(cdata, 0);
 
@@ -118,6 +133,9 @@ void handleSignConfigureBaker(uint8_t *cdata,
         int lengthCheck = dataLength;
 
         if (ctx_conf_baker->hasCapital) {
+            if (lengthCheck < 8) {
+                THROW(ERROR_INVALID_TRANSACTION);
+            }
             uint64_t capitalAmount = U8BE(cdata, 0);
             if (capitalAmount == 0) {
                 ctx_conf_baker->capitalRestakeDelegation.stopBaking = true;
@@ -133,6 +151,9 @@ void handleSignConfigureBaker(uint8_t *cdata,
         }
 
         if (ctx_conf_baker->hasRestakeEarnings) {
+            if (lengthCheck < 1) {
+                THROW(ERROR_INVALID_TRANSACTION);
+            }
             uint8_t restake = cdata[0];
             updateHash((cx_hash_t *)&tx_state->hash, cdata, 1);
             cdata += 1;
@@ -147,6 +168,9 @@ void handleSignConfigureBaker(uint8_t *cdata,
         }
 
         if (ctx_conf_baker->hasOpenForDelegation) {
+            if (lengthCheck < 1) {
+                THROW(ERROR_INVALID_TRANSACTION);
+            }
             uint8_t openForDelegation = cdata[0];
             updateHash((cx_hash_t *)&tx_state->hash, cdata, 1);
             cdata += 1;

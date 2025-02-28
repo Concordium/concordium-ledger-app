@@ -20,7 +20,9 @@ void buildAndSignTransactionHash() {
 
     uint8_t signedHash[64];
     sign(tx_state->transactionHash, signedHash);
-
+    if (sizeof(signedHash) > sizeof(G_io_apdu_buffer)) {
+        THROW(ERROR_BUFFER_OVERFLOW);
+    }
     memmove(G_io_apdu_buffer, signedHash, sizeof(signedHash));
     sendSuccess(sizeof(signedHash));
 }
@@ -46,15 +48,27 @@ void readCborInitial(uint8_t *cdata, uint8_t dataLength) {
         // shortCount is the length, no extra bytes are used.
         length = shortCount;
     } else if (shortCount == CBOR_ONE_BYTE_LENGTH) {
+        if (dataLength < 1) {
+            THROW(ERROR_BUFFER_OVERFLOW);
+        }
         length = cdata[0];
         sizeLength = 1;
     } else if (shortCount == CBOR_TWO_BYTE_LENGTH) {
+        if (dataLength < 2) {
+            THROW(ERROR_BUFFER_OVERFLOW);
+        }
         length = U2BE(cdata, 0);
         sizeLength = 2;
     } else if (shortCount == CBOR_FOUR_BYTE_LENGTH) {
+        if (dataLength < 4) {
+            THROW(ERROR_BUFFER_OVERFLOW);
+        }
         length = U4BE(cdata, 0);
         sizeLength = 4;
     } else if (shortCount == CBOR_EIGHT_BYTE_LENGTH) {
+        if (dataLength < 8) {
+            THROW(ERROR_BUFFER_OVERFLOW);
+        }
         length = U8BE(cdata, 0);
         sizeLength = 8;
     } else if (shortCount == CBOR_INDEFINITE_LENGTH) {

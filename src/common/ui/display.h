@@ -14,7 +14,7 @@ void uiExportPrivateKey(volatile unsigned int *flags);
 #ifdef HAVE_BAGL
 // Define the dynamic UI elements. These are required as the majority of
 // the transaction elements are optional, so the UI has to be dynamically set.
-extern const ux_flow_step_t *ux_sign_configure_baker_first[8];
+extern const ux_flow_step_t *ux_sign_configure_baker_first[10];
 extern const ux_flow_step_t *ux_sign_configure_baker_url[6];
 extern const ux_flow_step_t *ux_sign_configure_baker_commission[9];
 #endif

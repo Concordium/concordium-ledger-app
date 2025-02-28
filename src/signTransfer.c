@@ -9,10 +9,16 @@ static tx_state_t *tx_state = &global_tx_state;
 #define P1_MEMO              0x02
 #define P1_AMOUNT            0x03
 
-void handleSignTransfer(uint8_t *cdata, volatile unsigned int *flags) {
-    cdata += handleHeaderAndToAddress(cdata, TRANSFER, ctx->displayStr, sizeof(ctx->displayStr));
+void handleSignTransfer(uint8_t *cdata, uint8_t lc, volatile unsigned int *flags) {
+    uint8_t offset =
+        handleHeaderAndToAddress(cdata, lc, TRANSFER, ctx->displayStr, sizeof(ctx->displayStr));
+    cdata += offset;
+    uint8_t remainingDataLength = lc - offset;
 
     // Build display value of the amount to transfer, and also add the bytes to the hash.
+    if (remainingDataLength < 8) {
+        THROW(ERROR_BUFFER_OVERFLOW);
+    }
     uint64_t amount = U8BE(cdata, 0);
     amountToGtuDisplay(ctx->displayAmount, sizeof(ctx->displayAmount), amount);
     updateHash((cx_hash_t *)&tx_state->hash, cdata, 8);
@@ -37,14 +43,19 @@ void handleSignTransferWithMemo(uint8_t *cdata,
     if (isInitialCall) {
         ctx->state = TX_TRANSFER_INITIAL;
     }
-
+    uint8_t remainingDataLength = dataLength;
     if (p1 == P1_INITIAL_WITH_MEMO && ctx->state == TX_TRANSFER_INITIAL) {
-        cdata += handleHeaderAndToAddress(cdata,
-                                          TRANSFER_WITH_MEMO,
-                                          ctx->displayStr,
-                                          sizeof(ctx->displayStr));
-
+        uint8_t offset = handleHeaderAndToAddress(cdata,
+                                                  remainingDataLength,
+                                                  TRANSFER_WITH_MEMO,
+                                                  ctx->displayStr,
+                                                  sizeof(ctx->displayStr));
+        cdata += offset;
+        remainingDataLength -= offset;
         // hash the memo length
+        if (remainingDataLength < 2) {
+            THROW(ERROR_BUFFER_OVERFLOW);
+        }
         memo_ctx->cborLength = U2BE(cdata, 0);
         if (memo_ctx->cborLength > MAX_MEMO_SIZE) {
             THROW(ERROR_INVALID_PARAM);
@@ -77,6 +88,9 @@ void handleSignTransferWithMemo(uint8_t *cdata,
         finishMemo();
     } else if (p1 == P1_AMOUNT && ctx->state == TX_TRANSFER_AMOUNT) {
         // Build display value of the amount to transfer, and also add the bytes to the hash.
+        if (remainingDataLength < 8) {
+            THROW(ERROR_BUFFER_OVERFLOW);
+        }
         uint64_t amount = U8BE(cdata, 0);
         amountToGtuDisplay(ctx->displayAmount, sizeof(ctx->displayAmount), amount);
         updateHash((cx_hash_t *)&tx_state->hash, cdata, 8);

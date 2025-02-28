@@ -94,7 +94,6 @@ size_t decimalNumberToDisplay(uint8_t *dst,
     if (dstLength < 2) {
         THROW(ERROR_BUFFER_OVERFLOW);
     }
-
     // A zero amount should be displayed as a plain '0'.
     if (amount == 0) {
         dst[0] = '0';
@@ -174,6 +173,9 @@ size_t fractionToPercentageDisplay(uint8_t *dst, size_t dstLength, uint32_t numb
     }
 
     size_t offset = decimalNumberToDisplay(dst, dstLength, number, 1000, 3);
+    if (dstLength < offset + 2) {
+        THROW(ERROR_BUFFER_OVERFLOW);
+    }
     dst[offset] = '%';
     dst[offset + 1] = '\0';
     return offset + 2;
@@ -185,7 +187,7 @@ size_t fractionToPercentageDisplay(uint8_t *dst, size_t dstLength, uint32_t numb
  * to relate to in the GUI.
  */
 size_t amountToGtuDisplay(uint8_t *dst, size_t dstLength, uint64_t microGtuAmount) {
-    if (dstLength < 4) return 0;  // Prevent overflow
+    if (dstLength < 5) return 0;  // Prevent overflow
     memmove(dst, "CCD ", 4);
     size_t offset = decimalNumberToDisplay(dst + 4, dstLength, microGtuAmount, 1000000, 6) + 4;
     dst[offset] = '\0';

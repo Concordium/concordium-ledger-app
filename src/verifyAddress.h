@@ -1,6 +1,6 @@
 #pragma once
 
-void handleVerifyAddress(uint8_t *cdata, uint8_t p1, volatile unsigned int *flags);
+void handleVerifyAddress(uint8_t *cdata, uint8_t p1, uint8_t lc, volatile unsigned int *flags);
 
 typedef struct {
     uint8_t display[21];

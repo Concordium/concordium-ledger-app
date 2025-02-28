@@ -5,12 +5,19 @@ static keyDerivationPath_t *keyPath = &path;
 static accountSender_t *accountSender = &global_account_sender;
 static const uint32_t HARDENED_OFFSET = 0x80000000;
 
-int parseKeyDerivationPath(uint8_t *cdata) {
+int parseKeyDerivationPath(uint8_t *cdata, uint8_t dataLength) {
+    if (dataLength < 1) {
+        THROW(ERROR_INVALID_PATH);
+    }
     keyPath->pathLength = cdata[0];
 
     // Concordium does not use key paths with a length greater than 8,
     // so if that was received, then throw an error.
     if (keyPath->pathLength > 8) {
+        THROW(ERROR_INVALID_PATH);
+    }
+
+    if (dataLength < 1 + (4 * keyPath->pathLength)) {
         THROW(ERROR_INVALID_PATH);
     }
 
@@ -31,7 +38,10 @@ int parseKeyDerivationPath(uint8_t *cdata) {
  * Use hashAccountTransactionHeaderAndKind or hashUpdateHeaderAndType
  * instead of using this method directly.
  */
-int hashHeaderAndType(uint8_t *cdata, uint8_t headerLength, uint8_t validType) {
+int hashHeaderAndType(uint8_t *cdata, uint8_t dataLength, uint8_t headerLength, uint8_t validType) {
+    if (dataLength < headerLength + 1) {
+        THROW(ERROR_INVALID_TRANSACTION);
+    }
     updateHash((cx_hash_t *)&tx_state->hash, cdata, headerLength);
     cdata += headerLength;
 
@@ -53,7 +63,9 @@ int hashHeaderAndType(uint8_t *cdata, uint8_t headerLength, uint8_t validType) {
  * is parsed and saved in a global variable, so that it is available to be displayed
  * for all account transactions.
  */
-int hashAccountTransactionHeaderAndKind(uint8_t *cdata, uint8_t validTransactionKind) {
+int hashAccountTransactionHeaderAndKind(uint8_t *cdata,
+                                        uint8_t dataLength,
+                                        uint8_t validTransactionKind) {
     // Parse the account sender address from the transaction header, so it can be shown.
     size_t outputSize = sizeof(accountSender->sender);
     if (base58check_encode(cdata, 32, accountSender->sender, &outputSize) == -1) {
@@ -62,7 +74,10 @@ int hashAccountTransactionHeaderAndKind(uint8_t *cdata, uint8_t validTransaction
     }
     accountSender->sender[55] = '\0';
 
-    return hashHeaderAndType(cdata, ACCOUNT_TRANSACTION_HEADER_LENGTH, validTransactionKind);
+    return hashHeaderAndType(cdata,
+                             dataLength,
+                             ACCOUNT_TRANSACTION_HEADER_LENGTH,
+                             validTransactionKind);
 }
 
 /**
@@ -70,27 +85,35 @@ int hashAccountTransactionHeaderAndKind(uint8_t *cdata, uint8_t validTransaction
  * type is verified to have the supplied value to prevent processing
  * invalid transactions.
  */
-int hashUpdateHeaderAndType(uint8_t *cdata, uint8_t validUpdateType) {
-    return hashHeaderAndType(cdata, UPDATE_HEADER_LENGTH, validUpdateType);
+int hashUpdateHeaderAndType(uint8_t *cdata, uint8_t dataLength, uint8_t validUpdateType) {
+    return hashHeaderAndType(cdata, dataLength, UPDATE_HEADER_LENGTH, validUpdateType);
 }
 
 int handleHeaderAndToAddress(uint8_t *cdata,
+                             uint8_t dataLength,
                              uint8_t kind,
                              uint8_t *recipientDst,
                              size_t recipientSize) {
     // Parse the key derivation path, which should always be the first thing received
     // in a command to the Ledger application.
-    int keyPathLength = parseKeyDerivationPath(cdata);
+    int keyPathLength = parseKeyDerivationPath(cdata, dataLength);
     cdata += keyPathLength;
+    uint8_t remainingDataLength = dataLength - keyPathLength;
 
     // Initialize the hash that will be the hash of the whole transaction, which is what will be
     // signed if the user approves.
-    cx_sha256_init(&tx_state->hash);
-    int headerLength = hashAccountTransactionHeaderAndKind(cdata, kind);
+    if (cx_sha256_init(&tx_state->hash) != CX_SHA256) {
+        THROW(ERROR_FAILED_CX_OPERATION);
+    }
+    int headerLength = hashAccountTransactionHeaderAndKind(cdata, remainingDataLength, kind);
     cdata += headerLength;
+    remainingDataLength -= headerLength;
 
     // Extract the recipient address and add to the hash.
     uint8_t toAddress[32];
+    if (remainingDataLength < 32) {
+        THROW(ERROR_INVALID_TRANSACTION);
+    }
     memmove(toAddress, cdata, 32);
     updateHash((cx_hash_t *)&tx_state->hash, toAddress, 32);
 

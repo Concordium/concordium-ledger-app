@@ -11,15 +11,15 @@ int handler(uint8_t INS,
     switch (INS) {
         case INS_GET_PUBLIC_KEY:
             LEDGER_ASSERT(cdata != NULL, "NULL cdata");
-            handleGetPublicKey(cdata, p1, p2, flags);
+            handleGetPublicKey(cdata, p1, p2, lc, flags);
             break;
         case INS_VERIFY_ADDRESS:
             LEDGER_ASSERT(cdata != NULL, "NULL cdata");
-            handleVerifyAddress(cdata, p1, flags);
+            handleVerifyAddress(cdata, p1, lc, flags);
             break;
         case INS_SIGN_TRANSFER:
             LEDGER_ASSERT(cdata != NULL, "NULL cdata");
-            handleSignTransfer(cdata, flags);
+            handleSignTransfer(cdata, lc, flags);
             break;
         case INS_SIGN_TRANSFER_WITH_MEMO:
             LEDGER_ASSERT(cdata != NULL, "NULL cdata");
@@ -27,7 +27,7 @@ int handler(uint8_t INS,
             break;
         case INS_SIGN_TRANSFER_WITH_SCHEDULE:
             LEDGER_ASSERT(cdata != NULL, "NULL cdata");
-            handleSignTransferWithSchedule(cdata, p1, flags, isInitialCall);
+            handleSignTransferWithSchedule(cdata, p1, lc, flags, isInitialCall);
             break;
         case INS_SIGN_TRANSFER_WITH_SCHEDULE_AND_MEMO:
             LEDGER_ASSERT(cdata != NULL, "NULL cdata");
@@ -39,7 +39,7 @@ int handler(uint8_t INS,
             break;
         case INS_EXPORT_PRIVATE_KEY:
             LEDGER_ASSERT(cdata != NULL, "NULL cdata");
-            handleExportPrivateKey(cdata, p1, p2, flags);
+            handleExportPrivateKey(cdata, p1, p2, lc, flags);
             break;
         case INS_TRANSFER_TO_PUBLIC:
             LEDGER_ASSERT(cdata != NULL, "NULL cdata");
@@ -51,7 +51,7 @@ int handler(uint8_t INS,
             break;
         case INS_PUBLIC_INFO_FOR_IP:
             LEDGER_ASSERT(cdata != NULL, "NULL cdata");
-            handleSignPublicInformationForIp(cdata, p1, flags, isInitialCall);
+            handleSignPublicInformationForIp(cdata, p1, lc, flags, isInitialCall);
             break;
         case INS_CONFIGURE_BAKER:
             LEDGER_ASSERT(cdata != NULL, "NULL cdata");

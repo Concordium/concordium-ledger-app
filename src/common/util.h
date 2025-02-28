@@ -78,7 +78,7 @@ void getPublicKey(uint8_t *publicKeyArray);
  * differ in length.
  * @return number of bytes received in the key derivation path
  */
-int parseKeyDerivationPath(uint8_t *cdata);
+int parseKeyDerivationPath(uint8_t *cdata, uint8_t dataLength);
 
 /**
  * Signs the input with the private key for the loaded key derivation path.
@@ -144,30 +144,36 @@ void getIdentityAccountDisplayNewPath(uint8_t *dst,
  * Adds the account transaction header and transaction kind to the current
  * transaction hash.
  * @param cdata the incoming command data pointing to the start of the account transaction header
+ * @param dataLength the length of the incoming command data
  * @param validTransactionKind the expected transaction kind, used to validate that the transaction
  * is valid
  * @return the count of hashed bytes from cdata
  */
-int hashAccountTransactionHeaderAndKind(uint8_t *cdata, uint8_t validTransactionKind);
+int hashAccountTransactionHeaderAndKind(uint8_t *cdata,
+                                        uint8_t dataLength,
+                                        uint8_t validTransactionKind);
 
 /**
  * Adds the update header and update type to the current transaction hash.
  * @param cdata the incoming command data pointing to the start of the update header
+ * @param dataLength the length of the incoming command data
  * @param validUpdateType the expected update type used to validate that the transaction is valid
  * @return the count of hashed bytes from cdata
  */
-int hashUpdateHeaderAndType(uint8_t *cdata, uint8_t validUpdateType);
+int hashUpdateHeaderAndType(uint8_t *cdata, uint8_t dataLength, uint8_t validUpdateType);
 
 /**
  * Adds the account transaction header and the recipient address to the transaction hash, and
  * writes the base58 encoded recipient address for later display.
  * @param cdata the incoming command data pointing to the start of the input, i.e. with the key path
  * at the start
+ * @param dataLength the length of the incoming command data
  * @param kind the transaction type
  * @param recipientDst the destination where to write the base58 encoded recipient address
  * @param recipientSize the size of the recipient destination
  */
 int handleHeaderAndToAddress(uint8_t *cdata,
+                             uint8_t dataLength,
                              uint8_t kind,
                              uint8_t *recipientDst,
                              size_t recipientSize);

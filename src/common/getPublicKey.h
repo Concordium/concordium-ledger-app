@@ -8,7 +8,11 @@
  * @param p2 use 0x00 to only export the public-key, and use 0x01 to also
  * export the signature on the public-key signed with the corresponding private-key.
  */
-void handleGetPublicKey(uint8_t *cdata, uint8_t p1, uint8_t p2, volatile unsigned int *flags);
+void handleGetPublicKey(uint8_t *cdata,
+                        uint8_t p1,
+                        uint8_t p2,
+                        uint8_t lc,
+                        volatile unsigned int *flags);
 void sendPublicKey(bool compare);
 
 typedef struct {

@@ -92,7 +92,7 @@ int secondsToTm(long long t, tm *tm) {
 int prefixWithZero(uint8_t *dst, size_t dstLength, int value) {
     if (value < 10) {
         if (dstLength < 1) {
-            return -1;  // Prevent overflow
+            THROW(ERROR_BUFFER_OVERFLOW);
         }
         memmove(dst, "0", 1);
         return 1;
@@ -102,6 +102,12 @@ int prefixWithZero(uint8_t *dst, size_t dstLength, int value) {
 
 int timeToDisplayText(tm time, uint8_t *dst, size_t dstLength) {
     int offset = 0;
+
+    // Check if we have enough space for full timestamp
+    // Format: "YYYY-MM-DD HH:MM:SS" (19 chars + null terminator)
+    if (dstLength < 20) {
+        THROW(ERROR_BUFFER_OVERFLOW);
+    }
 
     offset += numberToText(dst, dstLength, time.tm_year + 1900);
 
