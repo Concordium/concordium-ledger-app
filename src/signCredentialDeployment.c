@@ -240,16 +240,22 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer,
         if (remainingDataLength < 48) {
             THROW(ERROR_BUFFER_OVERFLOW);
         }
+        if (format_hex(dataBuffer, 48, ctx->regIdCred, sizeof(ctx->regIdCred)) == -1) {
+            THROW(ERROR_BUFFER_OVERFLOW);
+        }
+        ctx->regIdCred[48 * 2] = '\0';
         updateHash((cx_hash_t *)&tx_state->hash, dataBuffer, 48);
         dataBuffer += 48;
         remainingDataLength -= 48;
 
         // Parse identity provider index.
-        // We do not show the identity provider id, because it is infeasible for the user to
-        // validate it, and there are no known reasonable attacks made possible by replacing this.
         if (remainingDataLength < 4) {
             THROW(ERROR_BUFFER_OVERFLOW);
         }
+        uint64_t identityProviderIndex = U4BE(dataBuffer, 0);
+        numberToText((uint8_t *)ctx->identityProviderIndex,
+                     sizeof(ctx->identityProviderIndex),
+                     identityProviderIndex);
         updateHash((cx_hash_t *)&tx_state->hash, dataBuffer, 4);
         dataBuffer += 4;
         remainingDataLength -= 4;
@@ -287,23 +293,30 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer,
         }
 
         // Parse ArIdentity
-        // We do not show the AR identity id, because it is infeasible for the user to validate it,
-        // and there are no known reasonable attacks made possible by replacing this.
         if (lc < 4) {
             THROW(ERROR_BUFFER_OVERFLOW);
         }
+        if (format_hex(dataBuffer, 4, ctx->arIdentity, sizeof(ctx->arIdentity)) == -1) {
+            THROW(ERROR_BUFFER_OVERFLOW);
+        }
+        ctx->arIdentity[8] = '\0';
         updateHash((cx_hash_t *)&tx_state->hash, dataBuffer, 4);
         dataBuffer += 4;
         remainingDataLength -= 4;
 
         // Parse enc_id_cred_pub_share
-        // We do not show encrypted shares, as they are not possible for a user
-        // to validate.
         uint8_t encIdCredPubShare[96];
         if (remainingDataLength < 96) {
             THROW(ERROR_BUFFER_OVERFLOW);
         }
         memmove(encIdCredPubShare, dataBuffer, 96);
+        if (format_hex(encIdCredPubShare,
+                       96,
+                       ctx->encIdCredPubShare,
+                       sizeof(ctx->encIdCredPubShare)) == -1) {
+            THROW(ERROR_BUFFER_OVERFLOW);
+        }
+        ctx->encIdCredPubShare[96 * 2] = '\0';
         updateHash((cx_hash_t *)&tx_state->hash, encIdCredPubShare, 96);
 
         if (ctx->anonymityRevocationListLength == 1) {
