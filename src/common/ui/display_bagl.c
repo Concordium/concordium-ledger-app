@@ -440,15 +440,36 @@ UX_STEP_CB(ux_credential_deployment_threshold_flow_1_step,
            {"AR threshold",
             (char *)global.signCredentialDeploymentContext.anonymityRevocationThreshold});
 
-UX_STEP_NOCB(ux_sign_credential_deployment_0_step,
+UX_STEP_NOCB(ux_sign_credential_deployment_address_step,
              bnnn_paging,
              {.title = "Address",
               .text = (char *)global.signCredentialDeploymentContext.accountAddress});
-UX_STEP_CB(ux_sign_credential_deployment_1_step,
+
+UX_STEP_NOCB(ux_sign_credential_deployment_1_step,
+             bnnn_paging,
+             {.title = "RegIdCred",
+              .text = (char *)global.signCredentialDeploymentContext.regIdCred});
+
+UX_STEP_NOCB(ux_sign_credential_deployment_2_step,
+             bnnn_paging,
+             {.title = "Identity provider",
+              .text = (char *)global.signCredentialDeploymentContext.identityProviderIndex});
+
+UX_STEP_NOCB(ux_sign_credential_deployment_3_step,
+             bnnn_paging,
+             {.title = "AR identity",
+              .text = (char *)global.signCredentialDeploymentContext.arIdentity});
+
+UX_STEP_NOCB(ux_sign_credential_deployment_4_step,
+             bnnn_paging,
+             {.title = "EncryptedShare",
+              .text = (char *)global.signCredentialDeploymentContext.encIdCredPubShare});
+
+UX_STEP_CB(ux_sign_credential_deployment_approve_step,
            pnn,
            buildAndSignTransactionHash(),
            {&C_icon_validate_14, "Sign", "details"});
-UX_STEP_CB(ux_sign_credential_deployment_2_step,
+UX_STEP_CB(ux_sign_credential_deployment_reject_step,
            pnn,
            sendUserRejection(),
            {&C_icon_crossmark, "Decline to", "sign details"});
@@ -458,17 +479,25 @@ UX_FLOW(ux_sign_credential_deployment_existing_with_intro,
         &ux_credential_deployment_verification_key_flow_0_step,
         &ux_credential_deployment_threshold_flow_0_step,
         &ux_credential_deployment_threshold_flow_1_step,
-        &ux_sign_credential_deployment_0_step,
+        &ux_sign_credential_deployment_address_step,
         &ux_sign_credential_deployment_1_step,
-        &ux_sign_credential_deployment_2_step);
+        &ux_sign_credential_deployment_2_step,
+        &ux_sign_credential_deployment_3_step,
+        &ux_sign_credential_deployment_4_step,
+        &ux_sign_credential_deployment_approve_step,
+        &ux_sign_credential_deployment_reject_step);
 
 UX_FLOW(ux_sign_credential_deployment_existing,
         &ux_credential_deployment_verification_key_flow_0_step,
         &ux_credential_deployment_threshold_flow_0_step,
         &ux_credential_deployment_threshold_flow_1_step,
-        &ux_sign_credential_deployment_0_step,
+        &ux_sign_credential_deployment_address_step,
         &ux_sign_credential_deployment_1_step,
-        &ux_sign_credential_deployment_2_step);
+        &ux_sign_credential_deployment_2_step,
+        &ux_sign_credential_deployment_3_step,
+        &ux_sign_credential_deployment_4_step,
+        &ux_sign_credential_deployment_approve_step,
+        &ux_sign_credential_deployment_reject_step);
 
 UX_FLOW(ux_sign_credential_deployment_new_with_intro,
         &ux_credential_deployment_review_details,
@@ -476,14 +505,22 @@ UX_FLOW(ux_sign_credential_deployment_new_with_intro,
         &ux_credential_deployment_threshold_flow_0_step,
         &ux_credential_deployment_threshold_flow_1_step,
         &ux_sign_credential_deployment_1_step,
-        &ux_sign_credential_deployment_2_step);
+        &ux_sign_credential_deployment_2_step,
+        &ux_sign_credential_deployment_3_step,
+        &ux_sign_credential_deployment_4_step,
+        &ux_sign_credential_deployment_approve_step,
+        &ux_sign_credential_deployment_reject_step);
 
 UX_FLOW(ux_sign_credential_deployment_new,
         &ux_credential_deployment_verification_key_flow_0_step,
         &ux_credential_deployment_threshold_flow_0_step,
         &ux_credential_deployment_threshold_flow_1_step,
         &ux_sign_credential_deployment_1_step,
-        &ux_sign_credential_deployment_2_step);
+        &ux_sign_credential_deployment_2_step,
+        &ux_sign_credential_deployment_3_step,
+        &ux_sign_credential_deployment_4_step,
+        &ux_sign_credential_deployment_approve_step,
+        &ux_sign_credential_deployment_reject_step);
 
 UX_STEP_CB(ux_sign_credential_update_id_0_step,
            bnnn_paging,
