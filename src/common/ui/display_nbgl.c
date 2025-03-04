@@ -548,9 +548,21 @@ void uiSignCredentialDeploymentNewIntroDisplay(void) {
     pairs[pairIndex].item = "Signature threshold";
     pairs[pairIndex].value = (char *)global.signCredentialDeploymentContext.signatureThreshold;
     pairIndex++;
+    pairs[pairIndex].item = "RegIdCred";
+    pairs[pairIndex].value = (char *)global.signCredentialDeploymentContext.regIdCred;
+    pairIndex++;
+    pairs[pairIndex].item = "Identity provider index";
+    pairs[pairIndex].value = (char *)global.signCredentialDeploymentContext.identityProviderIndex;
+    pairIndex++;
     pairs[pairIndex].item = "AR threshold";
     pairs[pairIndex].value =
         (char *)global.signCredentialDeploymentContext.anonymityRevocationThreshold;
+    pairIndex++;
+    pairs[pairIndex].item = "AR identity";
+    pairs[pairIndex].value = (char *)global.signCredentialDeploymentContext.arIdentity;
+    pairIndex++;
+    pairs[pairIndex].item = "EncIdCredPubShare";
+    pairs[pairIndex].value = (char *)global.signCredentialDeploymentContext.encIdCredPubShare;
     pairIndex++;
 
     // Create the page content
@@ -579,9 +591,21 @@ void uiSignCredentialDeploymentExistingIntroDisplay(void) {
     pairs[pairIndex].item = "Signature threshold";
     pairs[pairIndex].value = (char *)global.signCredentialDeploymentContext.signatureThreshold;
     pairIndex++;
+    pairs[pairIndex].item = "RegIdCred";
+    pairs[pairIndex].value = (char *)global.signCredentialDeploymentContext.regIdCred;
+    pairIndex++;
+    pairs[pairIndex].item = "Identity provider index";
+    pairs[pairIndex].value = (char *)global.signCredentialDeploymentContext.identityProviderIndex;
+    pairIndex++;
     pairs[pairIndex].item = "AR threshold";
     pairs[pairIndex].value =
         (char *)global.signCredentialDeploymentContext.anonymityRevocationThreshold;
+    pairIndex++;
+    pairs[pairIndex].item = "AR identity";
+    pairs[pairIndex].value = (char *)global.signCredentialDeploymentContext.arIdentity;
+    pairIndex++;
+    pairs[pairIndex].item = "EncIdCredPubShare";
+    pairs[pairIndex].value = (char *)global.signCredentialDeploymentContext.encIdCredPubShare;
     pairIndex++;
     pairs[pairIndex].item = "Address";
     pairs[pairIndex].value = (char *)global.signCredentialDeploymentContext.accountAddress;
@@ -613,9 +637,21 @@ void uiSignCredentialDeploymentNewDisplay(void) {
     pairs[pairIndex].item = "Signature threshold";
     pairs[pairIndex].value = (char *)global.signCredentialDeploymentContext.signatureThreshold;
     pairIndex++;
+    pairs[pairIndex].item = "RegIdCred";
+    pairs[pairIndex].value = (char *)global.signCredentialDeploymentContext.regIdCred;
+    pairIndex++;
+    pairs[pairIndex].item = "Identity provider index";
+    pairs[pairIndex].value = (char *)global.signCredentialDeploymentContext.identityProviderIndex;
+    pairIndex++;
     pairs[pairIndex].item = "AR threshold";
     pairs[pairIndex].value =
         (char *)global.signCredentialDeploymentContext.anonymityRevocationThreshold;
+    pairIndex++;
+    pairs[pairIndex].item = "AR identity";
+    pairs[pairIndex].value = (char *)global.signCredentialDeploymentContext.arIdentity;
+    pairIndex++;
+    pairs[pairIndex].item = "EncIdCredPubShare";
+    pairs[pairIndex].value = (char *)global.signCredentialDeploymentContext.encIdCredPubShare;
     pairIndex++;
 
     // Create the page content
@@ -644,9 +680,21 @@ void uiSignCredentialDeploymentExistingDisplay(void) {
     pairs[pairIndex].item = "Signature threshold";
     pairs[pairIndex].value = (char *)global.signCredentialDeploymentContext.signatureThreshold;
     pairIndex++;
+    pairs[pairIndex].item = "RegIdCred";
+    pairs[pairIndex].value = (char *)global.signCredentialDeploymentContext.regIdCred;
+    pairIndex++;
+    pairs[pairIndex].item = "Identity provider index";
+    pairs[pairIndex].value = global.signCredentialDeploymentContext.identityProviderIndex;
+    pairIndex++;
     pairs[pairIndex].item = "AR threshold";
     pairs[pairIndex].value =
         (char *)global.signCredentialDeploymentContext.anonymityRevocationThreshold;
+    pairIndex++;
+    pairs[pairIndex].item = "AR identity";
+    pairs[pairIndex].value = (char *)global.signCredentialDeploymentContext.arIdentity;
+    pairIndex++;
+    pairs[pairIndex].item = "EncIdCredPubShare";
+    pairs[pairIndex].value = (char *)global.signCredentialDeploymentContext.encIdCredPubShare;
     pairIndex++;
     pairs[pairIndex].item = "Address";
     pairs[pairIndex].value = (char *)global.signCredentialDeploymentContext.accountAddress;
