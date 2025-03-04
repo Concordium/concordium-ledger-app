@@ -19,6 +19,7 @@
 #include <base58.h>
 #include <glyphs.h>
 #include <limits.h>
+#include <format.h>
 
 #ifdef HAVE_NBGL
 #include <nbgl_use_case.h>

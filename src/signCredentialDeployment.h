@@ -55,6 +55,11 @@ typedef struct {
     uint8_t anonymityRevocationThreshold[13];
     uint16_t anonymityRevocationListLength;
 
+    char regIdCred[48 * 2 + 1];
+    char identityProviderIndex[4 * 2 + 1];
+    char arIdentity[4 * 2 + 1];
+    char encIdCredPubShare[96 * 2 + 1];
+
     uint8_t validTo[8];
     uint8_t createdAt[8];
 
