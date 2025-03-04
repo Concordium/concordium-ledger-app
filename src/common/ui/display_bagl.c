@@ -745,10 +745,14 @@ void startTransferDisplay(bool displayMemo, volatile unsigned int *flags) {
 UX_STEP_NOCB(ux_sign_transfer_to_public_1_step,
              bnnn_paging,
              {.title = "Unshield amount", .text = (char *)global.signTransferToPublic.amount});
+UX_STEP_NOCB(ux_sign_transfer_to_public_2_step,
+             bnnn_paging,
+             {.title = "Recipient", .text = (char *)global.signTransferToPublic.recipientAddress});
 UX_FLOW(ux_sign_transfer_to_public,
         &ux_sign_flow_shared_review,
         &ux_sign_flow_account_sender_view,
         &ux_sign_transfer_to_public_1_step,
+        &ux_sign_transfer_to_public_2_step,
         &ux_sign_flow_shared_sign,
         &ux_sign_flow_shared_decline);
 

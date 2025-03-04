@@ -972,6 +972,9 @@ void uiSignTransferToPublicDisplay(volatile unsigned int *flags) {
     pairs[pairIndex].item = "Unshield amount";
     pairs[pairIndex].value = (char *)global.signTransferToPublic.amount;
     pairIndex++;
+    pairs[pairIndex].item = "Recipient";
+    pairs[pairIndex].value = (char *)global.signTransferToPublic.recipientAddress;
+    pairIndex++;
 
     // Create the page content
     nbgl_contentTagValueList_t content;
