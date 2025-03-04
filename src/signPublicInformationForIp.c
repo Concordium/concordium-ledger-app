@@ -1,4 +1,5 @@
 #include "globals.h"
+#include "signPublicInformationForIp.h"
 
 static signPublicInformationForIp_t *ctx = &global.signPublicInformationForIp;
 static tx_state_t *tx_state = &global_tx_state;
@@ -24,20 +25,26 @@ void handleSignPublicInformationForIp(uint8_t *cdata,
         if (cx_sha256_init(&tx_state->hash) != CX_SHA256) {
             THROW(ERROR_FAILED_CX_OPERATION);
         }
-
-        // We do not display IdCredPub as it is infeasible for the user to verify its correctness,
-        // and maliciously replacing this value cannot give an attacker control of an account.
+        // Parse IdCredPub
         if (remainingDataLength < 48) {
             THROW(ERROR_BUFFER_OVERFLOW);
         }
+        if (format_hex(cdata, 48, ctx->idCredPub, sizeof(ctx->idCredPub)) == -1) {
+            THROW(ERROR_BUFFER_OVERFLOW);
+        }
+        ctx->idCredPub[48 * 2] = '\0';
         updateHash((cx_hash_t *)&tx_state->hash, cdata, 48);
         cdata += 48;
         remainingDataLength -= 48;
-        // We do not display CredId as it is infeasible for the user to verify its correctness,
-        // and maliciously replacing this value cannot give an attacker control of an account.
+
+        // Parse CredId
         if (remainingDataLength < 48) {
             THROW(ERROR_BUFFER_OVERFLOW);
         }
+        if (format_hex(cdata, 48, ctx->credId, sizeof(ctx->credId)) == -1) {
+            THROW(ERROR_BUFFER_OVERFLOW);
+        }
+        ctx->credId[48 * 2] = '\0';
         updateHash((cx_hash_t *)&tx_state->hash, cdata, 48);
         cdata += 48;
         remainingDataLength -= 48;
@@ -56,23 +63,26 @@ void handleSignPublicInformationForIp(uint8_t *cdata,
         if (ctx->publicKeysLength <= 0) {
             THROW(ERROR_INVALID_STATE);
         }
+        // Parse key type
+        if (remainingDataLength < 1) {
+            THROW(ERROR_BUFFER_OVERFLOW);
+        }
+        if (format_hex(cdata, 1, ctx->keyType, sizeof(ctx->keyType)) == -1) {
+            THROW(ERROR_BUFFER_OVERFLOW);
+        }
+        ctx->keyType[2] = '\0';
+        // Hash key type
+        updateHash((cx_hash_t *)&tx_state->hash, cdata, 1);
+        cdata += 1;
+        remainingDataLength -= 1;
         // Hash key index
         if (remainingDataLength < 1) {
             THROW(ERROR_BUFFER_OVERFLOW);
         }
+
         updateHash((cx_hash_t *)&tx_state->hash, cdata, 1);
         cdata += 1;
         remainingDataLength -= 1;
-
-        // Hash key type
-        // We do not display the key type, as currently only ed_25519 is used.
-        if (remainingDataLength < 1) {
-            THROW(ERROR_BUFFER_OVERFLOW);
-        }
-        updateHash((cx_hash_t *)&tx_state->hash, cdata, 1);
-        cdata += 1;
-        remainingDataLength -= 1;
-
         uint8_t publicKey[32];
         if (remainingDataLength < 32) {
             THROW(ERROR_BUFFER_OVERFLOW);

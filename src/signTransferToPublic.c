@@ -42,6 +42,11 @@ void handleSignTransferToPublic(uint8_t *cdata,
         updateHash((cx_hash_t *)&tx_state->hash, cdata, 192);
         cdata += 192;
         remainingDataLength -= 192;
+        PRINTF(
+            "km-logs ---- [signTransferToPublic] (handleSignTransferToPublic) "
+            "remainingDataLength1: "
+            "%d\n",
+            remainingDataLength);
 
         // Parse transaction amount so it can be displayed.
         if (remainingDataLength < 8) {
@@ -52,6 +57,26 @@ void handleSignTransferToPublic(uint8_t *cdata,
         updateHash((cx_hash_t *)&tx_state->hash, cdata, 8);
         cdata += 8;
         remainingDataLength -= 8;
+        PRINTF(
+            "km-logs ---- [signTransferToPublic] (handleSignTransferToPublic) "
+            "remainingDataLength2: "
+            "%d\n",
+            remainingDataLength);
+
+        // Parse Recipient address
+        if (remainingDataLength < 32) {
+            THROW(ERROR_BUFFER_OVERFLOW);
+        }
+        if (format_hex(cdata, 32, ctx->recipientAddress, sizeof(ctx->recipientAddress)) == -1) {
+            THROW(ERROR_BUFFER_OVERFLOW);
+        }
+        PRINTF(
+            "km-logs ---- [signTransferToPublic] (handleSignTransferToPublic) recipientAddress: "
+            "%s\n",
+            ctx->recipientAddress);
+        updateHash((cx_hash_t *)&tx_state->hash, cdata, 32);
+        cdata += 32;
+        remainingDataLength -= 32;
 
         // Hash amount index
         if (remainingDataLength < 8) {

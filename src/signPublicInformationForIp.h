@@ -1,5 +1,7 @@
 #pragma once
 
+#import "buffer.h"
+
 /**
  * Handles the signing flow, including updating the display, for the signing
  * of the public information for the identity provider.
@@ -23,5 +25,9 @@ typedef struct {
     uint8_t publicKeysLength;
     char publicKey[68];
     uint8_t threshold[4];
+    char idCredPub[48 * 2 + 1];
+    char credId[48 * 2 + 1];
+
+    char keyType[2 + 1];
     publicInfoForIpState_t state;
 } signPublicInformationForIp_t;

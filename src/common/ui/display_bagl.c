@@ -593,6 +593,18 @@ UX_STEP_NOCB(ux_sign_public_info_for_ip_display_public_key,
              bnnn_paging,
              {.title = "Public key", .text = (char *)global.signPublicInformationForIp.publicKey});
 
+UX_STEP_NOCB(ux_sign_public_info_for_ip_display_key_type,
+             bnnn_paging,
+             {.title = "Key type", .text = (char *)global.signPublicInformationForIp.keyType});
+
+UX_STEP_NOCB(ux_sign_public_info_for_ip_display_id_cred_pub,
+             bnnn_paging,
+             {.title = "Id Cred Pub", .text = (char *)global.signPublicInformationForIp.idCredPub});
+
+UX_STEP_NOCB(ux_sign_public_info_for_ip_display_cred_id,
+             bnnn_paging,
+             {.title = "Credential ID", .text = (char *)global.signPublicInformationForIp.credId});
+
 UX_STEP_CB(ux_sign_public_info_for_ip_continue,
            nn,
            sendSuccessNoIdle(),
@@ -620,15 +632,21 @@ UX_STEP_NOCB(ux_sign_public_info_for_ip_display_threshold,
 // Display a public key with continue
 UX_FLOW(ux_sign_public_info_for_ip_public_key,
         &ux_sign_public_info_for_ip_display_public_key,
+        &ux_sign_public_info_for_ip_display_key_type,
+
         &ux_sign_public_info_for_ip_continue);
 // Display intro view and a public key with continue
 UX_FLOW(ux_review_public_info_for_ip,
         &ux_sign_public_info_review,
         &ux_sign_public_info_for_ip_display_public_key,
+        &ux_sign_public_info_for_ip_display_key_type,
+        &ux_sign_public_info_for_ip_display_id_cred_pub,
+        &ux_sign_public_info_for_ip_display_cred_id,
         &ux_sign_public_info_for_ip_continue);
 // Display last public key and threshold and respond with signature / rejection
 UX_FLOW(ux_sign_public_info_for_ip_final,
         &ux_sign_public_info_for_ip_display_public_key,
+        &ux_sign_public_info_for_ip_display_key_type,
         &ux_sign_public_info_for_ip_display_threshold,
         &ux_sign_public_info_for_ip_sign,
         &ux_sign_public_info_for_ip_decline);
@@ -636,6 +654,9 @@ UX_FLOW(ux_sign_public_info_for_ip_final,
 UX_FLOW(ux_sign_public_info_for_ip_complete,
         &ux_sign_public_info_review,
         &ux_sign_public_info_for_ip_display_public_key,
+        &ux_sign_public_info_for_ip_display_key_type,
+        &ux_sign_public_info_for_ip_display_id_cred_pub,
+        &ux_sign_public_info_for_ip_display_cred_id,
         &ux_sign_public_info_for_ip_display_threshold,
         &ux_sign_public_info_for_ip_sign,
         &ux_sign_public_info_for_ip_decline);
@@ -724,10 +745,14 @@ void startTransferDisplay(bool displayMemo, volatile unsigned int *flags) {
 UX_STEP_NOCB(ux_sign_transfer_to_public_1_step,
              bnnn_paging,
              {.title = "Unshield amount", .text = (char *)global.signTransferToPublic.amount});
+UX_STEP_NOCB(ux_sign_transfer_to_public_2_step,
+             bnnn_paging,
+             {.title = "Recipient", .text = (char *)global.signTransferToPublic.recipientAddress});
 UX_FLOW(ux_sign_transfer_to_public,
         &ux_sign_flow_shared_review,
         &ux_sign_flow_account_sender_view,
         &ux_sign_transfer_to_public_1_step,
+        &ux_sign_transfer_to_public_2_step,
         &ux_sign_flow_shared_sign,
         &ux_sign_flow_shared_decline);
 

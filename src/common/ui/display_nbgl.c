@@ -748,10 +748,18 @@ void uiSignPublicInformationForIpCompleteDisplay(void) {
     pairs[pairIndex].item = "Public key";
     pairs[pairIndex].value = (char *)global.signPublicInformationForIp.publicKey;
     pairIndex++;
+    pairs[pairIndex].item = "Key type";
+    pairs[pairIndex].value = global.signPublicInformationForIp.keyType;
+    pairIndex++;
     pairs[pairIndex].item = "Signature threshold";
     pairs[pairIndex].value = (char *)global.signPublicInformationForIp.threshold;
     pairIndex++;
-
+    pairs[pairIndex].item = "Id Cred Pub";
+    pairs[pairIndex].value = (char *)global.signPublicInformationForIp.idCredPub;
+    pairIndex++;
+    pairs[pairIndex].item = "Credential ID";
+    pairs[pairIndex].value = (char *)global.signPublicInformationForIp.credId;
+    pairIndex++;
     // Create the page content
     nbgl_contentTagValueList_t content;
     content.nbPairs = pairIndex;
@@ -768,12 +776,20 @@ void uiSignPublicInformationForIpCompleteDisplay(void) {
                        "Sign identity",
                        review_choice_sign);
 }
-
 void uiReviewPublicInformationForIpDisplay(void) {
     // Setup data to display
     uint8_t pairIndex = 0;
     pairs[pairIndex].item = "Public key";
     pairs[pairIndex].value = global.signPublicInformationForIp.publicKey;
+    pairIndex++;
+    pairs[pairIndex].item = "Key type";
+    pairs[pairIndex].value = global.signPublicInformationForIp.keyType;
+    pairIndex++;
+    pairs[pairIndex].item = "Id Cred Pub";
+    pairs[pairIndex].value = (char *)global.signPublicInformationForIp.idCredPub;
+    pairIndex++;
+    pairs[pairIndex].item = "Credential ID";
+    pairs[pairIndex].value = (char *)global.signPublicInformationForIp.credId;
     pairIndex++;
 
     // Create the page content
@@ -798,6 +814,9 @@ void uiSignPublicInformationForIpFinalDisplay(void) {
     uint8_t pairIndex = 0;
     pairs[pairIndex].item = "Public key";
     pairs[pairIndex].value = (char *)global.signPublicInformationForIp.publicKey;
+    pairIndex++;
+    pairs[pairIndex].item = "Key type";
+    pairs[pairIndex].value = global.signPublicInformationForIp.keyType;
     pairIndex++;
     pairs[pairIndex].item = "Signature threshold";
     pairs[pairIndex].value = (char *)global.signPublicInformationForIp.threshold;
@@ -825,6 +844,9 @@ void uiSignPublicInformationForIpPublicKeyDisplay(void) {
     uint8_t pairIndex = 0;
     pairs[pairIndex].item = "Public key";
     pairs[pairIndex].value = global.signPublicInformationForIp.publicKey;
+    pairIndex++;
+    pairs[pairIndex].item = "Key type";
+    pairs[pairIndex].value = global.signPublicInformationForIp.keyType;
     pairIndex++;
 
     // Create the page content
@@ -949,6 +971,9 @@ void uiSignTransferToPublicDisplay(volatile unsigned int *flags) {
     pairIndex++;
     pairs[pairIndex].item = "Unshield amount";
     pairs[pairIndex].value = (char *)global.signTransferToPublic.amount;
+    pairIndex++;
+    pairs[pairIndex].item = "Recipient";
+    pairs[pairIndex].value = (char *)global.signTransferToPublic.recipientAddress;
     pairIndex++;
 
     // Create the page content
