@@ -760,7 +760,6 @@ void uiSignPublicInformationForIpCompleteDisplay(void) {
     pairs[pairIndex].item = "Credential ID";
     pairs[pairIndex].value = (char *)global.signPublicInformationForIp.credId;
     pairIndex++;
-    PRINTF("km-log ---- [display_nbgl.c] uiSignPublicInformationForIpCompleteDisplay\n");
     // Create the page content
     nbgl_contentTagValueList_t content;
     content.nbPairs = pairIndex;
