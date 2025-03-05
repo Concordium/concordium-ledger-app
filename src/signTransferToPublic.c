@@ -67,9 +67,14 @@ void handleSignTransferToPublic(uint8_t *cdata,
         if (remainingDataLength < 32) {
             THROW(ERROR_BUFFER_OVERFLOW);
         }
-        if (format_hex(cdata, 32, ctx->recipientAddress, sizeof(ctx->recipientAddress)) == -1) {
+        size_t recipientAddressSize = sizeof(ctx->recipientAddress);
+        if (base58check_encode(cdata, 32, ctx->recipientAddress, &recipientAddressSize) == -1) {
+            PRINTF(
+                "km-logs ---- [signTransferToPublic] (handleSignTransferToPublic) "
+                "base58check_encode failed\n");
             THROW(ERROR_BUFFER_OVERFLOW);
         }
+        ctx->recipientAddress[55] = '\0';
         PRINTF(
             "km-logs ---- [signTransferToPublic] (handleSignTransferToPublic) recipientAddress: "
             "%s\n",

@@ -19,7 +19,7 @@ typedef enum {
 
 typedef struct {
     uint8_t amount[30];
-    char recipientAddress[32 * 2 + 1];
+    uint8_t recipientAddress[57];
     uint16_t proofSize;
     transferToPublicState_t state;
 } signTransferToPublic_t;
