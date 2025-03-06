@@ -268,7 +268,9 @@ void handleSignConfigureBaker(uint8_t *cdata,
         if (!ctx_conf_baker->hasMetadataUrl) {
             THROW(ERROR_INVALID_TRANSACTION);
         }
-
+        if (dataLength < 2) {
+            THROW(ERROR_BUFFER_OVERFLOW);
+        }
         ctx_conf_baker->url.urlLength = U2BE(cdata, 0);
         if (ctx_conf_baker->url.urlLength > 2048) {
             THROW(ERROR_INVALID_TRANSACTION);
@@ -322,6 +324,9 @@ void handleSignConfigureBaker(uint8_t *cdata,
         handleCommissionRates(cdata, dataLength);
         *flags |= IO_ASYNCH_REPLY;
     } else if (P1_SUSPENDED == p1 && ctx_conf_baker->state == CONFIGURE_BAKER_SUSPENDED) {
+        if (dataLength < 1) {
+            THROW(ERROR_INVALID_TRANSACTION);
+        }
         uint8_t suspended = cdata[0];
         updateHash((cx_hash_t *)&tx_state->hash, cdata, 1);
         dataLength -= 1;
