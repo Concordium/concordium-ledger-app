@@ -267,7 +267,7 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer,
         int offset = numberToText(ctx->anonymityRevocationThreshold,
                                   sizeof(ctx->anonymityRevocationThreshold),
                                   dataBuffer[0]);
-        if (offset + 8 > sizeof(ctx->anonymityRevocationThreshold)) {
+        if ((size_t)(offset + 8) > sizeof(ctx->anonymityRevocationThreshold)) {
             THROW(ERROR_BUFFER_OVERFLOW);
         }
         memmove(ctx->anonymityRevocationThreshold + offset, " out of ", 8);
