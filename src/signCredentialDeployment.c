@@ -14,10 +14,10 @@ void processNextVerificationKey(void) {
 
 void parseVerificationKey(uint8_t *buffer, uint8_t dataLength) {
     // Hash key index
-    updateHash((cx_hash_t *)&tx_state->hash, buffer, 1);
     if (dataLength < 1) {
         THROW(ERROR_BUFFER_OVERFLOW);  // Ensure safe access
     }
+    updateHash((cx_hash_t *)&tx_state->hash, buffer, 1);
     dataLength -= 1;
     buffer += 1;
 
@@ -267,6 +267,9 @@ void handleSignCredentialDeployment(uint8_t *dataBuffer,
         int offset = numberToText(ctx->anonymityRevocationThreshold,
                                   sizeof(ctx->anonymityRevocationThreshold),
                                   dataBuffer[0]);
+        if ((size_t)(offset + 8) > sizeof(ctx->anonymityRevocationThreshold)) {
+            THROW(ERROR_BUFFER_OVERFLOW);
+        }
         memmove(ctx->anonymityRevocationThreshold + offset, " out of ", 8);
         offset += 8;
         updateHash((cx_hash_t *)&tx_state->hash, dataBuffer, 1);

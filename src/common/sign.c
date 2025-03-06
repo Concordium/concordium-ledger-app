@@ -28,8 +28,13 @@ void buildAndSignTransactionHash() {
 }
 
 void readCborInitial(uint8_t *cdata, uint8_t dataLength) {
+    uint8_t remainingDataLength = dataLength;
+    if (remainingDataLength < 1) {
+        THROW(ERROR_BUFFER_OVERFLOW);
+    }
     uint8_t header = cdata[0];
     cdata += 1;
+    remainingDataLength -= 1;
     ctx->cborLength -= 1;
     // the first byte of an cbor encoding contains the type (3 high bits) and the shortCount (5
     // lower bits);
@@ -48,25 +53,25 @@ void readCborInitial(uint8_t *cdata, uint8_t dataLength) {
         // shortCount is the length, no extra bytes are used.
         length = shortCount;
     } else if (shortCount == CBOR_ONE_BYTE_LENGTH) {
-        if (dataLength < 1) {
+        if (remainingDataLength < 1) {
             THROW(ERROR_BUFFER_OVERFLOW);
         }
         length = cdata[0];
         sizeLength = 1;
     } else if (shortCount == CBOR_TWO_BYTE_LENGTH) {
-        if (dataLength < 2) {
+        if (remainingDataLength < 2) {
             THROW(ERROR_BUFFER_OVERFLOW);
         }
         length = U2BE(cdata, 0);
         sizeLength = 2;
     } else if (shortCount == CBOR_FOUR_BYTE_LENGTH) {
-        if (dataLength < 4) {
+        if (remainingDataLength < 4) {
             THROW(ERROR_BUFFER_OVERFLOW);
         }
         length = U4BE(cdata, 0);
         sizeLength = 4;
     } else if (shortCount == CBOR_EIGHT_BYTE_LENGTH) {
-        if (dataLength < 8) {
+        if (remainingDataLength < 8) {
             THROW(ERROR_BUFFER_OVERFLOW);
         }
         length = U8BE(cdata, 0);
@@ -77,7 +82,6 @@ void readCborInitial(uint8_t *cdata, uint8_t dataLength) {
         THROW(ERROR_INVALID_PARAM);
     }
     cdata += sizeLength;
-
     ctx->cborLength -= sizeLength;
     switch (ctx->majorType) {
         case 0:
