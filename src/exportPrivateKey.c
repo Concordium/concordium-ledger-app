@@ -65,6 +65,9 @@ void exportPrivateKeyBls(void) {
             ctx->path[lastSubPathIndex] = lastSubPath | HARDENED_OFFSET;
             getBlsPrivateKey(ctx->path, lastSubPathIndex + 1, privateKey, sizeof(privateKey));
             uint8_t tx = 0;
+            if (sizeof(privateKey) > sizeof(G_io_apdu_buffer)) {
+                THROW(ERROR_BUFFER_OVERFLOW);
+            }
             memmove(G_io_apdu_buffer, privateKey, sizeof(privateKey));
             tx += sizeof(privateKey);
 
@@ -76,6 +79,9 @@ void exportPrivateKeyBls(void) {
                 }
                 ctx->path[lastSubPathIndex] = lastSubPath | HARDENED_OFFSET;
                 getBlsPrivateKey(ctx->path, lastSubPathIndex + 1, privateKey, sizeof(privateKey));
+                if (sizeof(privateKey) + tx > sizeof(G_io_apdu_buffer)) {
+                    THROW(ERROR_BUFFER_OVERFLOW);
+                }
                 memmove(G_io_apdu_buffer + tx, privateKey, sizeof(privateKey));
                 tx += sizeof(privateKey);
             }
