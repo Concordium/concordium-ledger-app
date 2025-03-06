@@ -82,7 +82,6 @@ void readCborInitial(uint8_t *cdata, uint8_t dataLength) {
         THROW(ERROR_INVALID_PARAM);
     }
     cdata += sizeLength;
-    remainingDataLength -= sizeLength;
     ctx->cborLength -= sizeLength;
     switch (ctx->majorType) {
         case 0:
