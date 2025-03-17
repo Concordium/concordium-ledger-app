@@ -16,7 +16,7 @@
 // flow.
 #define INS_CREDENTIAL_DEPLOYMENT 0x04
 
-#define INS_EXPORT_PRIVATE_KEY 0x05
+#define INS_EXPORT_PRIVATE_KEY_LEGACY 0x05
 
 #define INS_DEPLOY_MODULE 0x06
 
@@ -38,6 +38,8 @@
 
 #define INS_APP_NAME     0x36
 #define INS_GET_APP_NAME 0x21
+
+#define INS_EXPORT_PRIVATE_KEY_NEW 0x37
 
 int handler(uint8_t INS,
             uint8_t *cdata,

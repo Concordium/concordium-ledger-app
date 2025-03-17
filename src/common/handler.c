@@ -37,9 +37,13 @@ int handler(uint8_t INS,
             LEDGER_ASSERT(cdata != NULL, "NULL cdata");
             handleSignCredentialDeployment(cdata, p1, p2, lc, flags, isInitialCall);
             break;
-        case INS_EXPORT_PRIVATE_KEY:
+        case INS_EXPORT_PRIVATE_KEY_LEGACY:
             LEDGER_ASSERT(cdata != NULL, "NULL cdata");
-            handleExportPrivateKey(cdata, p1, p2, lc, flags);
+            handleExportPrivateKey(cdata, p1, p2, lc, true, flags);
+            break;
+        case INS_EXPORT_PRIVATE_KEY_NEW:
+            LEDGER_ASSERT(cdata != NULL, "NULL cdata");
+            handleExportPrivateKey(cdata, p1, p2, lc, false, flags);
             break;
         case INS_TRANSFER_TO_PUBLIC:
             LEDGER_ASSERT(cdata != NULL, "NULL cdata");
