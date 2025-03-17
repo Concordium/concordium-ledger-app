@@ -128,10 +128,14 @@ int handleHeaderAndToAddress(uint8_t *cdata,
 }
 
 void sendUserRejection() {
+    sendUserRejectionNoIdle();
+    ui_menu_main();
+}
+
+void sendUserRejectionNoIdle() {
     G_io_apdu_buffer[0] = ERROR_REJECTED_BY_USER >> 8;
     G_io_apdu_buffer[1] = ERROR_REJECTED_BY_USER & 0xFF;
     io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, 2);
-    ui_menu_main();
 }
 
 void sendSuccess(uint8_t tx) {

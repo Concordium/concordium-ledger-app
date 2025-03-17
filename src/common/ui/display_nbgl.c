@@ -26,9 +26,11 @@ static void review_public_key_choice(bool confirm) {
 
 static void review_verify_address(bool confirm) {
     if (confirm) {
-        sendSuccess(0);
+        sendSuccessResultNoIdle(0);
+        nbgl_useCaseReviewStatus(STATUS_TYPE_ADDRESS_VERIFIED, ui_menu_main);
     } else {
-        sendUserRejection();
+        sendUserRejectionNoIdle();
+        nbgl_useCaseReviewStatus(STATUS_TYPE_ADDRESS_REJECTED, ui_menu_main);
     }
 }
 
@@ -1064,9 +1066,6 @@ void uiVerifyAddress(volatile unsigned int *flags) {
     pairs[index].item = "Identity";
     pairs[index].value = (char *)global.verifyAddressContext.display;
     index++;
-    pairs[index].item = "Address";
-    pairs[index].value = (char *)global.verifyAddressContext.address;
-    index++;
 
     // Create the page content
     nbgl_contentTagValueList_t content;
@@ -1076,13 +1075,12 @@ void uiVerifyAddress(volatile unsigned int *flags) {
     content.nbMaxLinesForValue = 0;
     content.startIndex = 0;
     // Setup the review screen
-    nbgl_useCaseReviewLight(TYPE_OPERATION,
-                            &content,
-                            &C_app_concordium_64px,
-                            "Verify Address",
-                            NULL,  // No subtitle
-                            "Confirm",
-                            review_verify_address);
+    nbgl_useCaseAddressReview((char *)global.verifyAddressContext.address,
+                              &content,
+                              &C_app_concordium_64px,
+                              "Verify Address",
+                              NULL,  // No subtitle
+                              review_verify_address);
     *flags |= IO_ASYNCH_REPLY;
 }
 

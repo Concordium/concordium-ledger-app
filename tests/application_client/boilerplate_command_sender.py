@@ -92,7 +92,8 @@ class InsType(IntEnum):
     SIGN_TRANSFER = 0x02
     SIGN_TRANSFER_WITH_SCHEDULE = 0x03
     CREDENTIAL_DEPLOYMENT = 0x04
-    EXPORT_PRIVATE_KEY = 0x05
+    EXPORT_PRIVATE_KEY_LEGACY = 0x05
+    EXPORT_PRIVATE_KEY_NEW = 0x37
     DEPLOY_MODULE = 0x06
     INIT_CONTRACT = 0x07
     UPDATE_CONTRACT = 0x08
@@ -559,16 +560,16 @@ class BoilerplateCommandSender:
         else:
             raise ValueError(f"Invalid export type: {export_type}")
         if idp_index != -1:
-            data += bytes.fromhex("01")
+            ins = InsType.EXPORT_PRIVATE_KEY_NEW
             data += idp_index.to_bytes(4, byteorder="big")
         else:
-            data += bytes.fromhex("00")
+            ins = InsType.EXPORT_PRIVATE_KEY_LEGACY
 
         data += identity_index.to_bytes(4, byteorder="big")
         print("km------------data", data.hex())
         with self.backend.exchange_async(
             cla=CLA,
-            ins=InsType.EXPORT_PRIVATE_KEY,
+            ins=ins,
             p1=p1,
             p2=P2.P2_EXPORT_BLS_KEY,
             data=data,

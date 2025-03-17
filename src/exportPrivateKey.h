@@ -12,6 +12,7 @@ void handleExportPrivateKey(uint8_t *dataBuffer,
                             uint8_t p1,
                             uint8_t p2,
                             uint8_t lc,
+                            bool legacyDerivationPath,
                             volatile unsigned int *flags);
 
 typedef struct {

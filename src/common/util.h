@@ -29,8 +29,16 @@ static const uint8_t r[32] = {0x73, 0xed, 0xa7, 0x53, 0x29, 0x9d, 0x7d, 0x48, 0x
 void sendUserRejection();
 
 /**
+ * Send a user rejection back to the caller, which will indicate to
+ * the caller that the user has rejected the incoming command at some
+ * step in the process, i.e. if the user does not want to sign the
+ * incoming transaction.
+ *
+ * After sending the rejection the display will do nothing.
+ */
+void sendUserRejectionNoIdle();
+/**
  * Send a success back to the caller without returning the display to the
- * idle menu. This method should be used in instructions that span multiple
  * commands to avoid resetting the display back to the menu between commands.
  */
 void sendSuccessNoIdle();
