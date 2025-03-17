@@ -42,11 +42,6 @@ void handleSignTransferToPublic(uint8_t *cdata,
         updateHash((cx_hash_t *)&tx_state->hash, cdata, 192);
         cdata += 192;
         remainingDataLength -= 192;
-        PRINTF(
-            "km-logs ---- [signTransferToPublic] (handleSignTransferToPublic) "
-            "remainingDataLength1: "
-            "%d\n",
-            remainingDataLength);
 
         // Parse transaction amount so it can be displayed.
         if (remainingDataLength < 8) {
@@ -57,11 +52,6 @@ void handleSignTransferToPublic(uint8_t *cdata,
         updateHash((cx_hash_t *)&tx_state->hash, cdata, 8);
         cdata += 8;
         remainingDataLength -= 8;
-        PRINTF(
-            "km-logs ---- [signTransferToPublic] (handleSignTransferToPublic) "
-            "remainingDataLength2: "
-            "%d\n",
-            remainingDataLength);
 
         // Parse Recipient address
         if (remainingDataLength < 32) {
@@ -69,16 +59,9 @@ void handleSignTransferToPublic(uint8_t *cdata,
         }
         size_t recipientAddressSize = sizeof(ctx->recipientAddress);
         if (base58check_encode(cdata, 32, ctx->recipientAddress, &recipientAddressSize) == -1) {
-            PRINTF(
-                "km-logs ---- [signTransferToPublic] (handleSignTransferToPublic) "
-                "base58check_encode failed\n");
             THROW(ERROR_BUFFER_OVERFLOW);
         }
         ctx->recipientAddress[55] = '\0';
-        PRINTF(
-            "km-logs ---- [signTransferToPublic] (handleSignTransferToPublic) recipientAddress: "
-            "%s\n",
-            ctx->recipientAddress);
         updateHash((cx_hash_t *)&tx_state->hash, cdata, 32);
         cdata += 32;
         remainingDataLength -= 32;
