@@ -135,7 +135,6 @@ void handleExportPrivateKey(uint8_t *dataBuffer,
     uint32_t identity;
     if (ctx->isNewPath) {
         if (remainingDataLength < 4) {
-            PRINTF("km-logs (exportPrivateKey.c) [handleExportPrivateKey] Here 1");
             THROW(ERROR_INVALID_PATH);
         }
         identity_provider = U4BE(dataBuffer, offset);
@@ -143,7 +142,6 @@ void handleExportPrivateKey(uint8_t *dataBuffer,
         remainingDataLength -= 4;
     }
     if (remainingDataLength < 4) {
-        PRINTF("km-logs (exportPrivateKey.c) [handleExportPrivateKey] Here 2");
         THROW(ERROR_INVALID_PATH);
     }
     identity = U4BE(dataBuffer, offset);
