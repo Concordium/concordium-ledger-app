@@ -45,12 +45,14 @@ def test_sign_public_information_for_ip(
     # It will yield the result when the navigation is done
     with client.sign_public_information_for_ip_part_1(chunks=[data_1, data_2]):
         if firmware.is_nano:
-            navigator.navigate_and_compare(
+            navigate_until_text_and_compare(
+                firmware,
+                navigator,
+                "Continue",
                 default_screenshot_path,
                 test_name + "_1",
-                create_right_clicks_and_confirm(8),
-                screen_change_before_first_instruction=False,
-                screen_change_after_last_instruction=False,
+                False,
+                False,
             )
         else:
             navigate_until_text_and_compare(
@@ -65,12 +67,14 @@ def test_sign_public_information_for_ip(
             )
     with client.sign_public_information_for_ip_part_2(chunks=[data_3]):
         if firmware.is_nano:
-            navigator.navigate_and_compare(
+            navigate_until_text_and_compare(
+                firmware,
+                navigator,
+                "Continue",
                 default_screenshot_path,
                 test_name + "_2",
-                create_right_clicks_and_confirm(3),
-                screen_change_before_first_instruction=False,
-                screen_change_after_last_instruction=False,
+                False,
+                False,
             )
         else:
             navigate_until_text_and_compare(
