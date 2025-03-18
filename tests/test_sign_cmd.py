@@ -242,7 +242,7 @@ def test_sign_tx_transfer_with_schedule_and_memo_legacy_path(
     header_and_to_address = bytes.fromhex(header_and_to_address)
 
     # Define the memo
-    memo = "6474657374"  # "test" in hex
+    memo = "64746573746474657374647465737464746573746474657374647465737464746573746474657374"  # "test" in hex
     memo = bytes.fromhex(memo)
 
     memo_chunks = split_message(memo, MAX_APDU_LEN)
@@ -276,30 +276,27 @@ def test_sign_tx_transfer_with_schedule_and_memo_legacy_path(
     # Send the part with the memo
     for chunk in memo_chunks:
         with client.sign_tx_with_schedule_and_memo_part_2(memo_chunk=chunk):
-            # Navigate and compare screenshots for validation
-            if firmware.is_nano:
-                navigator.navigate_and_compare(
-                    default_screenshot_path,
-                    test_name,
-                    instructions_builder(6, backend),
-                    10,
-                    True,
-                    False,
-                )
-            else:
-                navigate_until_text_and_compare(
-                    firmware,
-                    navigator,
-                    "Continue",
-                    default_screenshot_path,
-                    test_name,
-                    True,
-                    False,
-                    NavInsID.USE_CASE_CHOICE_CONFIRM,
-                )
+            navigate_until_text_and_compare(
+                firmware,
+                navigator,
+                "Continue",
+                default_screenshot_path,
+                test_name,
+                True,
+                False,
+                NavInsID.USE_CASE_CHOICE_CONFIRM,
+            )
+
+    # # Process each chunk of pairs
+    # screenshots_so_far = 7 if firmware.is_nano else 3
 
     # Process each chunk of pairs
-    screenshots_so_far = 7 if firmware.is_nano else 3
+    screenshots_so_far = 3
+    if firmware.name == "nanos":
+        screenshots_so_far = 10
+    elif firmware.is_nano:
+        screenshots_so_far = 7
+
     for chunk in pairs_chunk:
         nbgl_confirm_instruction = NavInsID.USE_CASE_CHOICE_CONFIRM
         number_of_pairs_in_chunk = len(chunk) // 16
