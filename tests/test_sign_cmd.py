@@ -242,7 +242,7 @@ def test_sign_tx_transfer_with_schedule_and_memo_legacy_path(
     header_and_to_address = bytes.fromhex(header_and_to_address)
 
     # Define the memo
-    memo = "64746573746474657374647465737464746573746474657374647465737464746573746474657374"  # "test" in hex
+    memo = "6474657374"  # "test" in hex
     memo = bytes.fromhex(memo)
 
     memo_chunks = split_message(memo, MAX_APDU_LEN)
@@ -286,9 +286,6 @@ def test_sign_tx_transfer_with_schedule_and_memo_legacy_path(
                 False,
                 NavInsID.USE_CASE_CHOICE_CONFIRM,
             )
-
-    # # Process each chunk of pairs
-    # screenshots_so_far = 7 if firmware.is_nano else 3
 
     # Process each chunk of pairs
     screenshots_so_far = 3
