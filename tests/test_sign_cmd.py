@@ -187,7 +187,7 @@ def test_sign_tx_transfer_with_schedule_legacy_path(
     # Process each chunk of pairs
     screenshots_so_far = 3
     if firmware.name == "nanos":
-        screenshots_so_far = 9
+        screenshots_so_far = 10
     elif firmware.is_nano:
         screenshots_so_far = 6
 
@@ -290,7 +290,7 @@ def test_sign_tx_transfer_with_schedule_and_memo_legacy_path(
     # Process each chunk of pairs
     screenshots_so_far = 3
     if firmware.name == "nanos":
-        screenshots_so_far = 10
+        screenshots_so_far = 11
     elif firmware.is_nano:
         screenshots_so_far = 7
 
