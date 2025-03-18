@@ -246,14 +246,14 @@ def test_credential_update(
         ),
     ):
         if firmware.is_nano:
-            navigator.navigate_and_compare(
+            navigate_until_text_and_compare(
+                firmware,
+                navigator,
+                "Continue",
                 default_screenshot_path,
                 test_name + "/1_sender",
-                instructions_builder(
-                    number_of_screens_until_confirm=3, backend=backend
-                ),
-                screen_change_before_first_instruction=False,
-                screen_change_after_last_instruction=False,
+                False,
+                False,
             )
         else:
             navigate_until_text_and_compare(
@@ -296,6 +296,10 @@ def test_credential_update(
                     NavInsID.USE_CASE_CHOICE_CONFIRM,
                 )
 
+        number_of_screens_until_confirm = 1
+        if firmware.name == "nanos":
+            number_of_screens_until_confirm = 5
+
         with client.sign_update_credential_part_3(
             signature_threshold=signature_threshold,
             ar_identity=ar_identity,
@@ -311,7 +315,8 @@ def test_credential_update(
                     default_screenshot_path,
                     test_name + "/3_rem_credential",
                     instructions_builder(
-                        number_of_screens_until_confirm=1, backend=backend
+                        number_of_screens_until_confirm,
+                        backend,
                     ),
                     screen_change_before_first_instruction=False,
                     screen_change_after_last_instruction=False,
