@@ -29,7 +29,7 @@ APPNAME = "Concordium"
 
 # Application version
 APPVERSION_M = 5
-APPVERSION_N = 2
+APPVERSION_N = 3
 APPVERSION_P = 0
 APPVERSION = "$(APPVERSION_M).$(APPVERSION_N).$(APPVERSION_P)"
 
@@ -44,6 +44,7 @@ APP_SOURCE_PATH += src
 
 # Application icons following guidelines:
 # https://developers.ledger.com/docs/embedded-app/design-requirements/#device-icon
+ICON_NANOS = icons/app_concordium_16px.gif
 ICON_NANOX = icons/app_concordium_14px.gif
 ICON_NANOSP = icons/app_concordium_14px.gif
 ICON_STAX = icons/app_concordium_32px.gif

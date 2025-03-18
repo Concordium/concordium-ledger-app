@@ -238,6 +238,7 @@ def test_sign_configure_baker_commission_rate_only(
         == "2a6f49a786b62514d89bfc0e354689e1af2f3d3194b18b93433abd032e518fb72c55501fb5605402bf5a84b88f74d30a46ccb6a05907cb78144e93363b133205"
     )
 
+
 @pytest.mark.active_test_scope
 def test_sign_configure_baker_suspended_only(
     backend, firmware, navigator, default_screenshot_path, test_name
@@ -251,9 +252,7 @@ def test_sign_configure_baker_suspended_only(
     # As it requires on-screen validation, the function is asynchronous.
     # It will yield the result when the navigation is done
     with client.sign_configure_baker_suspended(
-        bitmap=bitmap,
-        suspended=False,
-        is_called_first=True
+        bitmap=bitmap, suspended=False, is_called_first=True
     ):
         # Validate the on-screen request by performing the navigation appropriate for this device
         navigate_until_text_and_compare(
@@ -274,25 +273,6 @@ def test_sign_configure_baker_suspended_only(
 def test_sign_configure_baker_all_parameters(
     backend, firmware, navigator, default_screenshot_path, test_name
 ):
-    nano_continue_1_instructions = [
-        NavInsID.RIGHT_CLICK,
-        NavInsID.RIGHT_CLICK,
-        NavInsID.RIGHT_CLICK,
-        NavInsID.RIGHT_CLICK,
-        NavInsID.RIGHT_CLICK,
-        NavInsID.RIGHT_CLICK,
-        NavInsID.RIGHT_CLICK,
-        NavInsID.BOTH_CLICK,
-    ]
-
-    nano_continue_2_instructions = [
-        NavInsID.RIGHT_CLICK,
-        NavInsID.RIGHT_CLICK,
-        NavInsID.RIGHT_CLICK,
-        NavInsID.RIGHT_CLICK,
-        NavInsID.RIGHT_CLICK,
-        NavInsID.BOTH_CLICK,
-    ]
 
     client = BoilerplateCommandSender(backend)
 
@@ -311,31 +291,49 @@ def test_sign_configure_baker_all_parameters(
         aggregation_key=bytes.fromhex(aggregationVerifyKey + aggregationVerifyKeyProof),
     ):
         if firmware.is_nano:
-            navigator.navigate_and_compare(
+            navigate_until_text_and_compare(
+                firmware,
+                navigator,
+                "Continue",
                 default_screenshot_path,
                 test_name + "_1",
-                nano_continue_1_instructions,
-                screen_change_before_first_instruction=False,
-                screen_change_after_last_instruction=False,
+                False,
+                False,
             )
         else:
             navigate_until_text_and_compare(
-                firmware, navigator, "Continue", default_screenshot_path, test_name + "_1", True, False, NavInsID.USE_CASE_CHOICE_CONFIRM
+                firmware,
+                navigator,
+                "Continue",
+                default_screenshot_path,
+                test_name + "_1",
+                True,
+                False,
+                NavInsID.USE_CASE_CHOICE_CONFIRM,
             )
     with client.sign_configure_baker_url(
         url=url_bytes, bitmap=bitmap, is_called_first=False
     ):
         if firmware.is_nano:
-            navigator.navigate_and_compare(
+            navigate_until_text_and_compare(
+                firmware,
+                navigator,
+                "Continue",
                 default_screenshot_path,
                 test_name + "_2",
-                nano_continue_2_instructions,
-                screen_change_before_first_instruction=False,
-                screen_change_after_last_instruction=False,
+                False,
+                False,
             )
         else:
             navigate_until_text_and_compare(
-                firmware, navigator, "Continue", default_screenshot_path, test_name + "_2", True, False, NavInsID.USE_CASE_CHOICE_CONFIRM
+                firmware,
+                navigator,
+                "Continue",
+                default_screenshot_path,
+                test_name + "_2",
+                True,
+                False,
+                NavInsID.USE_CASE_CHOICE_CONFIRM,
             )
     with client.sign_configure_baker_commission_rate(
         bitmap=bitmap,
@@ -345,7 +343,14 @@ def test_sign_configure_baker_all_parameters(
         is_called_first=False,
     ):
         navigate_until_text_and_compare(
-            firmware, navigator, "Continue", default_screenshot_path, test_name + "_3", True, False, NavInsID.USE_CASE_CHOICE_CONFIRM
+            firmware,
+            navigator,
+            "Continue",
+            default_screenshot_path,
+            test_name + "_3",
+            True,
+            False,
+            NavInsID.USE_CASE_CHOICE_CONFIRM,
         )
     with client.sign_configure_baker_suspended(
         bitmap=bitmap,

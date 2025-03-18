@@ -31,41 +31,31 @@ def test_register_data(
         header_and_type=header_and_type,
         data_length=len(data),
     ):
-        if firmware.is_nano:
-            navigator.navigate_and_compare(
-                default_screenshot_path,
-                test_name,
-                instructions_builder(3, backend),
-                10,
-                True,
-                False,
-            )
-        else:
-            navigate_until_text_and_compare(
-                firmware,
-                navigator,
-                "Continue",
-                default_screenshot_path,
-                test_name + "_1",
-                True,
-                False,
-                NavInsID.USE_CASE_CHOICE_CONFIRM,
-            )
+        navigate_until_text_and_compare(
+            firmware,
+            navigator,
+            "Continue",
+            default_screenshot_path,
+            test_name + "_1",
+            True,
+            False,
+            NavInsID.USE_CASE_CHOICE_CONFIRM,
+        )
+
     response = client.get_async_response()
     print(response.data.hex())
     assert response.status == 0x9000
-    screenshots_so_far = 4
+
     # Send the second part of the data
     with client.register_data_part_2(data):
         if firmware.is_nano:
             navigator.navigate_and_compare(
                 default_screenshot_path,
-                test_name,
+                test_name + "_2",
                 instructions_builder(1, backend) + [NavInsID.BOTH_CLICK],
-                10,
+                10,  # Timeout
                 False,
                 True,
-                screenshots_so_far,
             )
         else:
             navigate_until_text_and_compare(
