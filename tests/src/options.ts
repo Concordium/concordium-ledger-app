@@ -44,7 +44,7 @@ export class ConcordiumZemu extends Zemu {
     // This is a hack to get around the issue where a screen is not fully rendered, but
     // the screen has changed from the provided screenshot. This method waits a little bit
     // after the screen has changed in an attempt to ensure that it is fully rendered.
-    async waitUntilScreenIsNot(screen: ISnapshot, timeout?: number | undefined): Promise<void> {
+    async waitUntilScreenIsNot(screen: ISnapshot, timeout: number = 5000): Promise<void> {
         await super.waitUntilScreenIsNot(screen, timeout);
         await Zemu.sleep(100);
     }
