@@ -19,8 +19,7 @@ void handleSignCreatePlt(
 typedef enum {
     TX_CREATE_PLT_INITIAL = 70,
     TX_CREATE_PLT_PAYLOAD = 71,
-    TX_CREATE_PLT_INIT_PARAMS_LENGTH = 72,
-    TX_CREATE_PLT_INIT_PARAMS = 73,
+    TX_CREATE_PLT_INIT_PARAMS = 72,
 } createPltState_t;
 
 typedef struct {

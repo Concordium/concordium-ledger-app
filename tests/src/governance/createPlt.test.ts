@@ -15,8 +15,8 @@ test('[NANO S] Create PLT - Phase 1 & 2 (Initial + Payload)', setupZemu('nanos',
     const response1 = await transport.send(0xe0, 0x48, 0x00, 0x00, data);
     expect(response1).toEqual(Buffer.from('9000', 'hex'));
 
-    // Phase 2: Payload
-    data = Buffer.from('00000003545259af5684e70c1438e442066d017e4410af6da2b53bfa651a07d81efa2aa668db20a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d706', 'hex');
+    // Phase 2: Payload + init params length
+    data = Buffer.from('00000003545259af5684e70c1438e442066d017e4410af6da2b53bfa651a07d81efa2aa668db20a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7060600000001', 'hex');
     const response2 = await transport.send(0xe0, 0x48, 0x01, 0x00, data);
 
     // This should succeed if our state machine is working
@@ -30,7 +30,7 @@ test('[NANO S] Create PLT - Wrong P1 order (should fail)', setupZemu('nanos', as
     expect(response1).toEqual(Buffer.from('9000', 'hex'));
 
     // Skip Phase 2, try Phase 3 directly (should fail with INVALID_STATE)
-    data = Buffer.from('00000020', 'hex');
+    data = Buffer.from('ff', 'hex');
     const tx = transport.send(0xe0, 0x48, 0x02, 0x00, data);
 
     await expect(tx).rejects.toMatchObject({
@@ -44,21 +44,16 @@ test('[NANO S] Create PLT - Full flow minimal', setupZemu('nanos', async (sim, t
     const response1 = await transport.send(0xe0, 0x48, 0x00, 0x00, data);
     expect(response1).toEqual(Buffer.from('9000', 'hex'));
 
-    // Phase 2: Payload
-    data = Buffer.from('00000003545259af5684e70c1438e442066d017e4410af6da2b53bfa651a07d81efa2aa668db20a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d706', 'hex');
+    // Phase 2: Payload + init params length
+    data = Buffer.from('00000003545259af5684e70c1438e442066d017e4410af6da2b53bfa651a07d81efa2aa668db20a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d7060600000001', 'hex');
     const response2 = await transport.send(0xe0, 0x48, 0x01, 0x00, data);
     expect(response2).toEqual(Buffer.from('9000', 'hex'));
 
-    // Phase 3: Init params length (minimal - 1 byte) - No UI yet, just returns success
-    data = Buffer.from('00000001', 'hex');
-    const response3 = await transport.send(0xe0, 0x48, 0x02, 0x00, data);
-    expect(response3).toEqual(Buffer.from('9000', 'hex'));
-
-    // Phase 4: Init params (1 byte) - This will show UI and wait
+    // Phase 3: Init params (1 byte) - This will show UI and wait
     data = Buffer.from('ff', 'hex');
-    const tx = transport.send(0xe0, 0x48, 0x03, 0x00, data);
+    const tx = transport.send(0xe0, 0x48, 0x02, 0x00, data);
 
-    // Wait for UI to appear after Phase 4
+    // Wait for UI to appear after Phase 3
     await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
 
     // Navigate through the UI screens quickly - just navigate to sign
@@ -72,7 +67,7 @@ test('[NANO S] Create PLT - Full flow minimal', setupZemu('nanos', async (sim, t
     await sim.clickBoth(); // Sign
 
     await expect(tx).resolves.toEqual(
-        Buffer.from('b19bfe5fc65c4aed527a00a388e7328450c3c8762cf87c4058f4272741d943622b2ace5f8fe7530758bdff76e896562d973170e9daf240cde9fdfd19eda46e0f9000', 'hex'),
+        Buffer.from('bbf2bf26844430fb6f31e605ce71abb08d221e9c3486a2cc981b2fc235a9f8b0c6218deb0638b55636ebe07f1d5e17be5cbdf1013f792eb161e1647eb4ceef069000', 'hex'),
     );
 }));
 
@@ -82,26 +77,21 @@ test('[NANO S] Create PLT - Large init params (192 bytes)', setupZemu('nanos', a
     const response1 = await transport.send(0xe0, 0x48, 0x00, 0x00, data);
     expect(response1).toEqual(Buffer.from('9000', 'hex'));
 
-    // Phase 2: Payload
-    data = Buffer.from('00000003545259af5684e70c1438e442066d017e4410af6da2b53bfa651a07d81efa2aa668db20a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d706', 'hex');
+    // Phase 2: Payload + init params length (192 bytes)
+    data = Buffer.from('00000003545259af5684e70c1438e442066d017e4410af6da2b53bfa651a07d81efa2aa668db20a845815bd43a1999e90fbf971537a70392eb38f89e6bd32b3dd70e1a9551d70606000000c0', 'hex');
     const response2 = await transport.send(0xe0, 0x48, 0x01, 0x00, data);
     expect(response2).toEqual(Buffer.from('9000', 'hex'));
 
-    // Phase 3: Init params length (192 bytes)
-    data = Buffer.from('000000c0', 'hex');
-    const response3 = await transport.send(0xe0, 0x48, 0x02, 0x00, data);
-    expect(response3).toEqual(Buffer.from('9000', 'hex'));
-
-    // Phase 4: Init params (192 bytes of data)
+    // Phase 3: Init params (192 bytes of data)
     // Create a pattern that will be easy to identify
     const initParamsData = Buffer.alloc(192);
     for (let i = 0; i < 192; i++) {
         initParamsData[i] = i % 256;
     }
 
-    const tx = transport.send(0xe0, 0x48, 0x03, 0x00, initParamsData);
+    const tx = transport.send(0xe0, 0x48, 0x02, 0x00, initParamsData);
 
-    // Wait for UI to appear after Phase 4
+    // Wait for UI to appear after Phase 3
     await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
 
     // Navigate through the UI screens - init params shows hex content across multiple pages
@@ -115,6 +105,6 @@ test('[NANO S] Create PLT - Large init params (192 bytes)', setupZemu('nanos', a
     await sim.clickBoth(); // Sign
 
     await expect(tx).resolves.toEqual(
-        Buffer.from('985f0b44e0496eb45587d7b8299221b6afd984f495cb34a676d11982fda11b3d333ecb62802a83d1740ea2c12655df6bf211b4ed7e80aae608ce090da02cfb019000', 'hex'),
+        Buffer.from('0d187088c00e446589664f1c13cf777eb9789106f05cd7a8b7a159434e7fe2eaacf214db69975f04e4864b7bae33fd746386f586c7cfe1b58571e36b3008a50a9000', 'hex'),
     );
 }));

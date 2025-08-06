@@ -45,8 +45,7 @@ UX_FLOW(ux_sign_create_plt_start,
 
 #define P1_INITIAL                      0x00
 #define P1_PAYLOAD                      0x01
-#define P1_INIT_PARAMS_LENGTH           0x02
-#define P1_INIT_PARAMS                  0x03
+#define P1_INIT_PARAMS                  0x02
 
 void handleSignCreatePlt(
     uint8_t *cdata,
@@ -114,13 +113,10 @@ void handleSignCreatePlt(
         cdata += 1;
         bin2dec(ctx->decimals, sizeof(ctx->decimals), decimalsValue);
 
-        ctx->state = TX_CREATE_PLT_INIT_PARAMS_LENGTH;
-        sendSuccessNoIdle();
-
-    } else if (p1 == P1_INIT_PARAMS_LENGTH && ctx->state == TX_CREATE_PLT_INIT_PARAMS_LENGTH) {
-        // Parse initialization parameters length
+        // Parse initialization parameters length (4 bytes)
         ctx->initializationParamsLength = U4BE(cdata, 0);
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 4, NULL, 0);
+        cdata += 4;
         ctx->remainingInitializationParamsBytes = ctx->initializationParamsLength;
 
         // Initialization parameters are required for PLT creation
