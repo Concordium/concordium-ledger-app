@@ -33,8 +33,8 @@ UX_STEP_NOCB(
     bnnn_paging,
     {"Init Params", (char *) global.signCreatePltContext.initParamsHex});
 
-UX_FLOW(ux_sign_create_plt_start, 
-    &ux_sign_flow_shared_review, 
+UX_FLOW(ux_sign_create_plt_start,
+    &ux_sign_flow_shared_review,
     &ux_sign_create_plt_token_symbol,
     &ux_sign_create_plt_token_module,
     &ux_sign_create_plt_governance_account,
@@ -54,7 +54,7 @@ void handleSignCreatePlt(
     uint8_t dataLength,
     volatile unsigned int *flags,
     bool isInitialCall) {
-    
+
     if (isInitialCall) {
         ctx->state = TX_CREATE_PLT_INITIAL;
     }
@@ -67,7 +67,7 @@ void handleSignCreatePlt(
 
         // Read the total payload length (excluding init params)
         ctx->payloadLength = U8BE(cdata, 0);
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 8, NULL, 0);
+        updateHash((cx_hash_t *) &tx_state->hash, cdata, 8);
         cdata += 8;
 
         ctx->state = TX_CREATE_PLT_PAYLOAD;
@@ -76,7 +76,7 @@ void handleSignCreatePlt(
     } else if (p1 == P1_PAYLOAD && ctx->state == TX_CREATE_PLT_PAYLOAD) {
         // Parse token symbol length
         ctx->tokenSymbolLength = U4BE(cdata, 0);
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 4, NULL, 0);
+        updateHash((cx_hash_t *) &tx_state->hash, cdata, 4);
         cdata += 4;
 
         if (ctx->tokenSymbolLength > 128) {
@@ -87,19 +87,19 @@ void handleSignCreatePlt(
         if (ctx->tokenSymbolLength > 0) {
             memmove(ctx->tokenSymbol, cdata, ctx->tokenSymbolLength);
             ctx->tokenSymbol[ctx->tokenSymbolLength] = '\0';
-            cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, ctx->tokenSymbolLength, NULL, 0);
+            updateHash((cx_hash_t *) &tx_state->hash, cdata, ctx->tokenSymbolLength);
             cdata += ctx->tokenSymbolLength;
         }
 
         // Parse token module (32 bytes)
         toPaginatedHex(cdata, 32, ctx->tokenModule, sizeof(ctx->tokenModule));
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 32, NULL, 0);
+        updateHash((cx_hash_t *) &tx_state->hash, cdata, 32);
         cdata += 32;
 
         // Parse governance account (32 bytes, encode to base58)
         uint8_t governanceAccountBytes[32];
         memmove(governanceAccountBytes, cdata, 32);
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 32, NULL, 0);
+        updateHash((cx_hash_t *) &tx_state->hash, cdata, 32);
         cdata += 32;
 
         size_t outputSize = sizeof(ctx->governanceAccount);
@@ -110,7 +110,7 @@ void handleSignCreatePlt(
 
         // Parse decimals (1 byte)
         uint8_t decimalsValue = cdata[0];
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 1, NULL, 0);
+        updateHash((cx_hash_t *) &tx_state->hash, cdata, 1);
         cdata += 1;
         bin2dec(ctx->decimals, sizeof(ctx->decimals), decimalsValue);
 
@@ -120,7 +120,7 @@ void handleSignCreatePlt(
     } else if (p1 == P1_INIT_PARAMS_LENGTH && ctx->state == TX_CREATE_PLT_INIT_PARAMS_LENGTH) {
         // Parse initialization parameters length
         ctx->initializationParamsLength = U4BE(cdata, 0);
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 4, NULL, 0);
+        updateHash((cx_hash_t *) &tx_state->hash, cdata, 4);
         ctx->remainingInitializationParamsBytes = ctx->initializationParamsLength;
 
         // Initialization parameters are required for PLT creation
@@ -152,8 +152,8 @@ void handleSignCreatePlt(
         }
 
         // Hash the initialization parameters (all data is hashed, even if not all is displayed)
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, dataLength, NULL, 0);
-        
+        updateHash((cx_hash_t *) &tx_state->hash, cdata, dataLength);
+
         ctx->remainingInitializationParamsBytes -= dataLength;
 
         if (ctx->remainingInitializationParamsBytes == 0) {
@@ -162,10 +162,10 @@ void handleSignCreatePlt(
             if (displayLength > sizeof(ctx->initParams)) {
                 displayLength = sizeof(ctx->initParams);
             }
-            
+
             // Convert stored params to hex for display
             toPaginatedHex(ctx->initParams, displayLength, ctx->initParamsHex, sizeof(ctx->initParamsHex));
-            
+
             // If init params were truncated, append indicator
             if (ctx->initializationParamsLength > sizeof(ctx->initParams)) {
                 size_t currentLen = strlen(ctx->initParamsHex);
@@ -173,7 +173,7 @@ void handleSignCreatePlt(
                     strcat(ctx->initParamsHex, "...(truncated)");
                 }
             }
-            
+
             // Show UI for user review
             ux_flow_init(0, ux_sign_create_plt_start, NULL);
             *flags |= IO_ASYNCH_REPLY;

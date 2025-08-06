@@ -39,13 +39,13 @@ void handleSignUpdateMintDistribution(uint8_t *cdata, uint8_t p2, volatile unsig
     // Baker reward
     uint32_t bakerReward = U4BE(cdata, 0);
     fractionToPercentageDisplay(ctx->bakerReward, sizeof(ctx->bakerReward), bakerReward);
-    cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 4, NULL, 0);
+    updateHash((cx_hash_t *) &tx_state->hash, cdata, 4);
     cdata += 4;
 
     // Finalization reward
     uint32_t finalizationReward = U4BE(cdata, 0);
     fractionToPercentageDisplay(ctx->finalizationReward, sizeof(ctx->finalizationReward), finalizationReward);
-    cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 4, NULL, 0);
+    updateHash((cx_hash_t *) &tx_state->hash, cdata, 4);
 
     ux_flow_init(0, ux_sign_mint_rate, NULL);
     *flags |= IO_ASYNCH_REPLY;

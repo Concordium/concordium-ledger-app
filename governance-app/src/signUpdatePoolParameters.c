@@ -92,7 +92,7 @@ UX_FLOW(
 uint8_t parseCommissionRate(uint8_t *cdata, uint8_t *commissionRateDisplay, uint8_t sizeOfCommissionRateDisplay) {
     uint32_t rate = U4BE(cdata, 0);
     fractionToPercentageDisplay(commissionRateDisplay, sizeOfCommissionRateDisplay, rate);
-    cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 4, NULL, 0);
+    updateHash((cx_hash_t *) &tx_state->hash, cdata, 4);
     return 4;
 }
 
@@ -152,17 +152,17 @@ void handleSignUpdatePoolParameters(uint8_t *cdata, uint8_t p1, volatile unsigne
     } else if (p1 == P1_EQUITY && ctx->state == TX_UPDATE_POOL_PARAMETERS_EQUITY) {
         uint64_t minimumEquityCapital = U8BE(cdata, 0);
         amountToGtuDisplay(ctx->minimumEquityCapital, sizeof(ctx->minimumEquityCapital), minimumEquityCapital);
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 8, NULL, 0);
+        updateHash((cx_hash_t *) &tx_state->hash, cdata, 8);
         cdata += 8;
 
         cdata += parseCommissionRate(cdata, ctx->capitalBound, sizeof(ctx->capitalBound));
 
         uint64_t leverageBoundNumerator = U8BE(cdata, 0);
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 8, NULL, 0);
+        updateHash((cx_hash_t *) &tx_state->hash, cdata, 8);
         cdata += 8;
 
         uint64_t leverageBoundDenominator = U8BE(cdata, 0);
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 8, NULL, 0);
+        updateHash((cx_hash_t *) &tx_state->hash, cdata, 8);
 
         int numLength = numberToText(ctx->leverageBound, sizeof(ctx->leverageBound), leverageBoundNumerator);
         memmove(ctx->leverageBound + numLength, " / ", 3);

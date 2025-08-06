@@ -73,13 +73,13 @@ void handleSignAddIdentityProvider(
         cdata += hashUpdateHeaderAndType(cdata, UPDATE_TYPE_ADD_IDENTITY_PROVIDER);
 
         // Read the IpInfo length.
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 4, NULL, 0);
+        updateHash((cx_hash_t *) &tx_state->hash, cdata, 4);
         ctx->payloadLength = U4BE(cdata, 0);
         cdata += 4;
 
         // Read the ipIdentity.
         uint32_t ipIdentity = U4BE(cdata, 0);
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 4, NULL, 0);
+        updateHash((cx_hash_t *) &tx_state->hash, cdata, 4);
         bin2dec(ctx->ipIdentity, sizeof(ctx->ipIdentity), ipIdentity);
         ctx->payloadLength -= 4;
 
@@ -92,7 +92,7 @@ void handleSignAddIdentityProvider(
     } else if (p1 == P1_DESCRIPTION_LENGTH && ctx->state == TX_ADD_IDENTITY_PROVIDER_DESCRIPTION_LENGTH) {
         // Read current part of description length
         desc_ctx->textLength = U4BE(cdata, 0);
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 4, NULL, 0);
+        updateHash((cx_hash_t *) &tx_state->hash, cdata, 4);
         ctx->payloadLength -= 4;
 
         ctx->state = TX_ADD_IDENTITY_PROVIDER_DESCRIPTION;
@@ -106,7 +106,7 @@ void handleSignAddIdentityProvider(
             return;
         }
 
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, dataLength, NULL, 0);
+        updateHash((cx_hash_t *) &tx_state->hash, cdata, dataLength);
 
         memmove(desc_ctx->text, cdata, dataLength);
 
@@ -121,15 +121,15 @@ void handleSignAddIdentityProvider(
         checkIfDescriptionPartIsDoneIdentityProvider();
         displayDescriptionPart(flags);
     } else if (p1 == P1_VERIFY_KEY && ctx->state == TX_ADD_IDENTITY_PROVIDER_VERIFY_KEY) {
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, dataLength, NULL, 0);
-        cx_hash((cx_hash_t *) &ctx->hash, 0, cdata, dataLength, NULL, 0);
+        updateHash((cx_hash_t *) &tx_state->hash, cdata, dataLength);
+        updateHash((cx_hash_t *) &ctx->hash, cdata, dataLength);
         ctx->verifyKeyLength -= dataLength;
         ctx->payloadLength -= dataLength;
 
         if (ctx->verifyKeyLength == 0) {
             // We have received all bytes of the verifyKey.
             uint8_t hashBytes[32];
-            cx_hash((cx_hash_t *) &ctx->hash, CX_LAST, NULL, 0, hashBytes, 32);
+            hash((cx_hash_t *) &ctx->hash, CX_LAST, NULL, 0, hashBytes, 32);
             toPaginatedHex(hashBytes, 32, ctx->verifyKeyHash, sizeof(ctx->verifyKeyHash));
 
             ctx->state = TX_ADD_IDENTITY_PROVIDER_CDI_VERIFY_KEY;
@@ -143,7 +143,7 @@ void handleSignAddIdentityProvider(
             sendSuccessNoIdle();
         }
     } else if (p1 == P1_CDI_VERIFY_KEY && ctx->state == TX_ADD_IDENTITY_PROVIDER_CDI_VERIFY_KEY) {
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, CDI_VERIFY_KEY_LENGTH, NULL, 0);
+        updateHash((cx_hash_t *) &tx_state->hash, cdata, CDI_VERIFY_KEY_LENGTH);
         toPaginatedHex(cdata, CDI_VERIFY_KEY_LENGTH, ctx->cdiVerifyKey, sizeof(ctx->cdiVerifyKey));
         ctx->payloadLength -= CDI_VERIFY_KEY_LENGTH;
 

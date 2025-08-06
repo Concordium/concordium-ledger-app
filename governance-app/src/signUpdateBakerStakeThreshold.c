@@ -24,7 +24,7 @@ void handleSignUpdateBakerStakeThreshold(uint8_t *cdata, volatile unsigned int *
 
     uint64_t bakerThresholdAmount = U8BE(cdata, 0);
     amountToGtuDisplay(ctx->stakeThreshold, sizeof(ctx->stakeThreshold), bakerThresholdAmount);
-    cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 8, NULL, 0);
+    updateHash((cx_hash_t *) &tx_state->hash, cdata, 8);
 
     ux_flow_init(0, ux_sign_baker_stake_threshold, NULL);
     *flags |= IO_ASYNCH_REPLY;

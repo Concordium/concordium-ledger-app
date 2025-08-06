@@ -62,13 +62,13 @@ void handleSignAddAnonymityRevoker(
         cdata += hashUpdateHeaderAndType(cdata, UPDATE_TYPE_ADD_ANONYMITY_REVOKER);
 
         // Read the payload length.
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 4, NULL, 0);
+        updateHash((cx_hash_t *) &tx_state->hash, cdata, 4);
         ctx->payloadLength = U4BE(cdata, 0);
         cdata += 4;
 
         // Read the arIdentity.
         uint32_t arIdentity = U4BE(cdata, 0);
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 4, NULL, 0);
+        updateHash((cx_hash_t *) &tx_state->hash, cdata, 4);
         numberToText(ctx->arIdentity, sizeof(ctx->arIdentity), arIdentity);
 
         ctx->state = TX_ADD_ANONYMITY_REVOKER_DESCRIPTION_LENGTH;
@@ -80,7 +80,7 @@ void handleSignAddAnonymityRevoker(
     } else if (p1 == P1_DESCRIPTION_LENGTH && ctx->state == TX_ADD_ANONYMITY_REVOKER_DESCRIPTION_LENGTH) {
         // Read current part of description length
         desc_ctx->textLength = U4BE(cdata, 0);
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 4, NULL, 0);
+        updateHash((cx_hash_t *) &tx_state->hash, cdata, 4);
         ctx->payloadLength -= 4;
 
         ctx->state = TX_ADD_ANONYMITY_REVOKER_DESCRIPTION;
@@ -94,7 +94,7 @@ void handleSignAddAnonymityRevoker(
             THROW(ERROR_INVALID_STATE);
         }
 
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, dataLength, NULL, 0);
+        updateHash((cx_hash_t *) &tx_state->hash, cdata, dataLength);
 
         memmove(desc_ctx->text, cdata, dataLength);
 
@@ -110,7 +110,7 @@ void handleSignAddAnonymityRevoker(
     } else if (p1 == P1_PUBLIC_KEY && ctx->state == TX_ADD_ANONYMITY_REVOKER_PUBLIC_KEY) {
         uint8_t publicKey[96];
         memmove(publicKey, cdata, 96);
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, publicKey, 96, NULL, 0);
+        updateHash((cx_hash_t *) &tx_state->hash, publicKey, 96);
         toPaginatedHex(publicKey, 96, ctx->publicKey, sizeof(ctx->publicKey));
 
         ux_flow_init(0, ux_sign_add_anonymity_revoker_finish, NULL);

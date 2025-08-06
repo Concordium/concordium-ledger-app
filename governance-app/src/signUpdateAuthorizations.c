@@ -181,11 +181,11 @@ void handleSignUpdateAuthorizations(
             THROW(ERROR_INVALID_TRANSACTION);
         }
 
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 1, NULL, 0);
+        updateHash((cx_hash_t *) &tx_state->hash, cdata, 1);
         cdata += 1;
 
         ctx->publicKeyListLength = U2BE(cdata, 0);
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 2, NULL, 0);
+        updateHash((cx_hash_t *) &tx_state->hash, cdata, 2);
 
         ctx->state = TX_UPDATE_AUTHORIZATIONS_PUBLIC_KEY;
         ux_flow_init(0, ux_sign_update_authorizations_review, NULL);
@@ -193,13 +193,13 @@ void handleSignUpdateAuthorizations(
     } else if (
         p1 == P1_PUBLIC_KEY && ctx->state == TX_UPDATE_AUTHORIZATIONS_PUBLIC_KEY && ctx->publicKeyListLength > 0) {
         // Hash the schemeId
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 1, NULL, 0);
+        updateHash((cx_hash_t *) &tx_state->hash, cdata, 1);
         cdata += 1;
 
         uint8_t publicKeyInput[32];
         memmove(publicKeyInput, cdata, 32);
         toPaginatedHex(publicKeyInput, 32, ctx->publicKey, sizeof(ctx->publicKey));
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, publicKeyInput, 32, NULL, 0);
+        updateHash((cx_hash_t *) &tx_state->hash, publicKeyInput, 32);
 
         ctx->publicKeyListLength -= 1;
         if (ctx->publicKeyListLength == 0) {
@@ -208,7 +208,7 @@ void handleSignUpdateAuthorizations(
         ux_flow_init(0, ux_update_authorizations_public_key, NULL);
         *flags |= IO_ASYNCH_REPLY;
     } else if (p1 == P1_ACCESS_STRUCTURE_INITIAL && ctx->state == TX_UPDATE_AUTHORIZATIONS_ACCESS_STRUCTURE_SIZE) {
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 2, NULL, 0);
+        updateHash((cx_hash_t *) &tx_state->hash, cdata, 2);
         ctx->accessStructureSize = U2BE(cdata, 0);
         ctx->state = TX_UPDATE_AUTHORIZATIONS_ACCESS_STRUCTURE_INDEX;
         sendSuccessNoIdle();
@@ -218,7 +218,7 @@ void handleSignUpdateAuthorizations(
             THROW(ERROR_INVALID_TRANSACTION);
         }
         ctx->processedCount = dataLength / 2;
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, dataLength, NULL, 0);
+        updateHash((cx_hash_t *) &tx_state->hash, cdata, dataLength);
         memmove(ctx->buffer, cdata, dataLength);
         processKeyIndices();
         *flags |= IO_ASYNCH_REPLY;
@@ -226,7 +226,7 @@ void handleSignUpdateAuthorizations(
     } else if (
         p1 == P1_ACCESS_STRUCTURE_THRESHOLD && ctx->state == TX_UPDATE_AUTHORIZATIONS_ACCESS_STRUCTURE_THRESHOLD) {
         uint16_t threshold = U2BE(cdata, 0);
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 2, NULL, 0);
+        updateHash((cx_hash_t *) &tx_state->hash, cdata, 2);
         bin2dec(ctx->displayKeyIndex, sizeof(ctx->displayKeyIndex), threshold);
         memmove(ctx->title, "Threshold", 10);
 

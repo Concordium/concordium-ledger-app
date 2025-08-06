@@ -25,7 +25,7 @@ void handleSignUpdateValidatorScoreParameters(uint8_t *cdata, volatile unsigned 
 
     // A 64-bit number representing the number of blocks a validator is allowed to miss before being flagged for suspension.
     uint64_t max_missed_rounds = U8BE(cdata, 0);
-    cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 8, NULL, 0);
+    updateHash((cx_hash_t *) &tx_state->hash, cdata, 8);
     numberToText(ctx->max_missed_rounds, sizeof(ctx->max_missed_rounds), max_missed_rounds);
 
     ux_flow_init(0, ux_sign_validator_score_parameters, NULL);
