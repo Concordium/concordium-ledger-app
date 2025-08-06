@@ -9,9 +9,8 @@ An update instruction transaction for creating a new PLT (Programmable Liquidity
 INS | P1 | P2 | CDATA | Comment |
 |----|--------|-----|-------------|----|
 | `0x48` | `0x00` | `0x00` | `path_length path[uint32]x[5] update_instruction_header[28 bytes] update_type[uint8] payload_length[uint64]` | Update type must be 24. Contains derivation path and transaction header. |
-| `0x48` | `0x01` | `0x00` | `token_symbol_length[uint32] [token_symbol[token_symbol_length bytes]] [token_module[32 bytes]] [governance_account[32 bytes]] [decimals[uint8]]` | Transaction payload containing token details. All fields are included in this command. |
-| `0x48` | `0x02` | `0x00` | `initialization_params_length[uint32]` | Length of initialization parameters in bytes. Must be greater than 0. |
-| `0x48` | `0x03` | `0x00` | `initialization_params[1...255 bytes]` | Initialization parameters bytes. Sent in batches until the entirety of the initialization parameters (`initialization_params_length` bytes) has been sent. This command is repeated until all initialization parameter data has been sent. |
+| `0x48` | `0x01` | `0x00` | `token_symbol_length[uint32] [token_symbol[token_symbol_length bytes]] [token_module[32 bytes]] [governance_account[32 bytes]] [decimals[uint8]] [initialization_params_length[uint32]]` | Transaction payload containing token details and initialization parameters length. All fields are included in this command. |
+| `0x48` | `0x02` | `0x00` | `initialization_params[1...255 bytes]` | Initialization parameters bytes. Sent in batches until the entirety of the initialization parameters (`initialization_params_length` bytes) has been sent. This command is repeated until all initialization parameter data has been sent. |
 
 ## Data Format
 
@@ -36,9 +35,8 @@ The transaction payload is serialized in the following order according to Concor
 ## Transaction Flow
 
 1. **Initial Command** (P1=0x00): Contains derivation path, update header, and payload length
-2. **Payload Command** (P1=0x01): Contains all token details (symbol, module, governance account, decimals)
-3. **Init Params Length Command** (P1=0x02): Specifies the length of initialization parameters
-4. **Init Params Commands** (P1=0x03): Variable-length initialization data sent in 255-byte chunks
+2. **Payload Command** (P1=0x01): Contains all token details (symbol, module, governance account, decimals) **and initialization parameters length**
+3. **Init Params Commands** (P1=0x02): Variable-length initialization data sent in 255-byte chunks
 
 ## Display Format
 
