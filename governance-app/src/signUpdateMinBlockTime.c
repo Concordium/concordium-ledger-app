@@ -32,7 +32,7 @@ void handleSignMinBlockTime(uint8_t *cdata, volatile unsigned int *flags) {
     uint64_t minBlockTime = U8BE(cdata, 0);
     updateHash((cx_hash_t *) &tx_state->hash, cdata, 8);
     cdata += 8;
-    numberToTextWithUnit(ctx->minBlockTime, sizeof(ctx->minBlockTime), minBlockTime, "ms", 2);
+    numberToTextWithUnit(ctx->minBlockTime, sizeof(ctx->minBlockTime), minBlockTime, (uint8_t*)"ms", 2);
 
     ux_flow_init(0, ux_sign_update_min_block_time, NULL);
     *flags |= IO_ASYNCH_REPLY;
