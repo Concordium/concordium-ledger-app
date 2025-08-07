@@ -122,8 +122,8 @@ void handleSignCreatePlt(
             THROW(ERROR_INVALID_STATE);
         }
 
-        // Store init params data (up to 256 bytes for display)
-        // Note: If init params exceed 256 bytes, only the first 256 bytes will be displayed
+        // Store init params data (up to 512 bytes for display)
+        // Note: If init params exceed 512 bytes, only the first 512 bytes will be displayed
         uint32_t currentOffset = ctx->initializationParamsLength - ctx->remainingInitializationParamsBytes;
         uint32_t bytesToStore = dataLength;
         if (currentOffset + bytesToStore > sizeof(ctx->initParams)) {
