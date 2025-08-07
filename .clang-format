@@ -3,16 +3,19 @@ BasedOnStyle: Google
 IndentWidth: 4
 ---
 Language: Cpp
-ColumnLimit: 120
+ColumnLimit: 100
 PointerAlignment: Right
-AlignAfterOpenBracket: AlwaysBreak
+AlignAfterOpenBracket: Align
 AlignConsecutiveMacros: true
 AllowAllParametersOfDeclarationOnNextLine: false
-SpaceAfterCStyleCast: true
+SortIncludes: false
+SpaceAfterCStyleCast: false
+SpacesInCStyleCastParentheses: false
 AllowShortCaseLabelsOnASingleLine: false
 AllowAllArgumentsOnNextLine: false
-AllowShortBlocksOnASingleLine: false
+AllowShortBlocksOnASingleLine: Never
 AllowShortFunctionsOnASingleLine: None
 BinPackArguments: false
 BinPackParameters: false
-SortIncludes: false
+---
+

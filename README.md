@@ -1,121 +1,205 @@
-# Concordium Ledger application
+[![Ensure compliance with Ledger guidelines](https://github.com/blooo-io/concordium-ledger-app/actions/workflows/guidelines_enforcer.yml/badge.svg)](https://github.com/blooo-io/concordium-ledger-app/actions/workflows/guidelines_enforcer.yml) [![Build and run functional tests using ragger through reusable workflow](https://github.com/blooo-io/concordium-ledger-app/actions/workflows/build_and_functional_tests.yml/badge.svg)](https://github.com/blooo-io/concordium-ledger-app/actions/workflows/build_and_functional_tests.yml)
 
-An application for the Ledger Nano S, Ledger Nano S Plus and Ledger Nano X devices for retrieving keys and signing transactions.
+# Ledger Concordium Application
 
-## Secure SDK dependencies
+## Quick start guide
 
-We depend on [Nano S Secure SDK](https://github.com/LedgerHQ/nanos-secure-sdk/) and [Ledger Secure SDK](https://github.com/LedgerHQ/ledger-secure-sdk/), which have been added as git submodules. Make sure to initialize submodules when checking out this repository:
-```
-git submodule update --init
-```
+### With VSCode
 
-## Building and deploying
-We provide a small Dockerfile that wraps [ledger-app-builder](https://github.com/LedgerHQ/ledger-app-builder) which can be used for building, loading and deleting an application for the Ledger Nano S and Ledger Nano S Plus devices. Our Dockerfile provides the dependency required for zipping a release for sideloading.
+You can quickly setup a convenient environment to build and test your application by using [Ledger's VSCode developer tools extension](https://marketplace.visualstudio.com/items?itemName=LedgerHQ.ledger-dev-tools) which leverages the [ledger-app-dev-tools](https://github.com/LedgerHQ/ledger-app-builder/pkgs/container/ledger-app-builder%2Fledger-app-dev-tools) docker image.
 
-To build the Docker image run:
-```bash
-docker build -t concordium/ledger-app-builder .
-```
-You can now run the Docker container with
-```bash
-docker run --rm -ti -v "/dev/bus/usb:/dev/bus/usb" -v "$(realpath .):/app" --privileged concordium/ledger-app-builder:latest
-```
-You now have access to the commands provided by the Makefile:
-```
-// Load the application onto the connected device
-root@410e7ab19bea:/app# make load
+It will allow you, whether you are developing on macOS, Windows or Linux to quickly **build** your apps, **test** them on **Speculos** and **load** them on any supported device.
 
-// Delete the application from the connected device
-root@410e7ab19bea:/app# make delete
+* Install and run [Docker](https://www.docker.com/products/docker-desktop/).
+* Make sure you have an X11 server running :
+    * On Ubuntu Linux, it should be running by default.
+    * On macOS, install and launch [XQuartz](https://www.xquartz.org/) (make sure to go to XQuartz > Preferences > Security and check "Allow client connections").
+    * On Windows, install and launch [VcXsrv](https://sourceforge.net/projects/vcxsrv/) (make sure to configure it to disable access control).
+* Install [VScode](https://code.visualstudio.com/download) and add [Ledger's extension](https://marketplace.visualstudio.com/items?itemName=LedgerHQ.ledger-dev-tools).
+* Open a terminal and clone `concordium-ledger-app` with `git clone git@github.com:LedgerHQ/concordium-ledger-app.git`.
+* Open the `concordium-ledger-app` folder with VSCode.
+* Use Ledger extension's sidebar menu or open the tasks menu with `ctrl + shift + b` (`command + shift + b` on a Mac) to conveniently execute actions :
+    * Build the app for the device model of your choice with `Build`.
+    * Test your binary on [Speculos](https://github.com/LedgerHQ/speculos) with `Run with Speculos`.
+    * You can also run functional tests, load the app on a physical device, and more.
 
-// Switch BOLOS_SDK to build for Nano S Plus
-// Note that 'make clean' is a requirement when switching BOLOS_SDK.
-root@f382ee774923:/app# export BOLOS_SDK=$NANOSP_SDK
-root@f382ee774923:/app# make clean
-root@f382ee774923:/app# make load
-```
+:information_source: The terminal tab of VSCode will show you what commands the extension runs behind the scene.
 
-### For the Speculos emulator
+### With a terminal
 
-As the Ledger Nano X does not support sideloading, the only way to test updates on a Nano X is 
-to use the [Speculos emulator](https://github.com/LedgerHQ/speculos). Please follow their documentation
-for how to setup the emulator. To build the `.elf` file required by the emulator run:
-```
-export BOLOS_SDK=$NANOX_SDK
-make emulator
-```
-The file will be available at `bin/app.elf`.
+The [ledger-app-dev-tools](https://github.com/LedgerHQ/ledger-app-builder/pkgs/container/ledger-app-builder%2Fledger-app-dev-tools) docker image contains all the required tools and libraries to **build**, **test** and **load** an application.
 
-## Developing for the Ledger
+You can download it from the ghcr.io docker repository:
 
-Refer to the official documentation provided by Ledger. For quick development when deploying to the 
-device, make sure to deploy a custom certificate to the device. See the "PIN Bypass" section 
-[here](https://developers.ledger.com/docs/nano-app/debug/).
-
-For documentation of the exposed functionality and how to integrate with the Concordium specific 
-applications, please take a look [here](doc/api.md).
-
-## Linting
-A make target is available for linting:
-```bash
-make lint
+```shell
+sudo docker pull ghcr.io/ledgerhq/ledger-app-builder/ledger-app-dev-tools:latest
 ```
 
-## Testing
+You can then enter this development environment by executing the following command from the directory of the application `git` repository:
 
-### Running unit tests
-There are unit tests on some of the functions that do not rely on Ledger specific libraries.
-First, you must have the following installed:
+**Linux (Ubuntu)**
 
-- CMake >= 3.10
-- CMocka >= 1.1.5
-
-To build the tests:
-```bash
-cd unit_tests
-cmake -Bbuild -H. && make -C build
-```
-While still in the `unit_tests` directory, execute the following to run the unit tests:
-```bash
-CTEST_OUTPUT_ON_FAILURE=1 make -C build test
+```shell
+sudo docker run --rm -ti --user "$(id -u):$(id -g)" --privileged -v "/dev/bus/usb:/dev/bus/usb" -v "$(realpath .):/app" ghcr.io/ledgerhq/ledger-app-builder/ledger-app-dev-tools:latest
 ```
 
-### Running end to end tests
-An end to end test is available for each instruction implemented in the application. The end
-to end tests depend on having built the application for Nano S, Nano SP and Nano X, and having placed
-their `.elf` files correctly. This can achieved by running (from within Docker):
-```bash
-cd tests
-./build_binaries.sh
-```
-To fetch the required dependencies run:
-```bash
-yarn
+**macOS**
+
+```shell
+sudo docker run  --rm -ti --user "$(id -u):$(id -g)" --privileged -v "$(pwd -P):/app" ghcr.io/ledgerhq/ledger-app-builder/ledger-app-dev-tools:latest
 ```
 
-While still in the `tests` directory, execute the following to run the end to end tests:
-```bash
-yarn test
+**Windows (with PowerShell)**
+
+```shell
+docker run --rm -ti --privileged -v "$(Get-Location):/app" ghcr.io/ledgerhq/ledger-app-builder/ledger-app-dev-tools:latest
 ```
 
-## Building a release
-Note that it is only possible to build a release for the Ledger Nano S and the Ledger Nano S plus. This is because only those devices allow for sideloading of an application.
+The application's code will be available from inside the docker container, you can proceed to the following compilation steps to build your app.
 
-To make a new release of the Concordium Ledger application you must use the Docker setup described above.
+## Compilation and load
 
-Additionally you must set the following environment variables
-```
-LEDGER_SIGNING_KEY=private_key_used_for_signing_releases
-LEDGER_PUBLIC_KEY=public_key_matching_the_signing_key
-```
-To build a new release make sure that `APPVERSION` has been bumped correctly, and then run
-```
-make clean
-export BOLOS_SDK=$NANOS_SDK
-make release
+To easily setup a development environment for compilation and loading on a physical device, you can use the [VSCode integration](#with-vscode) whether you are on Linux, macOS or Windows.
 
-make clean
-export BOLOS_SDK=$NANOSP_SDK
-make release
+If you prefer using a terminal to perform the steps manually, you can use the guide below.
+
+### Compilation
+
+Setup a compilation environment by following the [shell with docker approach](#with-a-terminal).
+
+From inside the container, use the following command to build the app :
+
+```shell
+make DEBUG=1  # compile optionally with PRINTF
 ```
-The release will be packaged into two `.zip` archives, each with the required binary and the corresponding install scripts.
+
+You can choose which device to compile and load for by setting the `BOLOS_SDK` environment variable to the following values :
+
+* `BOLOS_SDK=$NANOX_SDK`
+* `BOLOS_SDK=$NANOSP_SDK`
+* `BOLOS_SDK=$STAX_SDK`
+
+By default this variable is set to build/load for Nano S+.
+
+### Loading on a physical device
+
+This step will vary slightly depending on your platform.
+
+:information_source: Your physical device must be connected, unlocked and the screen showing the dashboard (not inside an application).
+
+**Linux (Ubuntu)**
+
+First make sure you have the proper udev rules added on your host :
+
+```shell
+# Run these commands on your host, from the app's source folder.
+sudo cp .vscode/20-ledger.ledgerblue.rules /etc/udev/rules.d/
+sudo udevadm control --reload-rules 
+sudo udevadm trigger
+```
+
+Then once you have [opened a terminal](#with-a-terminal) in the `app-builder` image and [built the app](#compilation-and-load) for the device you want, run the following command :
+
+```shell
+# Run this command from the app-builder container terminal.
+make load    # load the app on a Nano S+ by default
+```
+
+[Setting the BOLOS_SDK environment variable](#compilation-and-load) will allow you to load on whichever supported device you want.
+
+**macOS / Windows (with PowerShell)**
+
+:information_source: It is assumed you have [Python](https://www.python.org/downloads/) installed on your computer.
+
+Run these commands on your host from the app's source folder once you have [built the app](#compilation-and-load) for the device you want :
+
+```shell
+# Install Python virtualenv
+python3 -m pip install virtualenv 
+# Create the 'ledger' virtualenv
+python3 -m virtualenv ledger
+```
+
+Enter the Python virtual environment
+
+* macOS : `source ledger/bin/activate`
+* Windows : `.\ledger\Scripts\Activate.ps1`
+
+```shell
+# Install Ledgerblue (tool to load the app)
+python3 -m pip install ledgerblue 
+# Load the app.
+python3 -m ledgerblue.runScript --scp --fileName bin/app.apdu --elfFile bin/app.elf
+```
+
+## Test
+
+The concordium app comes with functional tests implemented with Ledger's [Ragger](https://github.com/LedgerHQ/ragger) test framework.
+
+### macOS / Windows
+
+To test your app on macOS or Windows, it is recommended to use [Ledger's VS Code extension](#with-vscode) to quickly setup a working test environment.
+
+You can use the following sequence of tasks and commands (all accessible in the **extension sidebar menu**) :
+
+* `Select build target`
+* `Build app`
+
+Then you can choose to execute the functional tests :
+
+* Use `Run tests`.
+
+Or simply run the app on the Speculos emulator :
+
+* `Run with Speculos`.
+
+### Linux (Ubuntu)
+
+On Linux, you can use [Ledger's VS Code extension](#with-vscode) to run the tests. If you prefer not to, open a terminal and follow the steps below.
+
+Install the tests requirements :
+
+```shell
+pip install -r tests/requirements.txt 
+```
+
+Then you can :
+
+Run the functional tests (here for nanos+ but available for any device once you have built the binaries) :
+
+```shell
+pytest tests/ --tb=short -v --device nanosp
+```
+
+Or run your app directly with Speculos
+
+```shell
+speculos --model nanosp build/nanos2/bin/app.elf
+```
+
+## Documentation
+
+High level documentation such as [application specification](APP_SPECIFICATION.md), [APDU](doc/APDU.md) and [transaction serialization](doc/TRANSACTION.md) are included in developer documentation which can be generated with [doxygen](https://www.doxygen.nl)
+
+```shell
+doxygen .doxygen/Doxyfile
+```
+
+the process outputs HTML and LaTeX documentations in `doc/html` and `doc/latex` folders.
+
+## Continuous Integration
+
+The flow processed in [GitHub Actions](https://github.com/features/actions) is the following:
+
+- Ledger guidelines enforcer which verifies that an app is compliant with Ledger guidelines. The successful completion of this reusable workflow is a mandatory step for an app to be available on the Ledger application store. More information on the guidelines can be found in the repository [ledger-app-workflow](https://github.com/LedgerHQ/ledger-app-workflows)
+- Code formatting with [clang-format](http://clang.llvm.org/docs/ClangFormat.html)
+- Compilation of the application for all Ledger hardware in [ledger-app-builder](https://github.com/LedgerHQ/ledger-app-builder)
+- Unit tests of C functions with [cmocka](https://cmocka.org/) (see [unit-tests/](unit-tests/))
+- End-to-end tests with [Speculos](https://github.com/LedgerHQ/speculos) emulator and [ragger](https://github.com/LedgerHQ/ragger) (see [tests/](tests/))
+- Code coverage with [gcov](https://gcc.gnu.org/onlinedocs/gcc/Gcov.html)/[lcov](http://ltp.sourceforge.net/coverage/lcov.php) and upload to [codecov.io](https://about.codecov.io)
+- Documentation generation with [doxygen](https://www.doxygen.nl)
+
+It outputs 3 artifacts:
+- `compiled_app_binaries` within binary files of the build process for each device
+- `code-coverage` within HTML details of code coverage
+- `documentation` within HTML auto-generated documentation

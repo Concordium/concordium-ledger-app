@@ -1,0 +1,6 @@
+pytest
+ragger[speculos,ledgerwallet]>=1.11.4
+ecdsa>=0.16.1,<0.17.0
+pysha3>=1.0.0,<2.0.0
+py_ecc>=7.0.1,<8.0.0
+bip32>=3.4.0,<4.0.0

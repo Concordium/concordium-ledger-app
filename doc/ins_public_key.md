@@ -6,11 +6,11 @@ account or for a governance key.
 
 ## Protocol description
 
-* Single command
+- Single command
 
-| INS | P1 | P2 | CDATA | Comment |
-|-----|--------|-----|-------------|----|
-| `0x01` | `0x00` | `0x00` | `path[uint32]x[5..8]` | Export of a public-key with user acceptance. |
-| `0x01` | `0x01` | `0x00` | `path[uint32]x[5..8]` | Export of a public-key without user acceptance. |
-| `0x01` | `0x00` | `0x01` | `path[uint32]x[5..8]` | Export of a signed public-key with user acceptance. |
+| INS    | P1     | P2     | CDATA                 | Comment                                                |
+| ------ | ------ | ------ | --------------------- | ------------------------------------------------------ |
+| `0x01` | `0x00` | `0x00` | `path[uint32]x[5..8]` | Export of a public-key with user acceptance.           |
+| `0x01` | `0x01` | `0x00` | `path[uint32]x[5..8]` | Export of a public-key without user acceptance.        |
+| `0x01` | `0x00` | `0x01` | `path[uint32]x[5..8]` | Export of a signed public-key with user acceptance.    |
 | `0x01` | `0x01` | `0x01` | `path[uint32]x[5..8]` | Export of a signed public-key without user acceptance. |

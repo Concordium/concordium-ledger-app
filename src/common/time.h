@@ -1,7 +1,4 @@
-#ifndef _CONCORDIUM_APP_TIME_H_
-#define _CONCORDIUM_APP_TIME_H_
-
-#include <os.h>
+#pragma once
 
 typedef struct {
     int tm_sec;  /* seconds,  range 0 to 59          */
@@ -24,5 +21,3 @@ int secondsToTm(long long, tm *);
  * the format yyyy-mm-dd hh:mm:ss.
  */
 int timeToDisplayText(tm time, uint8_t *dst, size_t dstLength);
-
-#endif

@@ -1,7 +1,4 @@
-#ifndef _CONCORDIUM_APP_ACCOUNT_TRANSFER_WITH_SCHEDULE_H_
-#define _CONCORDIUM_APP_ACCOUNT_TRANSFER_WITH_SCHEDULE_H_
-
-#include "time.h"
+#pragma once
 
 /**
  * Handles the signing flow for the transfer with schedule account transaction.
@@ -10,14 +7,17 @@
  * transaction kind, recipient address and the number of scheduled transfers to make, 0x01 when
  * sending pairs of scheduled amounts.
  */
-void handleSignTransferWithSchedule(uint8_t *cdata, uint8_t p1, volatile unsigned int *flags, bool isInitialCall);
+void handleSignTransferWithSchedule(uint8_t *cdata,
+                                    uint8_t p1,
+                                    uint8_t lc,
+                                    volatile unsigned int *flags,
+                                    bool isInitialCall);
 
-void handleSignTransferWithScheduleAndMemo(
-    uint8_t *cdata,
-    uint8_t p1,
-    uint8_t dataLength,
-    volatile unsigned int *flags,
-    bool isInitialCall);
+void handleSignTransferWithScheduleAndMemo(uint8_t *cdata,
+                                           uint8_t p1,
+                                           uint8_t dataLength,
+                                           volatile unsigned int *flags,
+                                           bool isInitialCall);
 
 typedef enum {
     TX_TRANSFER_WITH_SCHEDULE_INITIAL = 28,
@@ -44,4 +44,4 @@ typedef struct {
     uint8_t pos;
 } signTransferWithScheduleContext_t;
 
-#endif
+void processNextScheduledAmount(uint8_t *buffer);

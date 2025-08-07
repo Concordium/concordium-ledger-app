@@ -1,18 +1,14 @@
 /*
- *  The code in the function secondsToTm is from the musl project (https://git.musl-libc.org/cgit/musl/),
- *  specifically taken from https://git.musl-libc.org/cgit/musl/tree/src/time/__secs_to_tm.c.
- *  The code has been edited slightly in the following way:
+ *  The code in the function secondsToTm is from the musl project
+ * (https://git.musl-libc.org/cgit/musl/), specifically taken from
+ * https://git.musl-libc.org/cgit/musl/tree/src/time/__secs_to_tm.c. The code has been edited
+ * slightly in the following way:
  *   - renamed the method to 'seconds_to_tm'.
  *   - since we do not have access to <time.h> we use a local version with a copy
  *     of the required 'tm' struct.
  *  The musl LICENSE is provided in licenses/musl-MIT.txt
  */
-#include "time.h"
-
-#include <limits.h>
-#include <string.h>
-
-#include "numberHelpers.h"
+#include "globals.h"
 
 /* 2000-03-01 (mod 400 year, immediately after feb29 */
 #define LEAPOCH (946684800LL + 86400 * (31 + 29))
@@ -70,7 +66,7 @@ int secondsToTm(long long t, tm *tm) {
 
     for (months = 0; days_in_month[months] <= remdays; months++) remdays -= days_in_month[months];
 
-    if (years + 100 > INT_MAX || years + 100 < INT_MIN) return -1;
+    if (years > INT_MAX - 100 || years < INT_MIN + 100) return -1;
 
     tm->tm_year = years + 100;
     tm->tm_mon = months + 2;
@@ -93,8 +89,11 @@ int secondsToTm(long long t, tm *tm) {
  * Helper function for prepending numbers that are
  * less than 10 with a '0', so that 5 results in 05.
  */
-int prefixWithZero(uint8_t *dst, int value) {
+int prefixWithZero(uint8_t *dst, size_t dstLength, int value) {
     if (value < 10) {
+        if (dstLength < 1) {
+            THROW(ERROR_BUFFER_OVERFLOW);
+        }
         memmove(dst, "0", 1);
         return 1;
     }
@@ -104,36 +103,42 @@ int prefixWithZero(uint8_t *dst, int value) {
 int timeToDisplayText(tm time, uint8_t *dst, size_t dstLength) {
     int offset = 0;
 
+    // Check if we have enough space for full timestamp
+    // Format: "YYYY-MM-DD HH:MM:SS" (19 chars + null terminator)
+    if (dstLength < 20) {
+        THROW(ERROR_BUFFER_OVERFLOW);
+    }
+
     offset += numberToText(dst, dstLength, time.tm_year + 1900);
 
     memmove(dst + offset, "-", 1);
     offset += 1;
 
-    offset += prefixWithZero(dst + offset, time.tm_mon + 1);
+    offset += prefixWithZero(dst + offset, dstLength - offset, time.tm_mon + 1);
     offset += numberToText(dst + offset, dstLength - offset, time.tm_mon + 1);
 
     memmove(dst + offset, "-", 1);
     offset += 1;
 
-    offset += prefixWithZero(dst + offset, time.tm_mday);
+    offset += prefixWithZero(dst + offset, dstLength - offset, time.tm_mday);
     offset += numberToText(dst + offset, dstLength - offset, time.tm_mday);
 
     memmove(dst + offset, " ", 1);
     offset += 1;
 
-    offset += prefixWithZero(dst + offset, time.tm_hour);
+    offset += prefixWithZero(dst + offset, dstLength - offset, time.tm_hour);
     offset += numberToText(dst + offset, dstLength - offset, time.tm_hour);
 
     memmove(dst + offset, ":", 1);
     offset += 1;
 
-    offset += prefixWithZero(dst + offset, time.tm_min);
+    offset += prefixWithZero(dst + offset, dstLength - offset, time.tm_min);
     offset += numberToText(dst + offset, dstLength - offset, time.tm_min);
 
     memmove(dst + offset, ":", 1);
     offset += 1;
 
-    offset += prefixWithZero(dst + offset, time.tm_sec);
+    offset += prefixWithZero(dst + offset, dstLength - offset, time.tm_sec);
     offset += bin2dec(dst + offset, dstLength - offset, time.tm_sec);
 
     return offset;
