@@ -18,10 +18,7 @@ UX_STEP_NOCB(
     bnnn_paging,
     {"Token Module", (char *) global.signCreatePltContext.tokenModule});
 
-UX_STEP_NOCB(
-    ux_sign_create_plt_governance_account,
-    bnnn_paging,
-    {"Governance Account", (char *) global.signCreatePltContext.governanceAccount});
+
 
 UX_STEP_NOCB(
     ux_sign_create_plt_decimals,
@@ -37,7 +34,6 @@ UX_FLOW(ux_sign_create_plt_start,
     &ux_sign_flow_shared_review, 
     &ux_sign_create_plt_token_symbol,
     &ux_sign_create_plt_token_module,
-    &ux_sign_create_plt_governance_account,
     &ux_sign_create_plt_decimals,
     &ux_sign_create_plt_init_params,
     &ux_sign_flow_shared_sign,
@@ -95,17 +91,7 @@ void handleSignCreatePlt(
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 32, NULL, 0);
         cdata += 32;
 
-        // Parse governance account (32 bytes, encode to base58)
-        uint8_t governanceAccountBytes[32];
-        memmove(governanceAccountBytes, cdata, 32);
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 32, NULL, 0);
-        cdata += 32;
 
-        size_t outputSize = sizeof(ctx->governanceAccount);
-        if (base58check_encode(governanceAccountBytes, 32, ctx->governanceAccount, &outputSize) != 0) {
-            THROW(ERROR_INVALID_TRANSACTION);
-        }
-        ctx->governanceAccount[outputSize] = '\0';
 
         // Parse decimals (1 byte)
         uint8_t decimalsValue = cdata[0];
