@@ -30,8 +30,8 @@ UX_STEP_NOCB(
     bnnn_paging,
     {"Init Params", (char *) global.signCreatePltContext.initParamsHex});
 
-UX_FLOW(ux_sign_create_plt_start, 
-    &ux_sign_flow_shared_review, 
+UX_FLOW(ux_sign_create_plt_start,
+    &ux_sign_flow_shared_review,
     &ux_sign_create_plt_token_symbol,
     &ux_sign_create_plt_token_module,
     &ux_sign_create_plt_decimals,
@@ -49,7 +49,7 @@ void handleSignCreatePlt(
     uint8_t dataLength,
     volatile unsigned int *flags,
     bool isInitialCall) {
-    
+
     if (isInitialCall) {
         ctx->state = TX_CREATE_PLT_INITIAL;
     }
@@ -90,8 +90,6 @@ void handleSignCreatePlt(
         toPaginatedHex(cdata, 32, ctx->tokenModule, sizeof(ctx->tokenModule));
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 32, NULL, 0);
         cdata += 32;
-
-
 
         // Parse decimals (1 byte)
         uint8_t decimalsValue = cdata[0];
@@ -135,7 +133,7 @@ void handleSignCreatePlt(
 
         // Hash the initialization parameters (all data is hashed, even if not all is displayed)
         cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, dataLength, NULL, 0);
-        
+
         ctx->remainingInitializationParamsBytes -= dataLength;
 
         if (ctx->remainingInitializationParamsBytes == 0) {
@@ -144,10 +142,10 @@ void handleSignCreatePlt(
             if (displayLength > sizeof(ctx->initParams)) {
                 displayLength = sizeof(ctx->initParams);
             }
-            
+
             // Convert stored params to hex for display
             toPaginatedHex(ctx->initParams, displayLength, ctx->initParamsHex, sizeof(ctx->initParamsHex));
-            
+
             // If init params were truncated, append indicator
             if (ctx->initializationParamsLength > sizeof(ctx->initParams)) {
                 size_t currentLen = strlen(ctx->initParamsHex);
@@ -155,7 +153,7 @@ void handleSignCreatePlt(
                     strcat(ctx->initParamsHex, "...(truncated)");
                 }
             }
-            
+
             // Show UI for user review
             ux_flow_init(0, ux_sign_create_plt_start, NULL);
             *flags |= IO_ASYNCH_REPLY;
