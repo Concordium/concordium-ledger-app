@@ -33,6 +33,7 @@ typedef struct {
     uint8_t minimumEquityCapital[26];
     uint8_t capitalBound[8];
     uint8_t leverageBound[44];
+    char updateTypeText[32];
     updatePoolParametersState_t state;
 } signUpdatePoolParametersContext_t;
 

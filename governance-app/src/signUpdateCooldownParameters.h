@@ -11,6 +11,7 @@ void handleSignUpdateCooldownParameters(uint8_t *cdata, volatile unsigned int *f
 typedef struct {
     uint8_t poolOwnerCooldown[21];
     uint8_t delegatorCooldown[21];
+    char updateTypeText[32];
 } signUpdateCooldownParametersContext_t;
 
 #endif

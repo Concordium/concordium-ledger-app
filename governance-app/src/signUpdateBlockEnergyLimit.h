@@ -11,6 +11,7 @@ void handleSignUpdateBlockEnergyLimit(uint8_t *cdata, volatile unsigned int *fla
 
 typedef struct {
     uint8_t blockEnergyLimit[22];
+    char updateTypeText[32];
 } signUpdateBlockEnergyLimitContext_t;
 
 #endif
