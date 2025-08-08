@@ -8,6 +8,10 @@ static signTransactionDistributionFeeContext_t *ctx = &global.signTransactionDis
 static tx_state_t *tx_state = &global_tx_state;
 
 UX_STEP_NOCB(
+    ux_sign_transaction_fee_distribution_type_step,
+    bn,
+    {"Update type", (char *) global.signTransactionDistributionFeeContext.updateTypeText});
+UX_STEP_NOCB(
     ux_sign_transaction_dist_1_step,
     bnnn_paging,
     {.title = "Baker fee", .text = (char *) global.signTransactionDistributionFeeContext.baker});
@@ -18,6 +22,7 @@ UX_STEP_NOCB(
 UX_FLOW(
     ux_sign_transaction_dist,
     &ux_sign_flow_shared_review,
+    &ux_sign_transaction_fee_distribution_type_step,
     &ux_sign_transaction_dist_1_step,
     &ux_sign_transaction_dist_2_step,
     &ux_sign_flow_shared_sign,
@@ -28,6 +33,10 @@ void handleSignUpdateTransactionFeeDistribution(uint8_t *cdata, volatile unsigne
 
     cx_sha256_init(&tx_state->hash);
     cdata += hashUpdateHeaderAndType(cdata, UPDATE_TYPE_TRANSACTION_FEE_DISTRIBUTION);
+
+    // Set update type text for display
+    strncpy(ctx->updateTypeText, getUpdateTypeText(UPDATE_TYPE_TRANSACTION_FEE_DISTRIBUTION), sizeof(ctx->updateTypeText));
+    ctx->updateTypeText[sizeof(ctx->updateTypeText) - 1] = '\0';
 
     // Baker fee is first 4 bytes
     uint32_t bakerFee = U4BE(cdata, 0);

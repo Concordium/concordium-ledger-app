@@ -30,6 +30,7 @@ typedef struct {
     textState_t textState;
     updateProtocolState_t state;
     char specificationHash[68];
+    char updateTypeText[32];
 } signUpdateProtocolContext_t;
 
 #endif

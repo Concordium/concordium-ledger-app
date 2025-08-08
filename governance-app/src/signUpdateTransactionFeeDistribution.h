@@ -11,6 +11,7 @@ void handleSignUpdateTransactionFeeDistribution(uint8_t *cdata, volatile unsigne
 typedef struct {
     uint8_t baker[8];
     uint8_t gasAccount[8];
+    char updateTypeText[32];
 } signTransactionDistributionFeeContext_t;
 
 #endif

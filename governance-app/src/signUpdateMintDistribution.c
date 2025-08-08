@@ -7,6 +7,12 @@
 static signUpdateMintDistribution_t *ctx = &global.signUpdateMintDistribution;
 static tx_state_t *tx_state = &global_tx_state;
 
+#include "util.h"
+
+UX_STEP_NOCB(
+    ux_sign_mint_distribution_type_step,
+    bn,
+    {"Update type", (char *) global.signUpdateMintDistribution.updateTypeText});
 UX_STEP_NOCB(
     ux_sign_mint_rate_1_step,
     bnnn_paging,
@@ -18,6 +24,7 @@ UX_STEP_NOCB(
 UX_FLOW(
     ux_sign_mint_rate,
     &ux_sign_flow_shared_review,
+    &ux_sign_mint_distribution_type_step,
     &ux_sign_mint_rate_1_step,
     &ux_sign_mint_rate_2_step,
     &ux_sign_flow_shared_sign,
@@ -35,6 +42,10 @@ void handleSignUpdateMintDistribution(uint8_t *cdata, uint8_t p2, volatile unsig
     cx_sha256_init(&tx_state->hash);
 
     cdata += hashUpdateHeaderAndType(cdata, UPDATE_TYPE_MINT_DISTRIBUTION_V1);
+
+    // Set update type text for UI
+    strncpy(ctx->updateTypeText, getUpdateTypeText(UPDATE_TYPE_MINT_DISTRIBUTION_V1), sizeof(ctx->updateTypeText));
+    ctx->updateTypeText[sizeof(ctx->updateTypeText) - 1] = '\0';
 
     // Baker reward
     uint32_t bakerReward = U4BE(cdata, 0);
