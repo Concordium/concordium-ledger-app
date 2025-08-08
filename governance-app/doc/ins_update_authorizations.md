@@ -5,7 +5,7 @@ Consists of two types of transactions for updating level 2 keys, i.e. the keys t
 * Update level 2 keys using root keys
 * Update level 2 keys using level 1 keys
 
-Key update types: 
+Key update types:
 
 * Key update type 2 is using level 1 keys and 3 is using root keys. Note that this is different from `V0` where 1 was level 1 keys and 2 was root keys.
 
@@ -22,4 +22,15 @@ INS | P1 | P2 | CDATA | Comment |
 | `0x2A/0x2C` | `0x01` | `0x01` | `scheme_id[uint8] public_key[32 bytes]` | |
 | `0x2A/0x2C` | `0x02` | `0x01` | `access_structure_size[uint16]` | The number of key indices for the current access structure. |
 | `0x2A/0x2C` | `0x03` | `0x01` | `key_index[uint16]x[access_structure_size]` | Key indices for the current access structure. |
-|`0x2A/0x2C`|`0x04`|`0x01`| `threshold[uint16]` | The signing threshold for the current access structure. If there are access structures that have not been transmitted, then GOTO command with `p1 == 0x02` and send the following access structure, and repeat until all access structures have been processed. |
+| `0x2A/0x2C` | `0x04` | `0x01` | `threshold[uint16]` | The signing threshold for the current access structure. If there are access structures that have not been transmitted, then GOTO command with `p1 == 0x02` and send the following access structure, and repeat until all access structures have been processed. |
+
+## Transaction Flow
+
+1. **Review**: Shows a summary of the transaction.
+2. **Update type**: Shows the human-readable update type ("Update authorizations").
+3. **Key update type**: Shows which key level is being used to authorize the update.
+4. **Number of keys**: Shows the number of keys being updated.
+5. **Keys**: Shows each key (paginated if necessary).
+6. **Access structure**: Shows the access structure.
+7. **Threshold**: Shows the threshold for the access structure.
+8. **Sign/Decline**: User can approve or reject the transaction.

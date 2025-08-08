@@ -1,6 +1,6 @@
 # Update foundation account
 
-Used for updating the account address of the foundation account, i.e. updating which account is considered the foundation account that will 
+Used for updating the account address of the foundation account, i.e. updating which account is considered the foundation account that will
 receive foundation rewards.
 
 ## Protocol description

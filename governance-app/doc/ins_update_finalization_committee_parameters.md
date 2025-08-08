@@ -18,12 +18,3 @@ INS | P1 | P2 | CDATA | Comment |
 4. **Max finalizers**: Shows the maximum number of finalizers.
 5. **Stake threshold**: Shows the relative stake threshold.
 6. **Sign/Decline**: User can approve or reject the transaction.
-
-## Display Format
-
-The Ledger will display the following information to the user:
-
-- **Update type**: The human-readable update type (always shown after the review screen).
-- **Min finalizers**: Minimum number of finalizers.
-- **Max finalizers**: Maximum number of finalizers.
-- **Stake threshold**: Relative stake threshold as a percentage.

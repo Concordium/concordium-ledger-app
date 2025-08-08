@@ -16,10 +16,3 @@ INS | P1 | P2 | CDATA | Comment |
 2. **Update type**: Shows the human-readable update type ("Min block time").
 3. **Min block time**: Shows the minimum block time value.
 4. **Sign/Decline**: User can approve or reject the transaction.
-
-## Display Format
-
-The Ledger will display the following information to the user:
-
-- **Update type**: The human-readable update type (always shown after the review screen).
-- **Min block time**: The minimum block time value, with unit.

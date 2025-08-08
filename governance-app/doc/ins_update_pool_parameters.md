@@ -27,14 +27,3 @@ INS | P1 | P2 | CDATA | Comment |
 6. **Capital bound**: Shows the maximum fraction of total staked capital.
 7. **Leverage bound**: Shows the maximum leverage ratio.
 8. **Sign/Decline**: User can approve or reject the transaction.
-
-## Display Format
-
-The Ledger will display the following information to the user:
-
-- **Update type**: The human-readable update type (always shown after the review screen).
-- **Passive delegation commissions**: Commission rates for passive delegation.
-- **Commission bounds**: Allowed commission ranges for bakers.
-- **Minimum equity capital**: Minimum equity capital required for a new baker.
-- **Capital bound**: Maximum fraction of total staked capital for a new baker.
-- **Leverage bound**: Maximum leverage ratio for a baker.

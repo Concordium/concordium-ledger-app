@@ -16,10 +16,3 @@ INS | P1 | P2 | CDATA | Comment |
 2. **Update type**: Shows the human-readable update type ("Block energy limit").
 3. **Block energy limit**: Shows the new block energy limit.
 4. **Sign/Decline**: User can approve or reject the transaction.
-
-## Display Format
-
-The Ledger will display the following information to the user:
-
-- **Update type**: The human-readable update type (always shown after the review screen).
-- **Block energy limit**: The new block energy limit value.

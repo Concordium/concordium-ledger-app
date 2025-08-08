@@ -35,18 +35,8 @@ The transaction payload is serialized in the following order according to Concor
 3. **Token Symbol**: Shows the human-readable token identifier.
 4. **Token Module**: Shows the hex representation of the 32-byte module hash.
 5. **Decimals**: Shows the number of decimal places.
-6. **Init Params**: Shows the initialization parameters in hex (paginated, up to 512 bytes displayed; if longer, shows "...(truncated)").
+6. **Init Params**: Shows the initialization parameters in hex (paginated, up to 256 bytes displayed; if longer, shows "...(truncated)").
 7. **Sign/Decline**: User can approve or reject the transaction.
-
-## Display Format
-
-The Ledger will display the following information to the user:
-
-- **Update type**: The human-readable update type (always shown after the review screen).
-- **Token Symbol**: The human-readable token identifier.
-- **Token Module**: Hex representation of the 32-byte module hash (paginated across multiple screens).
-- **Decimals**: Number of decimal places.
-- **Init Params**: Hex representation of initialization parameters (paginated, up to 512 bytes displayed). If parameters exceed 512 bytes, only the first 512 bytes are shown with a "...(truncated)" indicator.
 
 ## Error Conditions
 

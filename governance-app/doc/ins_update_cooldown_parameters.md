@@ -17,11 +17,3 @@ INS | P1 | P2 | CDATA | Comment |
 3. **Pool owner cooldown**: Shows the pool owner cooldown value.
 4. **Delegator cooldown**: Shows the delegator cooldown value.
 5. **Sign/Decline**: User can approve or reject the transaction.
-
-## Display Format
-
-The Ledger will display the following information to the user:
-
-- **Update type**: The human-readable update type (always shown after the review screen).
-- **Pool owner cooldown**: The pool owner cooldown in seconds.
-- **Delegator cooldown**: The delegator cooldown in seconds.

@@ -17,11 +17,3 @@ INS | P1 | P2 | CDATA | Comment |
 3. **Reward Period Length**: Shows the reward period length.
 4. **Mint rate**: Shows the mint rate.
 5. **Sign/Decline**: User can approve or reject the transaction.
-
-## Display Format
-
-The Ledger will display the following information to the user:
-
-- **Update type**: The human-readable update type (always shown after the review screen).
-- **Reward Period Length**: The reward period length in milliseconds.
-- **Mint rate**: The mint rate as a formatted string.
