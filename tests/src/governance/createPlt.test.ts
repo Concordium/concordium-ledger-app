@@ -88,10 +88,10 @@ async function createPlt(
     await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
     switch (device) {
         case "nanos":
-            await sim.navigateAndCompareSnapshots(".", images, [8, 0]);
+            await sim.navigateAndCompareSnapshots(".", images, [9, 0]);
             break;
         case "nanosp":
-            await sim.navigateAndCompareSnapshots(".", images, [6, 0]);
+            await sim.navigateAndCompareSnapshots(".", images, [7, 0]);
             break;
     }
     await expect(tx).resolves.toEqual(

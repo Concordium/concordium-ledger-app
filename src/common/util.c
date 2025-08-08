@@ -327,3 +327,58 @@ size_t hashAndLoadU64Ratio(uint8_t *cdata, uint8_t *dst, uint8_t sizeOfDst) {
     numberToText(dst + numLength + 3, sizeOfDst - (numLength + 3), denominator);
     return 16;
 }
+
+const char *getUpdateTypeText(uint8_t updateType) {
+    switch (updateType) {
+        case 0:  // UPDATE_TYPE_AUTHORIZATION
+            return "Authorization";
+        case 1:  // UPDATE_TYPE_PROTOCOL
+            return "Protocol";
+        case 3:  // UPDATE_TYPE_EURO_PER_ENERGY
+            return "Euro per energy";
+        case 4:  // UPDATE_TYPE_MICRO_GTU_PER_EURO
+            return "uCCD per Euro";
+        case 5:  // UPDATE_TYPE_FOUNDATION_ACCOUNT
+            return "Foundation account";
+        case 6:  // UPDATE_TYPE_MINT_DISTRIBUTION_V0
+            return "Mint distribution v0";
+        case 7:  // UPDATE_TYPE_TRANSACTION_FEE_DISTRIBUTION
+            return "Transaction fee distribution";
+        case 8:  // UPDATE_TYPE_GAS_REWARDS
+            return "GAS rewards";
+        case 9:  // UPDATE_TYPE_BAKER_STAKE_THRESHOLD
+            return "Baker stake threshold";
+        case 10: // UPDATE_TYPE_UPDATE_ROOT_KEYS
+            return "Root keys";
+        case 11: // UPDATE_TYPE_UPDATE_LEVEL1_KEYS
+            return "Level 1 keys";
+        case 12: // UPDATE_TYPE_ADD_ANONYMITY_REVOKER
+            return "Add anonymity revoker";
+        case 13: // UPDATE_TYPE_ADD_IDENTITY_PROVIDER
+            return "Add identity provider";
+        case 14: // UPDATE_TYPE_COOLDOWN_PARAMETERS
+            return "Cooldown parameters";
+        case 15: // UPDATE_TYPE_POOL_PARAMETERS
+            return "Pool parameters";
+        case 16: // UPDATE_TYPE_TIME_PARAMETERS
+            return "Time parameters";
+        case 17: // UPDATE_TYPE_MINT_DISTRIBUTION_V1
+            return "Mint distribution";
+        case 18: // UPDATE_TYPE_TIMEOUT_PARAMETERS
+            return "Timeout parameters";
+        case 19: // UPDATE_TYPE_MIN_BLOCK_TIME
+            return "Min block time";
+        case 20: // UPDATE_TYPE_BLOCK_ENERGY_LIMIT
+            return "Block energy limit";
+        case 21: // UPDATE_TYPE_GAS_REWARDS_CPV2
+            return "GAS rewards";
+        case 22: // UPDATE_TYPE_FINALIZATION_COMMITTEE_PARAMETERS
+            return "Finalization committee parameters";
+        case 23: // UPDATE_TYPE_VALIDATOR_SCORE_PARAMETERS
+            return "Validator score parameters";
+        case 24: // UPDATE_TYPE_CREATE_PLT
+            return "Create PLT";
+        default:
+            return "Unknown update";
+    }
+}

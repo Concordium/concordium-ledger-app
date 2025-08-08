@@ -9,6 +9,11 @@ static signCreatePltContext_t *ctx = &global.signCreatePltContext;
 static tx_state_t *tx_state = &global_tx_state;
 
 UX_STEP_NOCB(
+    ux_sign_create_plt_type,
+    bn,
+    {"Update type", (char *) global.signCreatePltContext.updateTypeText});
+
+UX_STEP_NOCB(
     ux_sign_create_plt_token_symbol,
     bnnn_paging,
     {"Token Symbol", (char *) global.signCreatePltContext.tokenSymbol});
@@ -32,6 +37,7 @@ UX_STEP_NOCB(
 
 UX_FLOW(ux_sign_create_plt_start,
     &ux_sign_flow_shared_review,
+    &ux_sign_create_plt_type,
     &ux_sign_create_plt_token_symbol,
     &ux_sign_create_plt_token_module,
     &ux_sign_create_plt_decimals,
@@ -59,6 +65,10 @@ void handleSignCreatePlt(
 
         cx_sha256_init(&tx_state->hash);
         cdata += hashUpdateHeaderAndType(cdata, UPDATE_TYPE_CREATE_PLT);
+
+        // Set update type text for display
+        strncpy(ctx->updateTypeText, getUpdateTypeText(UPDATE_TYPE_CREATE_PLT), sizeof(ctx->updateTypeText));
+        ctx->updateTypeText[sizeof(ctx->updateTypeText) - 1] = '\0';
 
         // Read the total payload length (excluding init params)
         ctx->payloadLength = U8BE(cdata, 0);
@@ -120,8 +130,8 @@ void handleSignCreatePlt(
             THROW(ERROR_INVALID_STATE);
         }
 
-        // Store init params data (up to 512 bytes for display)
-        // Note: If init params exceed 512 bytes, only the first 512 bytes will be displayed
+        // Store init params data (up to 256 bytes for display)
+        // Note: If init params exceed 256 bytes, only the first 256 bytes will be displayed
         uint32_t currentOffset = ctx->initializationParamsLength - ctx->remainingInitializationParamsBytes;
         uint32_t bytesToStore = dataLength;
         if (currentOffset + bytesToStore > sizeof(ctx->initParams)) {
