@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Support for create PLT (Protocol Level Token) transaction.
+- Ensure the update type is visible in the UI in one way or another for all update types.
 
 ## 1.1.0
 
