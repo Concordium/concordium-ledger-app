@@ -343,7 +343,7 @@ const char *getUpdateTypeText(uint8_t updateType) {
         case 6:  // UPDATE_TYPE_MINT_DISTRIBUTION_V0
             return "Mint distribution v0";
         case 7:  // UPDATE_TYPE_TRANSACTION_FEE_DISTRIBUTION
-            return "Transaction fee distribution";
+            return "Tx fee distribution";
         case 8:  // UPDATE_TYPE_GAS_REWARDS
             return "GAS rewards";
         case 9:  // UPDATE_TYPE_BAKER_STAKE_THRESHOLD
@@ -357,15 +357,15 @@ const char *getUpdateTypeText(uint8_t updateType) {
         case 13: // UPDATE_TYPE_ADD_IDENTITY_PROVIDER
             return "Add identity provider";
         case 14: // UPDATE_TYPE_COOLDOWN_PARAMETERS
-            return "Cooldown parameters";
+            return "Cooldown params";
         case 15: // UPDATE_TYPE_POOL_PARAMETERS
-            return "Pool parameters";
+            return "Pool params";
         case 16: // UPDATE_TYPE_TIME_PARAMETERS
-            return "Time parameters";
+            return "Time params";
         case 17: // UPDATE_TYPE_MINT_DISTRIBUTION_V1
             return "Mint distribution";
         case 18: // UPDATE_TYPE_TIMEOUT_PARAMETERS
-            return "Timeout parameters";
+            return "Timeout params";
         case 19: // UPDATE_TYPE_MIN_BLOCK_TIME
             return "Min block time";
         case 20: // UPDATE_TYPE_BLOCK_ENERGY_LIMIT
@@ -373,9 +373,9 @@ const char *getUpdateTypeText(uint8_t updateType) {
         case 21: // UPDATE_TYPE_GAS_REWARDS_CPV2
             return "GAS rewards";
         case 22: // UPDATE_TYPE_FINALIZATION_COMMITTEE_PARAMETERS
-            return "Finalization committee parameters";
+            return "Fin. comm. params";
         case 23: // UPDATE_TYPE_VALIDATOR_SCORE_PARAMETERS
-            return "Validator score parameters";
+            return "Valid. score params";
         case 24: // UPDATE_TYPE_CREATE_PLT
             return "Create PLT";
         default:
