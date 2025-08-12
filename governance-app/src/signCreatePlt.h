@@ -33,8 +33,8 @@ typedef struct {
     uint8_t tokenSymbol[129];  // Max 128 chars + null terminator
     char tokenModule[68];      // Hex representation (32 bytes * 2 + 4 chars for pagination + null)
     uint8_t decimals[4];       // String representation of uint8
-    uint8_t initParams[256];   // Buffer to store init params data (reduced from 512 bytes)
-    char initParamsHex[512];   // Hex representation for display (reduced from 2048 bytes)
+    uint8_t initParams[256];   // Buffer to store init params data (up to 256 bytes)
+    char initParamsHex[512];   // Hex representation for display (256 bytes * 2)
 
     createPltState_t state;
 } signCreatePltContext_t;
