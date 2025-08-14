@@ -16,7 +16,7 @@ UX_STEP_NOCB(
 UX_STEP_NOCB(
     ux_sign_create_plt_token_symbol,
     bnnn_paging,
-    {"Token Symbol", (char *) global.signCreatePltContext.tokenId});
+    {"Token ID", (char *) global.signCreatePltContext.tokenId});
 
 UX_STEP_NOCB(
     ux_sign_create_plt_token_module,
