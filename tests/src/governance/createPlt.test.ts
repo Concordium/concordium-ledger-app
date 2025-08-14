@@ -83,10 +83,10 @@ async function createPlt(sim: Zemu, transport: Transport, images: string, device
     await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
     switch (device) {
         case 'nanos':
-            await sim.navigateAndCompareSnapshots('.', images, [9, 0]);
+            await sim.navigateAndCompareSnapshots('.', images, [8, 0]);
             break;
         case 'nanosp':
-            await sim.navigateAndCompareSnapshots('.', images, [7, 0]);
+            await sim.navigateAndCompareSnapshots('.', images, [6, 0]);
             break;
         default:
             throw new Error(`Unsupported device: ${device}`);
@@ -101,7 +101,7 @@ async function createPlt(sim: Zemu, transport: Transport, images: string, device
 
 function chunkBuffer(buffer: Buffer, chunkSize: number): Buffer[] {
     if (chunkSize <= 0) {
-        throw new Error("Chunk size has to be a positive number.");
+        throw new Error('Chunk size has to be a positive number.');
     }
     const chunks: Buffer[] = [];
     for (let i = 0; i < buffer.length; i += chunkSize) {
@@ -110,70 +110,62 @@ function chunkBuffer(buffer: Buffer, chunkSize: number): Buffer[] {
     return chunks;
 }
 
-async function createPltPaginated(
-    sim: Zemu,
-    transport: Transport,
-    images: string
-) {
+async function createPltPaginated(sim: Zemu, transport: Transport, images: string) {
     // Phase 1: Initial
     let data = Buffer.from(
-        "080000045100000000000000000000000000000000000000020000000000000000000000000000000a00000000000000640000000063de5da700000029180000000000000165",
-        "hex"
+        '080000045100000000000000000000000000000000000000020000000000000000000000000000000a00000000000000640000000063de5da700000029180000000000000165',
+        'hex'
     );
     const response1 = await transport.send(0xe0, 0x48, 0x00, 0x00, data);
-    expect(response1).toEqual(Buffer.from("9000", "hex"));
+    expect(response1).toEqual(Buffer.from('9000', 'hex'));
 
     // Phase 2: Payload + init params length (48 bytes)
     data = Buffer.from(
-        "00000003545259af5684e70c1438e442066d017e4410af6da2b53bfa651a07d81efa2aa668db200600000030",
-        "hex"
+        '00000003545259af5684e70c1438e442066d017e4410af6da2b53bfa651a07d81efa2aa668db200600000030',
+        'hex'
     );
     const response2 = await transport.send(0xe0, 0x48, 0x01, 0x00, data);
-    expect(response2).toEqual(Buffer.from("9000", "hex"));
+    expect(response2).toEqual(Buffer.from('9000', 'hex'));
 
     // Phase 3: Init params (48 bytes)
     data = Buffer.from(
-        "a8646e616d65637a6273686275726e61626c65f56864656ea8646e616d65637a6273686275726e61626c65f56864656e",
-        "hex"
+        'a8646e616d65637a6273686275726e61626c65f56864656ea8646e616d65637a6273686275726e61626c65f56864656e',
+        'hex'
     );
     const tx = transport.send(0xe0, 0x48, 0x02, 0x00, data);
 
     await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
-    await sim.navigateAndCompareSnapshots(".", images, [8, 0]);
+    await sim.navigateAndCompareSnapshots('.', images, [7, 0]);
 
     await expect(tx).resolves.toEqual(
         Buffer.from(
-            "1def43230dc45def7199552847a4ee2b4e3700b5e46935a60a9f58e563541e7abd386198cb5e588380de735f04e3e0b6babf115e8bc698ccc67ca0318f96e5069000",
-            "hex"
+            '1def43230dc45def7199552847a4ee2b4e3700b5e46935a60a9f58e563541e7abd386198cb5e588380de735f04e3e0b6babf115e8bc698ccc67ca0318f96e5069000',
+            'hex'
         )
     );
 }
 
-async function createPltTruncated(
-    sim: Zemu,
-    transport: Transport,
-    images: string
-) {
+async function createPltTruncated(sim: Zemu, transport: Transport, images: string) {
     // Phase 1: Initial
     let data = Buffer.from(
-        "080000045100000000000000000000000000000000000000020000000000000000000000000000000a00000000000000640000000063de5da700000029180000000000000165",
-        "hex"
+        '080000045100000000000000000000000000000000000000020000000000000000000000000000000a00000000000000640000000063de5da700000029180000000000000165',
+        'hex'
     );
     const response1 = await transport.send(0xe0, 0x48, 0x00, 0x00, data);
-    expect(response1).toEqual(Buffer.from("9000", "hex"));
+    expect(response1).toEqual(Buffer.from('9000', 'hex'));
 
-    // Phase 2: Payload + init params length (0x0125 = 293 bytes)
+    // Phase 2: Payload + init params length (0x0258 = 600 bytes)
     data = Buffer.from(
-        "00000003545259af5684e70c1438e442066d017e4410af6da2b53bfa651a07d81efa2aa668db200600000125",
-        "hex"
+        '00000003545259af5684e70c1438e442066d017e4410af6da2b53bfa651a07d81efa2aa668db200600000258',
+        'hex'
     );
     const response2 = await transport.send(0xe0, 0x48, 0x01, 0x00, data);
-    expect(response2).toEqual(Buffer.from("9000", "hex"));
+    expect(response2).toEqual(Buffer.from('9000', 'hex'));
 
-    // Phase 3: Init params (293 bytes)
+    // Phase 3: Init params (600 bytes)
     data = Buffer.from(
-        "a8646e616d65637a6273686275726e61626c65f56864656e794c697374f4686d65746164617461a16375726c7068747470733a2f2f746573742e636f6d686d696e7461626c65f569616c6c6f774c697374f46d696e697469616c537570706c79a26576616c756519271068646563696d616c730271676f7665726e616e63654163636f756e74a26474797065676163636f756e746761646472657373a3665f5f74797065736363645f6163636f756e745f61646472657373676164647265737378323379624a363673705a327864574633617667785162326d656f755961376d70764d574e506d556e637a5538466f46386347426e6465636f64656441646472657373582087e3bec61b8db2fb7389b57d2be4f7dd95d1088dfeb6ef7352c13d2b2d27bb49",
-        "hex"
+        'a8646e616d65637a6273686275726e61626c65f56864656e794c697374f4686d65746164617461a16375726c7068747470733a2f2f746573742e636f6d686d696e7461626c65f569616c6c6f774c697374f46d696e697469616c537570706c79a26576616c756519271068646563696d616c730271676f7665726e616e63654163636f756e74a26474797065676163636f756e746761646472657373a3665f5f74797065736363645f6163636f756e745f61646472657373676164647265737378323379624a363673705a327864574633617667785162326d656f755961376d70764d574e506d556e637a5538466f46386347426e6465636f64656441646472657373582087e3bec61b8db2fb7389b57d2be4f7dd95d1088dfeb6ef7352c13d2b2d27bb49a8646e616d65637a6273686275726e61626c65f56864656e794c697374f4686d65746164617461a16375726c7068747470733a2f2f746573742e636f6d686d696e7461626c65f569616c6c6f774c697374f46d696e697469616c537570706c79a26576616c756519271068646563696d616c730271676f7665726e616e63654163636f756e74a26474797065676163636f756e746761646472657373a3665f5f74797065736363645f6163636f756e745f61646472657373676164647265737378323379624a363673705a327864574633617667785162326d656f755961376d70764d574e506d556e637a5538466f46386347426e6465636f64656441646472657373582087e3bec61b8db2fb7389b57d2be4f7dd95d1088dfeb6ef7352c13d2b2d27bb49c13d2b2d27bb49c13d2b2d27bb49',
+        'hex'
     );
     const chunks = chunkBuffer(data, 255);
     let tx;
@@ -181,47 +173,47 @@ async function createPltTruncated(
         data = chunks[i];
         const res = transport.send(0xe0, 0x48, 0x02, 0x00, data);
         if (i < chunks.length - 1) {
-            expect(await res).toEqual(Buffer.from("9000", "hex"));
+            expect(await res).toEqual(Buffer.from('9000', 'hex'));
         } else {
             tx = res;
         }
     }
 
     await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
-    await sim.navigateAndCompareSnapshots(".", images, [19, 0]);
+    await sim.navigateAndCompareSnapshots('.', images, [27, 0]);
 
     await expect(tx).resolves.toEqual(
         Buffer.from(
-            "7b5ebbc8bf14fd4a8046df1efd399b44c55e0cfa69dda1df866b48822863cc3ee071817298e1ff47e43190f459aedd5eb7146a4b35ceb617b255a7c77bb7fc069000",
-            "hex"
+            'de84a881eb3a2f0e600576c32fd87dbb08d0c0ba9fe4d1181c675542ac8783ba8a0fad833474dbe566192aa185262ff77a19782ac36063058e13601548ceb0009000',
+            'hex'
         )
     );
 }
 
 test(
-    "[NANO S] Create PLT",
-    setupZemu("nanos", async (sim, transport) => {
-        await createPlt(sim, transport, "nanos_create_plt/small", "nanos");
+    '[NANO S] Create PLT',
+    setupZemu('nanos', async (sim, transport) => {
+        await createPlt(sim, transport, 'nanos_create_plt/small', 'nanos');
     })
 );
 
 test(
-    "[NANO SP] Create PLT",
-    setupZemu("nanosp", async (sim, transport) => {
-        await createPlt(sim, transport, "nanosp_create_plt/small", "nanosp");
+    '[NANO SP] Create PLT',
+    setupZemu('nanosp', async (sim, transport) => {
+        await createPlt(sim, transport, 'nanosp_create_plt/small', 'nanosp');
     })
 );
 
 test(
-    "[NANO SP] Create PLT paginated params",
-    setupZemu("nanosp", async (sim, transport) => {
-        await createPltPaginated(sim, transport, "nanosp_create_plt/paginated");
+    '[NANO SP] Create PLT paginated params',
+    setupZemu('nanosp', async (sim, transport) => {
+        await createPltPaginated(sim, transport, 'nanosp_create_plt/paginated');
     })
 );
 
 test(
-    "[NANO SP] Create PLT truncated params",
-    setupZemu("nanosp", async (sim, transport) => {
-        await createPltTruncated(sim, transport, "nanosp_create_plt/truncated");
+    '[NANO SP] Create PLT truncated params (>512 bytes)',
+    setupZemu('nanosp', async (sim, transport) => {
+        await createPltTruncated(sim, transport, 'nanosp_create_plt/truncated');
     })
 );

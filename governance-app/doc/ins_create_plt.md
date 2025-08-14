@@ -35,7 +35,7 @@ The transaction payload is serialized in the following order according to Concor
 3. **Token Symbol**: Shows the human-readable token identifier.
 4. **Token Module**: Shows the hex representation of the 32-byte module hash.
 5. **Decimals**: Shows the number of decimal places.
-6. **Init Params**: Shows the initialization parameters in hex (paginated, up to 256 bytes displayed; if longer, shows "...(truncated)").
+6. **Init Params**: Shows the initialization parameters in hex (paginated, up to 512 bytes displayed).
 7. **Sign/Decline**: User can approve or reject the transaction.
 
 ## Error Conditions
