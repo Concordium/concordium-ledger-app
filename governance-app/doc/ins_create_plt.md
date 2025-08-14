@@ -41,7 +41,7 @@ The Ledger will display the following information to the user:
 - **Token Symbol**: The human-readable token identifier
 - **Token Module**: Hex representation of the 32-byte module hash (paginated across multiple screens)
 - **Decimals**: Number of decimal places
-- **Init Params**: Hex representation of initialization parameters (paginated, up to 512 bytes displayed). If parameters exceed 512 bytes, only the first 512 bytes are shown with a "...(truncated)" indicator.
+- **Init Params**: Hex representation of initialization parameters (paginated, up to 512 bytes displayed).
 
 ## Error Conditions
 

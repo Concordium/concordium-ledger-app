@@ -23,7 +23,7 @@ typedef enum {
 } createPltState_t;
 
 typedef struct {
-    uint32_t payloadLength;
+    // state
     uint32_t tokenSymbolLength;
     uint32_t initializationParamsLength;
     uint32_t remainingInitializationParamsBytes;
@@ -33,7 +33,7 @@ typedef struct {
     char tokenModule[68];      // Hex representation (32 bytes * 2 + 4 chars for pagination + null)
     uint8_t decimals[4];       // String representation of uint8
     uint8_t initParams[512];   // Buffer to store init params data (up to 512 bytes)
-    char initParamsHex[2048];  // Hex representation for display (512 bytes * 2 + pagination)
+    char initParamsHex[1088];  // Hex representation for display (512 bytes * 2 + (512/8) chars for pagination + null)
 
     createPltState_t state;
 } signCreatePltContext_t;
