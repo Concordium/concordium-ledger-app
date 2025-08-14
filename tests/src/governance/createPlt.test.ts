@@ -2,52 +2,33 @@ import Transport from "@ledgerhq/hw-transport";
 import Zemu from "@zondax/zemu";
 import { setupZemu } from "./options";
 
-test(
-    "[NANO S] Create PLT - Phase 1 (Initial)",
-    setupZemu("nanos", async (sim, transport) => {
-        // Phase 1: Initial command with derivation path and update header
-        const data = Buffer.from(
-            "080000045100000000000000000000000000000000000000020000000000000000000000000000000a00000000000000640000000063de5da700000029180000000000000165",
-            "hex"
-        );
-        const response = await transport.send(0xe0, 0x48, 0x00, 0x00, data);
-        expect(response).toEqual(Buffer.from("9000", "hex"));
-    })
-);
+test('[NANO S] Create PLT - Phase 1 (Initial)', setupZemu('nanos', async (sim, transport) => {
+    // Phase 1: Initial command with derivation path and update header
+    const data = Buffer.from('080000045100000000000000000000000000000000000000020000000000000000000000000000000a00000000000000640000000063de5da70000002918', 'hex');
+    const response = await transport.send(0xe0, 0x48, 0x00, 0x00, data);
+    expect(response).toEqual(Buffer.from('9000', 'hex'));
+}));
 
-test(
-    "[NANO S] Create PLT - Phase 1 & 2 (Initial + Payload)",
-    setupZemu("nanos", async (sim, transport) => {
-        // Phase 1: Initial command
-        let data = Buffer.from(
-            "080000045100000000000000000000000000000000000000020000000000000000000000000000000a00000000000000640000000063de5da700000029180000000000000165",
-            "hex"
-        );
-        const response1 = await transport.send(0xe0, 0x48, 0x00, 0x00, data);
-        expect(response1).toEqual(Buffer.from("9000", "hex"));
+test('[NANO S] Create PLT - Phase 1 & 2 (Initial + Payload)', setupZemu('nanos', async (sim, transport) => {
+    // Phase 1: Initial command
+    let data = Buffer.from('080000045100000000000000000000000000000000000000020000000000000000000000000000000a00000000000000640000000063de5da70000002918', 'hex');
+    const response1 = await transport.send(0xe0, 0x48, 0x00, 0x00, data);
+    expect(response1).toEqual(Buffer.from('9000', 'hex'));
 
-        // Phase 2: Payload + init params length
-        data = Buffer.from(
-            "00000003545259af5684e70c1438e442066d017e4410af6da2b53bfa651a07d81efa2aa668db200600000001",
-            "hex"
-        );
-        const response2 = await transport.send(0xe0, 0x48, 0x01, 0x00, data);
+    // Phase 2: Payload + init params length
+    data = Buffer.from('03545259af5684e70c1438e442066d017e4410af6da2b53bfa651a07d81efa2aa668db200600000001', 'hex');
+    const response2 = await transport.send(0xe0, 0x48, 0x01, 0x00, data);
 
         // This should succeed if our state machine is working
         expect(response2).toEqual(Buffer.from("9000", "hex"));
     })
 );
 
-test(
-    "[NANO S] Create PLT - Wrong P1 order (should fail)",
-    setupZemu("nanos", async (sim, transport) => {
-        // Phase 1: Initial command
-        let data = Buffer.from(
-            "080000045100000000000000000000000000000000000000020000000000000000000000000000000a00000000000000640000000063de5da700000029180000000000000165",
-            "hex"
-        );
-        const response1 = await transport.send(0xe0, 0x48, 0x00, 0x00, data);
-        expect(response1).toEqual(Buffer.from("9000", "hex"));
+test('[NANO S] Create PLT - Wrong P1 order (should fail)', setupZemu('nanos', async (sim, transport) => {
+    // Phase 1: Initial command
+    let data = Buffer.from('080000045100000000000000000000000000000000000000020000000000000000000000000000000a00000000000000640000000063de5da70000002918', 'hex');
+    const response1 = await transport.send(0xe0, 0x48, 0x00, 0x00, data);
+    expect(response1).toEqual(Buffer.from('9000', 'hex'));
 
         // Skip Phase 2, try Phase 3 directly (should fail with INVALID_STATE)
         data = Buffer.from("ff", "hex");
@@ -66,18 +47,12 @@ async function createPlt(
     device?: "nanos" | "nanosp"
 ) {
     // Phase 1: Initial
-    let data = Buffer.from(
-        "080000045100000000000000000000000000000000000000020000000000000000000000000000000a00000000000000640000000063de5da700000029180000000000000165",
-        "hex"
-    );
+    let data = Buffer.from('080000045100000000000000000000000000000000000000020000000000000000000000000000000a00000000000000640000000063de5da70000002918', 'hex');
     const response1 = await transport.send(0xe0, 0x48, 0x00, 0x00, data);
     expect(response1).toEqual(Buffer.from("9000", "hex"));
 
     // Phase 2: Payload + init params length
-    data = Buffer.from(
-        "00000003545259af5684e70c1438e442066d017e4410af6da2b53bfa651a07d81efa2aa668db200600000001",
-        "hex"
-    );
+    data = Buffer.from('03545259af5684e70c1438e442066d017e4410af6da2b53bfa651a07d81efa2aa668db200600000001', 'hex');
     const response2 = await transport.send(0xe0, 0x48, 0x01, 0x00, data);
     expect(response2).toEqual(Buffer.from("9000", "hex"));
 
@@ -95,10 +70,7 @@ async function createPlt(
             break;
     }
     await expect(tx).resolves.toEqual(
-        Buffer.from(
-            "0b84908dd2b8abf26c5a502b8a2f23c02bf38a5debcee6c2e9d480b9c57e6ddf98d3cd3d2d49c84be51a370b3f32379fc8cd4f9c5969e14886af2abb79dfa00a9000",
-            "hex"
-        )
+        Buffer.from('4a623bcb4b21f7aa79eed1d443e7835c6079d43a414be67a96e21064a31d5b8d09643841754199f75d92595ee4a0a6e7220ce47fab75a1906e944fcb9cd8e3059000', 'hex'),
     );
 }
 
@@ -120,7 +92,7 @@ async function createPltPaginated(
 ) {
     // Phase 1: Initial
     let data = Buffer.from(
-        "080000045100000000000000000000000000000000000000020000000000000000000000000000000a00000000000000640000000063de5da700000029180000000000000165",
+        "080000045100000000000000000000000000000000000000020000000000000000000000000000000a00000000000000640000000063de5da70000002918",
         "hex"
     );
     const response1 = await transport.send(0xe0, 0x48, 0x00, 0x00, data);
@@ -128,7 +100,7 @@ async function createPltPaginated(
 
     // Phase 2: Payload + init params length (48 bytes)
     data = Buffer.from(
-        "00000003545259af5684e70c1438e442066d017e4410af6da2b53bfa651a07d81efa2aa668db200600000030",
+        "03545259af5684e70c1438e442066d017e4410af6da2b53bfa651a07d81efa2aa668db200600000030",
         "hex"
     );
     const response2 = await transport.send(0xe0, 0x48, 0x01, 0x00, data);
@@ -146,7 +118,7 @@ async function createPltPaginated(
 
     await expect(tx).resolves.toEqual(
         Buffer.from(
-            "1def43230dc45def7199552847a4ee2b4e3700b5e46935a60a9f58e563541e7abd386198cb5e588380de735f04e3e0b6babf115e8bc698ccc67ca0318f96e5069000",
+            "40a983b0b25c0da8899361bd0c4e20931b600842389d743fdcf204ad424ff186a8b7188271aefe743a797fd68a6552cac6ae9bf59e17899229a44b161eb1f6089000",
             "hex"
         )
     );
@@ -159,7 +131,7 @@ async function createPltTruncated(
 ) {
     // Phase 1: Initial
     let data = Buffer.from(
-        "080000045100000000000000000000000000000000000000020000000000000000000000000000000a00000000000000640000000063de5da700000029180000000000000165",
+        "080000045100000000000000000000000000000000000000020000000000000000000000000000000a00000000000000640000000063de5da70000002918",
         "hex"
     );
     const response1 = await transport.send(0xe0, 0x48, 0x00, 0x00, data);
@@ -167,7 +139,7 @@ async function createPltTruncated(
 
     // Phase 2: Payload + init params length (0x0258 = 600 bytes)
     data = Buffer.from(
-        "00000003545259af5684e70c1438e442066d017e4410af6da2b53bfa651a07d81efa2aa668db200600000258",
+        "03545259af5684e70c1438e442066d017e4410af6da2b53bfa651a07d81efa2aa668db200600000258",
         "hex"
     );
     const response2 = await transport.send(0xe0, 0x48, 0x01, 0x00, data);
@@ -195,7 +167,7 @@ async function createPltTruncated(
 
     await expect(tx).resolves.toEqual(
         Buffer.from(
-            "de84a881eb3a2f0e600576c32fd87dbb08d0c0ba9fe4d1181c675542ac8783ba8a0fad833474dbe566192aa185262ff77a19782ac36063058e13601548ceb0009000",
+            "3f87227970e04e0a79a83f87436c01e9398477067786cda2abf355a1e99d466c0a399d38e18b9cb1084ca1f9579b5ddf25a36721f33484f437646dd3b8c713099000",
             "hex"
         )
     );

@@ -11,7 +11,7 @@ static tx_state_t *tx_state = &global_tx_state;
 UX_STEP_NOCB(
     ux_sign_create_plt_token_symbol,
     bnnn_paging,
-    {"Token Symbol", (char *) global.signCreatePltContext.tokenSymbol});
+    {"Token Symbol", (char *) global.signCreatePltContext.tokenId});
 
 UX_STEP_NOCB(
     ux_sign_create_plt_token_module,
@@ -55,27 +55,24 @@ void handleSignCreatePlt(
         cx_sha256_init(&tx_state->hash);
         cdata += hashUpdateHeaderAndType(cdata, UPDATE_TYPE_CREATE_PLT);
 
-        updateHash((cx_hash_t *) &tx_state->hash, cdata, 8);
-        cdata += 8;
-
         ctx->state = TX_CREATE_PLT_PAYLOAD;
         sendSuccessNoIdle();
 
     } else if (p1 == P1_PAYLOAD && ctx->state == TX_CREATE_PLT_PAYLOAD) {
-        // Parse token symbol length
-        ctx->tokenSymbolLength = U4BE(cdata, 0);
-        updateHash((cx_hash_t *) &tx_state->hash, cdata, 4);
-        cdata += 4;
-
-        if (ctx->tokenSymbolLength > 128 || ctx->tokenSymbolLength == 0) {
+        // Parse token id length (1 byte)
+        uint8_t tokenIdLength = cdata[0];
+        if (tokenIdLength > 128 || tokenIdLength == 0) {
             THROW(ERROR_INVALID_TRANSACTION);
         }
 
-        // Parse token symbol
-        memmove(ctx->tokenSymbol, cdata, ctx->tokenSymbolLength);
-        ctx->tokenSymbol[ctx->tokenSymbolLength] = '\0';
-        updateHash((cx_hash_t *) &tx_state->hash, cdata, ctx->tokenSymbolLength);
-        cdata += ctx->tokenSymbolLength;
+        updateHash((cx_hash_t *) &tx_state->hash, cdata, 1);
+        cdata += 1;
+
+        // Parse token id
+        memmove(ctx->tokenId, cdata, tokenIdLength);
+        ctx->tokenId[tokenIdLength] = '\0';
+        updateHash((cx_hash_t *) &tx_state->hash, cdata, tokenIdLength);
+        cdata += tokenIdLength;
 
         // Parse token module (32 bytes)
         toPaginatedHex(cdata, 32, ctx->tokenModule, sizeof(ctx->tokenModule));
