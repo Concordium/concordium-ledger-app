@@ -4,19 +4,19 @@ import { setupZemu } from './options';
 
 test('[NANO S] Create PLT - Phase 1 (Initial)', setupZemu('nanos', async (sim, transport) => {
     // Phase 1: Initial command with derivation path and update header
-    let data = Buffer.from('080000045100000000000000000000000000000000000000020000000000000000000000000000000a00000000000000640000000063de5da700000029180000000000000165', 'hex');
+    const data = Buffer.from('080000045100000000000000000000000000000000000000020000000000000000000000000000000a00000000000000640000000063de5da70000002918', 'hex');
     const response = await transport.send(0xe0, 0x48, 0x00, 0x00, data);
     expect(response).toEqual(Buffer.from('9000', 'hex'));
 }));
 
 test('[NANO S] Create PLT - Phase 1 & 2 (Initial + Payload)', setupZemu('nanos', async (sim, transport) => {
     // Phase 1: Initial command
-    let data = Buffer.from('080000045100000000000000000000000000000000000000020000000000000000000000000000000a00000000000000640000000063de5da700000029180000000000000165', 'hex');
+    let data = Buffer.from('080000045100000000000000000000000000000000000000020000000000000000000000000000000a00000000000000640000000063de5da70000002918', 'hex');
     const response1 = await transport.send(0xe0, 0x48, 0x00, 0x00, data);
     expect(response1).toEqual(Buffer.from('9000', 'hex'));
 
     // Phase 2: Payload + init params length
-    data = Buffer.from('00000003545259af5684e70c1438e442066d017e4410af6da2b53bfa651a07d81efa2aa668db200600000001', 'hex');
+    data = Buffer.from('03545259af5684e70c1438e442066d017e4410af6da2b53bfa651a07d81efa2aa668db200600000001', 'hex');
     const response2 = await transport.send(0xe0, 0x48, 0x01, 0x00, data);
 
     // This should succeed if our state machine is working
@@ -25,7 +25,7 @@ test('[NANO S] Create PLT - Phase 1 & 2 (Initial + Payload)', setupZemu('nanos',
 
 test('[NANO S] Create PLT - Wrong P1 order (should fail)', setupZemu('nanos', async (sim, transport) => {
     // Phase 1: Initial command
-    let data = Buffer.from('080000045100000000000000000000000000000000000000020000000000000000000000000000000a00000000000000640000000063de5da700000029180000000000000165', 'hex');
+    let data = Buffer.from('080000045100000000000000000000000000000000000000020000000000000000000000000000000a00000000000000640000000063de5da70000002918', 'hex');
     const response1 = await transport.send(0xe0, 0x48, 0x00, 0x00, data);
     expect(response1).toEqual(Buffer.from('9000', 'hex'));
 
@@ -40,12 +40,12 @@ test('[NANO S] Create PLT - Wrong P1 order (should fail)', setupZemu('nanos', as
 
 async function createPlt(sim: Zemu, transport: Transport, images: string) {
     // Phase 1: Initial
-    let data = Buffer.from('080000045100000000000000000000000000000000000000020000000000000000000000000000000a00000000000000640000000063de5da700000029180000000000000165', 'hex');
+    let data = Buffer.from('080000045100000000000000000000000000000000000000020000000000000000000000000000000a00000000000000640000000063de5da70000002918', 'hex');
     const response1 = await transport.send(0xe0, 0x48, 0x00, 0x00, data);
     expect(response1).toEqual(Buffer.from('9000', 'hex'));
 
     // Phase 2: Payload + init params length
-    data = Buffer.from('00000003545259af5684e70c1438e442066d017e4410af6da2b53bfa651a07d81efa2aa668db200600000001', 'hex');
+    data = Buffer.from('03545259af5684e70c1438e442066d017e4410af6da2b53bfa651a07d81efa2aa668db200600000001', 'hex');
     const response2 = await transport.send(0xe0, 0x48, 0x01, 0x00, data);
     expect(response2).toEqual(Buffer.from('9000', 'hex'));
 
@@ -56,7 +56,7 @@ async function createPlt(sim: Zemu, transport: Transport, images: string) {
     await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
     await sim.navigateAndCompareSnapshots('.', images, [8, 0]);
     await expect(tx).resolves.toEqual(
-        Buffer.from('0b84908dd2b8abf26c5a502b8a2f23c02bf38a5debcee6c2e9d480b9c57e6ddf98d3cd3d2d49c84be51a370b3f32379fc8cd4f9c5969e14886af2abb79dfa00a9000', 'hex'),
+        Buffer.from('4a623bcb4b21f7aa79eed1d443e7835c6079d43a414be67a96e21064a31d5b8d09643841754199f75d92595ee4a0a6e7220ce47fab75a1906e944fcb9cd8e3059000', 'hex'),
     );
 }
 
