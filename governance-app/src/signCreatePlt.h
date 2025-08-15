@@ -34,6 +34,7 @@ typedef struct {
     uint8_t decimals[4];       // String representation of uint8
     uint8_t initParams[512];   // Buffer to store init params data (up to 512 bytes)
     char initParamsHex[1089];  // Hex representation for display (512 bytes * 2 + (512/8=64) chars for pagination + null)
+    char txHashHex[68];        // Hex representation (32 bytes * 2 + 4 chars for pagination + null)
 
     createPltState_t state;
 } signCreatePltContext_t;

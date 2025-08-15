@@ -77,10 +77,10 @@ async function createPlt(sim: Zemu, transport: Transport, images: string, device
     await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
     switch (device) {
         case 'nanos':
-            await sim.navigateAndCompareSnapshots('.', images, [9, 0]);
+            await sim.navigateAndCompareSnapshots('.', images, [13, 0]);
             break;
         case 'nanosp':
-            await sim.navigateAndCompareSnapshots('.', images, [7, 0]);
+            await sim.navigateAndCompareSnapshots('.', images, [9, 0]);
             break;
         default:
             throw new Error(`Unsupported device: ${device}`);
@@ -126,7 +126,7 @@ async function createPltPaginated(sim: Zemu, transport: Transport, images: strin
     const tx = transport.send(0xe0, 0x48, 0x02, 0x00, data);
 
     await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
-    await sim.navigateAndCompareSnapshots('.', images, [8, 0]);
+    await sim.navigateAndCompareSnapshots('.', images, [10, 0]);
 
     await expect(tx).resolves.toEqual(
         Buffer.from(
@@ -169,7 +169,7 @@ async function createPltTruncated(sim: Zemu, transport: Transport, images: strin
     }
 
     await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
-    await sim.navigateAndCompareSnapshots('.', images, [28, 0]);
+    await sim.navigateAndCompareSnapshots('.', images, [30, 0]);
 
     await expect(tx).resolves.toEqual(
         Buffer.from(

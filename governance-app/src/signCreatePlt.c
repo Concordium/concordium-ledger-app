@@ -8,15 +8,9 @@
 static signCreatePltContext_t *ctx = &global.signCreatePltContext;
 static tx_state_t *tx_state = &global_tx_state;
 
-UX_STEP_NOCB(
-    ux_sign_create_plt_type,
-    bn,
-    {"Update type", (char *) global.signCreatePltContext.updateTypeText});
+UX_STEP_NOCB(ux_sign_create_plt_type, bn, {"Update type", (char *) global.signCreatePltContext.updateTypeText});
 
-UX_STEP_NOCB(
-    ux_sign_create_plt_token_symbol,
-    bnnn_paging,
-    {"Token ID", (char *) global.signCreatePltContext.tokenId});
+UX_STEP_NOCB(ux_sign_create_plt_token_symbol, bnnn_paging, {"Token ID", (char *) global.signCreatePltContext.tokenId});
 
 UX_STEP_NOCB(
     ux_sign_create_plt_token_module,
@@ -29,6 +23,10 @@ UX_STEP_NOCB(
     ux_sign_create_plt_init_params,
     bnnn_paging,
     {"Init Params", (char *) global.signCreatePltContext.initParamsHex});
+UX_STEP_NOCB(
+    ux_sign_create_plt_hash,
+    bnnn_paging,
+    {"Update Hash", (char *) global.signCreatePltContext.txHashHex});
 
 UX_FLOW(
     ux_sign_create_plt_start,
@@ -38,7 +36,8 @@ UX_FLOW(
     &ux_sign_create_plt_token_module,
     &ux_sign_create_plt_decimals,
     &ux_sign_create_plt_init_params,
-    &ux_sign_flow_shared_sign,
+    &ux_sign_create_plt_hash,
+    &ux_sign_flow_shared_sign_prebuilt,
     &ux_sign_flow_shared_decline);
 
 #define P1_INITIAL     0x00
@@ -144,6 +143,12 @@ void handleSignCreatePlt(
 
             // Convert stored params to hex for display
             toPaginatedHex(ctx->initParams, displayLength, ctx->initParamsHex, sizeof(ctx->initParamsHex));
+
+            // Finalize the copy of the hash and store result for display
+            hash((cx_hash_t *) &tx_state->hash, CX_LAST, NULL, 0, tx_state->transactionHash, 32);
+
+            // Convert the transaction hash to hex for verification
+            toPaginatedHex(tx_state->transactionHash, 32, ctx->txHashHex, sizeof(ctx->txHashHex));
 
             // Show UI for user review
             ux_flow_init(0, ux_sign_create_plt_start, NULL);
