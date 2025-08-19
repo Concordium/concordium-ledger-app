@@ -37,7 +37,7 @@ APP_FILE_NAME = concordium-governance-ledger-app
 # Version must be no greater than 99.99.999, otherwise
 # extra memory must be allocated in menu.c.
 APPVERSION_MAJOR=1
-APPVERSION_MINOR=1
+APPVERSION_MINOR=2
 APPVERSION_PATCH=0
 APPVERSION=$(APPVERSION_MAJOR).$(APPVERSION_MINOR).$(APPVERSION_PATCH)
 
