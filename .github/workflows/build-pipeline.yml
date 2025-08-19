@@ -17,7 +17,7 @@ jobs:
         container: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
 
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
               with:
                   submodules: 'recursive'
             - name: Build
@@ -27,7 +27,7 @@ jobs:
                   mv bin/app.elf concordium_nanos.elf
 
             - name: Upload binary
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v5
               with:
                 name: nanos
                 path: ./concordium_nanos.elf
@@ -39,7 +39,7 @@ jobs:
         container: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
 
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
               with:
                   submodules: 'recursive'
 
@@ -50,7 +50,7 @@ jobs:
                   mv bin/app.elf concordium_nanosplus.elf
 
             - name: Upload binary
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v5
               with:
                 name: nanosplus
                 path: ./concordium_nanosplus.elf
@@ -62,7 +62,7 @@ jobs:
         container: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
 
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
               with:
                   submodules: 'recursive'
             - name: Build
@@ -72,7 +72,7 @@ jobs:
                   mv bin/app.elf concordium_nanox.elf
 
             - name: Upload binary
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v5
               with:
                 name: nanox
                 path: ./concordium_nanox.elf
@@ -84,7 +84,7 @@ jobs:
         container: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
 
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
               with:
                   submodules: 'recursive'
             - name: Build
@@ -95,7 +95,7 @@ jobs:
                   mv bin/app.elf ccdGovernance_nanos.elf
 
             - name: Upload binary
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v5
               with:
                 name: governance-nanos
                 path: ./governance-app/ccdGovernance_nanos.elf
@@ -107,7 +107,7 @@ jobs:
         container: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
 
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
               with:
                   submodules: 'recursive'
             - name: Build
@@ -118,7 +118,7 @@ jobs:
                   mv bin/app.elf ccdGovernance_nanosplus.elf
 
             - name: Upload binary
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v5
               with:
                 name: governance-nanosplus
                 path: ./governance-app/ccdGovernance_nanosplus.elf
@@ -130,7 +130,7 @@ jobs:
         container: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
 
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
               with:
                   submodules: 'recursive'
 
@@ -144,7 +144,7 @@ jobs:
         runs-on: ubuntu-latest
 
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
 
             - name: Lint
               uses: DoozyX/clang-format-lint-action@v0.15
@@ -161,14 +161,14 @@ jobs:
         runs-on: ubuntu-latest
 
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
               with:
                 submodules: 'recursive'
             - run: sudo apt-get update -y && sudo apt-get install -y libusb-1.0.0 libudev-dev
 
-            - uses: actions/setup-node@v3
+            - uses: actions/setup-node@v4
               with:
-                node-version: "16"
+                node-version: "22"
 
             - name: Setup dependencies
               run: |
@@ -179,7 +179,7 @@ jobs:
                 mkdir tests/bin
 
             - name: Download binaries
-              uses: actions/download-artifact@v4
+              uses: actions/download-artifact@v5
               with:
                 path: tests/bin
 
@@ -189,7 +189,7 @@ jobs:
 
             - name: Upload snapshots
               if: always()
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v5
               with:
                 name: snapshots
                 path: ./tests/snapshots-tmp
@@ -203,7 +203,7 @@ jobs:
 
       steps:
           - name: Clone
-            uses: actions/checkout@v3
+            uses: actions/checkout@v4
 
           - name: Build unit tests
             run: |
