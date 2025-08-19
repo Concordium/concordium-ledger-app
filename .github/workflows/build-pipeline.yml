@@ -216,3 +216,18 @@ jobs:
             run: |
               cd unit_tests/
               make -C build test
+                
+    # The point of this job is to make it easy to add protection rules that require all status checks to pass.
+    results:
+      if: ${{ always() }}
+      runs-on: ubuntu-latest
+      name: Workflow result
+      needs: [compile-nano-s, compile-nano-s-plus, compile-nano-x, compile-governance-nano-s, compile-governance-nano-s-plus, scan-build, run_unit_test, lint, e2e-tests]
+      steps:
+        - run: exit 1
+          # see https://stackoverflow.com/a/67532120/4907315
+          if: >-
+            ${{
+                 contains(needs.*.result, 'failure')
+              || contains(needs.*.result, 'cancelled')
+            }}
