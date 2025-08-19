@@ -30,18 +30,13 @@ The transaction payload is serialized in the following order according to Concor
 
 ## Transaction Flow
 
-1. **Initial Command** (P1=0x00): Contains derivation path and update header
-2. **Payload Command** (P1=0x01): Contains all token details (token ID, module, decimals) **and initialization parameters length**
-3. **Init Params Commands** (P1=0x02): Variable-length initialization data sent in 255-byte chunks
-
-## Display Format
-
-The Ledger will display the following information to the user:
-
-- **Token ID**: The human-readable token identifier
-- **Token Module**: Hex representation of the 32-byte module hash (paginated across multiple screens)
-- **Decimals**: Number of decimal places
-- **Init Params**: Hex representation of initialization parameters (paginated, up to 512 bytes displayed).
+1. **Review**: Shows a summary of the transaction.
+2. **Update type**: Shows the human-readable update type ("Create PLT").
+3. **Token ID**: Shows the human-readable token identifier.
+4. **Token Module**: Shows the hex representation of the 32-byte module hash.
+5. **Decimals**: Shows the number of decimal places.
+6. **Init Params**: Shows the initialization parameters in hex (paginated, up to 512 bytes displayed).
+7. **Sign/Decline**: User can approve or reject the transaction.
 
 ## Error Conditions
 

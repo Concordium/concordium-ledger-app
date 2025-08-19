@@ -30,6 +30,7 @@ typedef struct {
     uint32_t verifyKeyLength;
     uint8_t ipIdentity[5];
     char cdiVerifyKey[68];
+    char updateTypeText[32];
     addIdentityProviderState_t state;
 } signAddIdentityProviderContext_t;
 

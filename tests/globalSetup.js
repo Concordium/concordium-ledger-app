@@ -2,9 +2,9 @@ const Zemu = require('@zondax/zemu').default;
 
 const catchExit = () => {
     process.on('SIGINT', () => {
-        Zemu.stopAllEmuContainers()
-    })
-}
+        Zemu.stopAllEmuContainers();
+    });
+};
 
 module.exports = async () => {
     catchExit();

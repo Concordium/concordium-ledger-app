@@ -48,6 +48,10 @@ UX_STEP_NOCB(
     {"Min transaction fee", (char *) global.signPoolParameters.transactionFeeCommissionRateMin});
 
 UX_STEP_NOCB(
+    ux_sign_pool_parameters_update_type_step,
+    bn,
+    {"Update type", (char *) global.signPoolParameters.updateTypeText});
+UX_STEP_NOCB(
     ux_sign_pool_parameters_minimum_capital_step,
     nn_paging,
     {.title = "Min equity capital", .text = (char *) global.signPoolParameters.minimumEquityCapital});
@@ -63,6 +67,7 @@ UX_STEP_NOCB(
 UX_FLOW(
     ux_sign_pool_parameters_initial,
     &ux_sign_flow_shared_review,
+    &ux_sign_pool_parameters_update_type_step,
     &ux_sign_pool_parameters_finalization_reward_step,
     &ux_sign_pool_parameters_baking_reward_step,
     &ux_sign_pool_parameters_transaction_fee_step);
@@ -106,6 +111,10 @@ void handleSignUpdatePoolParameters(uint8_t *cdata, uint8_t p1, volatile unsigne
 
         cx_sha256_init(&tx_state->hash);
         cdata += hashUpdateHeaderAndType(cdata, UPDATE_TYPE_POOL_PARAMETERS);
+
+        // Set update type text for display
+        strncpy(ctx->updateTypeText, getUpdateTypeText(UPDATE_TYPE_POOL_PARAMETERS), sizeof(ctx->updateTypeText));
+        ctx->updateTypeText[sizeof(ctx->updateTypeText) - 1] = '\0';
 
         cdata += parseCommissionRate(
             cdata,

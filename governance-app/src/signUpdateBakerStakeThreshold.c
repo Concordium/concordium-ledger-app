@@ -6,6 +6,12 @@
 static signUpdateBakerStakeThresholdContext_t *ctx = &global.signUpdateBakerStakeThreshold;
 static tx_state_t *tx_state = &global_tx_state;
 
+#include "util.h"
+
+UX_STEP_NOCB(
+    ux_sign_baker_stake_threshold_type_step,
+    bn,
+    {"Update type", (char *) global.signUpdateBakerStakeThreshold.updateTypeText});
 UX_STEP_NOCB(
     ux_sign_baker_stake_threshold_1_step,
     bnnn_paging,
@@ -13,6 +19,7 @@ UX_STEP_NOCB(
 UX_FLOW(
     ux_sign_baker_stake_threshold,
     &ux_sign_flow_shared_review,
+    &ux_sign_baker_stake_threshold_type_step,
     &ux_sign_baker_stake_threshold_1_step,
     &ux_sign_flow_shared_sign,
     &ux_sign_flow_shared_decline);
@@ -21,6 +28,8 @@ void handleSignUpdateBakerStakeThreshold(uint8_t *cdata, volatile unsigned int *
     cdata += parseKeyDerivationPath(cdata);
     cx_sha256_init(&tx_state->hash);
     cdata += hashUpdateHeaderAndType(cdata, UPDATE_TYPE_BAKER_STAKE_THRESHOLD);
+
+    strncpy(ctx->updateTypeText, getUpdateTypeText(UPDATE_TYPE_BAKER_STAKE_THRESHOLD), sizeof(ctx->updateTypeText));
 
     uint64_t bakerThresholdAmount = U8BE(cdata, 0);
     amountToGtuDisplay(ctx->stakeThreshold, sizeof(ctx->stakeThreshold), bakerThresholdAmount);

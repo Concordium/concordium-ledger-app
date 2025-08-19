@@ -175,4 +175,11 @@ void getBlsPrivateKey(uint32_t *keyPathInput, uint8_t keyPathLength, uint8_t *pr
  */
 size_t hashAndLoadU64Ratio(uint8_t *cdata, uint8_t *dst, uint8_t sizeOfDst);
 
+/**
+ * Gets the human-readable text for an update type.
+ * @param updateType the update type value
+ * @return the human-readable update type text
+ */
+const char *getUpdateTypeText(uint8_t updateType);
+
 #endif

@@ -3,7 +3,8 @@ import Zemu, { DEFAULT_START_OPTIONS, IStartOptions } from '@zondax/zemu';
 import Transport from '@ledgerhq/hw-transport';
 import { ISnapshot } from '@zondax/zemu/dist/types';
 
-const SEED_PHRASE = 'vendor sphere crew wise puppy wise stand wait tissue boy fortune myself hamster intact window garment negative dynamic permit genre limb work dial guess';
+const SEED_PHRASE =
+    'vendor sphere crew wise puppy wise stand wait tissue boy fortune myself hamster intact window garment negative dynamic permit genre limb work dial guess';
 
 const sharedOptions: Omit<IStartOptions, 'model'> = {
     ...DEFAULT_START_OPTIONS,
@@ -50,16 +51,19 @@ export class ConcordiumZemu extends Zemu {
 function getZemu(device: 'nanos' | 'nanosp' | 'nanox') {
     if (device === 'nanos') {
         return new ConcordiumZemu(NANOS_ELF_PATH);
-    } else if (device === 'nanosp') {
-        return new ConcordiumZemu(NANOS_PLUS_ELF_PATH);
-    } else {
-        return new ConcordiumZemu(NANOX_ELF_PATH);
     }
+    if (device === 'nanosp') {
+        return new ConcordiumZemu(NANOS_PLUS_ELF_PATH);
+    }
+    return new ConcordiumZemu(NANOX_ELF_PATH);
 }
 
 export function getSetupZemu(getter: typeof getZemu) {
-    return (device: 'nanos' | 'nanosp' | 'nanox', func: (sim: ConcordiumZemu, transport: Transport, device: 'nanos' | 'nanosp' | 'nanox') => Promise<void>) => {
-        return async () => {
+    return (
+            device: 'nanos' | 'nanosp' | 'nanox',
+            func: (sim: ConcordiumZemu, transport: Transport, device: 'nanos' | 'nanosp' | 'nanox') => Promise<void>
+        ) =>
+        async () => {
             const sim = getter(device);
             let simOptions;
             if (device === 'nanos') {
@@ -77,7 +81,6 @@ export function getSetupZemu(getter: typeof getZemu) {
                 await sim.close();
             }
         };
-    }
 }
 
 export const setupZemu = getSetupZemu(getZemu);

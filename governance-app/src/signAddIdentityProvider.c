@@ -8,12 +8,20 @@ static signAddIdentityProviderContext_t *ctx = &global.withDescription.signAddId
 static descriptionContext_t *desc_ctx = &global.withDescription.descriptionContext;
 static tx_state_t *tx_state = &global_tx_state;
 
+UX_STEP_NOCB(
+    ux_sign_add_identity_provider_type_step,
+    bn,
+    {"Update type", (char *) global.withDescription.signAddIdentityProviderContext.updateTypeText});
 UX_STEP_CB(
     ux_sign_add_identity_provider_ipIdentity,
     bn,
     sendSuccessNoIdle(),
     {"Identity provider", (char *) global.withDescription.signAddIdentityProviderContext.ipIdentity});
-UX_FLOW(ux_sign_add_identity_provider_start, &ux_sign_flow_shared_review, &ux_sign_add_identity_provider_ipIdentity);
+UX_FLOW(
+    ux_sign_add_identity_provider_start,
+    &ux_sign_flow_shared_review,
+    &ux_sign_add_identity_provider_type_step,
+    &ux_sign_add_identity_provider_ipIdentity);
 
 UX_STEP_CB(
     ux_sign_add_identity_provider_verify_key_hash,
@@ -71,6 +79,10 @@ void handleSignAddIdentityProvider(
         cx_sha256_init(&tx_state->hash);
         cx_sha256_init(&ctx->hash);
         cdata += hashUpdateHeaderAndType(cdata, UPDATE_TYPE_ADD_IDENTITY_PROVIDER);
+
+        // Set update type text for display
+        strncpy(ctx->updateTypeText, getUpdateTypeText(UPDATE_TYPE_ADD_IDENTITY_PROVIDER), sizeof(ctx->updateTypeText));
+        ctx->updateTypeText[sizeof(ctx->updateTypeText) - 1] = '\0';
 
         // Read the IpInfo length.
         updateHash((cx_hash_t *) &tx_state->hash, cdata, 4);

@@ -10,12 +10,17 @@ static tx_state_t *tx_state = &global_tx_state;
 void handleText(void);
 void switchToLoading(void);
 
+UX_STEP_NOCB(
+    ux_sign_protocol_update_type_step,
+    bn,
+    {"Update type", (char *) global.signUpdateProtocolContext.updateTypeText});
+
 UX_STEP_CB(
     ux_sign_protocol_update_1_step,
     bnnn_paging,
     handleText(),
     {"Message", (char *) global.signUpdateProtocolContext.buffer});
-UX_FLOW(ux_sign_protocol_update, &ux_sign_flow_shared_review, &ux_sign_protocol_update_1_step);
+UX_FLOW(ux_sign_protocol_update, &ux_sign_flow_shared_review, &ux_sign_protocol_update_type_step, &ux_sign_protocol_update_1_step);
 
 UX_STEP_CB(
     ux_sign_protocol_update_url_0_step,
@@ -67,6 +72,9 @@ void handleSignUpdateProtocol(
 
         cx_sha256_init(&tx_state->hash);
         cdata += hashUpdateHeaderAndType(cdata, UPDATE_TYPE_PROTOCOL);
+
+        // Set update type text for display
+        strncpy(ctx->updateTypeText, getUpdateTypeText(UPDATE_TYPE_PROTOCOL), sizeof(ctx->updateTypeText));
 
         // Read payload length.
         ctx->payloadLength = U8BE(cdata, 0);

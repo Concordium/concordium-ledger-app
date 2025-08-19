@@ -7,6 +7,10 @@ static signUpdateCooldownParametersContext_t *ctx = &global.signCooldownParamete
 static tx_state_t *tx_state = &global_tx_state;
 
 UX_STEP_NOCB(
+    ux_sign_cooldown_parameters_type_step,
+    bn,
+    {"Update type", (char *) global.signCooldownParameters.updateTypeText});
+UX_STEP_NOCB(
     ux_sign_cooldown_parameters_1_step,
     bnnn_paging,
     {.title = "Pool owner cooldown", .text = (char *) global.signCooldownParameters.poolOwnerCooldown});
@@ -17,6 +21,7 @@ UX_STEP_NOCB(
 UX_FLOW(
     ux_sign_cooldown_parameters,
     &ux_sign_flow_shared_review,
+    &ux_sign_cooldown_parameters_type_step,
     &ux_sign_cooldown_parameters_1_step,
     &ux_sign_cooldown_parameters_2_step,
     &ux_sign_flow_shared_sign,
@@ -27,6 +32,9 @@ void handleSignUpdateCooldownParameters(uint8_t *cdata, volatile unsigned int *f
 
     cx_sha256_init(&tx_state->hash);
     cdata += hashUpdateHeaderAndType(cdata, UPDATE_TYPE_COOLDOWN_PARAMETERS);
+
+    // Set update type text
+    strncpy(ctx->updateTypeText, getUpdateTypeText(UPDATE_TYPE_COOLDOWN_PARAMETERS), sizeof(ctx->updateTypeText));
 
     // Pool owner cooldown is a 64-bit number (represents seconds)
     uint64_t poolOwnerCooldown = U8BE(cdata, 0);

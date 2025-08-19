@@ -12,6 +12,7 @@ typedef struct {
     uint8_t timeoutBase[21];
     uint8_t increaseTimeoutRatio[44];
     uint8_t decreaseTimeoutRatio[44];
+    char updateTypeText[32];
 } signUpdateTimeoutParametersContext_t;
 
 #endif

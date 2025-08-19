@@ -13,6 +13,7 @@ typedef struct {
     uint8_t minFinalizers[11];
     uint8_t maxFinalizers[11];
     uint8_t relativeStakeThreshold[8];
+    char updateTypeText[32];
 } signUpdateFinalizationCommitteeParametersContext_t;
 
 #endif

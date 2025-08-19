@@ -11,6 +11,7 @@ void handleSignMinBlockTime(uint8_t *cdata, volatile unsigned int *flags);
 
 typedef struct {
     uint8_t minBlockTime[25];
+    char updateTypeText[32];
 } signUpdateMinBlockTimeContext_t;
 
 #endif

@@ -9,12 +9,17 @@ static signUpdateFoundationAccountContext_t *ctx = &global.signUpdateFoundationA
 static tx_state_t *tx_state = &global_tx_state;
 
 UX_STEP_NOCB(
+    ux_sign_foundation_account_type_step,
+    bn,
+    {"Update type", (char *) global.signUpdateFoundationAccountContext.updateTypeText});
+UX_STEP_NOCB(
     ux_sign_foundation_account_address_1_step,
     bnnn_paging,
     {.title = "Foundation acc.", .text = (char *) global.signUpdateFoundationAccountContext.foundationAccountAddress});
 UX_FLOW(
     ux_sign_foundation_account_address,
     &ux_sign_flow_shared_review,
+    &ux_sign_foundation_account_type_step,
     &ux_sign_foundation_account_address_1_step,
     &ux_sign_flow_shared_sign,
     &ux_sign_flow_shared_decline);
@@ -24,6 +29,10 @@ void handleSignUpdateFoundationAccount(uint8_t *cdata, volatile unsigned int *fl
 
     cx_sha256_init(&tx_state->hash);
     cdata += hashUpdateHeaderAndType(cdata, UPDATE_TYPE_FOUNDATION_ACCOUNT);
+
+    // Set update type text
+    strncpy(ctx->updateTypeText, getUpdateTypeText(UPDATE_TYPE_FOUNDATION_ACCOUNT), sizeof(ctx->updateTypeText));
+    ctx->updateTypeText[sizeof(ctx->updateTypeText) - 1] = '\0';
 
     // The foundation account address is 32 bytes.
     uint8_t foundationAccount[32];

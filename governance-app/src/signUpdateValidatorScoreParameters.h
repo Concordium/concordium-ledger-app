@@ -10,6 +10,7 @@ void handleSignUpdateValidatorScoreParameters(uint8_t *cdata, volatile unsigned 
 
 typedef struct {
     uint8_t max_missed_rounds[21];
+    char updateTypeText[32];
 } signUpdateValidatorScoreParametersContext_t;
 
 #endif

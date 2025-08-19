@@ -11,6 +11,7 @@ void handleSignUpdateTimeParameters(uint8_t *cdata, volatile unsigned int *flags
 typedef struct {
     uint8_t mintRate[35];
     uint8_t rewardPeriodLength[21];
+    char updateTypeText[32];
 } signUpdateTimeParametersContext_t;
 
 #endif

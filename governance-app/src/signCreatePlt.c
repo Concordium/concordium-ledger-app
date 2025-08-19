@@ -9,9 +9,14 @@ static signCreatePltContext_t *ctx = &global.signCreatePltContext;
 static tx_state_t *tx_state = &global_tx_state;
 
 UX_STEP_NOCB(
+    ux_sign_create_plt_type,
+    bn,
+    {"Update type", (char *) global.signCreatePltContext.updateTypeText});
+
+UX_STEP_NOCB(
     ux_sign_create_plt_token_symbol,
     bnnn_paging,
-    {"Token Symbol", (char *) global.signCreatePltContext.tokenId});
+    {"Token ID", (char *) global.signCreatePltContext.tokenId});
 
 UX_STEP_NOCB(
     ux_sign_create_plt_token_module,
@@ -28,6 +33,7 @@ UX_STEP_NOCB(
 UX_FLOW(
     ux_sign_create_plt_start,
     &ux_sign_flow_shared_review,
+    &ux_sign_create_plt_type,
     &ux_sign_create_plt_token_symbol,
     &ux_sign_create_plt_token_module,
     &ux_sign_create_plt_decimals,
@@ -54,6 +60,10 @@ void handleSignCreatePlt(
 
         cx_sha256_init(&tx_state->hash);
         cdata += hashUpdateHeaderAndType(cdata, UPDATE_TYPE_CREATE_PLT);
+
+        // Set update type text for display
+        strncpy(ctx->updateTypeText, getUpdateTypeText(UPDATE_TYPE_CREATE_PLT), sizeof(ctx->updateTypeText));
+        ctx->updateTypeText[sizeof(ctx->updateTypeText) - 1] = '\0';
 
         ctx->state = TX_CREATE_PLT_PAYLOAD;
         sendSuccessNoIdle();

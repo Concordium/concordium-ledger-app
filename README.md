@@ -21,19 +21,39 @@ You can now run the Docker container with
 docker run --rm -ti -v "/dev/bus/usb:/dev/bus/usb" -v "$(realpath .):/app" --privileged concordium/ledger-app-builder:latest
 ```
 You now have access to the commands provided by the Makefile:
-```
-// Load the application onto the connected device
-root@410e7ab19bea:/app# make load
 
-// Delete the application from the connected device
-root@410e7ab19bea:/app# make delete
-
-// Switch BOLOS_SDK to build for Nano S Plus
-// Note that 'make clean' is a requirement when switching BOLOS_SDK.
-root@f382ee774923:/app# export BOLOS_SDK=$NANOSP_SDK
-root@f382ee774923:/app# make clean
-root@f382ee774923:/app# make load
+```sh
+# Load the application onto the connected device
+make load # this does not work for macos/windows out of the box, due to limited usb support.
 ```
+
+```sh
+# Delete the application from the connected device
+make delete
+```
+
+```sh
+# Switch BOLOS_SDK to build for Nano S Plus
+# Note that 'make clean' is a requirement when switching BOLOS_SDK.
+export BOLOS_SDK=$NANOSP_SDK
+make clean
+make
+```
+
+### Loading onto the ledger (alternative to make load)
+
+This approach requires `python`, `pip` the pip module `ledgerblue` to be installed locally on the machine.
+
+```
+python -m ledgerblue.loadApp --targetId <target-id> --apiLevel 24 --fileName bin/app.hex --appName <app-name> --appVersion <app-version> --delete --tlv
+```
+
+- **app-name**: the application name used on the device.
+  - "Concordium" for the the app used for regular users
+  - "CCDGovernance" for the governance app
+- **app-version**: the version of the application.
+- **target-id**: the target id of the device.
+  - "0x33100004" for nano S+
 
 ### For the Speculos emulator
 

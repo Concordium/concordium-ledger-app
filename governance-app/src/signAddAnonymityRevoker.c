@@ -9,12 +9,16 @@ static signAddAnonymityRevokerContext_t *ctx = &global.withDescription.signAddAn
 static descriptionContext_t *desc_ctx = &global.withDescription.descriptionContext;
 static tx_state_t *tx_state = &global_tx_state;
 
+UX_STEP_NOCB(
+    ux_sign_add_anonymity_revoker_type,
+    bn,
+    {"Update type", (char *) global.withDescription.signAddAnonymityRevokerContext.updateTypeText});
 UX_STEP_CB(
     ux_sign_add_anonymity_revoker_arIdentity,
     bn,
     sendSuccessNoIdle(),
     {"AR Identity", (char *) global.withDescription.signAddAnonymityRevokerContext.arIdentity});
-UX_FLOW(ux_sign_add_anonymity_revoker_start, &ux_sign_flow_shared_review, &ux_sign_add_anonymity_revoker_arIdentity);
+UX_FLOW(ux_sign_add_anonymity_revoker_start, &ux_sign_flow_shared_review, &ux_sign_add_anonymity_revoker_type, &ux_sign_add_anonymity_revoker_arIdentity);
 
 UX_STEP_NOCB(
     ux_sign_add_anonymity_revoker_public_key,
@@ -60,6 +64,10 @@ void handleSignAddAnonymityRevoker(
 
         cx_sha256_init(&tx_state->hash);
         cdata += hashUpdateHeaderAndType(cdata, UPDATE_TYPE_ADD_ANONYMITY_REVOKER);
+
+        // Set update type text for display
+        strncpy(ctx->updateTypeText, getUpdateTypeText(UPDATE_TYPE_ADD_ANONYMITY_REVOKER), sizeof(ctx->updateTypeText));
+        ctx->updateTypeText[sizeof(ctx->updateTypeText) - 1] = '\0';
 
         // Read the payload length.
         updateHash((cx_hash_t *) &tx_state->hash, cdata, 4);
