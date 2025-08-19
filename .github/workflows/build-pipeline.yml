@@ -17,7 +17,7 @@ jobs:
         container: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
 
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v5
               with:
                   submodules: 'recursive'
             - name: Build
@@ -39,7 +39,7 @@ jobs:
         container: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
 
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v5
               with:
                   submodules: 'recursive'
 
@@ -62,7 +62,7 @@ jobs:
         container: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
 
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v5
               with:
                   submodules: 'recursive'
             - name: Build
@@ -84,7 +84,7 @@ jobs:
         container: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
 
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v5
               with:
                   submodules: 'recursive'
             - name: Build
@@ -107,7 +107,7 @@ jobs:
         container: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
 
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v5
               with:
                   submodules: 'recursive'
             - name: Build
@@ -130,7 +130,7 @@ jobs:
         container: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
 
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v5
               with:
                   submodules: 'recursive'
 
@@ -144,7 +144,7 @@ jobs:
         runs-on: ubuntu-latest
 
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v5
 
             - name: Lint
               uses: DoozyX/clang-format-lint-action@v0.15
@@ -161,7 +161,7 @@ jobs:
         runs-on: ubuntu-latest
 
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v5
               with:
                 submodules: 'recursive'
             - run: sudo apt-get update -y && sudo apt-get install -y libusb-1.0.0 libudev-dev
@@ -203,7 +203,7 @@ jobs:
 
       steps:
           - name: Clone
-            uses: actions/checkout@v4
+            uses: actions/checkout@v5
 
           - name: Build unit tests
             run: |
