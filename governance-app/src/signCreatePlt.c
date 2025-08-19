@@ -91,32 +91,33 @@ void handleSignCreatePlt(
 
         // Parse decimals (1 byte)
         uint8_t decimalsValue = cdata[0];
+        bin2dec(ctx->decimals, sizeof(ctx->decimals), decimalsValue);
         updateHash((cx_hash_t *) &tx_state->hash, cdata, 1);
         cdata += 1;
-        bin2dec(ctx->decimals, sizeof(ctx->decimals), decimalsValue);
 
         // Parse initialization parameters length (4 bytes)
         ctx->initializationParamsLength = U4BE(cdata, 0);
         updateHash((cx_hash_t *) &tx_state->hash, cdata, 4);
         cdata += 4;
-        ctx->remainingInitializationParamsBytes = ctx->initializationParamsLength;
 
         // Initialization parameters are required for PLT creation
         if (ctx->initializationParamsLength == 0) {
             THROW(ERROR_INVALID_TRANSACTION);
         }
 
-        // Initialize init params storage
-        memset(ctx->initParams, 0, sizeof(ctx->initParams));
-        memset(ctx->initParamsHex, 0, sizeof(ctx->initParamsHex));
-
+        ctx->remainingInitializationParamsBytes = ctx->initializationParamsLength;
         ctx->state = TX_CREATE_PLT_INIT_PARAMS;
+
         sendSuccessNoIdle();
 
     } else if (p1 == P1_INIT_PARAMS && ctx->state == TX_CREATE_PLT_INIT_PARAMS) {
         if (ctx->remainingInitializationParamsBytes < dataLength) {
             THROW(ERROR_INVALID_STATE);
         }
+
+        // Hash the initialization parameters (all data is hashed, even if not
+        // all is displayed)
+        updateHash((cx_hash_t *) &tx_state->hash, cdata, dataLength);
 
         // Store init params data (up to 512 bytes for display)
         // Note: If init params exceed 512 bytes, only the first 512 bytes will be displayed
@@ -129,11 +130,7 @@ void handleSignCreatePlt(
             memmove(ctx->initParams + currentOffset, cdata, bytesToStore);
         }
 
-        // Hash the initialization parameters (all data is hashed, even if not
-        // all is displayed)
-        updateHash((cx_hash_t *) &tx_state->hash, cdata, dataLength);
         ctx->remainingInitializationParamsBytes -= dataLength;
-
         if (ctx->remainingInitializationParamsBytes == 0) {
             // All initialization parameters received, convert to hex for
             // display
