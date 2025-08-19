@@ -1,0 +1,120 @@
+name: Release Build
+
+on:
+  push:
+    tags:
+      - 'governance-app/*.*.*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag (e.g., governance-app/1.2.3)'
+        required: true
+        type: string
+
+jobs:
+  verify-version:
+    name: Verify Version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.extract-version.outputs.version }}
+      tag: ${{ steps.extract-version.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          submodules: 'recursive'
+          
+      - name: Extract version from tag
+        id: extract-version
+        run: |
+          # Determine if we're running from workflow_dispatch or tag push
+          if [ -n "${{ github.event.inputs.tag }}" ]; then
+            TAG="${{ github.event.inputs.tag }}"
+          else
+            TAG="${{ github.ref_name }}"
+          fi
+          
+          # Check if tag matches expected format
+          if [[ ! "$TAG" =~ ^governance-app/[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Invalid tag format: $TAG. Expected format: governance-app/x.y.z"
+            exit 1
+          fi
+          
+          # Extract version part
+          VERSION=${TAG#governance-app/}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          
+          # Get version from Makefile
+          MAKEFILE_VERSION=$(grep -E "^APPVERSION" governance-app/Makefile | cut -d' ' -f3)
+          
+          # Verify versions match
+          if [ "$VERSION" != "$MAKEFILE_VERSION" ]; then
+            echo "Error: Tag version ($VERSION) does not match version in Makefile ($MAKEFILE_VERSION)"
+            echo "Please update the version in governance-app/Makefile to match the tag"
+            exit 1
+          fi
+          
+          echo "Version verified: $VERSION"
+
+  release:
+    name: Release for ${{ matrix.name }}
+    needs: verify-version
+    runs-on: ubuntu-latest
+    container: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
+    strategy:
+      matrix:
+        include:
+          - name: Governance Nano S
+            device: nanos
+            sdk_var: $NANOS_SDK
+            app_dir: governance-app
+          - name: Governance Nano S Plus
+            device: nanosplus
+            sdk_var: $NANOSP_SDK
+            app_dir: governance-app
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          submodules: 'recursive'
+          
+      - name: Set up signing keys
+        run: |
+          # The keys are already in hex format, so we just pass them directly as environment variables
+          echo "LEDGER_SIGNING_KEY=${{ secrets.LEDGER_SIGNING_KEY }}" >> $GITHUB_ENV
+          echo "LEDGER_PUBLIC_KEY=${{ secrets.LEDGER_PUBLIC_KEY }}" >> $GITHUB_ENV
+
+      - name: Build and sign release
+        run: |
+          cd ${{ matrix.app_dir }}
+          make clean
+          BOLOS_SDK=${{ matrix.sdk_var }} \
+          LEDGER_SIGNING_KEY="${{ env.LEDGER_SIGNING_KEY }}" \
+          LEDGER_PUBLIC_KEY="${{ env.LEDGER_PUBLIC_KEY }}" \
+          make release
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: governance-${{ matrix.device }}-release
+          path: ${{ matrix.app_dir }}/*.zip
+
+  create-release:
+    needs: [verify-version, release]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v5
+        with:
+          path: ./artifacts
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ needs.verify-version.outputs.tag }}
+          name: Governance App ${{ needs.verify-version.outputs.version }}
+          draft: true
+          files: |
+            ./artifacts/**/*.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
