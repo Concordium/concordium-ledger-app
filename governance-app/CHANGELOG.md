@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Support for create PLT (Protocol Level Token) transaction.
+
 ## 1.1.0
 
 - Support for update validator score parameters transaction.

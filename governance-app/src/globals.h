@@ -27,6 +27,7 @@
 #include "signUpdateBlockEnergyLimit.h"
 #include "signUpdateFinalizationCommitteeParameters.h"
 #include "signUpdateValidatorScoreParameters.h"
+#include "signCreatePlt.h"
 #include "ux.h"
 
 #define CONCORDIUM_PURPOSE   1105
@@ -66,7 +67,8 @@ typedef enum {
     UPDATE_TYPE_BLOCK_ENERGY_LIMIT = 20,
     UPDATE_TYPE_GAS_REWARDS_CPV2 = 21,
     UPDATE_TYPE_FINALIZATION_COMMITTEE_PARAMETERS = 22,
-    UPDATE_TYPE_VALIDATOR_SCORE_PARAMETERS = 23
+    UPDATE_TYPE_VALIDATOR_SCORE_PARAMETERS = 23,
+    UPDATE_TYPE_CREATE_PLT = 24
 } updateType_e;
 
 typedef struct {
@@ -130,6 +132,7 @@ typedef union {
     signUpdateBlockEnergyLimitContext_t signUpdateBlockEnergyLimit;
     signUpdateFinalizationCommitteeParametersContext_t signUpdateFinalizationCommitteeParameters;
     signUpdateValidatorScoreParametersContext_t signUpdateValidatorScoreParameters;
+    signCreatePltContext_t signCreatePltContext;
     updateWithDescription_t withDescription;
 } instructionContext;
 extern instructionContext global;

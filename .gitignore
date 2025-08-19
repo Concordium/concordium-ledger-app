@@ -31,3 +31,5 @@ concordium-ledger-app-*
 /governance-app/obj*
 /governance-app/debug*
 /governance-app/bin
+
+.DS_Store

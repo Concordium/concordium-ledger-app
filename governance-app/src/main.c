@@ -44,6 +44,7 @@
 #include "signUpdateBlockEnergyLimit.h"
 #include "signUpdateFinalizationCommitteeParameters.h"
 #include "signUpdateValidatorScoreParameters.h"
+#include "signCreatePlt.h"
 #include "ux.h"
 
 // Global variable definitions
@@ -81,6 +82,9 @@ instructionContext global;
 
 // Protocol update 8 transactions.
 #define INS_UPDATE_VALIDATOR_SCORE_PARAMETERS 0x47
+
+// Protocol update 9 transactions.
+#define INS_CREATE_PLT 0x48
 
 void handler(
     uint8_t INS,
@@ -171,6 +175,9 @@ void handler(
                         break;
                     case INS_UPDATE_VALIDATOR_SCORE_PARAMETERS:
                         handleSignUpdateValidatorScoreParameters(cdata, flags);
+                        break;
+                    case INS_CREATE_PLT:
+                        handleSignCreatePlt(cdata, p1, lc, flags, isInitialCall);
                         break;
                     default:
                         THROW(ERROR_INVALID_INSTRUCTION);
