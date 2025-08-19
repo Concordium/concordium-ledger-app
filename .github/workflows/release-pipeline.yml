@@ -60,6 +60,7 @@ jobs:
     name: Release for ${{ matrix.name }}
     needs: verify-version
     runs-on: ubuntu-latest
+    environment: release-ledger-app
     container: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
     strategy:
       matrix:
@@ -116,5 +117,3 @@ jobs:
           draft: true
           files: |
             ./artifacts/**/*.zip
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
