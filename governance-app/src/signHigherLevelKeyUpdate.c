@@ -68,11 +68,11 @@ void handleSignHigherLevelKeys(
                 THROW(ERROR_INVALID_TRANSACTION);
             }
         }
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 1, NULL, 0);
+        updateHash((cx_hash_t *) &tx_state->hash, cdata, 1);
         cdata += 1;
 
         ctx->numberOfUpdateKeys = U2BE(cdata, 0);
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 2, NULL, 0);
+        updateHash((cx_hash_t *) &tx_state->hash, cdata, 2);
 
         ctx->state = TX_UPDATE_KEYS_KEY;
         ux_flow_init(0, ux_sign_root_keys_review, NULL);
@@ -85,11 +85,11 @@ void handleSignHigherLevelKeys(
         }
 
         // Hash the schemeId
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 1, NULL, 0);
+        updateHash((cx_hash_t *) &tx_state->hash, cdata, 1);
         cdata += 1;
 
         toPaginatedHex(cdata, 32, ctx->updateVerificationKey, sizeof(ctx->updateVerificationKey));
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 32, NULL, 0);
+        updateHash((cx_hash_t *) &tx_state->hash, cdata, 32);
 
         ctx->numberOfUpdateKeys -= 1;
         if (ctx->numberOfUpdateKeys == 0) {
@@ -101,7 +101,7 @@ void handleSignHigherLevelKeys(
     } else if (p1 == P1_THRESHOLD && ctx->state == TX_UPDATE_KEYS_THRESHOLD) {
         uint16_t threshold = U2BE(cdata, 0);
         bin2dec(ctx->threshold, sizeof(ctx->threshold), threshold);
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 2, NULL, 0);
+        updateHash((cx_hash_t *) &tx_state->hash, cdata, 2);
 
         ux_flow_init(0, ux_sign_root_keys_update_threshold, NULL);
         *flags |= IO_ASYNCH_REPLY;

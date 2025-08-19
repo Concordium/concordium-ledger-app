@@ -32,13 +32,13 @@ void handleSignUpdateTransactionFeeDistribution(uint8_t *cdata, volatile unsigne
     // Baker fee is first 4 bytes
     uint32_t bakerFee = U4BE(cdata, 0);
     fractionToPercentageDisplay(ctx->baker, sizeof(ctx->baker), bakerFee);
-    cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 4, NULL, 0);
+    updateHash((cx_hash_t *) &tx_state->hash, cdata, 4);
     cdata += 4;
 
     // Gas account fee is the next 4 bytes
     uint32_t gasAccountFee = U4BE(cdata, 0);
     fractionToPercentageDisplay(ctx->gasAccount, sizeof(ctx->gasAccount), gasAccountFee);
-    cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 4, NULL, 0);
+    updateHash((cx_hash_t *) &tx_state->hash, cdata, 4);
 
     ux_flow_init(0, ux_sign_transaction_dist, NULL);
     *flags |= IO_ASYNCH_REPLY;

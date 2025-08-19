@@ -70,7 +70,7 @@ void handleSignUpdateProtocol(
 
         // Read payload length.
         ctx->payloadLength = U8BE(cdata, 0);
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 8, NULL, 0);
+        updateHash((cx_hash_t *) &tx_state->hash, cdata, 8);
 
         ctx->textState = MESSAGE;
         ctx->state = TX_UPDATE_PROTOCOL_TEXT_LENGTH;
@@ -79,7 +79,7 @@ void handleSignUpdateProtocol(
     } else if (p1 == P1_TEXT_LENGTH && ctx->state == TX_UPDATE_PROTOCOL_TEXT_LENGTH) {
         // Read message text length
         ctx->textLength = U8BE(cdata, 0);
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 8, NULL, 0);
+        updateHash((cx_hash_t *) &tx_state->hash, cdata, 8);
 
         // Update payload length to ensure we end up with the length of the auxiliary data.
         ctx->payloadLength -= 8;
@@ -92,7 +92,7 @@ void handleSignUpdateProtocol(
         }
 
         memmove(ctx->buffer, cdata, dataLength);
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, dataLength, NULL, 0);
+        updateHash((cx_hash_t *) &tx_state->hash, cdata, dataLength);
         ctx->textLength -= dataLength;
         ctx->payloadLength -= dataLength;
 
@@ -116,7 +116,7 @@ void handleSignUpdateProtocol(
 
         *flags |= IO_ASYNCH_REPLY;
     } else if (p1 == P1_SPECIFICATION_HASH && ctx->state == TX_UPDATE_PROTOCOL_SPECIFICATION_HASH) {
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 32, NULL, 0);
+        updateHash((cx_hash_t *) &tx_state->hash, cdata, 32);
         toPaginatedHex(cdata, 32, ctx->specificationHash, sizeof(ctx->specificationHash));
         ctx->payloadLength -= 32;
 
@@ -124,7 +124,7 @@ void handleSignUpdateProtocol(
         ux_flow_init(0, ux_sign_protocol_update_specification_hash, NULL);
         *flags |= IO_ASYNCH_REPLY;
     } else if (p1 == P1_AUXILIARY_DATA && ctx->state == TX_UPDATE_PROTOCOL_AUXILIARY_DATA) {
-        cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, dataLength, NULL, 0);
+        updateHash((cx_hash_t *) &tx_state->hash, cdata, dataLength);
         ctx->payloadLength -= dataLength;
 
         if (ctx->payloadLength == 0) {

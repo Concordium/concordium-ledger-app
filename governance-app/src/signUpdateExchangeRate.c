@@ -31,10 +31,10 @@ void handleSignUpdateExchangeRate(uint8_t *cdata, volatile unsigned int *flags) 
     cx_sha256_init(&tx_state->hash);
     // Note that this method cannot easily use hashUpdateHeaderAndType from util.h, as
     // the UI is built based on the specific update type.
-    cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, UPDATE_HEADER_LENGTH, NULL, 0);
+    updateHash((cx_hash_t *) &tx_state->hash, cdata, UPDATE_HEADER_LENGTH);
     cdata += UPDATE_HEADER_LENGTH;
     uint8_t updateType = cdata[0];
-    cx_hash((cx_hash_t *) &tx_state->hash, 0, cdata, 1, NULL, 0);
+    updateHash((cx_hash_t *) &tx_state->hash, cdata, 1);
     cdata += 1;
 
     if (updateType == 3) {
