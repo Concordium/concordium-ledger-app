@@ -26,7 +26,7 @@ async function updateAuthorizations(
 
     transport.send(0xe0, ins, 0x00, p2, data);
     await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
-    await sim.navigateAndCompareSnapshots('.', `${device}_update_authorizations/init_${level}`, [2]);
+    await sim.navigateAndCompareSnapshots('.', `${device}_update_authorizations/init_${level}`, [1]);
     let snapshot = await sim.clickBoth(undefined, false);
 
     const key1 = Buffer.from('00b6bc751f1abfb6440ff5cce27d7cdd1e7b0b8ec174f54de426890635b27e7daf', 'hex');

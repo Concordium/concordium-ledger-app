@@ -47,7 +47,7 @@ void handleSignUpdateGasRewards(uint8_t *cdata, volatile unsigned int *flags) {
 
     updateHash((cx_hash_t *) &tx_state->hash, cdata, 12);
 
-    fractionToPercentageDisplay(ctx->gasBaker, sizeof(ctx->gasBaker), gasBaker);    
+    fractionToPercentageDisplay(ctx->gasBaker, sizeof(ctx->gasBaker), gasBaker);
     fractionToPercentageDisplay(ctx->gasAccountCreation, sizeof(ctx->gasAccountCreation), gasAccountCreation);
     fractionToPercentageDisplay(ctx->gasChainUpdate, sizeof(ctx->gasChainUpdate), gasChainUpdate);
 

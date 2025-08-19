@@ -1,218 +1,174 @@
 name: Build and test
 
 on:
-    push:
-        branches: [main]
-    pull_request:
-        branches: [main]
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
 
-    # Allows us to run the workflow manually from the Actions tab
-    workflow_dispatch:
+  # Allows us to run the workflow manually from the Actions tab
+  workflow_dispatch:
 
 jobs:
-    compile-nano-s:
-        name: Compile for Nano S
-        runs-on: ubuntu-latest
+  compile:
+    name: Compile for ${{ matrix.name }}
+    runs-on: ubuntu-latest
+    container: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
+    strategy:
+      matrix:
+        include:
+          - name: Nano S
+            device: nanos
+            sdk_var: $NANOS_SDK
+            app_dir: "."
+            artifact_name: nanos
+            output_name: concordium_nanos.elf
+            output_path: ./concordium_nanos.elf
+          - name: Nano S Plus
+            device: nanosplus
+            sdk_var: $NANOSP_SDK
+            app_dir: "."
+            artifact_name: nanosplus
+            output_name: concordium_nanosplus.elf
+            output_path: ./concordium_nanosplus.elf
+          - name: Nano X
+            device: nanox
+            sdk_var: $NANOX_SDK
+            app_dir: "."
+            artifact_name: nanox
+            output_name: concordium_nanox.elf
+            output_path: ./concordium_nanox.elf
+          - name: Governance Nano S
+            device: governance-nanos
+            sdk_var: $NANOS_SDK
+            app_dir: governance-app
+            artifact_name: governance-nanos
+            output_name: ccdGovernance_nanos.elf
+            output_path: ./governance-app/ccdGovernance_nanos.elf
+          - name: Governance Nano S Plus
+            device: governance-nanosplus
+            sdk_var: $NANOSP_SDK
+            app_dir: governance-app
+            artifact_name: governance-nanosplus
+            output_name: ccdGovernance_nanosplus.elf
+            output_path: ./governance-app/ccdGovernance_nanosplus.elf
 
-        container: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          submodules: 'recursive'
+          
+      - name: Build
+        run: |
+          cd ${{ matrix.app_dir }}
+          make clean
+          BOLOS_SDK=${{ matrix.sdk_var }} make
+          mv bin/app.elf ${{ matrix.output_name }}
 
-        steps:
-            - uses: actions/checkout@v3
-              with:
-                  submodules: 'recursive'
-            - name: Build
-              run: |
-                  make clean
-                  BOLOS_SDK=$NANOS_SDK make
-                  mv bin/app.elf concordium_nanos.elf
+      - name: Upload binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: ${{ matrix.output_path }}
 
-            - name: Upload binary
-              uses: actions/upload-artifact@v4
-              with:
-                name: nanos
-                path: ./concordium_nanos.elf
+  scan-build:
+    name: Run Clang Static Analyzer
+    runs-on: ubuntu-latest
 
-    compile-nano-s-plus:
-        name: Compile for Nano S Plus
-        runs-on: ubuntu-latest
+    container: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
 
-        container: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          submodules: 'recursive'
 
-        steps:
-            - uses: actions/checkout@v3
-              with:
-                  submodules: 'recursive'
+      - name: Clang Static Analyzer
+        run: |
+          make clean
+          scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build --status-bugs make default
 
-            - name: Build
-              run: |
-                  make clean
-                  BOLOS_SDK=$NANOSP_SDK make
-                  mv bin/app.elf concordium_nanosplus.elf
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
 
-            - name: Upload binary
-              uses: actions/upload-artifact@v4
-              with:
-                name: nanosplus
-                path: ./concordium_nanosplus.elf
+    steps:
+      - uses: actions/checkout@v5
 
-    compile-nano-x:
-        name: Compile for Nano X
-        runs-on: ubuntu-latest
+      - name: Lint
+        uses: DoozyX/clang-format-lint-action@v0.15
+        with:
+          source: './src ./unit_tests'
+          extensions: 'c,h'
+          clangFormatVersion: 15
+          style: file
+          inplace: false
 
-        container: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
+  e2e-tests:
+    name: End to end tests
+    needs: [compile]
+    runs-on: ubuntu-latest
 
-        steps:
-            - uses: actions/checkout@v3
-              with:
-                  submodules: 'recursive'
-            - name: Build
-              run: |
-                  make clean
-                  BOLOS_SDK=$NANOX_SDK make
-                  mv bin/app.elf concordium_nanox.elf
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          submodules: 'recursive'
+      - run: sudo apt-get update -y && sudo apt-get install -y libusb-1.0.0 libudev-dev
 
-            - name: Upload binary
-              uses: actions/upload-artifact@v4
-              with:
-                name: nanox
-                path: ./concordium_nanox.elf
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
 
-    compile-governance-nano-s:
-        name: Compile Governance app for Nano S
-        runs-on: ubuntu-latest
+      - name: Setup dependencies
+        run: |
+          cd tests && yarn
 
-        container: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
+      - name: Create directory for binaries
+        run: |
+          mkdir tests/bin
 
-        steps:
-            - uses: actions/checkout@v3
-              with:
-                  submodules: 'recursive'
-            - name: Build
-              run: |
-                  cd governance-app
-                  make clean
-                  BOLOS_SDK=$NANOS_SDK make
-                  mv bin/app.elf ccdGovernance_nanos.elf
+      - name: Download binaries
+        uses: actions/download-artifact@v5
+        with:
+          path: tests/bin
 
-            - name: Upload binary
-              uses: actions/upload-artifact@v4
-              with:
-                name: governance-nanos
-                path: ./governance-app/ccdGovernance_nanos.elf
+      - name: Run tests
+        run: |
+          cd tests && yarn test
 
-    compile-governance-nano-s-plus:
-        name: Compile Governance app for Nano S Plus
-        runs-on: ubuntu-latest
+  run_unit_test:
+    name: Unit test
+    runs-on: ubuntu-latest
 
-        container: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
+    container:
+      image: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
 
-        steps:
-            - uses: actions/checkout@v3
-              with:
-                  submodules: 'recursive'
-            - name: Build
-              run: |
-                  cd governance-app
-                  make clean
-                  BOLOS_SDK=$NANOSP_SDK make
-                  mv bin/app.elf ccdGovernance_nanosplus.elf
+    steps:
+      - name: Clone
+        uses: actions/checkout@v5
 
-            - name: Upload binary
-              uses: actions/upload-artifact@v4
-              with:
-                name: governance-nanosplus
-                path: ./governance-app/ccdGovernance_nanosplus.elf
+      - name: Build unit tests
+        run: |
+          cd unit_tests/
+          cmake -Bbuild -H. && make -C build
 
-    scan-build:
-        name: Run Clang Static Analyzer
-        runs-on: ubuntu-latest
-
-        container: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
-
-        steps:
-            - uses: actions/checkout@v3
-              with:
-                  submodules: 'recursive'
-
-            - name: Clang Static Analyzer
-              run: |
-                  make clean
-                  scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build --status-bugs make default
-
-    lint:
-        name: Lint
-        runs-on: ubuntu-latest
-
-        steps:
-            - uses: actions/checkout@v3
-
-            - name: Lint
-              uses: DoozyX/clang-format-lint-action@v0.15
-              with:
-                source: './src ./unit_tests'
-                extensions: 'c,h'
-                clangFormatVersion: 15
-                style: file
-                inplace: false
-
-    e2e-tests:
-        name: End to end tests
-        needs: [compile-nano-s, compile-nano-s-plus, compile-nano-x, compile-governance-nano-s]
-        runs-on: ubuntu-latest
-
-        steps:
-            - uses: actions/checkout@v3
-              with:
-                submodules: 'recursive'
-            - run: sudo apt-get update -y && sudo apt-get install -y libusb-1.0.0 libudev-dev
-
-            - uses: actions/setup-node@v3
-              with:
-                node-version: "16"
-
-            - name: Setup dependencies
-              run: |
-                cd tests && yarn
-
-            - name: Create directory for binaries
-              run: |
-                mkdir tests/bin
-
-            - name: Download binaries
-              uses: actions/download-artifact@v4
-              with:
-                path: tests/bin
-
-            - name: Run tests
-              run: |
-                cd tests && yarn test
-
-            - name: Upload snapshots
-              if: always()
-              uses: actions/upload-artifact@v4
-              with:
-                name: snapshots
-                path: ./tests/snapshots-tmp
-
-    run_unit_test:
-      name: Unit test
-      runs-on: ubuntu-latest
-
-      container:
-        image: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
-
-      steps:
-          - name: Clone
-            uses: actions/checkout@v3
-
-          - name: Build unit tests
-            run: |
-              cd unit_tests/
-              cmake -Bbuild -H. && make -C build
-
-          - name: Run unit tests
-            env:
-              CTEST_OUTPUT_ON_FAILURE: 1
-            run: |
-              cd unit_tests/
-              make -C build test
+      - name: Run unit tests
+        env:
+          CTEST_OUTPUT_ON_FAILURE: 1
+        run: |
+          cd unit_tests/
+          make -C build test
+            
+  # The point of this job is to make it easy to add protection rules that require all status checks to pass.
+  results:
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    name: Workflow result
+    needs: [compile, scan-build, run_unit_test, lint, e2e-tests]
+    steps:
+      - run: exit 1
+        # see https://stackoverflow.com/a/67532120/4907315
+        if: >-
+          ${{
+               contains(needs.*.result, 'failure')
+            || contains(needs.*.result, 'cancelled')
+          }}

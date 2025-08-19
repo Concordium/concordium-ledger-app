@@ -35,7 +35,10 @@ void handleSignUpdateTransactionFeeDistribution(uint8_t *cdata, volatile unsigne
     cdata += hashUpdateHeaderAndType(cdata, UPDATE_TYPE_TRANSACTION_FEE_DISTRIBUTION);
 
     // Set update type text for display
-    strncpy(ctx->updateTypeText, getUpdateTypeText(UPDATE_TYPE_TRANSACTION_FEE_DISTRIBUTION), sizeof(ctx->updateTypeText));
+    strncpy(
+        ctx->updateTypeText,
+        getUpdateTypeText(UPDATE_TYPE_TRANSACTION_FEE_DISTRIBUTION),
+        sizeof(ctx->updateTypeText));
     ctx->updateTypeText[sizeof(ctx->updateTypeText) - 1] = '\0';
 
     // Baker fee is first 4 bytes

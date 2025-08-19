@@ -348,35 +348,35 @@ const char *getUpdateTypeText(uint8_t updateType) {
             return "GAS rewards";
         case 9:  // UPDATE_TYPE_BAKER_STAKE_THRESHOLD
             return "Baker stake threshold";
-        case 10: // UPDATE_TYPE_UPDATE_ROOT_KEYS
+        case 10:  // UPDATE_TYPE_UPDATE_ROOT_KEYS
             return "Root keys";
-        case 11: // UPDATE_TYPE_UPDATE_LEVEL1_KEYS
+        case 11:  // UPDATE_TYPE_UPDATE_LEVEL1_KEYS
             return "Level 1 keys";
-        case 12: // UPDATE_TYPE_ADD_ANONYMITY_REVOKER
+        case 12:  // UPDATE_TYPE_ADD_ANONYMITY_REVOKER
             return "Add anonymity revoker";
-        case 13: // UPDATE_TYPE_ADD_IDENTITY_PROVIDER
+        case 13:  // UPDATE_TYPE_ADD_IDENTITY_PROVIDER
             return "Add identity provider";
-        case 14: // UPDATE_TYPE_COOLDOWN_PARAMETERS
+        case 14:  // UPDATE_TYPE_COOLDOWN_PARAMETERS
             return "Cooldown params";
-        case 15: // UPDATE_TYPE_POOL_PARAMETERS
+        case 15:  // UPDATE_TYPE_POOL_PARAMETERS
             return "Pool params";
-        case 16: // UPDATE_TYPE_TIME_PARAMETERS
+        case 16:  // UPDATE_TYPE_TIME_PARAMETERS
             return "Time params";
-        case 17: // UPDATE_TYPE_MINT_DISTRIBUTION_V1
+        case 17:  // UPDATE_TYPE_MINT_DISTRIBUTION_V1
             return "Mint distribution";
-        case 18: // UPDATE_TYPE_TIMEOUT_PARAMETERS
+        case 18:  // UPDATE_TYPE_TIMEOUT_PARAMETERS
             return "Timeout params";
-        case 19: // UPDATE_TYPE_MIN_BLOCK_TIME
+        case 19:  // UPDATE_TYPE_MIN_BLOCK_TIME
             return "Min block time";
-        case 20: // UPDATE_TYPE_BLOCK_ENERGY_LIMIT
+        case 20:  // UPDATE_TYPE_BLOCK_ENERGY_LIMIT
             return "Block energy limit";
-        case 21: // UPDATE_TYPE_GAS_REWARDS_CPV2
+        case 21:  // UPDATE_TYPE_GAS_REWARDS_CPV2
             return "GAS rewards";
-        case 22: // UPDATE_TYPE_FINALIZATION_COMMITTEE_PARAMETERS
+        case 22:  // UPDATE_TYPE_FINALIZATION_COMMITTEE_PARAMETERS
             return "Fin. comm. params";
-        case 23: // UPDATE_TYPE_VALIDATOR_SCORE_PARAMETERS
+        case 23:  // UPDATE_TYPE_VALIDATOR_SCORE_PARAMETERS
             return "Valid. score params";
-        case 24: // UPDATE_TYPE_CREATE_PLT
+        case 24:  // UPDATE_TYPE_CREATE_PLT
             return "Create PLT";
         default:
             return "Unknown update";

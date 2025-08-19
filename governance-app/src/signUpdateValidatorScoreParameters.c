@@ -29,9 +29,13 @@ void handleSignUpdateValidatorScoreParameters(uint8_t *cdata, volatile unsigned 
     cdata += hashUpdateHeaderAndType(cdata, UPDATE_TYPE_VALIDATOR_SCORE_PARAMETERS);
 
     // Set update type text for display
-    strncpy(ctx->updateTypeText, getUpdateTypeText(UPDATE_TYPE_VALIDATOR_SCORE_PARAMETERS), sizeof(ctx->updateTypeText));
+    strncpy(
+        ctx->updateTypeText,
+        getUpdateTypeText(UPDATE_TYPE_VALIDATOR_SCORE_PARAMETERS),
+        sizeof(ctx->updateTypeText));
 
-    // A 64-bit number representing the number of blocks a validator is allowed to miss before being flagged for suspension.
+    // A 64-bit number representing the number of blocks a validator is allowed to miss before being flagged for
+    // suspension.
     uint64_t max_missed_rounds = U8BE(cdata, 0);
     updateHash((cx_hash_t *) &tx_state->hash, cdata, 8);
     numberToText(ctx->max_missed_rounds, sizeof(ctx->max_missed_rounds), max_missed_rounds);
