@@ -75,9 +75,9 @@ instructionContext global;
 #define INS_UPDATE_TIME_PARAMETERS     0x42
 
 // Protocol update 6 transactions.
-#define INS_UPDATE_TIMEOUT_PARAMETERS 0x43
-#define INS_UPDATE_MIN_BLOCK_TIME     0x44
-#define INS_UPDATE_BLOCK_ENERGY_LIMIT 0x45
+#define INS_UPDATE_TIMEOUT_PARAMETERS                0x43
+#define INS_UPDATE_MIN_BLOCK_TIME                    0x44
+#define INS_UPDATE_BLOCK_ENERGY_LIMIT                0x45
 #define INS_UPDATE_FINALIZATION_COMMITTEE_PARAMETERS 0x46
 
 // Protocol update 8 transactions.
@@ -93,98 +93,82 @@ void handler(
     uint8_t p2,
     uint8_t lc,
     volatile unsigned int *flags,
-    bool isInitialCall
-    ) {
-                switch (INS) {
-                    case INS_GET_PUBLIC_KEY:
-                        handleGetPublicKey(cdata, p1, p2, flags);
-                        break;
-                    case INS_UPDATE_EXCHANGE_RATE:
-                        handleSignUpdateExchangeRate(cdata, flags);
-                        break;
-                    case INS_UPDATE_PROTOCOL:
-                        handleSignUpdateProtocol(cdata, p1, lc, flags, isInitialCall);
-                        break;
-                    case INS_UPDATE_TRANSACTION_FEE_DIST:
-                        handleSignUpdateTransactionFeeDistribution(cdata, flags);
-                        break;
-                    case INS_UPDATE_GAS_REWARDS:
-                        handleSignUpdateGasRewards(cdata, flags);
-                        break;
-                    case INS_UPDATE_FOUNDATION_ACCOUNT:
-                        handleSignUpdateFoundationAccount(cdata, flags);
-                        break;
-                    case INS_UPDATE_MINT_DISTRIBUTION:
-                        handleSignUpdateMintDistribution(cdata, p2, flags);
-                        break;
-                    case INS_UPDATE_BAKER_STAKE_THRESHOLD:
-                        handleSignUpdateBakerStakeThreshold(cdata, flags);
-                        break;
-                    case INS_UPDATE_ROOT_KEYS:
-                        handleSignHigherLevelKeys(cdata, p1, UPDATE_TYPE_UPDATE_ROOT_KEYS, flags, isInitialCall);
-                        break;
-                    case INS_UPDATE_LEVEL1_KEYS:
-                        handleSignHigherLevelKeys(cdata, p1, UPDATE_TYPE_UPDATE_LEVEL1_KEYS, flags, isInitialCall);
-                        break;
-                    case INS_UPDATE_LEVEL2_KEYS_ROOT:
-                        handleSignUpdateAuthorizations(
-                            cdata,
-                            p1,
-                            p2,
-                            UPDATE_TYPE_UPDATE_ROOT_KEYS,
-                            lc,
-                            flags,
-                            isInitialCall);
-                        break;
-                    case INS_UPDATE_LEVEL2_KEYS_LEVEL1:
-                        handleSignUpdateAuthorizations(
-                            cdata,
-                            p1,
-                            p2,
-                            UPDATE_TYPE_UPDATE_LEVEL1_KEYS,
-                            lc,
-                            flags,
-                            isInitialCall);
-                        break;
-                    case INS_ADD_IDENTITY_PROVIDER:
-                        handleSignAddIdentityProvider(cdata, p1, lc, flags, isInitialCall);
-                        break;
-                    case INS_ADD_ANONYMITY_REVOKER:
-                        handleSignAddAnonymityRevoker(cdata, p1, lc, flags, isInitialCall);
-                        break;
-                    case INS_UPDATE_TIME_PARAMETERS:
-                        handleSignUpdateTimeParameters(cdata, flags);
-                        break;
-                    case INS_UPDATE_COOLDOWN_PARAMETERS:
-                        handleSignUpdateCooldownParameters(cdata, flags);
-                        break;
-                    case INS_UPDATE_POOL_PARAMETERS:
-                        handleSignUpdatePoolParameters(cdata, p1, flags, isInitialCall);
-                        break;
-                    case INS_UPDATE_TIMEOUT_PARAMETERS:
-                        handleSignTimeoutParameters(cdata, flags);
-                        break;
-                    case INS_UPDATE_MIN_BLOCK_TIME:
-                        handleSignMinBlockTime(cdata, flags);
-                        break;
-                    case INS_UPDATE_BLOCK_ENERGY_LIMIT:
-                        handleSignUpdateBlockEnergyLimit(cdata, flags);
-                        break;
-                    case INS_UPDATE_FINALIZATION_COMMITTEE_PARAMETERS:
-                        handleSignUpdateFinalizationCommitteeParameters(cdata, flags);
-                        break;
-                    case INS_UPDATE_VALIDATOR_SCORE_PARAMETERS:
-                        handleSignUpdateValidatorScoreParameters(cdata, flags);
-                        break;
-                    case INS_CREATE_PLT:
-                        handleSignCreatePlt(cdata, p1, lc, flags, isInitialCall);
-                        break;
-                    default:
-                        THROW(ERROR_INVALID_INSTRUCTION);
-                        break;
-                }
+    bool isInitialCall) {
+    switch (INS) {
+        case INS_GET_PUBLIC_KEY:
+            handleGetPublicKey(cdata, p1, p2, flags);
+            break;
+        case INS_UPDATE_EXCHANGE_RATE:
+            handleSignUpdateExchangeRate(cdata, flags);
+            break;
+        case INS_UPDATE_PROTOCOL:
+            handleSignUpdateProtocol(cdata, p1, lc, flags, isInitialCall);
+            break;
+        case INS_UPDATE_TRANSACTION_FEE_DIST:
+            handleSignUpdateTransactionFeeDistribution(cdata, flags);
+            break;
+        case INS_UPDATE_GAS_REWARDS:
+            handleSignUpdateGasRewards(cdata, flags);
+            break;
+        case INS_UPDATE_FOUNDATION_ACCOUNT:
+            handleSignUpdateFoundationAccount(cdata, flags);
+            break;
+        case INS_UPDATE_MINT_DISTRIBUTION:
+            handleSignUpdateMintDistribution(cdata, p2, flags);
+            break;
+        case INS_UPDATE_BAKER_STAKE_THRESHOLD:
+            handleSignUpdateBakerStakeThreshold(cdata, flags);
+            break;
+        case INS_UPDATE_ROOT_KEYS:
+            handleSignHigherLevelKeys(cdata, p1, UPDATE_TYPE_UPDATE_ROOT_KEYS, flags, isInitialCall);
+            break;
+        case INS_UPDATE_LEVEL1_KEYS:
+            handleSignHigherLevelKeys(cdata, p1, UPDATE_TYPE_UPDATE_LEVEL1_KEYS, flags, isInitialCall);
+            break;
+        case INS_UPDATE_LEVEL2_KEYS_ROOT:
+            handleSignUpdateAuthorizations(cdata, p1, p2, UPDATE_TYPE_UPDATE_ROOT_KEYS, lc, flags, isInitialCall);
+            break;
+        case INS_UPDATE_LEVEL2_KEYS_LEVEL1:
+            handleSignUpdateAuthorizations(cdata, p1, p2, UPDATE_TYPE_UPDATE_LEVEL1_KEYS, lc, flags, isInitialCall);
+            break;
+        case INS_ADD_IDENTITY_PROVIDER:
+            handleSignAddIdentityProvider(cdata, p1, lc, flags, isInitialCall);
+            break;
+        case INS_ADD_ANONYMITY_REVOKER:
+            handleSignAddAnonymityRevoker(cdata, p1, lc, flags, isInitialCall);
+            break;
+        case INS_UPDATE_TIME_PARAMETERS:
+            handleSignUpdateTimeParameters(cdata, flags);
+            break;
+        case INS_UPDATE_COOLDOWN_PARAMETERS:
+            handleSignUpdateCooldownParameters(cdata, flags);
+            break;
+        case INS_UPDATE_POOL_PARAMETERS:
+            handleSignUpdatePoolParameters(cdata, p1, flags, isInitialCall);
+            break;
+        case INS_UPDATE_TIMEOUT_PARAMETERS:
+            handleSignTimeoutParameters(cdata, flags);
+            break;
+        case INS_UPDATE_MIN_BLOCK_TIME:
+            handleSignMinBlockTime(cdata, flags);
+            break;
+        case INS_UPDATE_BLOCK_ENERGY_LIMIT:
+            handleSignUpdateBlockEnergyLimit(cdata, flags);
+            break;
+        case INS_UPDATE_FINALIZATION_COMMITTEE_PARAMETERS:
+            handleSignUpdateFinalizationCommitteeParameters(cdata, flags);
+            break;
+        case INS_UPDATE_VALIDATOR_SCORE_PARAMETERS:
+            handleSignUpdateValidatorScoreParameters(cdata, flags);
+            break;
+        case INS_CREATE_PLT:
+            handleSignCreatePlt(cdata, p1, lc, flags, isInitialCall);
+            break;
+        default:
+            THROW(ERROR_INVALID_INSTRUCTION);
+            break;
+    }
 }
-
 
 // Boot procedure that ensures that the main menu is loaded, and that the application then starts
 // listening for APDU commands by running concordium_main().

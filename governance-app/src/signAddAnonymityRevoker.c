@@ -18,7 +18,11 @@ UX_STEP_CB(
     bn,
     sendSuccessNoIdle(),
     {"AR Identity", (char *) global.withDescription.signAddAnonymityRevokerContext.arIdentity});
-UX_FLOW(ux_sign_add_anonymity_revoker_start, &ux_sign_flow_shared_review, &ux_sign_add_anonymity_revoker_type, &ux_sign_add_anonymity_revoker_arIdentity);
+UX_FLOW(
+    ux_sign_add_anonymity_revoker_start,
+    &ux_sign_flow_shared_review,
+    &ux_sign_add_anonymity_revoker_type,
+    &ux_sign_add_anonymity_revoker_arIdentity);
 
 UX_STEP_NOCB(
     ux_sign_add_anonymity_revoker_public_key,

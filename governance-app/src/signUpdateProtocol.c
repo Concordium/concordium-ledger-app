@@ -20,7 +20,11 @@ UX_STEP_CB(
     bnnn_paging,
     handleText(),
     {"Message", (char *) global.signUpdateProtocolContext.buffer});
-UX_FLOW(ux_sign_protocol_update, &ux_sign_flow_shared_review, &ux_sign_protocol_update_type_step, &ux_sign_protocol_update_1_step);
+UX_FLOW(
+    ux_sign_protocol_update,
+    &ux_sign_flow_shared_review,
+    &ux_sign_protocol_update_type_step,
+    &ux_sign_protocol_update_1_step);
 
 UX_STEP_CB(
     ux_sign_protocol_update_url_0_step,

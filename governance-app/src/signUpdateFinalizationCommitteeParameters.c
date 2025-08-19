@@ -26,11 +26,12 @@ UX_STEP_NOCB(
     ux_sign_update_finalization_committee_parameters_step_2,
     bnnn_paging,
     {.title = "Max finalizers", .text = (char *) global.signUpdateFinalizationCommitteeParameters.maxFinalizers});
-    
+
 UX_STEP_NOCB(
     ux_sign_update_finalization_committee_parameters_step_3,
     bnnn_paging,
-    {.title = "Stake threshold", .text = (char *) global.signUpdateFinalizationCommitteeParameters.relativeStakeThreshold});
+    {.title = "Stake threshold",
+     .text = (char *) global.signUpdateFinalizationCommitteeParameters.relativeStakeThreshold});
 
 UX_FLOW(
     ux_sign_update_finalization_committee_parameters,
@@ -48,7 +49,10 @@ void handleSignUpdateFinalizationCommitteeParameters(uint8_t *cdata, volatile un
     cdata += hashUpdateHeaderAndType(cdata, UPDATE_TYPE_FINALIZATION_COMMITTEE_PARAMETERS);
 
     // Set update type text
-    strncpy(ctx->updateTypeText, getUpdateTypeText(UPDATE_TYPE_FINALIZATION_COMMITTEE_PARAMETERS), sizeof(ctx->updateTypeText));
+    strncpy(
+        ctx->updateTypeText,
+        getUpdateTypeText(UPDATE_TYPE_FINALIZATION_COMMITTEE_PARAMETERS),
+        sizeof(ctx->updateTypeText));
     ctx->updateTypeText[sizeof(ctx->updateTypeText) - 1] = '\0';
 
     uint32_t minFinalizers = U4BE(cdata, 0);
@@ -59,7 +63,10 @@ void handleSignUpdateFinalizationCommitteeParameters(uint8_t *cdata, volatile un
 
     bin2dec(ctx->minFinalizers, sizeof(ctx->minFinalizers), minFinalizers);
     bin2dec(ctx->maxFinalizers, sizeof(ctx->maxFinalizers), maxFinalizers);
-    fractionToPercentageDisplay(ctx->relativeStakeThreshold, sizeof(ctx->relativeStakeThreshold), relativeStakeThreshold);
+    fractionToPercentageDisplay(
+        ctx->relativeStakeThreshold,
+        sizeof(ctx->relativeStakeThreshold),
+        relativeStakeThreshold);
 
     ux_flow_init(0, ux_sign_update_finalization_committee_parameters, NULL);
     *flags |= IO_ASYNCH_REPLY;

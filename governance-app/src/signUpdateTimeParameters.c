@@ -6,10 +6,7 @@
 static signUpdateTimeParametersContext_t *ctx = &global.signTimeParameters;
 static tx_state_t *tx_state = &global_tx_state;
 
-UX_STEP_NOCB(
-    ux_sign_time_parameters_type_step,
-    bn,
-    {"Update type", (char *) global.signTimeParameters.updateTypeText});
+UX_STEP_NOCB(ux_sign_time_parameters_type_step, bn, {"Update type", (char *) global.signTimeParameters.updateTypeText});
 UX_STEP_NOCB(
     ux_sign_time_parameters_1_step,
     bnnn_paging,

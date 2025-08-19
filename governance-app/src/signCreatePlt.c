@@ -8,15 +8,9 @@
 static signCreatePltContext_t *ctx = &global.signCreatePltContext;
 static tx_state_t *tx_state = &global_tx_state;
 
-UX_STEP_NOCB(
-    ux_sign_create_plt_type,
-    bn,
-    {"Update type", (char *) global.signCreatePltContext.updateTypeText});
+UX_STEP_NOCB(ux_sign_create_plt_type, bn, {"Update type", (char *) global.signCreatePltContext.updateTypeText});
 
-UX_STEP_NOCB(
-    ux_sign_create_plt_token_symbol,
-    bnnn_paging,
-    {"Token ID", (char *) global.signCreatePltContext.tokenId});
+UX_STEP_NOCB(ux_sign_create_plt_token_symbol, bnnn_paging, {"Token ID", (char *) global.signCreatePltContext.tokenId});
 
 UX_STEP_NOCB(
     ux_sign_create_plt_token_module,
