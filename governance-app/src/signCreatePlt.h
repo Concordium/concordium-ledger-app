@@ -29,8 +29,8 @@ typedef struct {
 
     // Display fields
     uint8_t tokenId[129];      // Max 128 chars + null terminator
-    char tokenModule[68];      // Hex representation (32 bytes * 2 + 4 chars for pagination + null)
-    uint8_t decimals[4];       // String representation of uint8
+    char tokenModule[69];      // Hex representation (32 bytes * 2 + 4 chars for pagination + null)
+    uint8_t decimals[4];       // String representation of uint8 (max 3 chars + null)
     uint8_t initParams[512];   // Buffer to store init params data (up to 512 bytes)
     char initParamsHex[1089];  // Hex representation for display (512 bytes * 2 + (512/8=64) chars for pagination + null)
 

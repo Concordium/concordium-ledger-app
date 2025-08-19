@@ -82,6 +82,8 @@ instructionContext global;
 
 // Protocol update 8 transactions.
 #define INS_UPDATE_VALIDATOR_SCORE_PARAMETERS 0x47
+
+// Protocol update 9 transactions.
 #define INS_CREATE_PLT 0x48
 
 void handler(
