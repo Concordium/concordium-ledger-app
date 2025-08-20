@@ -102,6 +102,7 @@ jobs:
 
   create-release:
     needs: [verify-version, release]
+    if: github.ref_type == 'tag'
     runs-on: ubuntu-latest
     steps:
       - name: Download all artifacts
