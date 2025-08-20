@@ -51,7 +51,7 @@ async function updateProtocol(
         if (i === chunkedData.length - 1) {
             const tx = transport.send(0xe0, 0x21, 0x04, 0x00, chunk);
             await sim.waitUntilScreenIsNot(snap);
-            await sim.navigateAndCompareSnapshots('.', `${name}/aux`, [0], false);
+            await sim.navigateAndCompareSnapshots('.', `${name}/aux-data`, [0], false);
 
             await expect(tx).resolves.toEqual(
                 Buffer.from(
