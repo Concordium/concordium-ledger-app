@@ -7,6 +7,6 @@
 
 FROM ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
 
-RUN apk add --update zip
+RUN apt-get update && apt-get install -y zip
 
 CMD ["/bin/bash"]

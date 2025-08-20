@@ -67,7 +67,6 @@ jobs:
     needs: verify-version
     runs-on: ubuntu-latest
     environment: release-ledger-app
-    container: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
     strategy:
       matrix:
         include:
@@ -85,17 +84,23 @@ jobs:
         with:
           submodules: 'recursive'
           
-      - name: Build and sign release
+      - name: Build Docker image
+        run: |
+          docker build -t ledger-app-builder:local .
+          
+      - name: Build and sign release in Docker container
         env:
           LEDGER_SIGNING_KEY: ${{ secrets.LEDGER_SIGNING_KEY }}
           LEDGER_PUBLIC_KEY: ${{ secrets.LEDGER_PUBLIC_KEY }}
         run: |
-          cd ${{ matrix.app_dir }}
-          make clean
-          BOLOS_SDK=${{ matrix.sdk_var }} \
-          LEDGER_SIGNING_KEY="${{ env.LEDGER_SIGNING_KEY }}" \
-          LEDGER_PUBLIC_KEY="${{ env.LEDGER_PUBLIC_KEY }}" \
-          make release
+          docker run --rm \
+            -v ${{ github.workspace }}:/app \
+            -w /app/${{ matrix.app_dir }} \
+            -e LEDGER_SIGNING_KEY="${{ env.LEDGER_SIGNING_KEY }}" \
+            -e LEDGER_PUBLIC_KEY="${{ env.LEDGER_PUBLIC_KEY }}" \
+            -e BOLOS_SDK=${{ matrix.sdk_var }} \
+            ledger-app-builder:local \
+            "make release"
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
