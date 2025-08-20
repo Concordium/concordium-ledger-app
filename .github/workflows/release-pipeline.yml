@@ -67,6 +67,7 @@ jobs:
     needs: verify-version
     runs-on: ubuntu-latest
     environment: release-ledger-app
+    container: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
     strategy:
       matrix:
         include:
@@ -83,34 +84,31 @@ jobs:
       - uses: actions/checkout@v5
         with:
           submodules: 'recursive'
-          
-      - name: Build Docker image
+
+      - name: Install dependencies
         run: |
-          docker build -t ledger-app-builder:local .
+          apt-get update
+          apt-get install -y zip
           
-      - name: Build and sign release in Docker container
+      - name: Build and sign release
         env:
           LEDGER_SIGNING_KEY: ${{ secrets.LEDGER_SIGNING_KEY }}
           LEDGER_PUBLIC_KEY: ${{ secrets.LEDGER_PUBLIC_KEY }}
+        working-directory: ${{ matrix.app_dir }}
         run: |
-          docker run --rm \
-            -v ${{ github.workspace }}:/app \
-            -w /app/${{ matrix.app_dir }} \
-            -e LEDGER_SIGNING_KEY="${{ env.LEDGER_SIGNING_KEY }}" \
-            -e LEDGER_PUBLIC_KEY="${{ env.LEDGER_PUBLIC_KEY }}" \
-            -e BOLOS_SDK=${{ matrix.sdk_var }} \
-            ledger-app-builder:local \
-            "make release"
-
+          BOLOS_SDK=${{ matrix.sdk_var }} \
+          LEDGER_SIGNING_KEY="${{ env.LEDGER_SIGNING_KEY }}" \
+          LEDGER_PUBLIC_KEY="${{ env.LEDGER_PUBLIC_KEY }}" \
+          make release
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: governance-${{ matrix.device }}-release
+          name: ccd-governance-${{ matrix.device }}
           path: ${{ matrix.app_dir }}/*.zip
 
   create-release:
     needs: [verify-version, release]
-    if: github.ref_type == 'tag'
+    # if: github.ref_type == 'tag'
     runs-on: ubuntu-latest
     steps:
       - name: Download all artifacts
