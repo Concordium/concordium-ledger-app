@@ -45,7 +45,13 @@ jobs:
           echo "tag=$TAG" >> $GITHUB_OUTPUT
           
           # Get version from Makefile
-          MAKEFILE_VERSION=$(grep -E "^APPVERSION" governance-app/Makefile | cut -d' ' -f3)
+          MAKEFILE_MAJOR=$(grep -E "^APPVERSION_MAJOR=" governance-app/Makefile | cut -d'=' -f2)
+          MAKEFILE_MINOR=$(grep -E "^APPVERSION_MINOR=" governance-app/Makefile | cut -d'=' -f2)
+          MAKEFILE_PATCH=$(grep -E "^APPVERSION_PATCH=" governance-app/Makefile | cut -d'=' -f2)
+          MAKEFILE_VERSION="$MAKEFILE_MAJOR.$MAKEFILE_MINOR.$MAKEFILE_PATCH"
+          
+          echo "Makefile version: $MAKEFILE_VERSION"
+          echo "Tag version: $VERSION"
           
           # Verify versions match
           if [ "$VERSION" != "$MAKEFILE_VERSION" ]; then
