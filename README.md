@@ -55,6 +55,8 @@ python -m ledgerblue.loadApp --targetId <target-id> --apiLevel 24 --fileName bin
 - **target-id**: the target id of the device.
   - "0x33100004" for nano S+
 
+Please note that the `apiLevel` changes according to the sdk used to build the application. 
+
 ### For the Speculos emulator
 
 As the Ledger Nano X does not support sideloading, the only way to test updates on a Nano X is 
