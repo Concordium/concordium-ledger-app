@@ -1,4 +1,4 @@
-name: Release Build
+name: Governance App Release Build
 
 on:
   push:
@@ -79,13 +79,10 @@ jobs:
         with:
           submodules: 'recursive'
           
-      - name: Set up signing keys
-        run: |
-          # The keys are already in hex format, so we just pass them directly as environment variables
-          echo "LEDGER_SIGNING_KEY=${{ secrets.LEDGER_SIGNING_KEY }}" >> $GITHUB_ENV
-          echo "LEDGER_PUBLIC_KEY=${{ secrets.LEDGER_PUBLIC_KEY }}" >> $GITHUB_ENV
-
       - name: Build and sign release
+        env:
+          LEDGER_SIGNING_KEY: ${{ secrets.LEDGER_SIGNING_KEY }}
+          LEDGER_PUBLIC_KEY: ${{ secrets.LEDGER_PUBLIC_KEY }}
         run: |
           cd ${{ matrix.app_dir }}
           make clean
