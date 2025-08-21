@@ -17,3 +17,14 @@ Tests for this app can be found in the main test folders, under the [governance 
 **Once the changes are merged:**
 4. `git tag governance-app/x.y.z` on the merge commit
 5. `git push --tags origin governance-app/x.y.z` to trigger the release workflow
+
+Tests for this app can be found in the main test folders, under the governance subfolder.
+
+## Building the Governance Ledger App
+
+Ensure you are in the repository root (not inside the `governance-app` folder) and that the Docker image has been built as described in the [main app](../README.md). 
+Although the full build process is covered in the [main app](../README.md), an example screenshot is included below for clarity. 
+Especially to highlight that you need to navigate into this `governance-app` folder inside the docker image.
+
+![governanceAppSideLoadingScreenshot](./doc/governanceAppSideLoading.png) 
+

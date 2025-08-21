@@ -10,6 +10,7 @@ git submodule update --init
 ```
 
 ## Building and deploying
+
 We provide a small Dockerfile that wraps [ledger-app-builder](https://github.com/LedgerHQ/ledger-app-builder) which can be used for building, loading and deleting an application for the Ledger Nano S and Ledger Nano S Plus devices. Our Dockerfile provides the dependency required for zipping a release for sideloading.
 
 To build the Docker image run:
@@ -20,12 +21,21 @@ You can now run the Docker container with
 ```bash
 docker run --rm -ti -v "/dev/bus/usb:/dev/bus/usb" -v "$(realpath .):/app" --privileged concordium/ledger-app-builder:latest
 ```
-You now have access to the commands provided by the Makefile:
+
+This repo has two ledger apps. Staying in this folder inside the docker image will build the main app. Navigating inside the `goverance-app` folder inside the docker image will build the `governance` ledger app (see [governanceApp](./governance-app/README.md#building-the-governance-ledger-app)).
+
+You now have access to the commands provided by the Makefile within the docker image:
 
 ```sh
 # Load the application onto the connected device
 make load # this does not work for macos/windows out of the box, due to limited usb support.
 ```
+
+Above command will hold with the output similar as follows when successful and you will need to continue the flow on your ledger device to approve the side loading onto your ledger device.
+
+![mainAppSideLoadingScreenshot](./doc/mainAppSideLoading.png) 
+
+See [Troubleshooting](./README.md#troubleshooting) when you experience an error instead.
 
 ```sh
 # Delete the application from the connected device
@@ -56,6 +66,17 @@ python -m ledgerblue.loadApp --targetId <target-id> --apiLevel 24 --fileName bin
   - "0x33100004" for nano S+
 
 Please note that the `apiLevel` changes according to the sdk used to build the application. 
+
+### Troubleshooting
+
+When side loading onto the ledger device, you may encounter the following common issues 
+(the error codes are from the Ledger Nano S Plus device):
+
+| Issue | Error Message | Resolution |
+|-------|---------------|------------|
+| **Outdated Ledger firmware** | `ledgerblue.commException.CommException: Exception : Invalid status 511f (The OS version on your device does not seem compatible with the SDK version used to build the app)` | Update your device's firmware in **Ledger Live**. |
+| **Ledger not connected / unlocked** | `ledgerblue.commException.CommException: Exception : No dongle found`                                                                                     | Ensure your machine can detect the Ledger (test with **Ledger Live**) and unlock it by entering your PIN. |
+| **Not completing flows properly**   | `ledgerblue.commException.CommException: Exception : Invalid status 6603 (Unknown reason)`<br>`ledgerblue.commException.CommException: Exception : Invalid status 6601 (Unknown reason)` | Ensure you are on the main dashboard in the ledger device before trying to sideload an app. Ensure you complete the on-device prompts completely before sideloading again. The error can happen if you haven't properly completed a previously flow/prompt on the ledger device before trying to sideload again. Re-connecting the ledger device to your machine or moving around the cursor on the ledger device menu or open/closing apps on the ledger often resolves the issue so that the sideloading command works again. |
 
 ### For the Speculos emulator
 
