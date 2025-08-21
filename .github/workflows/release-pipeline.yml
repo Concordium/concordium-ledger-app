@@ -142,7 +142,7 @@ jobs:
 
   release:
     name: Release
-    needs: build
+    needs: [verify-version, build]
     if: github.ref_type == 'tag'
     runs-on: ubuntu-latest
     steps:
