@@ -21,20 +21,19 @@ You can now run the Docker container with
 ```bash
 docker run --rm -ti -v "/dev/bus/usb:/dev/bus/usb" -v "$(realpath .):/app" --privileged concordium/ledger-app-builder:latest
 ```
-You now have access to the commands provided by the Makefile:
+
+This repo has two ledger apps. Staying in this folder inside the docker image will build the main app. Navigating inside the `goverance-app` folder inside the docker image will build the `governance` ledger app (see [governanceApp](./governance-app/README.md#building-the-governance-ledger-app)).
+
+You now have access to the commands provided by the Makefile within the docker image:
 
 ```sh
 # Load the application onto the connected device
 make load # this does not work for macos/windows out of the box, due to limited usb support.
 ```
 
-The command will hold with the output similar as follows when successful and you will need to continue the flow on your ledger device to approve the side loading onto your ledger device.
+Above command will hold with the output similar as follows when successful and you will need to continue the flow on your ledger device to approve the side loading onto your ledger device.
 
-```
-python3 -m ledgerblue.loadApp --targetId 0x33100004 --targetVersion="" --apiLevel 24 --fileName bin/app.hex --appName "Concordium" --appFlags '0x000' --delete --tlv --dataSize $((0x`cat debug/app.map | grep _envram_data | tr -s ' ' | cut -f2 -d' ' |cut -f2 -d'x' ` - 0x`cat debug/app.map | grep _nvram_data | tr -s ' ' | cut -f2 -d' ' | cut -f2 -d'x'`)) --installparamsSize $((0x`cat debug/app.map | grep _einstall_parameters | tr -s ' ' | cut -f2 -d' ' |cut -f2 -d'x'` - 0x`cat debug/app.map | grep _install_parameters | tr -s ' ' | cut -f2 -d' ' |cut -f2 -d'x'`))
-Generated random root public key : b'0485964841636...1fab7784f0a076d46ea980742e7651'
-Using test master key b'04859648416...a44c9d03b93551fab7784f0a076d46ea980742e7651' 
-```
+![mainAppSideLoadingScreenshot](./doc/mainAppSideLoading.png) 
 
 See [Troubleshooting](./README.md#troubleshooting) when you experience an error instead.
 
