@@ -1,6 +1,6 @@
 # Concordium Governance Ledger application
 
-An application for the Ledger Nano S and Ledger Nano S Plus devices for retrieving keys and signing chain update transactions, intended for use alongside the [Desktop wallet](https://github.com/Concordium/concordium-desktop-wallet).
+An application for Ledger Nano S and Ledger Nano S Plus devices for retrieving keys and signing chain update transactions, intended for use alongside the [Desktop wallet](https://github.com/Concordium/concordium-desktop-wallet).
 
 ## Building the Governance Ledger App
 
@@ -28,5 +28,5 @@ Tests for this app can be found in the main test folders, under the governance s
 
 ## Loading onto the ledger from released artifacts
 
-Download an artifact for your device (`concordium-governance-ledger-app-VERSION-nanos...zip` or `concordium-governance-ledger-app-VERSION-nanosplus.zip` file) from a [release](https://github.com/Concordium/concordium-ledger-app/releases).
+Download an artifact for your device (`concordium-governance-ledger-app-VERSION-nanos-FIRMWARE_VERSION.zip` or `concordium-governance-ledger-app-VERSION-nanosplus.zip` file) from a [release](https://github.com/Concordium/concordium-ledger-app/releases).
 Follow the [guide](https://docs.concordium.com/en/mainnet/docs/desktop-wallet/install-ledger-app.html).

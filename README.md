@@ -2,8 +2,8 @@
 
 This repository contains two ledger applications designed for retrieving keys and signing transactions, intended for use alongside the [Desktop wallet](https://github.com/Concordium/concordium-desktop-wallet).
 
-- Main app (for the Ledger Nano S, Ledger Nano S Plus and Ledger Nano X devices)
-- Governance app (for the Ledger Nano S, and Ledger Nano S Plus devices)
+- Main app (for Ledger Nano S, Ledger Nano S Plus and Ledger Nano X devices)
+- Governance app (for Ledger Nano S, and Ledger Nano S Plus devices)
 
 ## Secure SDK dependencies
 
