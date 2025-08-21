@@ -1,3 +1,5 @@
+# Note that it is only possible to build a release for the Ledger Nano S and the Ledger Nano S plus. This is because only those devices allow for sideloading of an application.
+
 name: Governance App Release Build
 
 on:
