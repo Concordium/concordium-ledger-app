@@ -177,7 +177,7 @@ ifeq ($(BOLOS_SDK),$(NANOS_SDK))
 	@echo
 	@echo "Application was successfully signed and packaged to $(APP_FILE_NAME)-$(APPVERSION)-$(TARGET_DEVICE)-$(TARGET_VERSION).zip"
 else ifeq ($(BOLOS_SDK),$(NANOSP_SDK))
-# Nano S+ does NOT support side-loading signed apps with custom CA.
+# Nano S+ does NOT support side-loading signed apps with custom CA (in most recent firmware versions at least), so we handle this separately for now.
 	@echo
 	@echo "Packaging application for release"
 
