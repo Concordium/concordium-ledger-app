@@ -167,7 +167,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ needs.verify-version.outputs.tag }}
-          name: Governance App ${{ needs.verify-version.outputs.version }}
+          name: Concordium Governance App ${{ needs.verify-version.outputs.version }}
           body_path: release_body.md
           draft: true
           files: |
