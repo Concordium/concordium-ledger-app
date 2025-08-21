@@ -65,6 +65,8 @@ python -m ledgerblue.loadApp --targetId <target-id> --apiLevel 24 --fileName bin
 - **target-id**: the target id of the device.
   - "0x33100004" for nano S+
 
+Please note that the `apiLevel` changes according to the sdk used to build the application. 
+
 ### Troubleshooting
 
 When side loading onto the ledger device, you may encounter the following common issues 

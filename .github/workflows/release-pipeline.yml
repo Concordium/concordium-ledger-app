@@ -1,3 +1,5 @@
+# Note that it is only possible to build a release for the Ledger Nano S and the Ledger Nano S plus. This is because only those devices allow for sideloading of an application.
+
 name: Governance App Release Build
 
 on:
@@ -18,6 +20,7 @@ jobs:
     outputs:
       version: ${{ steps.extract-version.outputs.version }}
       tag: ${{ steps.extract-version.outputs.tag }}
+      changelog: ${{ steps.extract-changelog.outputs.changelog }}
     steps:
       - uses: actions/checkout@v5
         with:
@@ -45,7 +48,13 @@ jobs:
           echo "tag=$TAG" >> $GITHUB_OUTPUT
           
           # Get version from Makefile
-          MAKEFILE_VERSION=$(grep -E "^APPVERSION" governance-app/Makefile | cut -d' ' -f3)
+          MAKEFILE_MAJOR=$(grep -E "^APPVERSION_MAJOR=" governance-app/Makefile | cut -d'=' -f2)
+          MAKEFILE_MINOR=$(grep -E "^APPVERSION_MINOR=" governance-app/Makefile | cut -d'=' -f2)
+          MAKEFILE_PATCH=$(grep -E "^APPVERSION_PATCH=" governance-app/Makefile | cut -d'=' -f2)
+          MAKEFILE_VERSION="$MAKEFILE_MAJOR.$MAKEFILE_MINOR.$MAKEFILE_PATCH"
+          
+          echo "Makefile version: $MAKEFILE_VERSION"
+          echo "Tag version: $VERSION"
           
           # Verify versions match
           if [ "$VERSION" != "$MAKEFILE_VERSION" ]; then
@@ -55,9 +64,40 @@ jobs:
           fi
           
           echo "Version verified: $VERSION"
+          
+      - name: Extract changelog for release
+        id: extract-changelog
+        run: |
+          VERSION="${{ steps.extract-version.outputs.version }}"
+          echo "Extracting changelog for version $VERSION"
+          
+          # Extract changelog for the specific version
+          CHANGELOG=$(awk -v ver="## $VERSION" '
+            BEGIN { found=0; section=""; }
+            /^## [0-9]+\.[0-9]+\.[0-9]+/ { 
+              if (found==1) { exit }
+              if ($0 ~ ver) { found=1; next }
+            }
+            found==1 { section = section $0 "\n" }
+            END { print section }
+          ' governance-app/CHANGELOG.md)
+          
+          # Verify changelog exists
+          if [ -z "$CHANGELOG" ]; then
+            echo "Error: No changelog entry found for version $VERSION"
+            echo "Please update the CHANGELOG.md file with an entry for version $VERSION"
+            exit 1
+          fi
+          
+          # Save changelog to output (need to handle newlines for GitHub Actions output)
+          CHANGELOG_ESCAPED="${CHANGELOG//$'\n'/%0A}"
+          echo "changelog=$CHANGELOG_ESCAPED" >> $GITHUB_OUTPUT
+          
+          echo "Changelog found:"
+          echo "$CHANGELOG"
 
-  release:
-    name: Release for ${{ matrix.name }}
+  build:
+    name: Build for ${{ matrix.name }}
     needs: verify-version
     runs-on: ubuntu-latest
     environment: release-ledger-app
@@ -78,30 +118,46 @@ jobs:
       - uses: actions/checkout@v5
         with:
           submodules: 'recursive'
+
+      - name: Install dependencies
+        run: |
+          apt-get update
+          apt-get install -y zip
           
       - name: Build and sign release
         env:
           LEDGER_SIGNING_KEY: ${{ secrets.LEDGER_SIGNING_KEY }}
           LEDGER_PUBLIC_KEY: ${{ secrets.LEDGER_PUBLIC_KEY }}
+        working-directory: ${{ matrix.app_dir }}
         run: |
-          cd ${{ matrix.app_dir }}
-          make clean
           BOLOS_SDK=${{ matrix.sdk_var }} \
           LEDGER_SIGNING_KEY="${{ env.LEDGER_SIGNING_KEY }}" \
           LEDGER_PUBLIC_KEY="${{ env.LEDGER_PUBLIC_KEY }}" \
           make release
-
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: governance-${{ matrix.device }}-release
+          name: ccd-governance-${{ matrix.device }}
           path: ${{ matrix.app_dir }}/*.zip
 
-  create-release:
-    needs: [verify-version, release]
+  release:
+    name: Release
+    needs: build
     if: github.ref_type == 'tag'
     runs-on: ubuntu-latest
     steps:
+      - name: Create release body
+        run: |
+          # Get changelog from previous job output (decode escaped newlines)
+          CHANGELOG="${{ needs.verify-version.outputs.changelog }}"
+          CHANGELOG="${CHANGELOG//%0A/$'\n'}"
+          
+          # Write to file for release body
+          echo "$CHANGELOG" > release_body.md
+          
+          echo "Release body contents:"
+          cat release_body.md
+
       - name: Download all artifacts
         uses: actions/download-artifact@v5
         with:
@@ -112,6 +168,7 @@ jobs:
         with:
           tag_name: ${{ needs.verify-version.outputs.tag }}
           name: Governance App ${{ needs.verify-version.outputs.version }}
+          body_path: release_body.md
           draft: true
           files: |
             ./artifacts/**/*.zip
