@@ -67,35 +67,14 @@ python -m ledgerblue.loadApp --targetId <target-id> --apiLevel 24 --fileName bin
 
 ### Troubleshooting
 
-When side loading onto the ledger device, you may encounter the following common issues:
+When side loading onto the ledger device, you may encounter the following common issues 
+(the error codes are from the Ledger Nano S Plus device):
 
-- Outdated ledger firmware:
-
-```
-ledgerblue.commException.CommException: Exception : Invalid status 511f (The OS version on your device does not seem compatible with the SDK version used to build the app)
-```
-
-Go to `Ledger Live` and update the firmware on your ledger device.
-
-- Ledger not connected/unlocked:
-
-```
-ledgerblue.commException.CommException: Exception : No dongle found
-```
-
-Make sure your machine can connect to your ledger device (e.g. try to connect the ledger device in `Ledger Live` first for troubleshooting) and make sure your ledger is unlocked by entering its pin.
-
-- Not completing flows properly:
-
-```
-ledgerblue.commException.CommException: Exception : Invalid status 6603 (Unknown reason)
-or
-ledgerblue.commException.CommException: Exception : Invalid status 6601 (Unknown reason)
-
-```
-
-Make sure you are on the main dashboard in the ledger device before trying to sideload an app. Make sure you complete active flows on the ledger before sideloading again.
-The error can happen if you haven't properly completed a previously flow on the ledger device before trying to sideload again. Re-connecting the ledger device to your machine again or moving around the cursor on the ledger device menu or open/closing apps again often resolves the issue so that the sideloading command works again.
+| Issue | Error Message | Resolution |
+|-------|---------------|------------|
+| **Outdated Ledger firmware** | `ledgerblue.commException.CommException: Exception : Invalid status 511f (The OS version on your device does not seem compatible with the SDK version used to build the app)` | Update your device's firmware in **Ledger Live**. |
+| **Ledger not connected / unlocked** | `ledgerblue.commException.CommException: Exception : No dongle found`                                                                                     | Ensure your machine can detect the Ledger (test with **Ledger Live**) and unlock it by entering your PIN. |
+| **Not completing flows properly**   | `ledgerblue.commException.CommException: Exception : Invalid status 6603 (Unknown reason)`<br>`ledgerblue.commException.CommException: Exception : Invalid status 6601 (Unknown reason)` | Ensure you are on the main dashboard in the ledger device before trying to sideload an app. Ensure you complete the on-device prompts completely before sideloading again. The error can happen if you haven't properly completed a previously flow/prompt on the ledger device before trying to sideload again. Re-connecting the ledger device to your machine or moving around the cursor on the ledger device menu or open/closing apps on the ledger often resolves the issue so that the sideloading command works again. |
 
 ### For the Speculos emulator
 
