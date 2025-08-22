@@ -10,7 +10,7 @@ Key update types:
 * Key update type 2 is using level 1 keys and 3 is using root keys. Note that this is different from `V0` where 1 was level 1 keys and 2 was root keys.
 
 P2 corresponds to the version of the authorizations targeted:
-- 0 is reserved for V0 (no longer supported)
+- 0 is used for V0
 - 1 is used for V1
 - 2 is used for V2
 

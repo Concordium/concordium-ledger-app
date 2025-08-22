@@ -17,6 +17,12 @@ async function updateAuthorizations(
     let p2 = 0x01;
 
     switch (true) {
+        // V0
+        case type === '0a' && prefix === '02':
+        case type === '0b' && prefix === '01':
+            p2 = 0x01;
+            structureCount = 12;
+            break;
         // V1
         case type === '0a' && prefix === '03':
         case type === '0b' && prefix === '02':
@@ -103,6 +109,67 @@ async function updateAuthorizations(
         }
     }
 }
+
+// Auths V0 tests
+test(
+    '[NANO S] Update level 2 keys with root keys (V0)',
+    setupZemu('nanos', async (sim, transport) => {
+        await updateAuthorizations(
+            sim,
+            transport,
+            0x2a,
+            '2_root',
+            '0a',
+            '02',
+            'e9740c83110c2bc4fe876da81050cff27c1ab282178a3049327c6e97ebea34f2cd5f038e2b8dff466b1455e4d667d95d050fed1af04ea80c40360854dede1204'
+        );
+    })
+);
+
+test(
+    '[NANO SP] Update level 2 keys with root keys (V0)',
+    setupZemu('nanosp', async (sim, transport) => {
+        await updateAuthorizations(
+            sim,
+            transport,
+            0x2a,
+            '2_root',
+            '0a',
+            '02',
+            'e9740c83110c2bc4fe876da81050cff27c1ab282178a3049327c6e97ebea34f2cd5f038e2b8dff466b1455e4d667d95d050fed1af04ea80c40360854dede1204'
+        );
+    })
+);
+
+test(
+    '[NANO S] Update level 2 keys with level 1 keys (V0)',
+    setupZemu('nanos', async (sim, transport) => {
+        await updateAuthorizations(
+            sim,
+            transport,
+            0x2b,
+            '2_1',
+            '0b',
+            '01',
+            'b3843361c16bc8f9f7792df766f7192e8b77aae420c958d290d8408b9ac224350998d4c264e4e60c577385963a574391b122948afae0dcb1e0ae7fda8076150e'
+        );
+    })
+);
+
+test(
+    '[NANO SP] Update level 2 keys with level 1 keys (V0)',
+    setupZemu('nanosp', async (sim, transport) => {
+        await updateAuthorizations(
+            sim,
+            transport,
+            0x2b,
+            '2_1',
+            '0b',
+            '01',
+            'b3843361c16bc8f9f7792df766f7192e8b77aae420c958d290d8408b9ac224350998d4c264e4e60c577385963a574391b122948afae0dcb1e0ae7fda8076150e'
+        );
+    })
+);
 
 // Auths V1 tests
 test(

@@ -1,5 +1,3 @@
-#include <os.h>
-#include <os_io_seproxyhal.h>
 #include <stdint.h>
 #include <string.h>
 
@@ -98,8 +96,8 @@ const char *getAuthorizationName(uint8_t type) {
     }
 }
 
-static uint8_t txUpdateType;
-static uint8_t keyUpdateType;
+typedef enum { AUTHS_V0, AUTHS_V1, AUTHS_V2 } authsVersion_e;
+static authsVersion_e authsVersion;
 
 /**
  * Method to be called when the user validates the threshold in the UI. If there are
@@ -110,36 +108,16 @@ void processThreshold(void) {
     ctx->authorizationType += 1;
 
     uint8_t endMarker;
-    if (txUpdateType == UPDATE_TYPE_UPDATE_ROOT_KEYS) {
-        switch (keyUpdateType) {
-            case ROOT_UPDATE_LEVEL_2_V0:
-                endMarker = AUTHORIZATION_END_V0;
-                break;
-            case ROOT_UPDATE_LEVEL_2_V1:
-                endMarker = AUTHORIZATION_END_V1;
-                break;
-            case ROOT_UPDATE_LEVEL_2_V2:
-                endMarker = AUTHORIZATION_END_V2;
-                break;
-            default:
-                THROW(ERROR_INVALID_TRANSACTION);
-        }
-    } else if (txUpdateType == UPDATE_TYPE_UPDATE_LEVEL1_KEYS) {
-        switch (keyUpdateType) {
-            case LEVEL1_UPDATE_LEVEL_2_V0:
-                endMarker = AUTHORIZATION_END_V0;
-                break;
-            case LEVEL1_UPDATE_LEVEL_2_V1:
-                endMarker = AUTHORIZATION_END_V1;
-                break;
-            case LEVEL1_UPDATE_LEVEL_2_V2:
-                endMarker = AUTHORIZATION_END_V2;
-                break;
-            default:
-                THROW(ERROR_INVALID_TRANSACTION);
-        }
-    } else {
-        THROW(ERROR_INVALID_TRANSACTION);
+    switch (authsVersion) {
+        case AUTHS_V0:
+            endMarker = AUTHORIZATION_END_V0;
+            break;
+        case AUTHS_V1:
+            endMarker = AUTHORIZATION_END_V1;
+            break;
+        case AUTHS_V2:
+            endMarker = AUTHORIZATION_END_V2;
+            break;
     }
 
     if (ctx->authorizationType == endMarker) {
@@ -181,39 +159,22 @@ void processKeyIndices(void) {
 
 /**
  * Sets the display text for the update type.
- * Also validates that the key update type matches the update type.
  *
  * @param updateType The type of update:
  *  - UPDATE_TYPE_UPDATE_ROOT_KEYS (10): Update using root keys
  *  - UPDATE_TYPE_UPDATE_LEVEL1_KEYS (11): Update using level 1 keys
- * @param keyUpdateType The specific update version:
- *  - For root keys: ROOT_UPDATE_LEVEL_2_V0 (2), ROOT_UPDATE_LEVEL_2_V1 (3), ROOT_UPDATE_LEVEL_2_V2 (4)
- *  - For level 1 keys: LEVEL1_UPDATE_LEVEL_2_V0 (1), LEVEL1_UPDATE_LEVEL_2_V1 (2), LEVEL1_UPDATE_LEVEL_2_V2 (3)
  * @throws ERROR_INVALID_TRANSACTION if the parameters don't match expected values
  */
-void setTypeText() {
-    if (txUpdateType == UPDATE_TYPE_UPDATE_ROOT_KEYS) {
-        switch (keyUpdateType) {
-            case ROOT_UPDATE_LEVEL_2_V0:
-            case ROOT_UPDATE_LEVEL_2_V1:
-            case ROOT_UPDATE_LEVEL_2_V2:
-                memmove(ctx->type, "Level 2 w. level 1 keys", 24);
-                break;
-            default:
-                THROW(ERROR_INVALID_TRANSACTION);
-        }
-    } else if (txUpdateType == UPDATE_TYPE_UPDATE_LEVEL1_KEYS) {
-        switch (keyUpdateType) {
-            case LEVEL1_UPDATE_LEVEL_2_V0:
-            case LEVEL1_UPDATE_LEVEL_2_V1:
-            case LEVEL1_UPDATE_LEVEL_2_V2:
-                memmove(ctx->type, "Level 2 w. level 1 keys", 24);
-                break;
-            default:
-                THROW(ERROR_INVALID_TRANSACTION);
-        }
-    } else {
-        THROW(ERROR_INVALID_TRANSACTION);
+void setTypeText(uint8_t updateType) {
+    switch (updateType) {
+        case UPDATE_TYPE_UPDATE_ROOT_KEYS:
+            memmove(ctx->type, "Level 2 w. root keys", 24);
+            break;
+        case UPDATE_TYPE_UPDATE_LEVEL1_KEYS:
+            memmove(ctx->type, "Level 2 w. level 1 keys", 24);
+            break;
+        default:
+            THROW(ERROR_INVALID_TRANSACTION);
     }
 }
 
@@ -225,9 +186,9 @@ void setTypeText() {
 #define P1_ACCESS_STRUCTURE           0x03  // Contains the public-key indices for the current access structure.
 #define P1_ACCESS_STRUCTURE_THRESHOLD 0x04  // Contains the threshold for the current access structure.
 
-#define P2_V0 0x00
-#define P2_V1 0x01
-#define P2_V2 0x02
+#define P2_V0 AUTHS_V0
+#define P2_V1 AUTHS_V1
+#define P2_V2 AUTHS_V2
 
 void handleSignUpdateAuthorizations(
     uint8_t *cdata,
@@ -238,6 +199,7 @@ void handleSignUpdateAuthorizations(
     volatile unsigned int *flags,
     bool isInitialCall) {
     switch (p2) {
+        case P2_V0:
         case P2_V1:
         case P2_V2:
             break;
@@ -254,19 +216,55 @@ void handleSignUpdateAuthorizations(
         cx_sha256_init(&tx_state->hash);
         cdata += hashUpdateHeaderAndType(cdata, updateType);
 
-        txUpdateType = cdata[-1];
-        ctx->authorizationType = 0;
-
-        keyUpdateType = cdata[0];
+        uint8_t keyUpdateType = cdata[0];
         updateHash((cx_hash_t *) &tx_state->hash, cdata, 1);
         cdata += 1;
+
+        if (updateType == UPDATE_TYPE_UPDATE_ROOT_KEYS) {
+            switch (keyUpdateType) {
+                case ROOT_UPDATE_LEVEL_2_V0:
+                    authsVersion = AUTHS_V0;
+                    break;
+                case ROOT_UPDATE_LEVEL_2_V1:
+                    authsVersion = AUTHS_V1;
+                    break;
+                case ROOT_UPDATE_LEVEL_2_V2:
+                    authsVersion = AUTHS_V2;
+                    break;
+                default:
+                    THROW(ERROR_INVALID_TRANSACTION);
+            }
+        } else if (updateType == UPDATE_TYPE_UPDATE_LEVEL1_KEYS) {
+            switch (keyUpdateType) {
+                case LEVEL1_UPDATE_LEVEL_2_V0:
+                    authsVersion = AUTHS_V0;
+                    break;
+                case LEVEL1_UPDATE_LEVEL_2_V1:
+                    authsVersion = AUTHS_V1;
+                    break;
+                case LEVEL1_UPDATE_LEVEL_2_V2:
+                    authsVersion = AUTHS_V2;
+                    break;
+                default:
+                    THROW(ERROR_INVALID_TRANSACTION);
+            }
+        } else {
+            THROW(ERROR_INVALID_TRANSACTION);
+        }
+
+        // Validate p2 against auths type (these should match)
+        if (authsVersion != p2) {
+            THROW(ERROR_INVALID_PARAM);
+        }
 
         ctx->publicKeyListLength = U2BE(cdata, 0);
         updateHash((cx_hash_t *) &tx_state->hash, cdata, 2);
 
-        setTypeText();
+        setTypeText(updateType);
 
         ctx->state = TX_UPDATE_AUTHORIZATIONS_PUBLIC_KEY;
+        ctx->authorizationType = 0;
+
         ux_flow_init(0, ux_sign_update_authorizations_review, NULL);
         *flags |= IO_ASYNCH_REPLY;
     } else if (
