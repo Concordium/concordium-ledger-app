@@ -225,7 +225,9 @@ void setTypeText() {
 #define P1_ACCESS_STRUCTURE           0x03  // Contains the public-key indices for the current access structure.
 #define P1_ACCESS_STRUCTURE_THRESHOLD 0x04  // Contains the threshold for the current access structure.
 
+#define P2_V0 0x00
 #define P2_V1 0x01
+#define P2_V2 0x02
 
 void handleSignUpdateAuthorizations(
     uint8_t *cdata,
@@ -235,8 +237,12 @@ void handleSignUpdateAuthorizations(
     uint8_t dataLength,
     volatile unsigned int *flags,
     bool isInitialCall) {
-    if (p2 != P2_V1) {
-        THROW(ERROR_INVALID_PARAM);
+    switch (p2) {
+        case P2_V1:
+        case P2_V2:
+            break;
+        default:
+            THROW(ERROR_INVALID_PARAM);
     }
 
     if (isInitialCall) {
