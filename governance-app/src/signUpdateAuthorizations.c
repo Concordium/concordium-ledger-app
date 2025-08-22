@@ -4,9 +4,11 @@
 #include <string.h>
 
 #include "cx.h"
+#include "globals.h"
 #include "menu.h"
 #include "responseCodes.h"
 #include "sign.h"
+#include "signHigherLevelKeyUpdate.h"
 #include "util.h"
 
 static signUpdateAuthorizations_t *ctx = &global.signUpdateAuthorizations;
@@ -89,6 +91,8 @@ const char *getAuthorizationName(authorizationType_e type) {
             return "Cooldown parameters";
         case AUTHORIZATION_TIME_PARAMETERS:
             return "Time parameters";
+        case AUTHORIZATION_CREATE_PLT:
+            return "Create PLT";
         default:
             THROW(ERROR_INVALID_STATE);
     }
@@ -149,6 +153,8 @@ void processKeyIndices(void) {
 
 #define P2_V1 0x01
 
+static uint8_t keyUpdateType;
+
 void handleSignUpdateAuthorizations(
     uint8_t *cdata,
     uint8_t p1,
@@ -171,12 +177,28 @@ void handleSignUpdateAuthorizations(
         cdata += hashUpdateHeaderAndType(cdata, updateType);
         ctx->authorizationType = 0;
 
-        uint8_t keyUpdateType = cdata[0];
+        keyUpdateType = cdata[0];
 
-        if (keyUpdateType == ROOT_UPDATE_LEVEL_2_V1) {
-            memmove(ctx->type, "Level 2 w. root keys", 21);
-        } else if (keyUpdateType == LEVEL1_UPDATE_LEVEL_2_V1) {
-            memmove(ctx->type, "Level 2 w. level 1 keys", 24);
+        if (updateType == UPDATE_TYPE_UPDATE_ROOT_KEYS) {
+            switch (keyUpdateType) {
+                case ROOT_UPDATE_LEVEL_2_V0:
+                case ROOT_UPDATE_LEVEL_2_V1:
+                case ROOT_UPDATE_LEVEL_2_V2:
+                    memmove(ctx->type, "Level 2 w. level 1 keys", 24);
+                    break;
+                default:
+                    THROW(ERROR_INVALID_TRANSACTION);
+            }
+        } else if (updateType == UPDATE_TYPE_UPDATE_LEVEL1_KEYS) {
+            switch (keyUpdateType) {
+                case LEVEL1_UPDATE_LEVEL_2_V0:
+                case LEVEL1_UPDATE_LEVEL_2_V1:
+                case LEVEL1_UPDATE_LEVEL_2_V2:
+                    memmove(ctx->type, "Level 2 w. level 1 keys", 24);
+                    break;
+                default:
+                    THROW(ERROR_INVALID_TRANSACTION);
+            }
         } else {
             THROW(ERROR_INVALID_TRANSACTION);
         }
