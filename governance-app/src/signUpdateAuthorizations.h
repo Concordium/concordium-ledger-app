@@ -46,10 +46,16 @@ typedef enum {
     AUTHORIZATION_BAKER_STAKE_THRESHOLD,
     AUTHORIZATION_ADD_ANONYMITY_REVOKER,
     AUTHORIZATION_ADD_IDENTITY_PROVIDER,
-    AUTHORIZATION_COOLDOWN_PARAMETERS,
+    AUTHORIZATION_END_V0
+} authorizationTypeV0_e;
+
+typedef enum {
+    AUTHORIZATION_COOLDOWN_PARAMETERS = 12,
     AUTHORIZATION_TIME_PARAMETERS,
-    AUTHORIZATION_END
-} authorizationType_e;
+    AUTHORIZATION_END_V1
+} authorizationTypeV1_e;
+
+typedef enum { AUTHORIZATION_CREATE_PLT = 14, AUTHORIZATION_END_V2 } authorizationTypeV2_e;
 
 typedef struct {
     uint16_t publicKeyListLength;
@@ -66,7 +72,7 @@ typedef struct {
     int bufferPointer;
 
     updateAuthorizationsState_t state;
-    authorizationType_e authorizationType;
+    uint8_t authorizationType;
 } signUpdateAuthorizations_t;
 
 #endif

@@ -1,12 +1,12 @@
-#include <os.h>
-#include <os_io_seproxyhal.h>
 #include <stdint.h>
 #include <string.h>
 
 #include "cx.h"
+#include "globals.h"
 #include "menu.h"
 #include "responseCodes.h"
 #include "sign.h"
+#include "signHigherLevelKeyUpdate.h"
 #include "util.h"
 
 static signUpdateAuthorizations_t *ctx = &global.signUpdateAuthorizations;
@@ -59,7 +59,7 @@ UX_FLOW(ux_update_authorizations_public_key, &ux_update_authorizations_public_ke
  * type, as that value is only used to register that all access structures have
  * been processed.
  */
-const char *getAuthorizationName(authorizationType_e type) {
+const char *getAuthorizationName(uint8_t type) {
     switch (type) {
         case AUTHORIZATION_EMERGENCY:
             return "Emergency";
@@ -89,10 +89,15 @@ const char *getAuthorizationName(authorizationType_e type) {
             return "Cooldown parameters";
         case AUTHORIZATION_TIME_PARAMETERS:
             return "Time parameters";
+        case AUTHORIZATION_CREATE_PLT:
+            return "Create PLT";
         default:
             THROW(ERROR_INVALID_STATE);
     }
 }
+
+typedef enum { AUTHS_V0, AUTHS_V1, AUTHS_V2 } authsVersion_e;
+static authsVersion_e authsVersion;
 
 /**
  * Method to be called when the user validates the threshold in the UI. If there are
@@ -102,7 +107,20 @@ const char *getAuthorizationName(authorizationType_e type) {
 void processThreshold(void) {
     ctx->authorizationType += 1;
 
-    if (ctx->authorizationType == AUTHORIZATION_END) {
+    uint8_t endMarker;
+    switch (authsVersion) {
+        case AUTHS_V0:
+            endMarker = AUTHORIZATION_END_V0;
+            break;
+        case AUTHS_V1:
+            endMarker = AUTHORIZATION_END_V1;
+            break;
+        case AUTHS_V2:
+            endMarker = AUTHORIZATION_END_V2;
+            break;
+    }
+
+    if (ctx->authorizationType == endMarker) {
         ux_flow_init(0, ux_sign_flow_shared, NULL);
     } else {
         // Ask for the next access structure, as we have not processed all of
@@ -139,6 +157,27 @@ void processKeyIndices(void) {
     }
 }
 
+/**
+ * Sets the display text for the update type.
+ *
+ * @param updateType The type of update:
+ *  - UPDATE_TYPE_UPDATE_ROOT_KEYS (10): Update using root keys
+ *  - UPDATE_TYPE_UPDATE_LEVEL1_KEYS (11): Update using level 1 keys
+ * @throws ERROR_INVALID_TRANSACTION if the parameters don't match expected values
+ */
+void setTypeText(uint8_t updateType) {
+    switch (updateType) {
+        case UPDATE_TYPE_UPDATE_ROOT_KEYS:
+            memmove(ctx->type, "Level 2 w. root keys", 21);
+            break;
+        case UPDATE_TYPE_UPDATE_LEVEL1_KEYS:
+            memmove(ctx->type, "Level 2 w. level 1 keys", 24);
+            break;
+        default:
+            THROW(ERROR_INVALID_TRANSACTION);
+    }
+}
+
 #define P1_INITIAL \
     0x00  // Contains key derivation path, update header and update kind, update key type and count of incoming public
           // update keys.
@@ -147,7 +186,9 @@ void processKeyIndices(void) {
 #define P1_ACCESS_STRUCTURE           0x03  // Contains the public-key indices for the current access structure.
 #define P1_ACCESS_STRUCTURE_THRESHOLD 0x04  // Contains the threshold for the current access structure.
 
-#define P2_V1 0x01
+#define P2_V0 AUTHS_V0
+#define P2_V1 AUTHS_V1
+#define P2_V2 AUTHS_V2
 
 void handleSignUpdateAuthorizations(
     uint8_t *cdata,
@@ -157,8 +198,13 @@ void handleSignUpdateAuthorizations(
     uint8_t dataLength,
     volatile unsigned int *flags,
     bool isInitialCall) {
-    if (p2 != P2_V1) {
-        THROW(ERROR_INVALID_PARAM);
+    switch (p2) {
+        case P2_V0:
+        case P2_V1:
+        case P2_V2:
+            break;
+        default:
+            THROW(ERROR_INVALID_PARAM);
     }
 
     if (isInitialCall) {
@@ -169,25 +215,56 @@ void handleSignUpdateAuthorizations(
         cdata += parseKeyDerivationPath(cdata);
         cx_sha256_init(&tx_state->hash);
         cdata += hashUpdateHeaderAndType(cdata, updateType);
-        ctx->authorizationType = 0;
 
         uint8_t keyUpdateType = cdata[0];
+        updateHash((cx_hash_t *) &tx_state->hash, cdata, 1);
+        cdata += 1;
 
-        if (keyUpdateType == ROOT_UPDATE_LEVEL_2_V1) {
-            memmove(ctx->type, "Level 2 w. root keys", 21);
-        } else if (keyUpdateType == LEVEL1_UPDATE_LEVEL_2_V1) {
-            memmove(ctx->type, "Level 2 w. level 1 keys", 24);
+        if (updateType == UPDATE_TYPE_UPDATE_ROOT_KEYS) {
+            switch (keyUpdateType) {
+                case ROOT_UPDATE_LEVEL_2_V0:
+                    authsVersion = AUTHS_V0;
+                    break;
+                case ROOT_UPDATE_LEVEL_2_V1:
+                    authsVersion = AUTHS_V1;
+                    break;
+                case ROOT_UPDATE_LEVEL_2_V2:
+                    authsVersion = AUTHS_V2;
+                    break;
+                default:
+                    THROW(ERROR_INVALID_TRANSACTION);
+            }
+        } else if (updateType == UPDATE_TYPE_UPDATE_LEVEL1_KEYS) {
+            switch (keyUpdateType) {
+                case LEVEL1_UPDATE_LEVEL_2_V0:
+                    authsVersion = AUTHS_V0;
+                    break;
+                case LEVEL1_UPDATE_LEVEL_2_V1:
+                    authsVersion = AUTHS_V1;
+                    break;
+                case LEVEL1_UPDATE_LEVEL_2_V2:
+                    authsVersion = AUTHS_V2;
+                    break;
+                default:
+                    THROW(ERROR_INVALID_TRANSACTION);
+            }
         } else {
             THROW(ERROR_INVALID_TRANSACTION);
         }
 
-        updateHash((cx_hash_t *) &tx_state->hash, cdata, 1);
-        cdata += 1;
+        // Validate p2 against auths type (these should match)
+        if (authsVersion != p2) {
+            THROW(ERROR_INVALID_PARAM);
+        }
 
         ctx->publicKeyListLength = U2BE(cdata, 0);
         updateHash((cx_hash_t *) &tx_state->hash, cdata, 2);
 
+        setTypeText(updateType);
+
         ctx->state = TX_UPDATE_AUTHORIZATIONS_PUBLIC_KEY;
+        ctx->authorizationType = 0;
+
         ux_flow_init(0, ux_sign_update_authorizations_review, NULL);
         *flags |= IO_ASYNCH_REPLY;
     } else if (
@@ -208,6 +285,22 @@ void handleSignUpdateAuthorizations(
         ux_flow_init(0, ux_update_authorizations_public_key, NULL);
         *flags |= IO_ASYNCH_REPLY;
     } else if (p1 == P1_ACCESS_STRUCTURE_INITIAL && ctx->state == TX_UPDATE_AUTHORIZATIONS_ACCESS_STRUCTURE_SIZE) {
+        uint8_t lastAuthType;
+        switch (authsVersion) {
+            case AUTHS_V0:
+                lastAuthType = AUTHORIZATION_END_V0 - 1;
+                break;
+            case AUTHS_V1:
+                lastAuthType = AUTHORIZATION_END_V1 - 1;
+                break;
+            case AUTHS_V2:
+                lastAuthType = AUTHORIZATION_END_V2 - 1;
+                break;
+        }
+        if (ctx->authorizationType > lastAuthType) {
+            THROW(ERROR_INVALID_TRANSACTION);
+        }
+
         updateHash((cx_hash_t *) &tx_state->hash, cdata, 2);
         ctx->accessStructureSize = U2BE(cdata, 0);
         ctx->state = TX_UPDATE_AUTHORIZATIONS_ACCESS_STRUCTURE_INDEX;
