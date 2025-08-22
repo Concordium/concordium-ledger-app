@@ -2,8 +2,14 @@
 
 ## Unreleased
 
+### Added
+
+- Support for `AuthorizationsV2` for instuctions `0x2A` (update with root keys) and `0x2C` (update with level 1 keys)
+- Re-introduce support for `AuthorizationsV0` for instuctions `0x2A` (update with root keys) and `0x2C` (update with level 1 keys)
+
 ## 1.2.0
 
+### Added
 - Support for create PLT (Protocol Level Token) transaction.
 - Ensure the update type is visible in the UI in one way or another for all update types.
 
