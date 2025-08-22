@@ -285,6 +285,22 @@ void handleSignUpdateAuthorizations(
         ux_flow_init(0, ux_update_authorizations_public_key, NULL);
         *flags |= IO_ASYNCH_REPLY;
     } else if (p1 == P1_ACCESS_STRUCTURE_INITIAL && ctx->state == TX_UPDATE_AUTHORIZATIONS_ACCESS_STRUCTURE_SIZE) {
+        uint8_t lastAuthType;
+        switch (authsVersion) {
+            case AUTHS_V0:
+                lastAuthType = AUTHORIZATION_END_V0 - 1;
+                break;
+            case AUTHS_V1:
+                lastAuthType = AUTHORIZATION_END_V1 - 1;
+                break;
+            case AUTHS_V2:
+                lastAuthType = AUTHORIZATION_END_V2 - 1;
+                break;
+        }
+        if (ctx->authorizationType > lastAuthType) {
+            THROW(ERROR_INVALID_TRANSACTION);
+        }
+
         updateHash((cx_hash_t *) &tx_state->hash, cdata, 2);
         ctx->accessStructureSize = U2BE(cdata, 0);
         ctx->state = TX_UPDATE_AUTHORIZATIONS_ACCESS_STRUCTURE_INDEX;
