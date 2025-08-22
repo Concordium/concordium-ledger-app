@@ -112,21 +112,6 @@ async function updateAuthorizations(
 
 // Auths V0 tests
 test(
-    '[NANO S] Update level 2 keys with root keys (V0)',
-    setupZemu('nanos', async (sim, transport) => {
-        await updateAuthorizations(
-            sim,
-            transport,
-            0x2a,
-            '2_root',
-            '0a',
-            '02',
-            'e9740c83110c2bc4fe876da81050cff27c1ab282178a3049327c6e97ebea34f2cd5f038e2b8dff466b1455e4d667d95d050fed1af04ea80c40360854dede1204'
-        );
-    })
-);
-
-test(
     '[NANO SP] Update level 2 keys with root keys (V0)',
     setupZemu('nanosp', async (sim, transport) => {
         await updateAuthorizations(
@@ -137,21 +122,6 @@ test(
             '0a',
             '02',
             'e9740c83110c2bc4fe876da81050cff27c1ab282178a3049327c6e97ebea34f2cd5f038e2b8dff466b1455e4d667d95d050fed1af04ea80c40360854dede1204'
-        );
-    })
-);
-
-test(
-    '[NANO S] Update level 2 keys with level 1 keys (V0)',
-    setupZemu('nanos', async (sim, transport) => {
-        await updateAuthorizations(
-            sim,
-            transport,
-            0x2b,
-            '2_1',
-            '0b',
-            '01',
-            'b3843361c16bc8f9f7792df766f7192e8b77aae420c958d290d8408b9ac224350998d4c264e4e60c577385963a574391b122948afae0dcb1e0ae7fda8076150e'
         );
     })
 );
@@ -173,21 +143,6 @@ test(
 
 // Auths V1 tests
 test(
-    '[NANO S] Update level 2 keys with root keys (V1)',
-    setupZemu('nanos', async (sim, transport) => {
-        await updateAuthorizations(
-            sim,
-            transport,
-            0x2a,
-            '2_root',
-            '0a',
-            '03',
-            '02f76c94c76d552364e8b054001f86c2cd4417de90343920558ac00529e2bc429f6db1a37c7f75fea69ec663bfadcc847ad568996545de93adfa1674b12d4107'
-        );
-    })
-);
-
-test(
     '[NANO SP] Update level 2 keys with root keys (V1)',
     setupZemu('nanosp', async (sim, transport) => {
         await updateAuthorizations(
@@ -198,21 +153,6 @@ test(
             '0a',
             '03',
             '02f76c94c76d552364e8b054001f86c2cd4417de90343920558ac00529e2bc429f6db1a37c7f75fea69ec663bfadcc847ad568996545de93adfa1674b12d4107'
-        );
-    })
-);
-
-test(
-    '[NANO S] Update level 2 keys with level 1 keys (V1)',
-    setupZemu('nanos', async (sim, transport) => {
-        await updateAuthorizations(
-            sim,
-            transport,
-            0x2b,
-            '2_1',
-            '0b',
-            '02',
-            'ab92d78f158730042a1a4c2f738600f064ad5100551afad3760053f8f9e28e12d47a4e0484417f879e065332612e3cc4c5315e4f610f3fd4e3d7469c05855601'
         );
     })
 );
