@@ -13,14 +13,14 @@ async function updateAuthorizations(
 ) {
     const device = sim.startOptions.model;
 
-    let structureCount = 15;
-    let p2 = 0x01;
+    let structureCount: number;
+    let p2: number;
 
     switch (true) {
         // V0
         case type === '0a' && prefix === '02':
         case type === '0b' && prefix === '01':
-            p2 = 0x01;
+            p2 = 0x00;
             structureCount = 12;
             break;
         // V1

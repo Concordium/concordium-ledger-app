@@ -168,7 +168,7 @@ void processKeyIndices(void) {
 void setTypeText(uint8_t updateType) {
     switch (updateType) {
         case UPDATE_TYPE_UPDATE_ROOT_KEYS:
-            memmove(ctx->type, "Level 2 w. root keys", 24);
+            memmove(ctx->type, "Level 2 w. root keys", 21);
             break;
         case UPDATE_TYPE_UPDATE_LEVEL1_KEYS:
             memmove(ctx->type, "Level 2 w. level 1 keys", 24);

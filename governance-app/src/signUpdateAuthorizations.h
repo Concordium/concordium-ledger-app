@@ -55,10 +55,7 @@ typedef enum {
     AUTHORIZATION_END_V1
 } authorizationTypeV1_e;
 
-typedef enum {
-    AUTHORIZATION_CREATE_PLT = 14,
-    AUTHORIZATION_END_V2
-} authorizationTypeV2_e;
+typedef enum { AUTHORIZATION_CREATE_PLT = 14, AUTHORIZATION_END_V2 } authorizationTypeV2_e;
 
 typedef struct {
     uint16_t publicKeyListLength;
