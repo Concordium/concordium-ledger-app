@@ -1,9 +1,9 @@
 import Transport from '@ledgerhq/hw-transport';
-import Zemu from '@zondax/zemu';
+import { ConcordiumZemu } from '../options';
 import { setupZemu } from './options';
 
 async function updateAuthorizations(
-    sim: Zemu,
+    sim: ConcordiumZemu,
     transport: Transport,
     ins: number,
     level: string,
@@ -44,9 +44,9 @@ async function updateAuthorizations(
             '080000045100000000000000000000000000000000000000020000000000000000000000000000000a00000000000000640000000063de5da700000029',
             'hex'
         ),
-        Buffer.from(type, 'hex'),
-        Buffer.from(prefix, 'hex'),
-        Buffer.from('0002', 'hex'),
+        Buffer.from(type, 'hex'), // update type (root/level 1)
+        Buffer.from(prefix, 'hex'), // auths version targeted for corresponding update type
+        Buffer.from('0002', 'hex'), // number of keys
     ]);
 
     transport.send(0xe0, ins, 0x00, p2, data);
@@ -58,19 +58,19 @@ async function updateAuthorizations(
     const key2 = Buffer.from('0046a3e38ddf8b493be6e979034510b91db5448da9cba48c106139c288d658a004', 'hex');
     const keys = [key1, key2];
 
-    for (const key of keys) {
+    // Send each key individually
+    for (let i = 0; i < keys.length; i += 1) {
+        const key = keys[i];
         transport.send(0xe0, ins, 0x01, p2, key);
         await sim.waitUntilScreenIsNot(snapshot);
+
         switch (device) {
             case 'nanos':
-                await sim.clickRight();
-                await sim.clickRight();
-                await sim.clickRight();
-                await sim.clickRight(undefined, false);
+                await sim.navigateAndCompareSnapshots('.', `${device}_update_authorizations/keys/${i}`, [3]);
                 snapshot = await sim.clickBoth(undefined, false);
                 break;
             case 'nanosp':
-                await sim.clickRight();
+                await sim.navigateAndCompareSnapshots('.', `${device}_update_authorizations/keys/${i}`, [1]);
                 snapshot = await sim.clickBoth(undefined, false);
                 break;
             default:
@@ -80,9 +80,11 @@ async function updateAuthorizations(
 
     // Go through each access structure
     for (let i = 0; i < structureCount; i += 1) {
+        // First we send the initial data, i.e. the access strucutre size
         const accessStructureSize = Buffer.from('0003', 'hex');
         await transport.send(0xe0, ins, 0x02, p2, accessStructureSize);
 
+        // Then we send the key indices.
         const keyIndex1 = Buffer.from('0001', 'hex');
         const keyIndex2 = Buffer.from('00F1', 'hex');
         const keyIndex3 = Buffer.from('000C', 'hex');
@@ -91,21 +93,20 @@ async function updateAuthorizations(
         transport.send(0xe0, ins, 0x03, p2, accessStructureData);
         await sim.waitUntilScreenIsNot(snapshot);
 
-        await sim.navigateAndCompareSnapshots('.', `${device}_update_authorizations/${i}`, [0]);
-
-        await sim.clickBoth(undefined, false);
-        await sim.clickBoth(undefined, false);
-        await sim.clickBoth(undefined, false);
+        await sim.navigateAndCompareSnapshots('.', `${device}_update_authorizations/${i}`, [0, 0]); // go through keys 1,2,3
         snapshot = await sim.clickBoth(undefined, false);
 
+        // Finally, we send the threshold.
         const threshold = Buffer.from('0002', 'hex');
-        const tx = transport.send(0xe0, ins, 0x04, p2, threshold);
+        const result = transport.send(0xe0, ins, 0x04, p2, threshold);
         await sim.waitUntilScreenIsNot(snapshot);
+        await sim.compareSnapshot(`${device}_update_authorizations/${i}`, 'threshold');
         snapshot = await sim.clickBoth(undefined, false);
+
         if (i === structureCount - 1) {
             await sim.clickBoth();
-            const txHex = (await tx).toString('hex');
-            expect(txHex).toEqual(`${expectedSignature}9000`);
+            const tx = (await result).toString('hex');
+            expect(tx).toEqual(`${expectedSignature}9000`);
         }
     }
 }

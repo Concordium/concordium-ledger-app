@@ -1,4 +1,8 @@
-import { resolve } from 'path';
+/* eslint-disable lines-between-class-members */
+/* eslint-disable no-dupe-class-members */
+import { resolve } from 'node:path';
+import process from 'node:process';
+
 import Zemu, { DEFAULT_START_OPTIONS, IStartOptions } from '@zondax/zemu';
 import Transport from '@ledgerhq/hw-transport';
 import { ISnapshot } from '@zondax/zemu/dist/types';
@@ -45,6 +49,35 @@ export class ConcordiumZemu extends Zemu {
     async waitUntilScreenIsNot(screen: ISnapshot, timeout: number = 5000): Promise<void> {
         await super.waitUntilScreenIsNot(screen, timeout);
         await Zemu.sleep(100);
+    }
+
+    /**
+     * @param testcaseName - The name of the testcase, e.g. 'nanosp_update_auths'
+     * @param imgName - The name of the image, e.g. 'tx_hash'
+     * @returns true
+     */
+    // Implementation aligned with `Zemu.compareSnapshots`
+    async compareSnapshot(testcaseName: string, imgName: string): Promise<true> {
+        const snapshotGolden = resolve(`./snapshots/${testcaseName}/${imgName}.png`);
+        const snapshotTmp = resolve(`./snapshots-tmp/${testcaseName}/${imgName}.png`);
+
+        await this.snapshot(snapshotTmp); // Save the snapshot to tmp.
+        if (process.env.ZEMU_UPDATE_SNAPSHOTS) {
+            this.log(`updating golden snapshot ${snapshotGolden}`);
+            await this.snapshot(snapshotGolden); // Save the snapshot to golden if told to update.
+        }
+
+        this.log(`golden      ${snapshotGolden}`);
+        this.log(`tmp         ${snapshotTmp}`);
+        this.log('Start comparison');
+        this.log(`Checked     ${snapshotTmp}`);
+
+        const img1 = Zemu.LoadPng2RGB(`${snapshotTmp}`);
+        const img2 = Zemu.LoadPng2RGB(`${snapshotGolden}`);
+        if (!img1.data.equals(img2.data)) {
+            throw new Error(`Image [${imgName}] does not match!`);
+        }
+        return true;
     }
 }
 
