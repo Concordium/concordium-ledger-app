@@ -1,0 +1,14 @@
+diff --git a/dist/Zemu.js b/dist/Zemu.js
+index 2960db7c6fced864b017c8540aac5432449e5251..b075bfa1655daf59cdd69eb689dcf1429779fc81 100644
+--- a/dist/Zemu.js
++++ b/dist/Zemu.js
+@@ -478,6 +478,9 @@ class Zemu {
+         const modelWindow = this.getWindowRect();
+         if (filename !== '')
+             this.saveSnapshot(data, filename);
++        if (process.env.ZEMU_UPDATE_SNAPSHOTS && filename.includes('snapshots-tmp'))
++            this.saveSnapshot(data, `${filename}`.replace('snapshots-tmp', 'snapshots'));
++
+         const rect = {
+             height: modelWindow.height,
+             width: modelWindow.width,
