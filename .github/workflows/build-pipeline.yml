@@ -107,6 +107,9 @@ jobs:
     name: End to end tests
     needs: [compile]
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: tests
 
     steps:
       - uses: actions/checkout@v5
@@ -119,12 +122,10 @@ jobs:
           node-version: "22"
 
       - name: Setup dependencies
-        run: |
-          cd tests && yarn
+        run: yarn install --immutable
 
       - name: Create directory for binaries
-        run: |
-          mkdir tests/bin
+        run: mkdir bin
 
       - name: Download binaries
         uses: actions/download-artifact@v5
@@ -132,8 +133,7 @@ jobs:
           path: tests/bin
 
       - name: Run tests
-        run: |
-          cd tests && yarn test
+        run: yarn test
 
   run_unit_test:
     name: Unit test

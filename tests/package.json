@@ -1,10 +1,11 @@
 {
     "name": "test",
     "version": "1.0.0",
+    "packageManager": "yarn@4.9.4",
     "description": "End-to-end test suite for Concordium Ledger application",
     "dependencies": {
         "@ledgerhq/hw-transport": "^6.28.2",
-        "@zondax/zemu": "^0.61.0",
+        "@zondax/zemu": "patch:@zondax/zemu@npm%3A0.61.11#~/.yarn/patches/@zondax-zemu-npm-0.61.11-7b600fce36.patch",
         "jest": "^29.4.3",
         "ts-jest": "^29.0.5"
     },
