@@ -1,6 +1,9 @@
 # Concordium Ledger application
 
-An application for the Ledger Nano S, Ledger Nano S Plus and Ledger Nano X devices for retrieving keys and signing transactions.
+This repository contains two ledger applications designed for retrieving keys and signing transactions, intended for use alongside the [Desktop wallet](https://github.com/Concordium/concordium-desktop-wallet).
+
+- Main app (for Ledger Nano S, Ledger Nano S Plus and Ledger Nano X devices)
+- Governance app (for Ledger Nano S, and Ledger Nano S Plus devices)
 
 ## Secure SDK dependencies
 
@@ -22,9 +25,9 @@ You can now run the Docker container with
 docker run --rm -ti -v "/dev/bus/usb:/dev/bus/usb" -v "$(realpath .):/app" --privileged concordium/ledger-app-builder:latest
 ```
 
-This repo has two ledger apps. Staying in this folder inside the docker image will build the main app. Navigating inside the `goverance-app` folder inside the docker image will build the `governance` ledger app (see [governanceApp](./governance-app/README.md#building-the-governance-ledger-app)).
+This repo has two ledger apps. Staying in this folder inside the docker container will build the main app. Navigating into the `goverance-app` folder inside the docker container will build the `governance` ledger app (see [governanceApp](./governance-app/README.md#building-the-governance-ledger-app)).
 
-You now have access to the commands provided by the Makefile within the docker image:
+You now have access to the commands provided by the Makefile within the docker container:
 
 ```sh
 # Load the application onto the connected device
