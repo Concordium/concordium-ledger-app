@@ -76,15 +76,15 @@ const char *getAuthorizationName(uint8_t type) {
         case AUTHORIZATION_MINT_DISTRIBUTION:
             return "Mint distribution";
         case AUTHORIZATION_TRANSACTION_FEE_DISTRIBUTION:
-            return "Transaction fee distribution";
+            return "Tx fee distribution";
         case AUTHORIZATION_GAS_REWARDS:
             return "GAS rewards";
         case AUTHORIZATION_BAKER_STAKE_THRESHOLD:
-            return "Baker stake threshold";
+            return "Pool parameters";
         case AUTHORIZATION_ADD_ANONYMITY_REVOKER:
-            return "Add anonymity revoker";
+            return "Add anon. revoker";
         case AUTHORIZATION_ADD_IDENTITY_PROVIDER:
-            return "Add identity provider";
+            return "Add ID provider";
         case AUTHORIZATION_COOLDOWN_PARAMETERS:
             return "Cooldown parameters";
         case AUTHORIZATION_TIME_PARAMETERS:
