@@ -69,13 +69,13 @@ export class ConcordiumZemu extends Zemu {
         this.log(`golden      ${snapshotGolden}`);
         this.log(`tmp         ${snapshotTmp}`);
         this.log('Start comparison');
-        this.log(`Checked     ${snapshotTmp}`);
-
         const img1 = Zemu.LoadPng2RGB(`${snapshotTmp}`);
         const img2 = Zemu.LoadPng2RGB(`${snapshotGolden}`);
         if (!img1.data.equals(img2.data)) {
             throw new Error(`Image [${imgName}] does not match!`);
         }
+        this.log(`Checked     ${snapshotTmp}`);
+
         return true;
     }
 }
