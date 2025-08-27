@@ -122,9 +122,7 @@ jobs:
           node-version: "22"
 
       - name: Setup dependencies
-        run: |
-          corepack enable
-          yarn --immutable
+        run: yarn install --immutable
 
       - name: Create directory for binaries
         run: mkdir bin
