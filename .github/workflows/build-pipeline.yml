@@ -120,7 +120,7 @@ jobs:
 
       - name: Setup dependencies
         run: |
-          cd tests && yarn
+          cd tests && yarn --immutable
 
       - name: Create directory for binaries
         run: |
