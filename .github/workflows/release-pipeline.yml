@@ -89,8 +89,14 @@ jobs:
             exit 1
           fi
           
-          # Save changelog to output (need to handle newlines for GitHub Actions output)
-          CHANGELOG_ESCAPED="${CHANGELOG//$'\n'/%0A}"
+          # Save changelog to output (handle newlines and problematic characters for GitHub Actions output)
+          # Replace newlines with %0A, carriage returns with %0D, and percent with %25 per GitHub recommendations.
+          # Also escape backticks to avoid command substitution issues in later steps.
+          CHANGELOG_ESCAPED=${CHANGELOG//'%'/'%25'}
+          CHANGELOG_ESCAPED=${CHANGELOG_ESCAPED//$'\n'/'%0A'}
+          CHANGELOG_ESCAPED=${CHANGELOG_ESCAPED//$'\r'/'%0D'}
+          # Escape backticks to a similar markdown-safe character (’). They will render fine in release notes.
+          CHANGELOG_ESCAPED=${CHANGELOG_ESCAPED//\`/ʼ}
           echo "changelog=$CHANGELOG_ESCAPED" >> $GITHUB_OUTPUT
           
           echo "Changelog found:"
@@ -148,12 +154,16 @@ jobs:
     steps:
       - name: Create release body
         run: |
-          # Get changelog from previous job output (decode escaped newlines)
+          # Get changelog from previous job output (decode escaped characters)
           CHANGELOG="${{ needs.verify-version.outputs.changelog }}"
+          CHANGELOG="${CHANGELOG//%25/%}"
+          CHANGELOG="${CHANGELOG//%0D/$'\r'}"
           CHANGELOG="${CHANGELOG//%0A/$'\n'}"
-          
+          # Restore backticks if they were escaped
+          CHANGELOG="${CHANGELOG//ʼ/\` }"
+
           # Write to file for release body
-          echo "$CHANGELOG" > release_body.md
+          printf "%s" "$CHANGELOG" > release_body.md
           
           echo "Release body contents:"
           cat release_body.md
