@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.3.0
+
 ### Added
 
 - Support for `AuthorizationsV2` for instuctions `0x2A` (update with root keys) and `0x2C` (update with level 1 keys)
