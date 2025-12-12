@@ -1,22 +1,20 @@
-#ifndef _CONCORDIUM_APP_SIGN_CREDENTIAL_DEPLOYMENT_H_
-#define _CONCORDIUM_APP_SIGN_CREDENTIAL_DEPLOYMENT_H_
+#pragma once
 
-#include "cx.h"
-#include "os.h"
+void processNextVerificationKey(void);
 
-void handleSignCredentialDeployment(
-    uint8_t *dataBuffer,
-    uint8_t p1,
-    uint8_t p2,
-    volatile unsigned int *flags,
-    bool isInitialCall);
+void handleSignCredentialDeployment(uint8_t *dataBuffer,
+                                    uint8_t p1,
+                                    uint8_t p2,
+                                    uint8_t lc,
+                                    volatile unsigned int *flags,
+                                    bool isInitialCall);
 
-void handleSignUpdateCredential(
-    uint8_t *dataBuffer,
-    uint8_t p1,
-    uint8_t p2,
-    volatile unsigned int *flags,
-    bool isInitialCall);
+void handleSignUpdateCredential(uint8_t *dataBuffer,
+                                uint8_t p1,
+                                uint8_t p2,
+                                uint8_t lc,
+                                volatile unsigned int *flags,
+                                bool isInitialCall);
 
 typedef enum {
     TX_CREDENTIAL_DEPLOYMENT_INITIAL = 4,
@@ -57,6 +55,11 @@ typedef struct {
     uint8_t anonymityRevocationThreshold[13];
     uint16_t anonymityRevocationListLength;
 
+    char regIdCred[48 * 2 + 1];
+    char identityProviderIndex[4 * 2 + 1];
+    char arIdentity[4 * 2 + 1];
+    char encIdCredPubShare[96 * 2 + 1];
+
     uint8_t validTo[8];
     uint8_t createdAt[8];
 
@@ -71,5 +74,3 @@ typedef struct {
     protocolState_t state;
     bool showIntro;
 } signCredentialDeploymentContext_t;
-
-#endif

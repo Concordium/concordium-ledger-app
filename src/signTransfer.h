@@ -1,24 +1,22 @@
-#ifndef _CONCORDIUM_APP_ACCOUNT_TRANSFER_H_
-#define _CONCORDIUM_APP_ACCOUNT_TRANSFER_H_
+#pragma once
 
 /**
  * Handles the signing flow, including updating the display, for the 'simple transfer'
  * account transaction.
  * @param cdata please see /doc/ins_transfer.md for details
  */
-void handleSignTransfer(uint8_t *cdata, volatile unsigned int *flags);
+void handleSignTransfer(uint8_t *cdata, uint8_t lc, volatile unsigned int *flags);
 
 /**
  * Handles the signing flow, including updating the display, for the 'simple transfer with memo'
  * account transaction.
  * @param cdata please see /doc/ins_transfer.md for details
  */
-void handleSignTransferWithMemo(
-    uint8_t *cdata,
-    uint8_t p1,
-    uint8_t dataLength,
-    volatile unsigned int *flags,
-    bool isInitialCall);
+void handleSignTransferWithMemo(uint8_t *cdata,
+                                uint8_t p1,
+                                uint8_t dataLength,
+                                volatile unsigned int *flags,
+                                bool isInitialCall);
 
 typedef enum {
     TX_TRANSFER_INITIAL = 49,
@@ -32,5 +30,3 @@ typedef struct {
     uint8_t displayAmount[30];
     simpleTransferState_t state;
 } signTransferContext_t;
-
-#endif

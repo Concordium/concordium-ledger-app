@@ -1,8 +1,5 @@
-#ifndef _NUMBER_HELPERS_H_
-#define _NUMBER_HELPERS_H_
-
-#include <stddef.h>
-#include "stdint.h"
+#pragma once
+#include "globals.h"
 
 /**
  * Writes the input amount of µGTU to the supplied destination as its value in
@@ -32,7 +29,11 @@ size_t numberToText(uint8_t *dst, size_t dstLength, uint64_t number);
  * @param number the integer to convert to characters
  * @return number of bytes written to 'dst'
  */
-size_t numberToTextWithUnit(uint8_t *dst, size_t dstLength, uint64_t number, uint8_t *unit, size_t unitLength);
+size_t numberToTextWithUnit(uint8_t *dst,
+                            size_t dstLength,
+                            uint64_t number,
+                            uint8_t *unit,
+                            size_t unitLength);
 
 /**
  * Helper method that writes the input integer to a format that the device can
@@ -40,8 +41,8 @@ size_t numberToTextWithUnit(uint8_t *dst, size_t dstLength, uint64_t number, uin
  * @param dst where to write the text representation of the integer
  * @param dstLength the number of bytes that may be written to 'dst'
  * @param number the integer to convert to characters
- * @return number of bytes written to 'dst', i.e. the number of characters in the integer 'number' + 1 for string
- * termination
+ * @return number of bytes written to 'dst', i.e. the number of characters in the integer 'number' +
+ * 1 for string termination
  */
 size_t bin2dec(uint8_t *dst, size_t dstLength, uint64_t number);
 
@@ -67,5 +68,3 @@ size_t fractionToPercentageDisplay(uint8_t *dst, size_t dstLength, uint32_t numb
  * @param asHexSize the number of characters that may be written to 'asHex'
  */
 void toPaginatedHex(uint8_t *byteArray, const uint64_t len, char *asHex, size_t asHexSize);
-
-#endif
