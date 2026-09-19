@@ -27,6 +27,10 @@ void handleCborStep(void) {
 }
 
 void readCborInitial(uint8_t *cdata, uint8_t dataLength) {
+    // The CBOR header needs at least 1 byte.
+    if (dataLength < 1) {
+        THROW(ERROR_INVALID_PARAM);
+    }
     uint8_t header = cdata[0];
     cdata += 1;
     ctx->cborLength -= 1;
@@ -63,6 +67,11 @@ void readCborInitial(uint8_t *cdata, uint8_t dataLength) {
     } else {
         THROW(ERROR_INVALID_PARAM);
     }
+    // Ensure the declared length bytes are actually present in this APDU before
+    // they are consumed above; otherwise the U2BE/U4BE/U8BE reads go out of bounds.
+    if (dataLength < 1 + sizeLength) {
+        THROW(ERROR_INVALID_PARAM);
+    }
     cdata += sizeLength;
 
     ctx->cborLength -= sizeLength;
@@ -92,6 +101,10 @@ void readCborInitial(uint8_t *cdata, uint8_t dataLength) {
             if (ctx->cborLength != length) {
                 THROW(ERROR_INVALID_STATE);
             }
+            // Never let a string content write overflow the display buffer.
+            if (length > sizeof(ctx->display) - ctx->displayUsed) {
+                THROW(ERROR_INVALID_STATE);
+            }
             readCborContent(cdata, dataLength - 1 - sizeLength);
             break;
         default:
@@ -100,6 +113,17 @@ void readCborInitial(uint8_t *cdata, uint8_t dataLength) {
 }
 
 void readCborContent(uint8_t *cdata, uint8_t contentLength) {
+    // Bounds check before touching the display buffer: without it, a crafted
+    // CBOR length would make this memmove write past the end of ctx->display,
+    // corrupting adjacent globals on the device.
+    if (contentLength > sizeof(ctx->display) - ctx->displayUsed) {
+        THROW(ERROR_INVALID_STATE);
+    }
+    // Guard against cborLength underflow: receiving more content bytes than the
+    // declared CBOR payload length would wrap the counter and desync the flow.
+    if (contentLength > ctx->cborLength) {
+        THROW(ERROR_INVALID_STATE);
+    }
     ctx->cborLength -= contentLength;
     switch (ctx->majorType) {
         case 3:
